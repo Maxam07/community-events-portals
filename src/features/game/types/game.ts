@@ -110,6 +110,7 @@ import { PetName, PetResourceName, Pets } from "./pets";
 import { RockName } from "./resources";
 import { PetShopItemName } from "./petShop";
 import { League } from "features/leagues/leagues";
+import { Buff, BuffName } from "./buffs";
 
 export type Reward = {
   coins?: number;
@@ -869,6 +870,8 @@ export type Airdrop = {
   wearables: Partial<Record<BumpkinItem, number>>;
   sfl: number;
   coins: number;
+  xp?: number;
+  buff?: BuffName;
   message?: string;
   coordinates?: Coordinates;
   factionPoints?: number;
@@ -1606,6 +1609,10 @@ export type SocialFarming = {
     farms: number[];
   };
   cheers: { freeCheersClaimedAt: number };
+  waves?: {
+    date: string;
+    farms: number[];
+  };
   helpIncrease?: { boughtAt: number[] };
   clutter?: {
     spawnedAt: number;
@@ -1635,6 +1642,8 @@ export type FarmHands = {
 export interface GameState {
   home: Home;
   bank: Bank;
+
+  buffs?: Partial<Record<BuffName, Buff>>;
 
   choreBoard: ChoreBoard;
 
