@@ -164,10 +164,16 @@ export const POWER_UNLOCK_THRESHOLDS = {
 export const HONEY_SPAWN_POSITION: Position = { x: 304, y: -50 };
 export const HONEY_TARGET_Y = 80;
 
-// Immunities
-export const AURA_IMMUNITY: BumpkinAura = "Glitch Aura";  // Prevents from turning into a rice bun
-export const SHIRT_IMMUNITY: BumpkinShirt[] = ["Neon Noiz Jacket", "404 Chic Top"]; // Prevents from getting enlarged
-export const SHOES_IMMUNITY: BumpkinShoe[] = ["Neon Noiz Shoes", "404 Chic Boots"]; // Prevents inverted controls
+// Immunities add tool immunity
+export const AURA_IMMUNITY: BumpkinAura = "Glitch Aura"; // Prevents from turning into a rice bun
+export const SHIRT_IMMUNITY: BumpkinShirt[] = [
+  "Neon Noiz Jacket",
+  "404 Chic Top",
+]; // Prevents from getting enlarged
+export const SHOES_IMMUNITY: BumpkinShoe[] = [
+  "Neon Noiz Shoes",
+  "404 Chic Boots",
+]; // Prevents inverted controls
 export const HAT_IMMUNITY: BumpkinHat = "Aether Specs"; // Prevents from slowing down
 // Guide
 export const INSTRUCTIONS: {
