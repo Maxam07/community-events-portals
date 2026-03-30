@@ -1,7 +1,7 @@
 import Decimal from "decimal.js-light";
 import { trackFarmActivity } from "features/game/types/farmActivity";
 import { CONSUMABLES, COOKABLE_CAKES } from "features/game/types/consumables";
-import { getKeys } from "features/game/types/craftables";
+import { getKeys } from "lib/object";
 import {
   BoostName,
   GameState,
@@ -379,6 +379,7 @@ export function deliverOrder({
     const hasCropkeeperReputation = hasReputation({
       game,
       reputation: Reputation.Cropkeeper,
+      now: createdAt,
     });
 
     const requiresReputation = GOBLINS_REQUIRING_REPUTATION.includes(
@@ -556,6 +557,13 @@ export function deliverOrder({
         game.farmActivity,
         new Decimal(amount),
       );
+      if (hasVipAccess({ game, now: createdAt })) {
+        game.farmActivity = trackFarmActivity(
+          "VIP Ticket Earned",
+          game.farmActivity,
+          new Decimal(2),
+        );
+      }
       game.farmActivity = trackFarmActivity(
         `${chapter} Points Earned`,
         game.farmActivity,

@@ -10,7 +10,7 @@ import {
 } from "../events/landExpansion/claimDailyReward";
 import { DailyRewardName, getRewardsForStreak } from "../types/dailyRewards";
 import { InventoryItemName } from "../types/game";
-import { getKeys } from "../lib/crafting";
+import { getKeys } from "lib/object";
 import { ClaimReward } from "../expansion/components/ClaimReward";
 import { SUNNYSIDE } from "assets/sunnyside";
 import { secondsTillReset, secondsToString } from "lib/utils/time";
@@ -28,7 +28,10 @@ import basicBuffBox from "assets/rewardBoxes/basic_buff_box.png";
 import basicXPBox from "assets/rewardBoxes/basic_xp_box.png";
 import { BuffName } from "../types/buffs";
 import coinsIcon from "assets/icons/coins_stack.webp";
+import vipIcon from "assets/icons/vip.webp";
 import { getBumpkinLevel } from "../lib/level";
+import { getVipDailyBonusItem } from "../lib/vipAccess";
+import { useVipAccess } from "lib/utils/hooks/useVipAccess";
 
 export const DAILY_REWARD_IMAGES: Record<DailyRewardName, string> = {
   "default-reward": SUNNYSIDE.icons.expression_confused,
@@ -148,6 +151,7 @@ export const DailyRewardClaim: React.FC<{ showClose?: boolean }> = ({
       }).rewards,
     };
   });
+  const hasVip = useVipAccess({ game: gameState });
 
   if (showClaim) {
     const items = rewards[0].reward.reduce(
@@ -161,6 +165,12 @@ export const DailyRewardClaim: React.FC<{ showClose?: boolean }> = ({
       },
       {} as Partial<Record<InventoryItemName, number>>,
     );
+
+    const level = getBumpkinLevel(bumpkinExperience);
+    const vipGiftItem = hasVip ? getVipDailyBonusItem(level) : null;
+    if (vipGiftItem) {
+      items[vipGiftItem] = (items[vipGiftItem] ?? 0) + 1;
+    }
 
     const coins = rewards[0].reward.reduce((acc, reward) => {
       return acc + (reward.coins ?? 0);
@@ -188,6 +198,7 @@ export const DailyRewardClaim: React.FC<{ showClose?: boolean }> = ({
           xp,
           buff: buffs[0],
         }}
+        vipGiftItem={vipGiftItem ?? undefined}
         onClaim={() => {
           claim();
         }}
@@ -263,6 +274,12 @@ export const DailyRewardClaim: React.FC<{ showClose?: boolean }> = ({
                     className="h-16"
                   />
                 </div>
+              </div>
+              <div className="flex items-center justify-center gap-1">
+                <img src={vipIcon} className="h-3 w-3" alt="" />
+                <span className="text-xxs">
+                  {t("dailyReward.bonusVipGift")}
+                </span>
               </div>
             </ButtonPanel>
           );

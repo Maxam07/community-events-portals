@@ -340,6 +340,7 @@ import {
   startCompetition,
   StartCompetitionAction,
 } from "./landExpansion/startCompetition";
+import { startTrial, StartTrialAction } from "./landExpansion/startTrial";
 import {
   shipmentRestock,
   ShipmentRestockAction,
@@ -414,6 +415,14 @@ import {
   CollectLavaPitAction,
 } from "./landExpansion/collectLavaPit";
 import { startLavaPit, StartLavaPitAction } from "./landExpansion/startLavaPit";
+import {
+  startSaltHarvest,
+  StartSaltHarvestAction,
+} from "./landExpansion/startSaltHarvest";
+import {
+  claimSaltHarvest,
+  ClaimSaltHarvestAction,
+} from "./landExpansion/claimSaltHarvest";
 import { placeLavaPit, PlaceLavaPitAction } from "./landExpansion/placeLavaPit";
 import { moveLavaPit, MoveLavaPitAction } from "./landExpansion/moveLavaPit";
 import { buyResource, ResourceBoughtAction } from "./landExpansion/buyResource";
@@ -584,10 +593,24 @@ import {
   removeFarmHand,
   RemoveFarmHandAction,
 } from "./landExpansion/removeFarmHand";
+import { placeBumpkin, PlaceBumpkinAction } from "./landExpansion/placeBumpkin";
+import { moveBumpkin, MoveBumpkinAction } from "./landExpansion/moveBumpkin";
+import {
+  removeBumpkinPlacement,
+  RemoveBumpkinPlacementAction,
+} from "./landExpansion/removeBumpkinPlacement";
+import {
+  promoteFarmhand,
+  PromoteFarmhandAction,
+} from "./landExpansion/promoteFarmhand";
 import {
   speedUpProcessing,
   SpeedUpProcessingAction,
 } from "./landExpansion/speedUpProcessing";
+import {
+  upgradeSaltFarm,
+  UpgradeSaltFarmAction,
+} from "./landExpansion/upgradeSaltFarm";
 
 export type PlayingEvent =
   | ObsidianExchangedAction
@@ -723,6 +746,9 @@ export type PlayingEvent =
   | AcknowledgeCalendarEventAction
   | CollectLavaPitAction
   | StartLavaPitAction
+  | StartSaltHarvestAction
+  | ClaimSaltHarvestAction
+  | UpgradeSaltFarmAction
   | CancelQueuedRecipeAction
   | AcknowledgeOnChainAirdropAction
   | CompleteSocialTaskAction
@@ -756,8 +782,13 @@ export type PlayingEvent =
   | PlaceFarmHandAction
   | MoveFarmHandAction
   | RemoveFarmHandAction
+  | PlaceBumpkinAction
+  | MoveBumpkinAction
+  | RemoveBumpkinPlacementAction
+  | PromoteFarmhandAction
   | SpeedUpProcessingAction
-  | ClaimTrackMilestoneAction;
+  | ClaimTrackMilestoneAction
+  | StartTrialAction;
 
 export type LocalVisitingEvent =
   | CollectGarbageAction
@@ -820,7 +851,10 @@ export type PlacementEvent =
   | FlipCollectibleAction
   | PlaceFarmHandAction
   | MoveFarmHandAction
-  | RemoveFarmHandAction;
+  | RemoveFarmHandAction
+  | PlaceBumpkinAction
+  | MoveBumpkinAction
+  | RemoveBumpkinPlacementAction;
 
 export type GameEvent = PlayingEvent | PlacementEvent | VisitingEvent;
 
@@ -987,6 +1021,9 @@ export const PLAYING_EVENTS: Handlers<PlayingEvent> = {
   "calendarEvent.acknowledged": acknowledgeCalendarEvent,
   "lavaPit.collected": collectLavaPit,
   "lavaPit.started": startLavaPit,
+  "saltHarvest.started": startSaltHarvest,
+  "saltHarvest.claimed": claimSaltHarvest,
+  "saltFarm.upgraded": upgradeSaltFarm,
   "upgrade.spedUp": speedUpUpgrade,
   "socialTask.completed": completeSocialTask,
   "referral.rewardsClaimed": claimReferralRewards,
@@ -1008,6 +1045,7 @@ export const PLAYING_EVENTS: Handlers<PlayingEvent> = {
   "clutter.burned": burnClutter,
   "project.instantGrow": instantGrowProject,
   "project.started": startProject,
+  "trial.started": startTrial,
   "rock.upgraded": upgradeRock,
   "tree.upgraded": upgradeTree,
   "fish.retried": retryFish,
@@ -1019,6 +1057,10 @@ export const PLAYING_EVENTS: Handlers<PlayingEvent> = {
   "farmHand.placed": placeFarmHand,
   "farmHand.moved": moveFarmHand,
   "farmHand.removed": removeFarmHand,
+  "bumpkin.placed": placeBumpkin,
+  "bumpkin.moved": moveBumpkin,
+  "bumpkin.removedPlacement": removeBumpkinPlacement,
+  "farmhand.promoted": promoteFarmhand,
 };
 
 export const LOCAL_VISITING_EVENTS: Handlers<LocalVisitingEvent> = {
@@ -1063,6 +1105,9 @@ export const PLACEMENT_EVENTS: Handlers<PlacementEvent> = {
   "farmHand.placed": placeFarmHand,
   "farmHand.moved": moveFarmHand,
   "farmHand.removed": removeFarmHand,
+  "bumpkin.placed": placeBumpkin,
+  "bumpkin.moved": moveBumpkin,
+  "bumpkin.removedPlacement": removeBumpkinPlacement,
   "beehive.moved": moveBeehive,
   "beehive.placed": placeBeehive,
   "flowerBed.moved": moveFlowerBed,

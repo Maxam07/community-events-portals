@@ -29,7 +29,7 @@ import {
   ChapterStoreWearable,
 } from "features/game/types/megastore";
 import { getItemDescription } from "../ChapterStore";
-import { getKeys } from "features/game/types/craftables";
+import { getKeys } from "lib/object";
 import { ARTEFACT_SHOP_KEYS } from "features/game/types/collectibles";
 import { SFLDiscount } from "features/game/lib/SFLDiscount";
 import {
@@ -223,7 +223,7 @@ export const ItemDetail: React.FC<ItemOverlayProps> = ({
     }
 
     return sflBalance.greaterThanOrEqualTo(
-      SFLDiscount(state, new Decimal(sfl)),
+      SFLDiscount(state, new Decimal(sfl), now),
     );
   };
 
@@ -451,6 +451,7 @@ export const ItemDetail: React.FC<ItemOverlayProps> = ({
                           requirement={SFLDiscount(
                             state,
                             new Decimal(item.cost.sfl),
+                            now,
                           )}
                         />
                       </div>

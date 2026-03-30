@@ -1,9 +1,9 @@
 import {
-  BumpkinWings,
   BumpkinAura,
   Equipped,
   BumpkinShoe,
   BumpkinHat,
+  BumpkinTool,
 } from "features/game/types/bumpkin";
 import { translate as t } from "lib/i18n/translate";
 import { NPC_WEARABLES } from "lib/npcs";
@@ -25,6 +25,7 @@ import chest from "public/world/portal/images/chest.png";
 import food from "public/world/portal/images/tomato-splat.gif";
 import auraIcon from "public/world/portal/images/Bumpkin_Glitch_Aura.webp";
 import healthBar_icon from "public/world/portal/images/health_bar_low.webp";
+import combination_assets from "public/world/portal/images/combination_items.gif";
 
 export const PORTAL_NAME = "april-fools";
 export const PORTAL_TOKEN = "April Fools Token 2025";
@@ -165,11 +166,13 @@ export const HONEY_SPAWN_POSITION: Position = { x: 304, y: -50 };
 export const HONEY_TARGET_Y = 80;
 
 // Immunities
-export const AURA_IMMUNITY: BumpkinAura = "Slime Aura";
-export const WINGS_IMMUNITY: BumpkinWings = "Sol & Luna";
-export const SHOES_IMMUNITY: BumpkinShoe = "Crimstone Boots";
-export const HAT_IMMUNITY: BumpkinHat = "Grumpy Cat";
-
+export const AURA_IMMUNITY: BumpkinAura = "Glitch Aura"; // Prevents from turning into a rice bun
+export const TOOL_IMMUNITY: BumpkinTool = "Admin Fools Tools"; // Prevents from getting enlarged
+export const SHOES_IMMUNITY: BumpkinShoe[] = [
+  "Neon Noiz Shoes",
+  "404 Chic Boots",
+]; // Prevents inverted controls
+export const HAT_IMMUNITY: BumpkinHat = "Aether Specs"; // Prevents from slowing down
 // Guide
 export const INSTRUCTIONS: {
   image: string;
@@ -211,6 +214,10 @@ export const RESOURCES_TABLE: {
     image: chest,
     description: t(`${PORTAL_NAME}.resource3`),
   },
+  {
+    image: combination_assets,
+    description: t(`${PORTAL_NAME}.resource4`),
+  },
 ];
 
 export const REFEREE: {
@@ -224,23 +231,33 @@ export const REFEREE: {
 
 export const IMMUNITY_GUIDE: {
   image: string;
+  immunityName: string;
   description: string;
   width?: number;
 }[] = [
   {
     image: getWearableImage(`${AURA_IMMUNITY}`),
+    immunityName: AURA_IMMUNITY,
     description: t(`${PORTAL_NAME}.aura_immunityDescription`),
   },
   {
-    image: getWearableImage(`${WINGS_IMMUNITY}`),
-    description: t(`${PORTAL_NAME}.wings_immunityDescription`),
+    image: getWearableImage(`${TOOL_IMMUNITY}`),
+    immunityName: TOOL_IMMUNITY,
+    description: t(`${PORTAL_NAME}.tool_immunityDescription`),
   },
   {
-    image: getWearableImage(`${SHOES_IMMUNITY}`),
+    image: getWearableImage(`${SHOES_IMMUNITY[0]}`),
+    immunityName: SHOES_IMMUNITY[0],
+    description: t(`${PORTAL_NAME}.shoes_immunityDescription`),
+  },
+  {
+    image: getWearableImage(`${SHOES_IMMUNITY[1]}`),
+    immunityName: SHOES_IMMUNITY[1],
     description: t(`${PORTAL_NAME}.shoes_immunityDescription`),
   },
   {
     image: getWearableImage(`${HAT_IMMUNITY}`),
+    immunityName: HAT_IMMUNITY,
     description: t(`${PORTAL_NAME}.hat_immunityDescription`),
   },
 ];
@@ -272,7 +289,7 @@ export const ENEMIES_TABLE: {
   },
 ];
 
-export type Immunity_Wearables = "aura" | "wings" | "shoe" | "hat";
+export type Immunity_Wearables = "aura" | "tool" | "shoe" | "hat";
 
 export const IMMUNITY_TOOLTIP: {
   id: Immunity_Wearables;
@@ -285,9 +302,9 @@ export const IMMUNITY_TOOLTIP: {
     description: t(`${PORTAL_NAME}.aura_immunityDescription`),
   },
   {
-    id: "wings",
+    id: "tool",
     image: wings_immunity_icon,
-    description: t(`${PORTAL_NAME}.wings_immunityDescription`),
+    description: t(`${PORTAL_NAME}.tool_immunityDescription`),
   },
   {
     id: "shoe",

@@ -1,7 +1,7 @@
 import { KingdomLeaderboard } from "../expansion/components/leaderboard/actions/leaderboard";
+import { getKeys } from "lib/object";
 import { BoostType, BoostValue } from "../types/boosts";
 import { BumpkinItem } from "../types/bumpkin";
-import { getKeys } from "../types/decorations";
 import {
   FactionBanner,
   FactionName,
@@ -598,6 +598,7 @@ export function getFactionPetBoostMultiplier(game: GameState) {
 
   if (lastWeekStreak < 2) return 1;
 
+  // Set on week rollover in API populateFactionPet; see factionPetQualifiesForBoost.ts
   const qualifiesForBoost = game.faction?.pet?.qualifiesForBoost ?? false;
 
   if (!qualifiesForBoost) return 1;

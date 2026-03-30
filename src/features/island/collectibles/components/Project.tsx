@@ -17,6 +17,7 @@ import { useSelector } from "@xstate/react";
 import Decimal from "decimal.js-light";
 import classNames from "classnames";
 import {
+  getProjectReward,
   isHelpComplete,
   MonumentName,
   RAFFLE_REWARDS,
@@ -72,7 +73,7 @@ import { BumpkinParts } from "lib/utils/tokenUriBuilder";
 import { CloseButtonPanel } from "features/game/components/CloseablePanel";
 import { FarmHelped } from "features/island/hud/components/FarmHelped";
 import { getPartialInstantGrowPrice } from "features/game/events/landExpansion/instaGrowProject";
-import { getKeys } from "features/game/types/craftables";
+import { getKeys } from "lib/object";
 import { RequirementLabel } from "components/ui/RequirementsLabel";
 import { EffectSuccess } from "features/game/expansion/components/effects/EffectSuccess";
 
@@ -165,7 +166,11 @@ const ProjectComplete: React.FC<{
 
   const rewardItem = REWARD_ITEMS[project];
 
-  const amount = rewardItem?.amount ?? 0;
+  const { amount } = getProjectReward({
+    project,
+    game: state,
+    amount: rewardItem.amount,
+  });
 
   const isProjectComplete = cheers >= REQUIRED_CHEERS[project];
 

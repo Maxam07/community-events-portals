@@ -1,6 +1,6 @@
 import Decimal from "decimal.js-light";
 import { getBumpkinLevel } from "features/game/lib/level";
-import { getKeys } from "features/game/types/craftables";
+import { getKeys } from "lib/object";
 import {
   Bumpkin,
   GameState,
@@ -25,8 +25,12 @@ import { ITEM_DETAILS } from "features/game/types/images";
 import { gameAnalytics } from "lib/gameAnalytics";
 import { Context } from "features/game/GameProvider";
 import { craftingRequirementsMet } from "features/game/lib/craftingRequirement";
-import { getInstantGems } from "features/game/lib/getInstantGems";
 import { hasRequiredIslandExpansion } from "features/game/lib/hasRequiredIslandExpansion";
+import vipIcon from "assets/icons/vip.webp";
+import {
+  useExpansionCoinCostWithVip,
+  useVipAccess,
+} from "lib/utils/hooks/useVipAccess";
 /**
  * The props for the component.
  * @param gameState The game state.
@@ -72,6 +76,19 @@ export const ExpansionRequirements: React.FC<Props> = ({
   const hasLevel =
     getBumpkinLevel(bumpkin.experience) >= requirements.bumpkinLevel;
 
+  const fullCoinRequirement = requirements.coins ?? 0;
+  const effectiveCoinCost = useExpansionCoinCostWithVip({
+    coins: requirements.coins,
+    game: state,
+  });
+  const hasVip = useVipAccess({ game: state });
+  const showVipDiscount =
+    !!fullCoinRequirement && hasVip && effectiveCoinCost < fullCoinRequirement;
+  const requirementsWithVipCoins = {
+    ...requirements,
+    coins: effectiveCoinCost,
+  };
+
   const onExpand = () => {
     gameService.send("land.expanded");
     gameService.send("SAVE");
@@ -95,7 +112,7 @@ export const ExpansionRequirements: React.FC<Props> = ({
     onClose();
   };
 
-  const canExpand = craftingRequirementsMet(state, requirements);
+  const canExpand = craftingRequirementsMet(state, requirementsWithVipCoins);
 
   return (
     <div className="flex flex-col justify-center">
@@ -130,13 +147,28 @@ export const ExpansionRequirements: React.FC<Props> = ({
 
         <InnerPanel className="-ml-2 -mr-2 relative flex flex-col space-y-0.5">
           {!!requirements.coins && (
-            <RequirementLabel
-              key={"coins"}
-              type="coins"
-              balance={coins}
-              showLabel
-              requirement={requirements.coins}
-            />
+            <div key={"coins"} className="flex items-center gap-1 flex-wrap">
+              <RequirementLabel
+                type="coins"
+                balance={coins}
+                showLabel
+                requirement={effectiveCoinCost}
+              />
+
+              {showVipDiscount && (
+                <span className="flex items-center gap-1">
+                  <span className="line-through text-xs">
+                    {requirements.coins.toLocaleString()}
+                  </span>
+                  <img
+                    src={vipIcon}
+                    alt="VIP"
+                    className="h-4 w-4"
+                    title="VIP discount"
+                  />
+                </span>
+              )}
+            </div>
           )}
           {getKeys(requirements.resources).map((itemName) => {
             return (
@@ -174,20 +206,16 @@ export const Expanding: React.FC<{
   state: GameState;
   onClose: () => void;
   onInstantExpanded: () => void;
-}> = ({ state, onClose, onInstantExpanded }) => {
+  readyAt: number;
+  gems: number;
+}> = ({ state, onClose, onInstantExpanded, readyAt, gems }) => {
   const { t } = useAppTranslation();
-  const readyAt = state.expansionConstruction?.readyAt ?? 0;
 
   const { requirements } = expansionRequirements({ game: state });
   const totalSeconds = requirements?.seconds ?? 0;
   const { totalSeconds: secondsTillReady, ...ready } = useCountdown(
     readyAt ?? 0,
   );
-
-  const gems = getInstantGems({
-    readyAt: readyAt as number,
-    game: state,
-  });
 
   const hasAccess = !hasRequiredIslandExpansion(state.island.type, "desert");
 

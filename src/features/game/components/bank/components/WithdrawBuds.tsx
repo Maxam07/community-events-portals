@@ -6,10 +6,9 @@ import { Box } from "components/ui/Box";
 
 import { wallet } from "lib/blockchain/wallet";
 
-import { getKeys } from "features/game/types/craftables";
+import { getKeys } from "lib/object";
 import { SUNNYSIDE } from "assets/sunnyside";
 
-import { CONFIG } from "lib/config";
 import { useAppTranslation } from "lib/i18n/useAppTranslations";
 import { Context } from "features/game/GameProvider";
 import { MachineState } from "features/game/lib/gameMachine";
@@ -22,8 +21,8 @@ import { hasBoostRestriction } from "features/game/types/withdrawRestrictions";
 import { InfoPopover } from "features/island/common/InfoPopover";
 import { secondsToString } from "lib/utils/time";
 import { BoostName } from "features/game/types/game";
-
-const imageDomain = CONFIG.NETWORK === "mainnet" ? "buds" : "testnet-buds";
+import { getBudImage } from "lib/buds/types";
+import { useNow } from "lib/utils/hooks/useNow";
 
 interface Props {
   onWithdraw: (ids: number[]) => void;
@@ -62,9 +61,12 @@ export const WithdrawBuds: React.FC<Props> = ({
     setSelected((prev) => prev.filter((bud) => bud !== budId));
   };
 
+  const now = useNow();
+
   const hasAccess = hasReputation({
     game: state,
     reputation: Reputation.Seedling,
+    now,
   });
 
   if (!hasAccess) {
@@ -152,7 +154,7 @@ export const WithdrawBuds: React.FC<Props> = ({
                   <Box
                     key={`bud-${budId}`}
                     onClick={() => onAdd(budId)}
-                    image={`https://${imageDomain}.sunflower-land.com/images/${budId}.webp`}
+                    image={getBudImage(budId)}
                     iconClassName="scale-[1.8] origin-bottom absolute"
                     disabled={isRestricted}
                     secondaryImage={
@@ -178,7 +180,7 @@ export const WithdrawBuds: React.FC<Props> = ({
               <Box
                 key={`bud-${budId}`}
                 onClick={() => onRemove(budId)}
-                image={`https://${imageDomain}.sunflower-land.com/images/${budId}.webp`}
+                image={getBudImage(budId)}
                 iconClassName="scale-[1.8] origin-bottom absolute"
               />
             ))}

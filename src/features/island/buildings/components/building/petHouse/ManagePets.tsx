@@ -8,7 +8,7 @@ import {
   getRequiredFeedAmount,
 } from "features/game/events/pets/feedPet";
 import { Context } from "features/game/GameProvider";
-import { getKeys } from "features/game/lib/crafting";
+import { getKeys } from "lib/object";
 import { CookableName } from "features/game/types/consumables";
 import {
   PET_CATEGORIES,
@@ -60,7 +60,6 @@ export const ManagePets: React.FC<Props> = ({ activePets }) => {
     (state) => state.context.state.inventory,
   );
   const state = useSelector(gameService, (state) => state.context.state);
-  const farmId = useSelector(gameService, (state) => state.context.farmId);
 
   const handleConfirmFeed = () => {
     // Event to handle Bulk Feed
@@ -366,7 +365,6 @@ export const ManagePets: React.FC<Props> = ({ activePets }) => {
                 setSelectedFeed={setSelectedFeed}
                 handleResetRequests={() => handleResetRequests(petName)}
                 onAcknowledged={() => gameService.send("CONTINUE")}
-                farmId={farmId}
               />
             </PetInfo>
           );

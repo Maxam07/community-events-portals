@@ -179,4 +179,10 @@ export const SPAWNS: () => SpawnLocation = () => ({
       y: 290,
     },
   },
+  april_fools_island: {
+    default: {
+      x: 185,
+      y: 230,
+    },
+  },
 });
