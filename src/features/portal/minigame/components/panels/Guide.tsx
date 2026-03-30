@@ -72,7 +72,7 @@ export const Guide = () => {
         <Label type="default">{t(`${PORTAL_NAME}.immunities`)}</Label>
         <table className="w-full text-xs table-fixed border-collapse">
           <tbody>
-            {IMMUNITY_GUIDE.map(({ image, description, width = 13 }, index) => (
+            {IMMUNITY_GUIDE.map(({ image, immunityName, description, width = 13 }, index) => (
               <tr key={index}>
                 <td
                   style={{ border: "1px solid #b96f50" }}
@@ -85,7 +85,7 @@ export const Guide = () => {
                 <td
                   style={{ border: "1px solid #b96f50" }}
                   className="p-1.5 w-5/6"
-                >
+                ><span>{immunityName}: </span>
                   {t(`${PORTAL_NAME}.guideDescription`, {
                     description: description,
                   })}
