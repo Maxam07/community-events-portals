@@ -13,7 +13,7 @@ import { CloseButtonPanel } from "features/game/components/CloseablePanel";
 import { useActor } from "@xstate/react";
 import { RequirementLabel } from "components/ui/RequirementsLabel";
 import Decimal from "decimal.js-light";
-import { getKeys } from "features/game/types/craftables";
+import { getKeys } from "lib/object";
 import { getBumpkinLevel } from "features/game/lib/level";
 import { Label } from "components/ui/Label";
 import { NPC_WEARABLES } from "lib/npcs";
@@ -33,6 +33,7 @@ import confetti from "canvas-confetti";
 import { ModalContext } from "features/game/components/modal/ModalProvider";
 import { useVisiting } from "lib/utils/visitUtils";
 import { useNow } from "lib/utils/hooks/useNow";
+import { useExpansionCoinCostWithVip } from "lib/utils/hooks/useVipAccess";
 
 interface ExpandIconProps {
   onOpen: () => void;
@@ -43,6 +44,8 @@ interface ExpandIconProps {
   showHelper: boolean;
   inventory: Inventory;
   coins: number;
+  /** When set (e.g. VIP discount), used for coin requirement display and check instead of requirements.coins */
+  effectiveCoinCost?: number;
 }
 export const ExpandIcon: React.FC<ExpandIconProps> = ({
   onOpen,
@@ -53,8 +56,10 @@ export const ExpandIcon: React.FC<ExpandIconProps> = ({
   showHelper,
   inventory,
   coins,
+  effectiveCoinCost,
 }) => {
   const showRequirements = inventory["Basic Land"]?.lte(5);
+  const coinRequirement = effectiveCoinCost ?? requirements.coins ?? 0;
 
   const { t } = useAppTranslation();
   return (
@@ -86,10 +91,10 @@ export const ExpandIcon: React.FC<ExpandIconProps> = ({
                   <div className="mr-3 flex items-center mb-1" key={"coins"}>
                     <RequirementLabel
                       type="coins"
-                      requirement={requirements.coins}
+                      requirement={coinRequirement}
                       balance={coins}
                     />
-                    {coins >= requirements.coins && (
+                    {coins >= coinRequirement && (
                       <img
                         src={SUNNYSIDE.icons.confirm}
                         className="h-4 ml-0.5"
@@ -268,7 +273,14 @@ export const UpcomingExpansion: React.FC = () => {
     getBumpkinLevel(state.bumpkin?.experience ?? 0) <
     (requirements?.bumpkinLevel ?? 0);
 
-  const canExpand = craftingRequirementsMet(state, requirements);
+  const effectiveCoinCost = useExpansionCoinCostWithVip({
+    coins: requirements?.coins,
+    game: state,
+  });
+  const requirementsWithVipCoins = requirements
+    ? { ...requirements, coins: effectiveCoinCost }
+    : requirements;
+  const canExpand = craftingRequirementsMet(state, requirementsWithVipCoins);
 
   const showHelper =
     canExpand &&
@@ -300,6 +312,7 @@ export const UpcomingExpansion: React.FC = () => {
           requirements={requirements as IExpansionRequirements}
           showHelper={showHelper ?? false}
           coins={state.coins}
+          effectiveCoinCost={effectiveCoinCost}
         />
       )}
 

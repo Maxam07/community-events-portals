@@ -7,7 +7,7 @@ import { CollectionName } from "features/game/types/marketplace";
 import { useAppTranslation } from "lib/i18n/useAppTranslations";
 import { getChestItems } from "features/island/hud/components/inventory/utils/inventory";
 import { KNOWN_IDS } from "features/game/types";
-import { getKeys } from "features/game/types/craftables";
+import { getKeys } from "lib/object";
 import { availableWardrobe } from "features/game/events/landExpansion/equip";
 import { ITEM_IDS } from "features/game/types/bumpkin";
 import { getTradeableDisplay } from "features/marketplace/lib/tradeables";
@@ -19,7 +19,10 @@ import { ListViewCard } from "../ListViewCard";
 
 import chest from "assets/icons/chest.png";
 import { isNode } from "features/game/expansion/lib/expansionNodes";
-import { WEARABLE_RELEASES } from "features/game/types/withdrawables";
+import {
+  WEARABLE_RELEASES,
+  getPetReleases,
+} from "features/game/types/withdrawables";
 import { MachineState } from "features/game/lib/gameMachine";
 import { GameState } from "features/game/types/game";
 import { useNow } from "lib/utils/hooks/useNow";
@@ -42,6 +45,7 @@ export const MyCollection: React.FC = () => {
   const { buds, pets: { nfts: petNFTs = {} } = {} } = gameState;
 
   const now = useNow();
+  const nowDate = new Date(now);
 
   let items: CollectionItem[] = [];
 
@@ -59,7 +63,7 @@ export const MyCollection: React.FC = () => {
   const wardrobe = availableWardrobe(gameState);
   getKeys(wardrobe).forEach((name) => {
     const withdrawAt = WEARABLE_RELEASES[name]?.withdrawAt;
-    const canWithdraw = !!withdrawAt && withdrawAt <= new Date(now);
+    const canWithdraw = !!withdrawAt && withdrawAt <= nowDate;
     if (canWithdraw) {
       items.push({
         id: ITEM_IDS[name],
@@ -78,11 +82,16 @@ export const MyCollection: React.FC = () => {
   });
 
   getKeys(petNFTs ?? {}).forEach((id) => {
-    items.push({
-      id,
-      collection: "pets",
-      count: 1,
-    });
+    const petId = Number(id);
+    const { tradeAt } = getPetReleases(petId);
+    const canTrade = !!tradeAt && tradeAt <= nowDate;
+    if (canTrade) {
+      items.push({
+        id: petId,
+        collection: "pets",
+        count: 1,
+      });
+    }
   });
 
   items = items.filter((item) => {

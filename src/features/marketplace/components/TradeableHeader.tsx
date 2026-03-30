@@ -18,6 +18,7 @@ import {
   BlockchainEvent,
   Context as ContextType,
   MachineState,
+  selectGameState,
 } from "features/game/lib/gameMachine";
 import { useOnMachineTransition } from "lib/utils/hooks/useOnMachineTransition";
 import { PurchaseModalContent } from "./PurchaseModalContent";
@@ -29,10 +30,14 @@ import { isTradeResource } from "features/game/actions/tradeLimits";
 import classNames from "classnames";
 import { ITEM_DETAILS } from "features/game/types/images";
 import Decimal from "decimal.js-light";
-import { getRemainingTrades, Reputation } from "features/game/lib/reputation";
-import { hasReputation } from "features/game/lib/reputation";
-import { hasVipAccess } from "features/game/lib/vipAccess";
+import {
+  getRemainingTrades,
+  hasReputation,
+  Reputation,
+} from "features/game/lib/reputation";
+import { useVipAccess } from "lib/utils/hooks/useVipAccess";
 import { TradeableDisplay } from "../lib/tradeables";
+import { useNow } from "lib/utils/hooks/useNow";
 
 type TradeableHeaderProps = {
   authToken: string;
@@ -50,11 +55,6 @@ type TradeableHeaderProps = {
 };
 
 const _balance = (state: MachineState) => state.context.state.balance;
-const _hasTradeReputation = (state: MachineState) =>
-  hasReputation({
-    game: state.context.state,
-    reputation: Reputation.Cropkeeper,
-  });
 
 export const TradeableHeader: React.FC<TradeableHeaderProps> = ({
   authToken,
@@ -69,7 +69,13 @@ export const TradeableHeader: React.FC<TradeableHeaderProps> = ({
 }) => {
   const { gameService } = useContext(Context);
   const balance = useSelector(gameService, _balance);
-  const hasTradeReputation = useSelector(gameService, _hasTradeReputation);
+  const game = useSelector(gameService, selectGameState);
+  const now = useNow();
+  const hasTradeReputation = hasReputation({
+    game,
+    reputation: Reputation.Cropkeeper,
+    now,
+  });
   const params = useParams();
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
@@ -115,11 +121,14 @@ export const TradeableHeader: React.FC<TradeableHeaderProps> = ({
     isTradeResource(KNOWN_ITEMS[Number(params.id)]) &&
     params.collection === "collectibles";
 
-  const vipIsRequired =
-    tradeable?.isVip &&
-    !hasVipAccess({
-      game: gameService.getSnapshot().context.state,
-    });
+  const hasVipAccess = useVipAccess({
+    game: gameService.getSnapshot().context.state,
+    type: "full",
+  });
+
+  const vipIsRequired = tradeable?.isVip && !hasVipAccess;
+
+  const isTutorialItem = tradeable?.id === 2129;
 
   const showBuyNow =
     !isResources &&
@@ -127,7 +136,9 @@ export const TradeableHeader: React.FC<TradeableHeaderProps> = ({
     tradeable?.isActive &&
     !vipIsRequired &&
     // Don't show buy now if the listing is mine
-    cheapestListing.listedById !== farmId;
+    cheapestListing.listedById !== farmId &&
+    // Don't show buy if they have already bought the tutorial item
+    (!isTutorialItem || count === 0);
   // const showFreeListing = !isVIP && dailyListings === 0;
 
   const usd = gameService.getSnapshot().context.prices.sfl?.usd ?? 0.0;
@@ -137,6 +148,13 @@ export const TradeableHeader: React.FC<TradeableHeaderProps> = ({
   }, 0);
 
   const availableCount = count - totalListed;
+
+  const canBuy =
+    cheapestListing &&
+    balance.gte(cheapestListing.sfl) &&
+    limitedPurchasesLeft > 0;
+
+  const isTutorialBuy = canBuy && isTutorialItem && count === 0;
 
   return (
     <>
@@ -257,16 +275,15 @@ export const TradeableHeader: React.FC<TradeableHeaderProps> = ({
                 {showBuyNow && (
                   <Button
                     onClick={() => setShowPurchaseModal(true)}
-                    disabled={
-                      !balance.gt(cheapestListing.sfl) ||
-                      limitedPurchasesLeft <= 0
-                    }
-                    className="mr-1 w-full sm:w-auto"
+                    disabled={!canBuy}
+                    className={classNames("mr-1 w-full sm:w-auto", {
+                      "animate-pulsate": isTutorialBuy,
+                    })}
                   >
                     {t("marketplace.buyNow")}
                   </Button>
                 )}
-                {tradeable?.isActive && !vipIsRequired && (
+                {tradeable?.isActive && !vipIsRequired && !isTutorialItem && (
                   <Button
                     disabled={
                       !availableCount ||
@@ -275,6 +292,7 @@ export const TradeableHeader: React.FC<TradeableHeaderProps> = ({
                       (!hasTradeReputation &&
                         getRemainingTrades({
                           game: gameService.getSnapshot().context.state,
+                          now,
                         }) <= 0) ||
                       limitedTradesLeft <= 0
                     }
@@ -297,15 +315,15 @@ export const TradeableHeader: React.FC<TradeableHeaderProps> = ({
             {showBuyNow && (
               <Button
                 onClick={() => setShowPurchaseModal(true)}
-                disabled={
-                  !balance.gt(cheapestListing.sfl) || limitedPurchasesLeft <= 0
-                }
-                className="mr-1 w-full sm:w-auto"
+                disabled={!canBuy}
+                className={classNames("mr-1 w-full sm:w-auto", {
+                  "animate-pulsate": isTutorialBuy,
+                })}
               >
                 {t("marketplace.buyNow")}
               </Button>
             )}
-            {tradeable?.isActive && !vipIsRequired && (
+            {tradeable?.isActive && !vipIsRequired && !isTutorialItem && (
               <Button
                 onClick={onListClick}
                 disabled={
@@ -313,6 +331,7 @@ export const TradeableHeader: React.FC<TradeableHeaderProps> = ({
                   (!hasTradeReputation &&
                     getRemainingTrades({
                       game: gameService.getSnapshot().context.state,
+                      now,
                     }) <= 0) ||
                   limitedTradesLeft <= 0
                 }

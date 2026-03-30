@@ -128,6 +128,9 @@ export type CraftedEvent = `${
   | PetShopItemName
   | RecipeCollectibleName
   | BumpkinItem} Crafted`;
+export type CraftingStartedEvent = `${
+  | RecipeCollectibleName
+  | BumpkinItem} Crafting Started`;
 export type ConsumableEvent = `${ConsumableName} Collected`;
 export type SellEvent = `${SellableName} Sold`;
 export type TreasureEvent = `${TreasureName} Dug`;
@@ -150,6 +153,7 @@ export type FarmActivityName =
   | HarvestedEvent
   | BountiedEvent
   | CraftedEvent
+  | CraftingStartedEvent
   | ResourceBought
   | BiomeBought
   | "Obsidian Exchanged"
@@ -220,6 +224,12 @@ export type FarmActivityName =
   | "Farm Helped"
   | `${MonumentName} Completed`
   | "Daily Reward Collected"
+  | "VIP Coins Saved"
+  | "VIP FLOWER Saved"
+  | "VIP Ticket Earned"
+  | "VIP Gift Claimed"
+  | "Recipe Queued"
+  | "VIP XP Earned"
   | "Fish Missed"
   | "Fish Retried"
   | `${WaterTrapName} Collected`
@@ -231,18 +241,17 @@ export type FarmActivityName =
   | `${ChapterName} ${TrackName} Milestone Claimed`
   | `${BonusName} Bonus Claimed`
   | `${CrustaceanName} Caught with ${CrustaceanChum}`
-  | "Crafting Queue Cancelled";
+  | "Crafting Queue Cancelled"
+  | "Instant Gems Spent";
 
 export function trackFarmActivity(
   activityName: FarmActivityName,
   farmAnalytics: GameState["farmActivity"],
   amount = new Decimal(1),
 ) {
-  const previous = farmAnalytics || {};
-  const activityAmount = previous[activityName] || 0;
+  const previous = { ...farmAnalytics };
+  const activityAmount = previous[activityName] ?? 0;
 
-  return {
-    ...previous,
-    [activityName]: amount.add(activityAmount).toNumber(),
-  };
+  previous[activityName] = Math.max(0, amount.add(activityAmount).toNumber());
+  return previous;
 }

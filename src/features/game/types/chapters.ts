@@ -13,9 +13,9 @@ import betterTogetherBanner from "assets/decorations/banners/better_together_ban
 import pawPrintsBanner from "assets/decorations/banners/paw_prints_banner.webp";
 import crabChapterBanner from "assets/decorations/banners/crap_chapter_banner.webp";
 import { BeachBountyChapterArtefact } from "./treasure";
-import { getKeys } from "./decorations";
+import { getKeys } from "lib/object";
 import { ChapterFish } from "./fishing";
-import { getObjectEntries } from "../expansion/lib/utils";
+import { getObjectEntries } from "lib/object";
 
 export type ChapterName =
   | "Solar Flare"
@@ -31,6 +31,22 @@ export type ChapterName =
   | "Better Together"
   | "Paw Prints"
   | "Crabs and Traps";
+
+export const CHAPTER_ORDER: Record<ChapterName, number> = {
+  "Solar Flare": 1,
+  "Dawn Breaker": 2,
+  "Witches' Eve": 3,
+  "Catch the Kraken": 4,
+  "Spring Blossom": 5,
+  "Clash of Factions": 6,
+  "Pharaoh's Treasure": 7,
+  "Bull Run": 8,
+  "Winds of Change": 9,
+  "Great Bloom": 10,
+  "Better Together": 11,
+  "Paw Prints": 12,
+  "Crabs and Traps": 13,
+};
 
 type ChapterDates = { startDate: Date; endDate: Date; tasksBegin?: Date };
 

@@ -7,7 +7,7 @@ import { ITEM_DETAILS } from "features/game/types/images";
 import token from "assets/icons/flower_token.webp";
 
 import { useAppTranslation } from "lib/i18n/useAppTranslations";
-import { getKeys } from "features/game/types/craftables";
+import { getKeys } from "lib/object";
 import { SUNNYSIDE } from "assets/sunnyside";
 import { Label } from "components/ui/Label";
 import { Loading } from "features/auth/components";
@@ -27,6 +27,7 @@ import {
   MachineState,
 } from "features/game/lib/gameMachine";
 import { LastUpdatedAt } from "components/LastUpdatedAt";
+import { useNow } from "lib/utils/hooks/useNow";
 
 export const MARKET_BUNDLES: Record<TradeableName, number> = {
   // Crops
@@ -107,9 +108,11 @@ export const SalesPanel: React.FC<{
     });
   };
 
+  const now = useNow();
   const hasExchangeReputation = hasReputation({
     game: state,
     reputation: Reputation.Cropkeeper,
+    now,
   });
 
   const unitPrice = marketPrices?.prices?.currentPrices?.[selected] ?? 0;

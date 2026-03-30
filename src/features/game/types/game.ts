@@ -40,6 +40,7 @@ import {
   GoblinPirateItemName,
   HeliosBlacksmithItem,
   MegaStoreCollectibleName,
+  PlaceableLocation,
   PotionHouseItemName,
   PurchasableItems,
   SoldOutCollectibleName,
@@ -64,6 +65,8 @@ import {
 import { FarmActivityName } from "./farmActivity";
 import { MilestoneName } from "./milestones";
 import {
+  AgedFishName,
+  PrimeAgedFishName,
   FishName,
   FishingBait,
   MarineMarvelName,
@@ -76,6 +79,7 @@ import {
   FlowerSeedName,
   MutantFlowerName,
 } from "./flowers";
+import { PickledItemName } from "./pickled";
 import { translate } from "lib/i18n/translate";
 import { SpecialEvents } from "./specialEvents";
 import { TradeableName } from "../actions/sellMarketResource";
@@ -118,13 +122,22 @@ import { PetShopItemName } from "./petShop";
 import { League } from "features/leagues/leagues";
 import { Buff, BuffName } from "./buffs";
 import { CrustaceanChum, CrustaceanName, WaterTrapName } from "./crustaceans";
+import { SaltFarm } from "./salt";
 
 export type CraftingQueueItem = {
-  name: RecipeCollectibleName | BumpkinItem;
+  id: string;
   readyAt: number;
   startedAt: number;
-  type: "collectible" | "wearable";
-};
+} & (
+  | {
+      type: "collectible";
+      name: RecipeCollectibleName;
+    }
+  | {
+      type: "wearable";
+      name: BumpkinItem;
+    }
+);
 
 export type Reward = {
   coins?: number;
@@ -283,7 +296,10 @@ export type Coupons =
   | "Halloween Ticket 2025"
   | "Holiday Token 2025"
   | "Holiday Ticket 2025"
+  | "April Fools Token 2026"
+  | "April Fools Ticket 2026"
   | "Cheer"
+  | "CluckCoin"
   | Keys
   | ChapterTicket
   | ChapterRaffleTicket
@@ -423,6 +439,7 @@ export const COUPONS: Record<Coupons, { description: string }> = {
   },
   Bracelet: { description: "" },
   Cheer: { description: translate("description.cheer") },
+  CluckCoin: { description: translate("description.cluck.coin") },
   "Pet Cookie": { description: translate("description.petCookie") },
   Floater: { description: "Collected during the Crabs and Traps." },
   "Paw Prints Raffle Ticket": {
@@ -442,6 +459,12 @@ export const COUPONS: Record<Coupons, { description: string }> = {
   },
   "Holiday Ticket 2025": {
     description: translate("description.holidayTicket2025"),
+  },
+  "April Fools Token 2026": {
+    description: translate("description.aprilFoolsToken2026"),
+  },
+  "April Fools Ticket 2026": {
+    description: translate("description.aprilFoolsTicket2026"),
   },
 };
 
@@ -479,6 +502,8 @@ export type Bumpkin = {
   previousFreeSkillResetAt?: number;
   previousPowerUseAt?: Partial<Record<BumpkinRevampSkillName, number>>;
   paidSkillResets?: number;
+  coordinates?: Coordinates;
+  location?: Exclude<PlaceableLocation, "petHouse">;
 };
 
 export type SpecialEvent = "Chef Apron" | "Chef Hat";
@@ -626,6 +651,8 @@ export type InventoryItemName =
   | FishingBait
   | CompostName
   | FishName
+  | AgedFishName
+  | PrimeAgedFishName
   | MarineMarvelName
   | OldFishName
   | FlowerName
@@ -652,7 +679,8 @@ export type InventoryItemName =
   | PetResourceName
   | PetShopItemName
   | CrustaceanName
-  | ChapterRaffleTicket;
+  | ChapterRaffleTicket
+  | PickledItemName;
 
 export type Inventory = Partial<Record<InventoryItemName, Decimal>>;
 
@@ -1376,7 +1404,8 @@ export type Currency =
   | "Easter Token 2025"
   | "Colors Token 2025"
   | "Halloween Token 2025"
-  | "Holiday Token 2025";
+  | "Holiday Token 2025"
+  | "April Fools Token 2026";
 
 export type ShopItemBase = {
   shortDescription: string;
@@ -1635,6 +1664,7 @@ export type LavaPit = {
 export type VIP = {
   bundles: { name: VipBundle; boughtAt: number }[];
   expiresAt: number;
+  trialStartedAt?: number;
 };
 
 export type Chain = "ronin";
@@ -1942,6 +1972,7 @@ export interface GameState {
   craftingBox: {
     status: "pending" | "idle" | "crafting";
     queue?: CraftingQueueItem[];
+    /** @deprecated Derive from queue[0] via getCraftingBoxCurrent */
     item?:
       | {
           collectible: RecipeCollectibleName;
@@ -1951,8 +1982,10 @@ export interface GameState {
           collectible?: never;
           wearable: BumpkinItem;
         };
-    startedAt: number;
-    readyAt: number;
+    /** @deprecated Derive from queue[0] */
+    startedAt?: number;
+    /** @deprecated Derive from queue[0] */
+    readyAt?: number;
     recipes: Partial<Recipes>;
   };
   season: Season;
@@ -2025,6 +2058,7 @@ export interface GameState {
   prototypes?: {
     leagues?: League;
   };
+  saltFarm: SaltFarm;
 }
 
 export type AOE = Partial<
