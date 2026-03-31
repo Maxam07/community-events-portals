@@ -1,7 +1,7 @@
 import { Scene } from "../Scene";
 import { Enemy, PlayerFoodConfig, PlayerFoodType } from "../Types";
 import { createAnimation, onAnimationComplete } from "../lib/Utils";
-import { PLAYER_FOOD_CONFIG } from "../Constants";
+import { GAME_LIVES, PLAYER_FOOD_CONFIG } from "../Constants";
 import { Chest } from "./Chest";
 
 
@@ -82,9 +82,42 @@ export class PlayerFood extends Phaser.GameObjects.Container {
             this.scene.physics.add.overlap(this, chest, () => {
                 if (chest.isOpened) return;
                 chest.onFoodHit();
-                const body = this.body as Phaser.Physics.Arcade.Body;
-                const angle = Math.PI / 2;
-                body.setVelocity(Math.cos(angle) * this.config.speed, Math.sin(angle) * this.config.speed);
+
+                if (Math.random() < 0.8) {
+                    const body = this.body as Phaser.Physics.Arcade.Body;
+                    const angle = Math.PI / 2;
+                    body.setVelocity(Math.cos(angle) * this.config.speed, Math.sin(angle) * this.config.speed);
+                } else {
+                    if (this.scene.portalService &&
+                        this.scene.portalService.state.context.lives < GAME_LIVES) {
+                        this.scene.portalService.send("GAIN_LIFE");
+                    }
+                    this.playContact();
+
+                    const text = this.scene.add.text(-5, -17, "+1", {
+                        fontSize: "15px",
+                        fontFamily: "Basic",
+                        color: "#FFFFFF",
+                        resolution: 10,
+                        fontStyle: "bold",
+                        shadow: {
+                            offsetX: 5,
+                            offsetY: 5,
+                            color: "#000000",
+                            blur: 0,
+                            fill: true,
+                        },
+                    }).setOrigin(0.5);
+                    const heart = this.scene.add.sprite(5, -17, "heart");
+
+                    chest.add(text);
+                    chest.add(heart);
+
+                    this.scene.time.delayedCall(2000, () => {
+                        if (text && text.active) text.destroy();
+                        if (heart && heart.active) heart.destroy();
+                    });
+                }
             });
         });
 

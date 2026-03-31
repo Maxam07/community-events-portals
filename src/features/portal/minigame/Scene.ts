@@ -38,6 +38,7 @@ import { Chest } from "./containers/Chest";
 import { LineGlitch } from "./containers/LineGlitch";
 import VirtualJoyStick from "phaser3-rex-plugins/plugins/virtualjoystick";
 import { SQUARE_WIDTH } from "features/game/lib/constants";
+import { SUNNYSIDE } from "assets/sunnyside";
 
 // export const NPCS: NPCBumpkin[] = [
 //   {
@@ -382,6 +383,7 @@ export class Scene extends BaseScene {
     this.load.image("health_full", "/world/portal/images/health_bar_full.webp");
     this.load.image("health_half", "/world/portal/images/health_bar_half.webp");
     this.load.image("health_low", "/world/portal/images/health_bar_low.webp");
+    this.load.image("heart", SUNNYSIDE.icons.heart);
 
     // Food
     this.load.image("rice_bun", "/world/portal/images/rice_bun.png");

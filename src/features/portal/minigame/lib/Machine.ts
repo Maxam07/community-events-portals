@@ -88,7 +88,8 @@ export type PortalEvent =
   | LoseLifeEvent
   | SetValidationsEvent
   | { type: "COLLECT_RICE_BUN" }
-  | SimulateErrorEvent;
+  | SimulateErrorEvent
+  | { type: "GAIN_LIFE" };
 
 export type PortalState = {
   value:
@@ -359,6 +360,13 @@ export const portalMachine = createMachine<Context, PortalEvent, PortalState>({
           actions: assign({
             lives: (context: Context) => {
               return context.lives - 1;
+            },
+          }),
+        },
+        GAIN_LIFE: {
+          actions: assign({
+            lives: (context: Context) => {
+              return context.lives + 1;
             },
           }),
         },
