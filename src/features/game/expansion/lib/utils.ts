@@ -1,5 +1,6 @@
 import { Collectibles, Rock } from "features/game/types/game";
 import isEqual from "lodash.isequal";
+import { getObjectEntries } from "lib/object";
 
 export function canMine(
   rock: Rock,
@@ -8,13 +9,6 @@ export function canMine(
 ) {
   return now - rock.stone.minedAt >= recoveryTime * 1000;
 }
-
-/**
- * getEntries is a ref to Object.entries, but the return is typed literally.
- */
-export const getObjectEntries = Object.entries as <T extends object>(
-  obj: T,
-) => Array<[keyof T, T[keyof T]]>;
 
 interface ResourceObject {
   [id: string]: {
@@ -48,4 +42,23 @@ export const getSortedCollectiblePositions = (object: Collectibles) => {
 
 export function comparePositions(prev: any, next: any) {
   return isEqual(prev.positions, next.positions);
+}
+
+export type SaltFarmLayoutSlice = {
+  positions: { id: string; x: number; y: number }[];
+  saltFarmLevel: number;
+  basicLand: number;
+  saltNodeIds: string[];
+};
+
+export function compareSaltFarmSlice(
+  prev: SaltFarmLayoutSlice,
+  next: SaltFarmLayoutSlice,
+) {
+  return (
+    isEqual(prev.positions, next.positions) &&
+    prev.saltFarmLevel === next.saltFarmLevel &&
+    prev.basicLand === next.basicLand &&
+    isEqual(prev.saltNodeIds, next.saltNodeIds)
+  );
 }

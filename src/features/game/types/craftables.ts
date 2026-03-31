@@ -31,6 +31,7 @@ import { BED_FARMHAND_COUNT } from "./beds";
 import { ChapterCollectibleName } from "./megastore";
 import { MonumentName } from "./monuments";
 import { PetName, PetShrineName } from "./pets";
+import { getKeys } from "lib/object";
 
 export { FLAGS };
 
@@ -1044,21 +1045,6 @@ export const ANIMALS: Record<Animal, CraftableItem> = {
   },
 };
 
-/**
- * getKeys is a ref to Object.keys, but the return is typed literally.
- */
-export const getKeys = Object.keys as <T extends object>(
-  obj: T,
-) => Array<keyof T>;
-
-/**
- * getEntries is a ref to Object.entries, but the return is typed literally.
- */
-type Entries<T> = { [K in keyof T]: [K, T[K]] }[keyof T];
-export const getEntries = Object.entries as <T extends object>(
-  obj: T,
-) => Entries<T>[];
-
 export type Dimensions = { width: number; height: number };
 
 const flagsDimension = getKeys(FLAGS).reduce(
@@ -1502,7 +1488,7 @@ export const COLLECTIBLES_DIMENSIONS: Record<CollectibleName, Dimensions> = {
   "Frozen Cow": { width: 2, height: 1 },
   "Frozen Sheep": { width: 2, height: 1 },
   "Summer Chicken": { width: 1, height: 1 },
-  Jellyfish: { width: 2, height: 2 },
+  Jellyfish: { width: 2, height: 1 },
   Quarry: { width: 2, height: 2 },
   "Obsidian Turtle": { width: 1, height: 1 },
   "Winter Guardian": { width: 2, height: 2 },
@@ -1520,7 +1506,7 @@ export const COLLECTIBLES_DIMENSIONS: Record<CollectibleName, Dimensions> = {
   "Dr Cow": { width: 2, height: 1 },
   "Nurse Sheep": { width: 2, height: 1 },
   Lunalist: { width: 1, height: 1 },
-  "Pink Dolphin": { width: 2, height: 2 },
+  "Pink Dolphin": { width: 2, height: 1 },
   "Giant Kale": { width: 2, height: 2 },
 
   "Big Apple": { width: 2, height: 2 },

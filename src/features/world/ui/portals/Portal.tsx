@@ -18,7 +18,7 @@ import { portal } from "../community/actions/portal";
 import { Loading } from "features/auth/components";
 import { InventoryItemName } from "features/game/types/game";
 import { Box } from "components/ui/Box";
-import { getKeys } from "features/game/types/craftables";
+import { getKeys } from "lib/object";
 import { ITEM_DETAILS } from "features/game/types/images";
 
 import sflIcon from "assets/icons/flower_token.webp";
@@ -40,7 +40,8 @@ type PortalPurchase = {
  */
 const DOMAIN_MAP: Partial<Record<MinigameName, string>> = {
   "festival-of-colors-2025": "festival-of-colors",
-  "holiday-puzzle-2025": "halloween",
+  "april-fools": "halloween",
+  "chaacs-temple": "chaacs-temple.minigames",
 };
 
 export const Portal: React.FC<Props> = ({ portalName, onClose }) => {

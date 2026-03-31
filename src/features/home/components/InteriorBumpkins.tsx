@@ -5,7 +5,7 @@ import { NPCIcon, NPCPlaceable } from "features/island/bumpkin/components/NPC";
 import React, { useContext } from "react";
 import { Modal } from "components/ui/Modal";
 import { CloseButtonPanel } from "features/game/components/CloseablePanel";
-import { getKeys } from "features/game/types/craftables";
+import { getKeys } from "lib/object";
 import { BumpkinEquip } from "features/bumpkins/components/BumpkinEquip";
 import { Context } from "features/game/GameProvider";
 import { Button } from "components/ui/Button";
@@ -74,14 +74,30 @@ export const InteriorBumpkins: React.FC = () => {
     });
   };
 
+  const handlePlaceBumpkin = () => {
+    const landscaping = gameService.getSnapshot().children
+      .landscaping as MachineInterpreter;
+    landscaping.send("SELECT", {
+      placeable: { name: "Bumpkin" },
+      action: "bumpkin.placed",
+      requirements: { coins: 0, ingredients: {} },
+    });
+  };
+
   return (
     <>
       <div className="flex justify-between items-end">
         <div className="flex">
-          {!isLandscaping && (
+          {(!isLandscaping || !bumpkin.coordinates) && (
             <div
               className="mr-2 cursor-pointer"
-              onClick={() => setShowBumpkinModal(true)}
+              onClick={() => {
+                if (isLandscaping && !bumpkin.coordinates) {
+                  handlePlaceBumpkin();
+                } else if (!isLandscaping) {
+                  setShowBumpkinModal(true);
+                }
+              }}
             >
               <div
                 className="absolute"
@@ -102,6 +118,17 @@ export const InteriorBumpkins: React.FC = () => {
                   bottom: 0,
                 }}
               />
+              {isLandscaping && !bumpkin.coordinates && (
+                <img
+                  src={SUNNYSIDE.icons.click_icon}
+                  className="absolute z-10 animate-float"
+                  style={{
+                    width: `${10 * PIXEL_SCALE}px`,
+                    top: `${-13 * PIXEL_SCALE}px`,
+                    left: `${4 * PIXEL_SCALE}px`,
+                  }}
+                />
+              )}
             </div>
           )}
 
@@ -246,6 +273,7 @@ export const InteriorBumpkins: React.FC = () => {
           ]}
         >
           <BumpkinEquip
+            farmHandId={undefined}
             equipment={bumpkin?.equipped as BumpkinParts}
             onEquip={(equipment) => {
               gameService.send("bumpkin.equipped", {
@@ -273,6 +301,7 @@ export const InteriorBumpkins: React.FC = () => {
           ]}
         >
           <BumpkinEquip
+            farmHandId={selectedFarmHandId as string}
             equipment={farmHands[selectedFarmHandId as string]?.equipped}
             onEquip={(equipment) => {
               gameService.send("farmHand.equipped", {

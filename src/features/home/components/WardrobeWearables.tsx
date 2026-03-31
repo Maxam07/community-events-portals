@@ -10,7 +10,7 @@ import { Context } from "features/game/GameProvider";
 import { PIXEL_SCALE } from "features/game/lib/constants";
 import { SFLDiscount } from "features/game/lib/SFLDiscount";
 import { BumpkinItem } from "features/game/types/bumpkin";
-import { getKeys } from "features/game/types/decorations";
+import { getKeys } from "lib/object";
 import { GameState, Inventory } from "features/game/types/game";
 import { ITEM_DETAILS } from "features/game/types/images";
 import { getChapterTicket } from "features/game/types/chapters";
@@ -65,7 +65,7 @@ export const WardrobeWearables: React.FC = () => {
 
   const wearable = STYLIST_WEARABLES[selected] as StylistWearable; // Add type assertion to StylistWearable
 
-  const price = SFLDiscount(state, new Decimal(wearable.coins)).toNumber();
+  const price = SFLDiscount(state, new Decimal(wearable.coins), now).toNumber();
 
   const lessFunds = () => {
     if (!price) return false;

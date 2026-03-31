@@ -29,8 +29,10 @@ import { FlowerDashboard } from "features/flowerDashboard/FlowerDashboard";
 import { EconomyDashboard } from "features/economyDashboard/EconomyDashboard";
 import { RetentionDashboard } from "features/retentionDashboard/RetentionDashboard";
 import { ChapterDashboard } from "features/chapterDashboard/ChapterDashboard";
+import { GameWrapper } from "features/game/expansion/Game";
 import { ModalProvider } from "features/game/components/modal/ModalProvider";
 import { FeedProvider } from "features/social/FeedContext";
+import { AIBuilder } from "features/portal-ai/AIBuilder";
 
 // Lazy load routes
 const World = lazy(() =>
@@ -183,11 +185,23 @@ export const Navigation: React.FC = () => {
                                 />
                                 <Route
                                   path="/chapter"
-                                  element={<ChapterDashboard />}
+                                  element={
+                                    <GameWrapper>
+                                      <ChapterDashboard />
+                                    </GameWrapper>
+                                  }
                                 />
                                 <Route
                                   path="/game/chapter"
-                                  element={<ChapterDashboard />}
+                                  element={
+                                    <GameWrapper>
+                                      <ChapterDashboard />
+                                    </GameWrapper>
+                                  }
+                                />
+                                <Route
+                                  path="/ai-builder"
+                                  element={<AIBuilder />}
                                 />
                                 <Route
                                   path="*"

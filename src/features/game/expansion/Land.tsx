@@ -6,7 +6,8 @@ import classNames from "classnames";
 import { Section, useScrollIntoView } from "lib/utils/hooks/useScrollIntoView";
 import { MapPlacement } from "./components/MapPlacement";
 import { Context } from "../GameProvider";
-import { COLLECTIBLES_DIMENSIONS, getKeys } from "../types/craftables";
+import { COLLECTIBLES_DIMENSIONS } from "../types/craftables";
+import { getKeys } from "lib/object";
 import { LandBase } from "./components/LandBase";
 import { UpcomingExpansion } from "./components/UpcomingExpansion";
 import { BUILDINGS_DIMENSIONS, Home } from "../types/buildings";
@@ -36,9 +37,10 @@ import { createPortal } from "react-dom";
 import { NON_COLLIDING_OBJECTS } from "./placeable/lib/collisionDetection";
 import { getCurrentBiome } from "features/island/biomes/biomes";
 import { useVisiting } from "lib/utils/visitUtils";
+import { getObjectEntries } from "lib/object";
 import {
-  getObjectEntries,
   comparePositions,
+  compareSaltFarmSlice,
   getSortedResourcePositions,
   getSortedCollectiblePositions,
 } from "./lib/utils";
@@ -46,6 +48,12 @@ import { Clutter } from "features/island/clutter/Clutter";
 import { PetNFT } from "features/island/pets/PetNFT";
 import { WaterTrapSpot } from "features/island/fisherman/WaterTrapSpot";
 import { FarmHand } from "features/island/farmhand/FarmHand";
+import { PlacedBumpkin } from "features/island/bumpkin/components/PlacedBumpkin";
+import { SaltNode } from "./components/salt/SaltNode";
+import { SaltNodePlaceholder } from "./components/salt/SaltNodePlaceholder";
+import { getSaltNodeCoordinates } from "features/game/types/salt";
+import { getPendingSaltNodeIdsForUpgrade } from "features/game/types/salt";
+import { hasFeatureAccess } from "lib/flags";
 
 export const LAND_WIDTH = 6;
 
@@ -64,6 +72,10 @@ const _treePositions = (state: MachineState) => ({
   trees: state.context.state.trees,
   positions: getSortedResourcePositions(state.context.state.trees),
 });
+
+const _hasSaltFarmAccess = (state: MachineState) =>
+  hasFeatureAccess(state.context.state, "SALT_FARM");
+
 const _stonePositions = (state: MachineState) => {
   return {
     stones: state.context.state.stones,
@@ -124,6 +136,28 @@ const _lavaPitPositions = (state: MachineState) => {
   return {
     lavaPits: state.context.state.lavaPits,
     positions: getSortedResourcePositions(state.context.state.lavaPits),
+  };
+};
+
+const _saltNodePositions = (state: MachineState) => {
+  const saltNodes = state.context.state.saltFarm.nodes;
+  const saltFarmLevel = state.context.state.saltFarm.level;
+  const basicLand =
+    state.context.state.inventory["Basic Land"]?.toNumber() ?? 3;
+  const saltNodeIds = Object.keys(saltNodes).sort();
+  return {
+    saltNodes,
+    saltFarmLevel,
+    basicLand,
+    saltNodeIds,
+    positions: getObjectEntries(saltNodes)
+      .filter(([, node]) => !!node.coordinates)
+      .map(([id, node]) => ({
+        id,
+        x: node.coordinates.x,
+        y: node.coordinates.y,
+      }))
+      .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)),
   };
 };
 const _collectiblePositions = (state: MachineState) => {
@@ -211,6 +245,8 @@ const _petNFTPositions = (state: MachineState) => {
       }),
   };
 };
+
+const _bumpkinPlacement = (state: MachineState) => state.context.state.bumpkin;
 
 const _farmHandPositions = (state: MachineState) => {
   const bumpkins = state.context.state.farmHands?.bumpkins;
@@ -330,6 +366,12 @@ export const LandComponent: React.FC = () => {
     _lavaPitPositions,
     comparePositions,
   );
+  const { saltNodes, saltFarmLevel, basicLand } = useSelector(
+    gameService,
+    _saltNodePositions,
+    compareSaltFarmSlice,
+  );
+  const hasSaltFarmAccess = useSelector(gameService, _hasSaltFarmAccess);
   const { mushrooms } = useSelector(
     gameService,
     _mushroomPositions,
@@ -352,6 +394,7 @@ export const LandComponent: React.FC = () => {
     _farmHandPositions,
     comparePositions,
   );
+  const bumpkin = useSelector(gameService, _bumpkinPlacement);
   const { airdrops } = useSelector(
     gameService,
     _airdropPositions,
@@ -919,6 +962,18 @@ export const LandComponent: React.FC = () => {
     });
   }, [farmHands]);
 
+  const bumpkinElement = useMemo(() => {
+    if (!bumpkin?.coordinates || bumpkin.location === "home") return [];
+
+    const { x, y } = bumpkin.coordinates;
+
+    return [
+      <MapPlacement key="main-bumpkin" x={x} y={y} height={1} width={1}>
+        <PlacedBumpkin />
+      </MapPlacement>,
+    ];
+  }, [bumpkin]);
+
   const airdropElements = useMemo(() => {
     if (!airdrops) return [];
 
@@ -962,6 +1017,47 @@ export const LandComponent: React.FC = () => {
     });
   }, [waterTraps]);
 
+  const saltNodeElements = useMemo(() => {
+    return getObjectEntries(saltNodes)
+      .filter(([, node]) => !!node.coordinates)
+      .map(([id, node]) => {
+        const { x, y } = node.coordinates;
+
+        return (
+          <MapPlacement
+            key={`salt-node-${id}`}
+            x={x}
+            y={y}
+            height={2}
+            width={2}
+          >
+            <SaltNode id={id} visiting={visiting} />
+          </MapPlacement>
+        );
+      });
+  }, [saltNodes, visiting]);
+
+  const saltPlaceholderElements = useMemo(() => {
+    const pendingIds = getPendingSaltNodeIdsForUpgrade({
+      level: saltFarmLevel,
+      nodes: saltNodes,
+    });
+    return pendingIds.map((id) => {
+      const { x, y } = getSaltNodeCoordinates(basicLand, id);
+      return (
+        <MapPlacement
+          key={`salt-placeholder-${id}`}
+          x={x - 0.5}
+          y={y + 0.5}
+          height={2}
+          width={2}
+        >
+          <SaltNodePlaceholder visiting={visiting} />
+        </MapPlacement>
+      );
+    });
+  }, [basicLand, saltFarmLevel, saltNodes, visiting]);
+
   // Memoize island elements with enhanced performance tracking
   const islandElements = useMemo(() => {
     const elements = [
@@ -984,6 +1080,7 @@ export const LandComponent: React.FC = () => {
       budElements,
       petNFTElements,
       farmHandElements,
+      bumpkinElement,
       airdropElements,
     ].flat();
 
@@ -1027,6 +1124,7 @@ export const LandComponent: React.FC = () => {
     budElements,
     petNFTElements,
     farmHandElements,
+    bumpkinElement,
     airdropElements,
     mushroomElements,
   ]);
@@ -1098,6 +1196,8 @@ export const LandComponent: React.FC = () => {
 
         {/* Water trap spots - rendered after Fisherman to ensure they appear on top */}
         {!landscaping && waterTrapElements}
+        {!landscaping && hasSaltFarmAccess && saltPlaceholderElements}
+        {!landscaping && hasSaltFarmAccess && saltNodeElements}
 
         {/* Background darkens in landscaping */}
         <div

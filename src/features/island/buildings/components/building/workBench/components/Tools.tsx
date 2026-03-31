@@ -13,7 +13,7 @@ import {
   LOVE_ANIMAL_TOOLS,
   Tool,
 } from "features/game/types/tools";
-import { getKeys } from "features/game/types/craftables";
+import { getKeys } from "lib/object";
 import { SplitScreenView } from "components/ui/SplitScreenView";
 import { CraftingRequirements } from "components/ui/layouts/CraftingRequirements";
 import { makeBulkBuyTools } from "../../market/lib/makeBulkBuyAmount";
@@ -27,8 +27,9 @@ import { capitalize } from "lib/utils/capitalize";
 import { IslandType, LoveAnimalItem } from "features/game/types/game";
 import { getToolPrice } from "features/game/events/landExpansion/craftTool";
 import { Restock } from "../../market/restock/Restock";
-import { getObjectEntries } from "features/game/expansion/lib/utils";
+import { getObjectEntries } from "lib/object";
 import { getBumpkinLevel } from "features/game/lib/level";
+import { hasFeatureAccess } from "lib/flags";
 
 const isLoveAnimalTool = (
   toolName: WorkbenchToolName | LoveAnimalItem,
@@ -240,7 +241,11 @@ export const Tools: React.FC = () => {
             {t("waterTools")}
           </Label>
           <div className="flex flex-wrap mb-2">
-            {WATER_TOOLS.map(([toolName, tool]) => {
+            {WATER_TOOLS.filter(
+              ([toolName]) =>
+                toolName !== "Salt Rake" ||
+                hasFeatureAccess(state, "SALT_FARM"),
+            ).map(([toolName, tool]) => {
               const { requiredIsland } = tool;
               const isLocked =
                 !hasRequiredIslandExpansion(

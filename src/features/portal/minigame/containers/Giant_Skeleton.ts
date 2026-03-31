@@ -2,7 +2,7 @@ import { BumpkinContainer } from "../Core/BumpkinContainer";
 import { Scene } from "../Scene";
 import { createAnimation } from "../lib/Utils";
 import { MachineInterpreter } from "../lib/Machine";
-import { WINGS_IMMUNITY } from "../Constants";
+import { TOOL_IMMUNITY } from "../Constants";
 
 interface Props {
   x: number;
@@ -39,13 +39,15 @@ export class Giant_Skeleton extends Phaser.GameObjects.Container {
     this.health_status = "health";
 
     // Sprites
-    this.sprite = this.scene.add.sprite(0, 0, `${this.spriteName}_idle`).setVisible(false);
-    this.barrel = this.scene.add.sprite(0, -20, `${this.spriteName}_barrel`).setVisible(false);
-    this.health_bar = this.scene.add.image(
-      0,
-      -30,
-      `${this.health_status}_full`,
-    ).setVisible(false);
+    this.sprite = this.scene.add
+      .sprite(0, 0, `${this.spriteName}_idle`)
+      .setVisible(false);
+    this.barrel = this.scene.add
+      .sprite(0, -20, `${this.spriteName}_barrel`)
+      .setVisible(false);
+    this.health_bar = this.scene.add
+      .image(0, -30, `${this.health_status}_full`)
+      .setVisible(false);
     this.add([this.sprite, this.barrel, this.health_bar]);
     this.sprite.setActive(false);
 
@@ -236,21 +238,21 @@ export class Giant_Skeleton extends Phaser.GameObjects.Container {
   private handleImmunity() {
     if (!this.player) return;
 
-    const wing = this.player.clothing.wings;
+    const tool = this.player.clothing.tool;
     const enlargePlayer = 1.5;
     const defaultScale = 1;
 
-    if (!wing) {
+    if (!tool) {
       this.player.setScale(enlargePlayer);
-    } else if (WINGS_IMMUNITY.includes(wing)) {
+    } else if (TOOL_IMMUNITY.includes(tool)) {
       this.player.setScale(defaultScale);
     } else {
       this.player.setScale(enlargePlayer);
     }
   }
 
-  private createDamage() { }
-  private createEvents() { }
+  private createDamage() {}
+  private createEvents() {}
 
   public defeat() {
     if (this.isDefeated || !this.sprite.active) return;

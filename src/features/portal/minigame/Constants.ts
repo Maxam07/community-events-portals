@@ -1,9 +1,9 @@
 import {
-  BumpkinWings,
   BumpkinAura,
   Equipped,
   BumpkinShoe,
   BumpkinHat,
+  BumpkinTool,
 } from "features/game/types/bumpkin";
 import { translate as t } from "lib/i18n/translate";
 import { NPC_WEARABLES } from "lib/npcs";
@@ -25,6 +25,7 @@ import chest from "public/world/portal/images/chest.png";
 import food from "public/world/portal/images/tomato-splat.gif";
 import auraIcon from "public/world/portal/images/Bumpkin_Glitch_Aura.webp";
 import healthBar_icon from "public/world/portal/images/health_bar_low.webp";
+import combination_assets from "public/world/portal/images/combination_items.gif";
 
 export const PORTAL_NAME = "april-fools";
 export const PORTAL_TOKEN = "April Fools Token 2025";
@@ -165,53 +166,59 @@ export const HONEY_SPAWN_POSITION: Position = { x: 304, y: -50 };
 export const HONEY_TARGET_Y = 80;
 
 // Immunities
-export const AURA_IMMUNITY: BumpkinAura = "Slime Aura";
-export const WINGS_IMMUNITY: BumpkinWings = "Sol & Luna";
-export const SHOES_IMMUNITY: BumpkinShoe = "Crimstone Boots";
-export const HAT_IMMUNITY: BumpkinHat = "Grumpy Cat";
-
+export const AURA_IMMUNITY: BumpkinAura = "Glitch Aura"; // Prevents from turning into a rice bun
+export const TOOL_IMMUNITY: BumpkinTool = "Admin Fools Tools"; // Prevents from getting enlarged
+export const SHOES_IMMUNITY: BumpkinShoe[] = [
+  "Neon Noiz Shoes",
+  "404 Chic Boots",
+]; // Prevents inverted controls
+export const HAT_IMMUNITY: BumpkinHat = "Aether Specs"; // Prevents from slowing down
 // Guide
 export const INSTRUCTIONS: {
   image: string;
   description: string;
   width?: number;
 }[] = [
-    {
-      image: food,
-      description: t(`${PORTAL_NAME}.instructions1`),
-    },
-    {
-      image: giantIcon,
-      description: t(`${PORTAL_NAME}.instructions2`),
-    },
-    {
-      image: auraIcon,
-      description: t(`${PORTAL_NAME}.instructions3`),
-    },
-    {
-      image: healthBar_icon,
-      description: t(`${PORTAL_NAME}.instructions4`),
-    },
-  ];
+  {
+    image: food,
+    description: t(`${PORTAL_NAME}.instructions1`),
+  },
+  {
+    image: giantIcon,
+    description: t(`${PORTAL_NAME}.instructions2`),
+  },
+  {
+    image: auraIcon,
+    description: t(`${PORTAL_NAME}.instructions3`),
+  },
+  {
+    image: healthBar_icon,
+    description: t(`${PORTAL_NAME}.instructions4`),
+  },
+];
 
 export const RESOURCES_TABLE: {
   image: string;
   description: string;
   width?: number;
 }[] = [
-    {
-      image: riceBun,
-      description: t(`${PORTAL_NAME}.resource1`),
-    },
-    {
-      image: cannon,
-      description: t(`${PORTAL_NAME}.resource2`),
-    },
-    {
-      image: chest,
-      description: t(`${PORTAL_NAME}.resource3`),
-    },
-  ];
+  {
+    image: riceBun,
+    description: t(`${PORTAL_NAME}.resource1`),
+  },
+  {
+    image: cannon,
+    description: t(`${PORTAL_NAME}.resource2`),
+  },
+  {
+    image: chest,
+    description: t(`${PORTAL_NAME}.resource3`),
+  },
+  {
+    image: combination_assets,
+    description: t(`${PORTAL_NAME}.resource4`),
+  },
+];
 
 export const REFEREE: {
   image: string;
@@ -224,82 +231,92 @@ export const REFEREE: {
 
 export const IMMUNITY_GUIDE: {
   image: string;
+  immunityName: string;
   description: string;
   width?: number;
 }[] = [
-    {
-      image: getWearableImage(`${AURA_IMMUNITY}`),
-      description: t(`${PORTAL_NAME}.aura_immunityDescription`),
-    },
-    {
-      image: getWearableImage(`${WINGS_IMMUNITY}`),
-      description: t(`${PORTAL_NAME}.wings_immunityDescription`),
-    },
-    {
-      image: getWearableImage(`${SHOES_IMMUNITY}`),
-      description: t(`${PORTAL_NAME}.shoes_immunityDescription`),
-    },
-    {
-      image: getWearableImage(`${HAT_IMMUNITY}`),
-      description: t(`${PORTAL_NAME}.hat_immunityDescription`),
-    },
-  ];
+  {
+    image: getWearableImage(`${AURA_IMMUNITY}`),
+    immunityName: AURA_IMMUNITY,
+    description: t(`${PORTAL_NAME}.aura_immunityDescription`),
+  },
+  {
+    image: getWearableImage(`${TOOL_IMMUNITY}`),
+    immunityName: TOOL_IMMUNITY,
+    description: t(`${PORTAL_NAME}.tool_immunityDescription`),
+  },
+  {
+    image: getWearableImage(`${SHOES_IMMUNITY[0]}`),
+    immunityName: SHOES_IMMUNITY[0],
+    description: t(`${PORTAL_NAME}.shoes_immunityDescription`),
+  },
+  {
+    image: getWearableImage(`${SHOES_IMMUNITY[1]}`),
+    immunityName: SHOES_IMMUNITY[1],
+    description: t(`${PORTAL_NAME}.shoes_immunityDescription`),
+  },
+  {
+    image: getWearableImage(`${HAT_IMMUNITY}`),
+    immunityName: HAT_IMMUNITY,
+    description: t(`${PORTAL_NAME}.hat_immunityDescription`),
+  },
+];
 
 export const ENEMIES_TABLE: {
   image: string;
   description: string;
   width?: number;
 }[] = [
-    {
-      image: giantIcon,
-      description: t(`${PORTAL_NAME}.enemy1`),
-    },
-    {
-      image: sniperIcon,
-      description: t(`${PORTAL_NAME}.enemy2`),
-    },
-    {
-      image: menaceIcon,
-      description: t(`${PORTAL_NAME}.enemy3`),
-    },
-    {
-      image: blastIcon,
-      description: t(`${PORTAL_NAME}.enemy4`),
-    },
-    {
-      image: orangePuddle,
-      description: t(`${PORTAL_NAME}.enemy5`),
-    },
-  ];
+  {
+    image: giantIcon,
+    description: t(`${PORTAL_NAME}.enemy1`),
+  },
+  {
+    image: blastIcon,
+    description: t(`${PORTAL_NAME}.enemy2`),
+  },
+  {
+    image: menaceIcon,
+    description: t(`${PORTAL_NAME}.enemy3`),
+  },
+  {
+    image: sniperIcon,
+    description: t(`${PORTAL_NAME}.enemy4`),
+  },
+  {
+    image: orangePuddle,
+    description: t(`${PORTAL_NAME}.enemy5`),
+  },
+];
 
-export type Immunity_Wearables = "aura" | "wings" | "shoe" | "hat";
+export type Immunity_Wearables = "aura" | "tool" | "shoe" | "hat";
 
 export const IMMUNITY_TOOLTIP: {
   id: Immunity_Wearables;
   image: string;
   description: string;
 }[] = [
-    {
-      id: "aura",
-      image: aura_immunity_icon,
-      description: t(`${PORTAL_NAME}.aura_immunityDescription`),
-    },
-    {
-      id: "wings",
-      image: wings_immunity_icon,
-      description: t(`${PORTAL_NAME}.wings_immunityDescription`),
-    },
-    {
-      id: "shoe",
-      image: shoes_immunity,
-      description: t(`${PORTAL_NAME}.shoes_immunityDescription`),
-    },
-    {
-      id: "hat",
-      image: hat_immunity,
-      description: t(`${PORTAL_NAME}.hat_immunityDescription`),
-    },
-  ];
+  {
+    id: "aura",
+    image: aura_immunity_icon,
+    description: t(`${PORTAL_NAME}.aura_immunityDescription`),
+  },
+  {
+    id: "tool",
+    image: wings_immunity_icon,
+    description: t(`${PORTAL_NAME}.tool_immunityDescription`),
+  },
+  {
+    id: "shoe",
+    image: shoes_immunity,
+    description: t(`${PORTAL_NAME}.shoes_immunityDescription`),
+  },
+  {
+    id: "hat",
+    image: hat_immunity,
+    description: t(`${PORTAL_NAME}.hat_immunityDescription`),
+  },
+];
 
 // Panel
 export const PANEL_NPC_WEARABLES: Equipped = NPC_WEARABLES["goldtooth"];
