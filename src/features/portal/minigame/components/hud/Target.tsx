@@ -5,7 +5,6 @@ import { SUNNYSIDE } from "assets/sunnyside";
 import { Label } from "components/ui/Label";
 import { useAppTranslation } from "lib/i18n/useAppTranslations";
 import { PortalMachineState } from "../../lib/Machine";
-import { millisecondsToString } from "lib/utils/time";
 import { PORTAL_NAME } from "../../Constants";
 
 const _target = (state: PortalMachineState) =>
@@ -28,9 +27,7 @@ export const Target: React.FC = () => {
       type={isTargetReached ? "success" : "vibrant"}
     >
       {t(`${PORTAL_NAME}.targetScore`, {
-        target: millisecondsToString(target, {
-          length: "full",
-        }),
+        target,
       })}
     </Label>
   );

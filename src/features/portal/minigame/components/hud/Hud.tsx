@@ -14,6 +14,8 @@ import { Food } from "./Food";
 
 const _isJoystickActive = (state: PortalMachineState) =>
   state.context.isJoystickActive;
+const _isTraining = (state: PortalMachineState) =>
+  state.context.isTraining;
 // const _achievements = (state: PortalMachineState) =>
 //   state.context.state?.minigames.games[PORTAL_NAME]?.achievements ?? {};
 const _isPlaying = (state: PortalMachineState) => state.matches("playing");
@@ -24,6 +26,7 @@ export const Hud: React.FC = () => {
   const isJoystickActive = useSelector(portalService, _isJoystickActive);
   // const achievements = useSelector(portalService, _achievements);
   const isPlaying = useSelector(portalService, _isPlaying);
+  const isTraining = useSelector(portalService, _isTraining);
 
   // achievement toast provider
   // const { showAchievementToasts } = useAchievementToast();
@@ -49,7 +52,7 @@ export const Hud: React.FC = () => {
         <div className="pointer-events-none absolute flex flex-col gap-2 p-3">
           {isPlaying && (
             <>
-              <Target />
+              {!isTraining && <Target />}
               <Timer />
               <Lives />
               <Score />
