@@ -37,7 +37,6 @@ import { Honey } from "./containers/Honey";
 import { Chest } from "./containers/Chest";
 import { LineGlitch } from "./containers/LineGlitch";
 import VirtualJoyStick from "phaser3-rex-plugins/plugins/virtualjoystick";
-import { SQUARE_WIDTH } from "features/game/lib/constants";
 import { SUNNYSIDE } from "assets/sunnyside";
 
 // export const NPCS: NPCBumpkin[] = [
@@ -385,7 +384,10 @@ export class Scene extends BaseScene {
     this.load.image("health_low", "/world/portal/images/health_bar_low.webp");
     this.load.image("heart", SUNNYSIDE.icons.heart);
     this.load.image("cannon_icon", "/world/portal/images/cannon_icon.png");
-    this.load.image("shield_icon", "/world/portal/images/prevents_complete_visibility_icon.webp");
+    this.load.image(
+      "shield_icon",
+      "/world/portal/images/prevents_complete_visibility_icon.webp",
+    );
     this.load.image("honey_icon", "/world/portal/images/honey_icon.png");
 
     // Food
@@ -496,6 +498,8 @@ export class Scene extends BaseScene {
     this.load.audio("cannon_banana", "/world/portal/SFX/banana.mp3");
     this.load.audio("cannon_cabbage", "/world/portal/SFX/cabbage.wav");
     this.load.audio("cannon_apple", "/world/portal/SFX/cabbage.wav");
+    this.load.audio("rice_bun", "/world/portal/SFX/riceBunSFX.wav");
+    this.load.audio("player_hurt", "/world/portal/SFX/hurt.wav");
     // Background
     this.load.audio(
       "backgroundMusic",
@@ -672,12 +676,8 @@ export class Scene extends BaseScene {
         x: joystickX,
         y: joystickY,
         radius: 25,
-        base: this.add
-          .circle(0, 0, 37, 0x000000, 0.6)
-          .setDepth(buttonDepth),
-        thumb: this.add
-          .circle(0, 0, 17, 0xffffff, 0.6)
-          .setDepth(buttonDepth),
+        base: this.add.circle(0, 0, 37, 0x000000, 0.6).setDepth(buttonDepth),
+        thumb: this.add.circle(0, 0, 17, 0xffffff, 0.6).setDepth(buttonDepth),
         forceMin: 2,
       }).setScrollFactor(0);
 
@@ -824,7 +824,10 @@ export class Scene extends BaseScene {
     if (!this.cursorKeys) return;
 
     const animation =
-      this.isMoving && !(this.isCannonEnabled.left || this.isCannonEnabled.right) ? "carryNone" : "carryNoneIdle";
+      this.isMoving &&
+      !(this.isCannonEnabled.left || this.isCannonEnabled.right)
+        ? "carryNone"
+        : "carryNoneIdle";
 
     this.currentPlayer[animation]?.();
   }
