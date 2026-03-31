@@ -72,7 +72,8 @@ export class Blast_Skeleton extends Phaser.GameObjects.Container {
     (this.body as Phaser.Physics.Arcade.Body).enable = false;
 
     // Enemy
-    this.scheduleAction();
+    // this.scheduleAction();
+    this.initialSpawn();
 
     // Overlaps
     this.createOverlaps();
@@ -87,6 +88,13 @@ export class Blast_Skeleton extends Phaser.GameObjects.Container {
     return this.scene.registry.get("portalService") as
       | MachineInterpreter
       | undefined;
+  }
+
+  private initialSpawn() {
+    const initialDelay = 90000;
+    this.scene.time.delayedCall(initialDelay, () => {
+      this.scheduleAction();
+    });
   }
 
   private scheduleAction() {

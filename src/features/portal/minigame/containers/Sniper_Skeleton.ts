@@ -54,7 +54,8 @@ export class Sniper_Skeleton extends Phaser.GameObjects.Container {
     (this.body as Phaser.Physics.Arcade.Body).enable = false;
 
     // Setup
-    this.scheduleSniper();
+    this.initialSpawn();
+    // this.scheduleSniper();
     this.createOverlaps();
 
     scene.add.existing(this);
@@ -64,6 +65,13 @@ export class Sniper_Skeleton extends Phaser.GameObjects.Container {
     return this.scene.registry.get("portalService") as
       | MachineInterpreter
       | undefined;
+  }
+
+  private initialSpawn() {
+    const initialDelay = 60000;
+    this.scene.time.delayedCall(initialDelay, () => {
+      this.scheduleSniper();
+    });
   }
 
   private scheduleSniper() {
@@ -83,7 +91,8 @@ export class Sniper_Skeleton extends Phaser.GameObjects.Container {
     (this.body as Phaser.Physics.Arcade.Body).enable = true;
 
     const sprite = this.sprite;
-    const originalX = (this.player.getWorldTransformMatrix().tx - this.x) / this.scale;
+    const originalX =
+      (this.player.getWorldTransformMatrix().tx - this.x) / this.scale;
     const originalY = sprite.y;
     const originalScaleX = sprite.scaleX;
     const originalScaleY = sprite.scaleY;
@@ -97,7 +106,8 @@ export class Sniper_Skeleton extends Phaser.GameObjects.Container {
         this.scene.sound.play("sniper_spawn", { volume: 0.2 });
       },
       x: {
-        getEnd: () => Phaser.Math.Clamp(originalX + Phaser.Math.Between(-4, 4), minX, maxX),
+        getEnd: () =>
+          Phaser.Math.Clamp(originalX + Phaser.Math.Between(-4, 4), minX, maxX),
       },
       y: originalY + Phaser.Math.Between(-4, 4),
       scaleX: originalScaleX + Phaser.Math.FloatBetween(-0.08, 0.08),
@@ -261,8 +271,8 @@ export class Sniper_Skeleton extends Phaser.GameObjects.Container {
     );
   }
 
-  private createDamage() { }
-  private createEvents() { }
+  private createDamage() {}
+  private createEvents() {}
 
   public defeat() {
     if (!this.sprite.visible) return;
