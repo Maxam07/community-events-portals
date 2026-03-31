@@ -54,6 +54,7 @@ export class RiceBun extends Phaser.GameObjects.Container {
     if (this.isCollected) return;
     this.isCollected = true;
 
+    this.scene.sound.add("rice_bun", { volume: 0.2 }).play();
     this.scene.portalService?.send("COLLECT_RICE_BUN");
     this.destroy();
   }

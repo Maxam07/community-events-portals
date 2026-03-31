@@ -31,7 +31,6 @@ import {
 import { PlayerFood } from "../containers/PlayerFood";
 import { MachineInterpreter } from "../lib/Machine";
 import { EventBus } from "../lib/EventBus";
-import { Scene } from "../Scene";
 
 const NAME_ALIASES: Partial<Record<NPCName, string>> = {
   "pumpkin' pete": "pete",
@@ -1104,6 +1103,7 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
   }
 
   public hurt(onComplete?: () => void) {
+    this.scene.sound.add("player_hurt", { volume: 0.3 }).play();
     if (this.isHurting) return;
     if (!onComplete) {
       this.setVisible(true);
@@ -1412,7 +1412,7 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
 
     const progress = Phaser.Math.Clamp(
       (this.scene.time.now - this.shootChargeStartedAt) /
-      PLAYER_CANNON_CHARGE_DURATION,
+        PLAYER_CANNON_CHARGE_DURATION,
       0,
       1,
     );
@@ -1534,16 +1534,11 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
       duration: 1000,
     });
 
-    const loadingText = this.scene.add.text(
-      cx,
-      cy,
-      t("april-fools.loading"),
-      {
-        fontSize: "30px",
-        fontFamily: "Basic",
-        color: "#ffffff",
-      },
-    );
+    const loadingText = this.scene.add.text(cx, cy, t("april-fools.loading"), {
+      fontSize: "30px",
+      fontFamily: "Basic",
+      color: "#ffffff",
+    });
     loadingText.setOrigin(0.5);
     loadingText.setScrollFactor(0);
     loadingText.setDepth(10000001);
@@ -1556,7 +1551,8 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
   private showPower(power: string) {
     if (!this.scene) return;
 
-    this.powerImage = this.scene.add.image(this.x, this.y - 32, power)
+    this.powerImage = this.scene.add
+      .image(this.x, this.y - 32, power)
       .setScale(0.8)
       .setDepth(2000);
     this.powerText = this.scene.add
@@ -1572,7 +1568,8 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
           blur: 0,
           fill: true,
         },
-      }).setOrigin(0.5)
+      })
+      .setOrigin(0.5)
       .setDepth(2000);
 
     this.scene.time.delayedCall(1000, () => {
@@ -1581,11 +1578,11 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
         y: "-=25",
         alpha: { from: 1, to: 0 },
         duration: 1000,
-        ease: 'Sine.easeOut',
+        ease: "Sine.easeOut",
         onComplete: () => {
           if (this.powerImage?.active) this.powerImage.destroy();
           if (this.powerText?.active) this.powerText.destroy();
-        }
+        },
       });
     });
   }
