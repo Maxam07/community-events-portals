@@ -1165,6 +1165,8 @@ export abstract class BaseScene extends Phaser.Scene {
       return;
     }
 
+    this.currentPlayer.updates();
+
     // Update faction
     const faction = this.gameState.faction?.name;
 

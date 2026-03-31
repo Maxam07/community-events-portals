@@ -384,6 +384,9 @@ export class Scene extends BaseScene {
     this.load.image("health_half", "/world/portal/images/health_bar_half.webp");
     this.load.image("health_low", "/world/portal/images/health_bar_low.webp");
     this.load.image("heart", SUNNYSIDE.icons.heart);
+    this.load.image("cannon_icon", "/world/portal/images/cannon_icon.png");
+    this.load.image("shield_icon", "/world/portal/images/prevents_complete_visibility_icon.webp");
+    this.load.image("honey_icon", "/world/portal/images/honey_icon.png");
 
     // Food
     this.load.image("rice_bun", "/world/portal/images/rice_bun.png");
@@ -504,10 +507,10 @@ export class Scene extends BaseScene {
     this.map = this.make.tilemap({
       key: PORTAL_NAME,
     });
-    super.create();
-
-    // Reset listeners
+    // Reset listeners before creating base scene elements
     EventBus.removeAllListeners();
+
+    super.create();
 
     // Initialise
     this.initialiseProperties();

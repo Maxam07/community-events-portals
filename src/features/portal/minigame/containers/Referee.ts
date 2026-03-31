@@ -31,14 +31,14 @@ export class Referee extends Phaser.GameObjects.Container {
       .setScale(REFEREE_SCALE);
 
     const text = this.scene.add
-      .text(0, -16, t("april-fools.referee"), {
+      .text(0, -22, t("april-fools.referee"), {
         fontSize: "18px",
         fontFamily: "Basic",
         color: "#FFFFFF",
         resolution: 10,
         shadow: {
-          offsetX: 5,
-          offsetY: 5,
+          offsetX: 8,
+          offsetY: 8,
           color: "#000000",
           blur: 0,
           fill: true,

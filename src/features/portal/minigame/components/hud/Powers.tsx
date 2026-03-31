@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { useSelector } from "@xstate/react";
 import { PortalContext } from "../../lib/PortalProvider";
 import { PortalMachineState } from "../../lib/Machine";
@@ -42,6 +42,24 @@ export const Powers: React.FC = () => {
 
   const explosiveEffectiveBuns = Math.min(riceBunsCollected, POWER_UNLOCK_THRESHOLDS.EXPLOSIVE - 1);
   const explosiveProgress = getProgress(POWER_UNLOCK_THRESHOLDS.HONEY, POWER_UNLOCK_THRESHOLDS.EXPLOSIVE, explosiveEffectiveBuns);
+
+  useEffect(() => {
+    if (isCannonPowerUnlocked) {
+      EventBus.emit("new-power", { power: "cannon_icon" });
+    }
+  }, [isCannonPowerUnlocked]);
+
+  useEffect(() => {
+    if (isShieldPowerUnlocked) {
+      EventBus.emit("new-power", { power: "shield_icon" });
+    }
+  }, [isShieldPowerUnlocked]);
+
+  useEffect(() => {
+    if (isHoneyPowerUnlocked) {
+      EventBus.emit("new-power", { power: "honey_icon" });
+    }
+  }, [isHoneyPowerUnlocked]);
 
   return (
     <div className="flex flex-col absolute items-center right-0 p-2">

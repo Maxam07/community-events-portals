@@ -31,6 +31,7 @@ import {
 import { PlayerFood } from "../containers/PlayerFood";
 import { MachineInterpreter } from "../lib/Machine";
 import { EventBus } from "../lib/EventBus";
+import { Scene } from "../Scene";
 
 const NAME_ALIASES: Partial<Record<NPCName, string>> = {
   "pumpkin' pete": "pete",
@@ -104,6 +105,8 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
   private shootChargeStartedAt?: number;
   private shootChargeCompleted = false;
   private fakeProjectile?: Phaser.GameObjects.Image;
+  private powerImage?: Phaser.GameObjects.Image;
+  private powerText?: Phaser.GameObjects.Text;
 
   constructor({
     scene,
@@ -221,9 +224,19 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
     this.createShootChargeBar();
     this.createFakeProjectile();
 
-    // Listen for timer expiration from the React HUD
-    EventBus.once("timer-game-over", () => {
-      this.gameOver();
+    const onGameOver = () => {
+      if (this.active) this.gameOver();
+    };
+    EventBus.once("timer-game-over", onGameOver);
+
+    const onNewPower = ({ power }: { power: string }) => {
+      if (this.active) this.showPower(power);
+    };
+    EventBus.on("new-power", onNewPower);
+
+    this.on("destroy", () => {
+      EventBus.off("timer-game-over", onGameOver);
+      EventBus.off("new-power", onNewPower);
     });
 
     if (onClick) {
@@ -1092,6 +1105,11 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
 
   public hurt(onComplete?: () => void) {
     if (this.isHurting) return;
+    if (!onComplete) {
+      this.setVisible(true);
+      this.sprite?.setVisible(true);
+      this.shadow?.setVisible(true);
+    }
     this.isHurting = true;
     this.portalService?.send("LOSE_LIFE");
     this.cannonSprite?.setVisible(false);
@@ -1533,5 +1551,50 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
     this.scene.time.delayedCall(GAME_OVER_EFFECT_DURATION, () => {
       this.portalService?.send("GAME_OVER");
     });
+  }
+
+  private showPower(power: string) {
+    if (!this.scene) return;
+
+    this.powerImage = this.scene.add.image(this.x, this.y - 32, power)
+      .setScale(0.8)
+      .setDepth(2000);
+    this.powerText = this.scene.add
+      .text(this.x, this.y - 46, t("april-fools.newPower"), {
+        fontSize: "12px",
+        fontFamily: "Basic",
+        color: "#FFFFFF",
+        resolution: 10,
+        shadow: {
+          offsetX: 2,
+          offsetY: 2,
+          color: "#000000",
+          blur: 0,
+          fill: true,
+        },
+      }).setOrigin(0.5)
+      .setDepth(2000);
+
+    this.scene.time.delayedCall(1000, () => {
+      this.scene.tweens.add({
+        targets: [this.powerImage, this.powerText],
+        y: "-=25",
+        alpha: { from: 1, to: 0 },
+        duration: 1000,
+        ease: 'Sine.easeOut',
+        onComplete: () => {
+          if (this.powerImage?.active) this.powerImage.destroy();
+          if (this.powerText?.active) this.powerText.destroy();
+        }
+      });
+    });
+  }
+
+  public updates() {
+    const worldX = this.getWorldTransformMatrix().tx;
+    const worldY = this.getWorldTransformMatrix().ty;
+
+    this.powerImage?.setPosition(worldX, worldY - 32);
+    this.powerText?.setPosition(worldX, worldY - 46);
   }
 }
