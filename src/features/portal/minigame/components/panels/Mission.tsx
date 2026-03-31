@@ -213,30 +213,32 @@ export const Mission: React.FC<Props> = ({
               )}
             </div>
 
-            <div className="w-full flex flex-col gap-1 mb-3">
-              <OuterPanel className="w-full flex flex-col items-center">
-                <Label type="info">{t("leaderboard.score")}</Label>
-                <div>{formattedLastScore()}</div>
-              </OuterPanel>
-              <div className="flex gap-1">
+            {showScore && (
+              <div className="w-full flex flex-col gap-1 mb-3">
                 <OuterPanel className="w-full flex flex-col items-center">
-                  <Label type="default">{t(`${PORTAL_NAME}.bestToday`)}</Label>
-                  <div>{formattedBestToday()}</div>
+                  <Label type="info">{t("leaderboard.score")}</Label>
+                  <div>{formattedLastScore()}</div>
                 </OuterPanel>
+                <div className="flex gap-1">
+                  <OuterPanel className="w-full flex flex-col items-center">
+                    <Label type="default">{t(`${PORTAL_NAME}.bestToday`)}</Label>
+                    <div>{formattedBestToday()}</div>
+                  </OuterPanel>
+                  <OuterPanel className="w-full flex flex-col items-center">
+                    <Label type="default">
+                      {t(`${PORTAL_NAME}.bestAllTime`)}
+                    </Label>
+                    <div>{formattedBestAllTime()}</div>
+                  </OuterPanel>
+                </div>
                 <OuterPanel className="w-full flex flex-col items-center">
                   <Label type="default">
-                    {t(`${PORTAL_NAME}.bestAllTime`)}
+                    {t(`${PORTAL_NAME}.Immunity`)}
                   </Label>
-                  <div>{formattedBestAllTime()}</div>
+                  <Immunities_Wearables />
                 </OuterPanel>
               </div>
-              <OuterPanel className="w-full flex flex-col items-center">
-                <Label type="default">
-                  {t(`${PORTAL_NAME}.Immunity`)}
-                </Label>
-                <Immunities_Wearables />
-              </OuterPanel>
-            </div>
+            )}
           </div>
 
           {trainingButtonText ? (
@@ -269,7 +271,13 @@ export const Mission: React.FC<Props> = ({
                   >
                     <Button
                       className="whitespace-nowrap capitalize"
-                      onClick={() => setIsConfirming(true)}
+                      onClick={() => {
+                        if (confirmButtonText === t("start")) {
+                          setIsConfirming(true);
+                        } else {
+                          onConfirm();
+                        }
+                      }}
                     >
                       {confirmButtonText}
                     </Button>
@@ -298,7 +306,13 @@ export const Mission: React.FC<Props> = ({
               {confirmButtonText && (
                 <Button
                   className="whitespace-nowrap capitalize"
-                  onClick={() => setIsConfirming(true)}
+                  onClick={() => {
+                    if (confirmButtonText === t("start")) {
+                      setIsConfirming(true);
+                    } else {
+                      onConfirm();
+                    }
+                  }}
                 >
                   {confirmButtonText}
                 </Button>
