@@ -14,6 +14,9 @@ interface Props {
 const MENACE_MIN_CREATE = 4000;
 const MENACE_MAX_CREATE = 8000;
 const DEBUFF_DURATION = 4000;
+const INDICATOR_OFFSET_X = -15;
+const INDICATOR_OFFSET_Y = 20;
+const INDICATOR_SCALE = 0.8;
 
 export class Menace_Skeleton extends Phaser.GameObjects.Container {
   scene: Scene;
@@ -33,6 +36,7 @@ export class Menace_Skeleton extends Phaser.GameObjects.Container {
   private health_bar: Phaser.GameObjects.Image;
   private health_status: string;
   private emptyObject?: Phaser.GameObjects.Image;
+  private debuffIndicator?: Phaser.GameObjects.Image;
 
   constructor({ x, y, scene, player }: Props) {
     super(scene, x, y);
@@ -221,22 +225,38 @@ export class Menace_Skeleton extends Phaser.GameObjects.Container {
 
     if (!aura) {
       this.player.setVisible(false);
+
       this.emptyObject?.destroy();
       this.emptyObject = this.scene.add
         .image(worldX, worldY, "rice_bun")
         .setVisible(true)
         .setDepth(5);
+
+      this.debuffIndicator?.destroy();
+      this.debuffIndicator = this.scene.add
+          .image(worldX - INDICATOR_OFFSET_X, worldY - INDICATOR_OFFSET_Y, "debuff_indicator_riceBun")
+          .setScale(INDICATOR_SCALE)
+          .setVisible(true)
+          .setDepth(1000);
     } else if (AURA_IMMUNITY.includes(aura)) {
       this.player?.sprite?.setVisible(false);
       this.player?.shadow?.setVisible(false);
       this.player.showAura();
     } else {
       this.player.setVisible(false);
+
       this.emptyObject?.destroy();
       this.emptyObject = this.scene.add
         .image(worldX, worldY, "rice_bun")
         .setVisible(true)
         .setDepth(5);
+
+      this.debuffIndicator?.destroy();
+      this.debuffIndicator = this.scene.add
+          .image(worldX - INDICATOR_OFFSET_X, worldY - INDICATOR_OFFSET_Y, "debuff_indicator_riceBun")
+          .setScale(INDICATOR_SCALE)
+          .setVisible(true)
+          .setDepth(1000);
     }
 
     this.restorePlayer();
@@ -249,6 +269,9 @@ export class Menace_Skeleton extends Phaser.GameObjects.Container {
       this.emptyObject?.destroy();
       this.emptyObject = undefined;
 
+      this.debuffIndicator?.destroy();
+      this.debuffIndicator = undefined;
+
       this.player.setVisible(true);
       this.player?.sprite?.setVisible(true);
       this.player?.shadow?.setVisible(true);
@@ -258,11 +281,12 @@ export class Menace_Skeleton extends Phaser.GameObjects.Container {
   }
 
   public update() {
-    if (this.emptyObject && this.player) {
+    if (this.emptyObject && this.player && this.debuffIndicator) {
       const worldX = this.player.getWorldTransformMatrix().tx;
       const worldY = this.player.getWorldTransformMatrix().ty;
 
       this.emptyObject.setPosition(worldX, worldY);
+      this.debuffIndicator.setPosition(worldX - INDICATOR_OFFSET_X, worldY - INDICATOR_OFFSET_Y);
     }
   }
 

@@ -14,6 +14,9 @@ interface Props {
 const SNIPER_MIN_CREATE = 6000;
 const SNIPER_MAX_CREATE = 8000;
 const DEBUFF_DURATION = 3000;
+const INDICATOR_OFFSET_X = 15;
+const INDICATOR_OFFSET_Y = 20;
+const INDICATOR_SCALE = 0.8;
 
 export class Sniper_Skeleton extends Phaser.GameObjects.Container {
   scene: Scene;
@@ -24,6 +27,7 @@ export class Sniper_Skeleton extends Phaser.GameObjects.Container {
   private playerWorldX_Sprite?: number;
   private vegeName: string;
   public isDefeated: boolean = false;
+  private debuffIndicator?: Phaser.GameObjects.Image;
 
   constructor({ x, y, scene, player }: Props) {
     super(scene, x, y);
@@ -253,12 +257,29 @@ export class Sniper_Skeleton extends Phaser.GameObjects.Container {
 
     const shoe = this.player.clothing.shoes;
 
+    const worldX = this.player.getWorldTransformMatrix().tx;
+    const worldY = this.player.getWorldTransformMatrix().ty;
+    
     if (!shoe) {
       this.scene.isControlInverted = true;
+
+      this.debuffIndicator?.destroy();
+      this.debuffIndicator = this.scene.add
+          .image(worldX - INDICATOR_OFFSET_X, worldY - INDICATOR_OFFSET_Y, "debuff_indicator")
+          .setScale(INDICATOR_SCALE)
+          .setVisible(true)
+          .setDepth(1000);
     } else if (SHOES_IMMUNITY.includes(shoe)) {
       this.scene.isControlInverted = false;
     } else {
       this.scene.isControlInverted = true;
+
+      this.debuffIndicator?.destroy();
+      this.debuffIndicator = this.scene.add
+          .image(worldX - INDICATOR_OFFSET_X, worldY - INDICATOR_OFFSET_Y, "debuff_indicator")
+          .setScale(INDICATOR_SCALE)
+          .setVisible(true)
+          .setDepth(1000);
     }
 
     this.restorePlayer();
@@ -267,8 +288,22 @@ export class Sniper_Skeleton extends Phaser.GameObjects.Container {
   private restorePlayer() {
     this.scene.time.delayedCall(
       DEBUFF_DURATION,
-      () => (this.scene.isControlInverted = false),
+      () => {
+        this.scene.isControlInverted = false;
+        this.debuffIndicator?.destroy();
+        this.debuffIndicator = undefined;
+      },
+
     );
+  }
+
+  public update() {
+    if (this.debuffIndicator && this.player) {
+      const worldX = this.player.getWorldTransformMatrix().tx;
+      const worldY = this.player.getWorldTransformMatrix().ty;
+
+      this.debuffIndicator.setPosition(worldX - INDICATOR_OFFSET_X, worldY - INDICATOR_OFFSET_Y);
+    }
   }
 
   private createDamage() {}
