@@ -60,6 +60,7 @@ export class Scene extends BaseScene {
   private activeCannondSide: Side | null = null;
   private menaceSkeleton: Menace_Skeleton[] = [];
   private blastSkeleton: Blast_Skeleton[] = [];
+  private sniperSkeleton!: Sniper_Skeleton;;
   public allEnemies: Enemy[] = [];
   private riceBuns: RiceBun[] = [];
   private honey?: Honey;
@@ -399,6 +400,10 @@ export class Scene extends BaseScene {
     this.load.image("banana", "/world/portal/images/banana.png");
     this.load.image("sunflower", "/world/portal/images/sunflower.png");
 
+    // Debuff indicator
+    this.load.image("debuff_indicator", "world/portal/images/inverted_control_icon.webp");
+    this.load.image("debuff_indicator_riceBun", "world/portal/images/indicator_riceBun.webp");
+
     this.load.spritesheet(
       "cabbage_splat",
       "/world/portal/images/cabbage_splat.webp",
@@ -552,6 +557,7 @@ export class Scene extends BaseScene {
       this.resetVelocity();
     }
     this.menaceSkeleton.forEach((skeleton) => skeleton.update());
+    this.sniperSkeleton?.update();
 
     super.update();
     this.resetMobileButtonTransitions();
@@ -938,13 +944,13 @@ export class Scene extends BaseScene {
 
   private createSniperSkeleton() {
     const { x, y } = { x: 490, y: 10 };
-    const sniperSkeleton = new Sniper_Skeleton({
+    this.sniperSkeleton = new Sniper_Skeleton({
       x,
       y,
       scene: this,
       player: this.currentPlayer,
     });
-    this.allEnemies.push(sniperSkeleton);
+    this.allEnemies.push(this.sniperSkeleton);
   }
 
   private createMenaceSkeleton() {
