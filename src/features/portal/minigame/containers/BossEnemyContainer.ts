@@ -69,7 +69,7 @@ export class BossEnemy extends Phaser.GameObjects.Container {
     this.add([this.sprite, this.lifeBar]);
     this.scene.add.existing(this);
     this.setScale(this.config.scale);
-    this.setDepth(1000);
+    this.setDepth(this.config.depth);
 
     this.enemyBody = this.body as Phaser.Physics.Arcade.Body;
     this.enemyBody.setSize(this.config.bodyWidth, this.config.bodyHeight);
@@ -169,12 +169,12 @@ export class BossEnemy extends Phaser.GameObjects.Container {
   }
 
   changeDirection() {
-    const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
+    const angle = Phaser.Math.FloatBetween(0, Math.PI * 10);
 
     this.avoidX = Math.cos(angle);
     this.avoidY = Math.sin(angle);
 
-    this.avoidTimer = 20;
+    this.avoidTimer = 100;
   }
 
   private handleCollider() {

@@ -1,6 +1,7 @@
 import { Scene } from "../Scene";
 import { BumpkinContainer } from "../Core/BumpkinContainer";
 import { DropItemType } from "../Types";
+import { ORB_DEPTH } from "../constants";
 
 interface Props {
   x: number;
@@ -23,7 +24,8 @@ export class DropItem extends Phaser.Physics.Arcade.Sprite {
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
-    this.setDepth(100);
+    this.setDepth(ORB_DEPTH);
+    this.postFX.addGlow(0xffd966, 1.5, 0, false, 0.03, 24);
 
     this.handleCollision();
   }

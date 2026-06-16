@@ -181,6 +181,7 @@ export type EnemyConfig = {
   frameStart: number;
   frameEnd: number;
   frameRate: number;
+  depth: number;
   speed: number;
   hp: number;
   maxHp: number;
