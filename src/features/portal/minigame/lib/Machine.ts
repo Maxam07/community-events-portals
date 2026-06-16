@@ -11,6 +11,7 @@ import {
   DROP_ITEM_XP_VALUES,
 } from "../constants";
 import { GameState } from "features/game/types/game";
+import { BumpkinParts } from "lib/utils/tokenUriBuilder";
 import { purchaseMinigameItem } from "features/game/events/minigames/purchaseMinigameItem";
 import { startMinigameAttempt } from "features/game/events/minigames/startMinigameAttempt";
 import { submitMinigameScore } from "features/game/events/minigames/submitMinigameScore";
@@ -43,6 +44,7 @@ export interface Context {
   selectedWeapon: WeaponId;
   weaponLevels: Record<WeaponId, WeaponLevel>;
   hudWeapons: WeaponId[];
+  activeWearables?: BumpkinParts;
 }
 
 const WEAPON_IDS: WeaponId[] = [
@@ -128,6 +130,11 @@ type UpgradeWeaponEvent = {
   weapon: WeaponId;
 };
 
+type SetActiveWearablesEvent = {
+  type: "SET_ACTIVE_WEARABLES";
+  wearables: BumpkinParts;
+};
+
 export type PortalEvent =
   | SetJoystickActiveEvent
   | { type: "START" }
@@ -145,7 +152,8 @@ export type PortalEvent =
   | SetValidationsEvent
   | CollectItemEvent
   | SetSelectedWeaponEvent
-  | UpgradeWeaponEvent;
+  | UpgradeWeaponEvent
+  | SetActiveWearablesEvent;
 
 export type PortalState = {
   value:
@@ -184,9 +192,10 @@ const resetGameTransition = {
       lives: () => GAME_LIVES,
       maxLives: () => GAME_LIVES,
       endAt: () => 0,
-      selectedWeapon: () => "hoe",
+      selectedWeapon: () => "hoe" as WeaponId,
       weaponLevels: () => ({ ...DEFAULT_WEAPON_LEVELS }),
       hudWeapons: () => [...DEFAULT_HUD_WEAPONS],
+      activeWearables: (context: Context) => context.activeWearables,
       validations: () => structuredClone(VALIDATIONS),
     }) as any,
   },
@@ -223,6 +232,13 @@ export const portalMachine = createMachine<Context, PortalEvent, PortalState>({
       actions: assign({
         isJoystickActive: (_: Context, event: SetJoystickActiveEvent) => {
           return event.isJoystickActive;
+        },
+      }),
+    },
+    SET_ACTIVE_WEARABLES: {
+      actions: assign({
+        activeWearables: (_: Context, event: SetActiveWearablesEvent) => {
+          return event.wearables;
         },
       }),
     },

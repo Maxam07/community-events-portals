@@ -22,6 +22,7 @@ export interface PanelProps extends React.HTMLAttributes<HTMLDivElement> {
   hasTabs?: boolean;
   tabAlignment?: "top" | "left";
   bumpkinParts?: Partial<Equipped>;
+  innerPanelFooter?: React.ReactNode;
 }
 
 /**
@@ -31,6 +32,7 @@ export const Panel: React.FC<React.PropsWithChildren<PanelProps>> = ({
   children,
   hasTabs,
   bumpkinParts,
+  innerPanelFooter,
   ...divProps
 }) => {
   return (
@@ -50,6 +52,7 @@ export const Panel: React.FC<React.PropsWithChildren<PanelProps>> = ({
       )}
       <OuterPanel hasTabs={hasTabs} {...divProps}>
         <InnerPanel>{children}</InnerPanel>
+        {innerPanelFooter}
       </OuterPanel>
     </>
   );
@@ -125,7 +128,8 @@ export const OuterPanel: React.FC<React.PropsWithChildren<PanelProps>> = ({
   tabAlignment = "top",
   ...divProps
 }) => {
-  const { className, style, bumpkinParts, ...otherDivProps } = divProps;
+  const { className, style, bumpkinParts, innerPanelFooter, ...otherDivProps } =
+    divProps;
   const { isDarkMode } = useIsDarkMode();
   return (
     <>

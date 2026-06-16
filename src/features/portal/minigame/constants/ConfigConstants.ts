@@ -29,7 +29,7 @@ export const PORTAL_TOKEN = "Festival of Colors Token 2026";
 
 // Game config
 export const GAME_SECONDS = 300;
-export const GAME_LIVES = 5;
+export const GAME_LIVES = 100;
 
 // Player
 export const WALKING_SPEED = 50;

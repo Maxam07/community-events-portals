@@ -182,6 +182,7 @@ export class Scene extends BaseScene {
     this.handlePlayerInWater();
     this.createObstacles();
     this.initialiseCombat();
+    this.initialiseWearables();
     for (let i = 0; i < 20; i++) {
       this.createSwarmEnemies();
     }
@@ -391,6 +392,36 @@ export class Scene extends BaseScene {
       this.weaponManager = undefined;
       this.enemyGroup?.destroy(false);
       this.swarmGroup?.destroy(false);
+    });
+  }
+
+  private initialiseWearables() {
+    const portalService = this.portalService;
+    let activeWearables = portalService?.state.context.activeWearables;
+
+    if (activeWearables && this.currentPlayer) {
+      this.currentPlayer.changeClothing({
+        ...activeWearables,
+        updatedAt: Date.now(),
+      });
+    }
+
+    const subscription = portalService?.subscribe((state) => {
+      const nextWearables = state.context.activeWearables;
+      if (!nextWearables || !this.currentPlayer) return;
+      if (JSON.stringify(nextWearables) === JSON.stringify(activeWearables)) {
+        return;
+      }
+
+      activeWearables = nextWearables;
+      this.currentPlayer.changeClothing({
+        ...nextWearables,
+        updatedAt: Date.now(),
+      });
+    });
+
+    this.events.once("shutdown", () => {
+      subscription?.unsubscribe();
     });
   }
 

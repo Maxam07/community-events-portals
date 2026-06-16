@@ -35,6 +35,7 @@ interface Props<T extends string> {
   bumpkinParts?: Partial<Equipped>;
   className?: string;
   container?: React.FC<PanelProps>;
+  innerPanelFooter?: React.ReactNode;
   children?: React.ReactNode;
 }
 
@@ -61,6 +62,7 @@ export const CloseButtonPanel = <T extends string>({
   bumpkinParts,
   secondaryAction,
   className,
+  innerPanelFooter,
   children,
   container: Container = Panel,
 }: Props<T>) => {
@@ -84,6 +86,7 @@ export const CloseButtonPanel = <T extends string>({
       )}
       bumpkinParts={bumpkinParts}
       hasTabs={!!tabs}
+      innerPanelFooter={innerPanelFooter}
     >
       {/* Tabs */}
       {tabs && (
