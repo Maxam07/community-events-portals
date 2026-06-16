@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { Box } from "components/ui/Box";
 import { PortalMachineState } from "../../lib/Machine";
-import item from "public/world/pearl.webp";
+import item from "public/world/portal/images/ExpOrb_combined.webp";
 import Decimal from "decimal.js-light";
 import { useSelector } from "@xstate/react";
 import { PortalContext } from "../../lib/PortalProvider";
