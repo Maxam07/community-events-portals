@@ -18,7 +18,10 @@ import { SQUARE_WIDTH } from "features/game/lib/constants";
 import { DropItem } from "./containers/DropItemsContainer";
 import { WeaponId, WeaponLoadoutItem, DropItemType, BossTypes } from "./Types";
 import { BossEnemy } from "./containers/BossEnemyContainer";
-import { BOSS_WAVE_XP_THRESHOLDS } from "./constants/EnemyConstants";
+import {
+  BOSS_WAVE_XP_THRESHOLDS,
+  TOTAL_MOB_NUMBER,
+} from "./constants/EnemyConstants";
 
 // export const NPCS: NPCBumpkin[] = [
 //   {
@@ -183,7 +186,7 @@ export class Scene extends BaseScene {
     this.createObstacles();
     this.initialiseCombat();
     this.initialiseWearables();
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < TOTAL_MOB_NUMBER; i++) {
       this.createSwarmEnemies();
     }
     this.setupPortalListener();
@@ -595,7 +598,6 @@ export class Scene extends BaseScene {
       player: this.currentPlayer,
       bossType,
     });
-    boss.setDepth(1000);
 
     this.enemyGroup.add(boss);
     this.bossEnemies.push(boss);
@@ -659,7 +661,6 @@ export class Scene extends BaseScene {
       scene: this,
       player: this.currentPlayer,
     });
-    mob.setDepth(950);
 
     this.swarmEnemies.push(mob);
     this.swarmGroup.add(mob);

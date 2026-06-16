@@ -1,5 +1,9 @@
 import { BossTypes, DropItemType, EnemyConfig, MobTypes } from "../Types";
 
+export const BOSS_DEPTH = 100;
+export const ORB_DEPTH = 70;
+export const TOTAL_MOB_NUMBER = 30;
+
 // XP thresholds for boss spawns
 export const BOSS_WAVE_XP_THRESHOLDS = {
   boss1: 70,
@@ -71,6 +75,7 @@ export const MOB_CONFIGS: Record<MobTypes, EnemyConfig> = {
     frameStart: 0,
     frameEnd: 8,
     frameRate: 10,
+    depth: 80,
     speed: MOB_BALANCE_STATS.mob1.SPEED,
     hp: MOB_BALANCE_STATS.mob1.HP,
     maxHp: MOB_BALANCE_STATS.mob1.HP,
@@ -86,6 +91,7 @@ export const MOB_CONFIGS: Record<MobTypes, EnemyConfig> = {
     frameStart: 0,
     frameEnd: 8,
     frameRate: 10,
+    depth: 85,
     speed: MOB_BALANCE_STATS.mob2.SPEED,
     hp: MOB_BALANCE_STATS.mob2.HP,
     maxHp: MOB_BALANCE_STATS.mob2.HP,
@@ -101,6 +107,7 @@ export const MOB_CONFIGS: Record<MobTypes, EnemyConfig> = {
     frameStart: 0,
     frameEnd: 12,
     frameRate: 10,
+    depth: 80,
     speed: MOB_BALANCE_STATS.mob3.SPEED,
     hp: MOB_BALANCE_STATS.mob3.HP,
     maxHp: MOB_BALANCE_STATS.mob3.HP,
@@ -116,6 +123,7 @@ export const MOB_CONFIGS: Record<MobTypes, EnemyConfig> = {
     frameStart: 0,
     frameEnd: 11,
     frameRate: 10,
+    depth: 80,
     speed: MOB_BALANCE_STATS.mob4.SPEED,
     hp: MOB_BALANCE_STATS.mob4.HP,
     maxHp: MOB_BALANCE_STATS.mob4.HP,
@@ -131,6 +139,7 @@ export const MOB_CONFIGS: Record<MobTypes, EnemyConfig> = {
     frameStart: 0,
     frameEnd: 4,
     frameRate: 5,
+    depth: 90,
     speed: MOB_BALANCE_STATS.mob5.SPEED,
     hp: MOB_BALANCE_STATS.mob5.HP,
     maxHp: MOB_BALANCE_STATS.mob5.HP,
@@ -150,6 +159,7 @@ export const BOSS_CONFIGS: Record<BossTypes, EnemyConfig> = {
     frameStart: 0,
     frameEnd: 7,
     frameRate: 10,
+    depth: 100,
     speed: BOSS_BALANCE_STATS.boss1.SPEED,
     hp: BOSS_BALANCE_STATS.boss1.HP,
     maxHp: BOSS_BALANCE_STATS.boss1.HP,
@@ -165,6 +175,7 @@ export const BOSS_CONFIGS: Record<BossTypes, EnemyConfig> = {
     frameStart: 0,
     frameEnd: 7,
     frameRate: 10,
+    depth: BOSS_DEPTH,
     speed: BOSS_BALANCE_STATS.boss2.SPEED,
     hp: BOSS_BALANCE_STATS.boss2.HP,
     maxHp: BOSS_BALANCE_STATS.boss2.HP,
@@ -180,6 +191,7 @@ export const BOSS_CONFIGS: Record<BossTypes, EnemyConfig> = {
     frameStart: 0,
     frameEnd: 8,
     frameRate: 10,
+    depth: BOSS_DEPTH,
     speed: BOSS_BALANCE_STATS.boss3.SPEED,
     hp: BOSS_BALANCE_STATS.boss3.HP,
     maxHp: BOSS_BALANCE_STATS.boss3.HP,
