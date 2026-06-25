@@ -18,6 +18,7 @@ import { getUrl } from "features/portal/actions/loadPortal";
 import key from "public/world/minigame/base/key.png";
 import { OuterPanel } from "components/ui/Panel";
 import { Controls } from "./Controls";
+import { AbilityWearables } from "./AbilityWearables";
 
 interface Props {
   mode: "introduction" | "success" | "failed";
@@ -32,6 +33,8 @@ interface Props {
 const _lastScore = (state: PortalMachineState) => state.context.lastScore;
 const _minigame = (state: PortalMachineState) =>
   state.context.state?.minigames.games[PORTAL_NAME];
+const _bumpkinParts = (state: PortalMachineState) =>
+  state.context.state?.bumpkin.equipped;
 const _jwt = (state: PortalMachineState) => state.context.jwt;
 
 export const Mission: React.FC<Props> = ({
@@ -50,6 +53,7 @@ export const Mission: React.FC<Props> = ({
   const lastScore = useSelector(portalService, _lastScore);
   const minigame = useSelector(portalService, _minigame);
   const jwt = useSelector(portalService, _jwt);
+  const bumpkinParts = useSelector(portalService, _bumpkinParts);
 
   const farmId = !getUrl() ? 0 : decodeToken(jwt as string).farmId;
   const attemptsLeft = getAttemptsLeft(minigame, farmId);
@@ -117,6 +121,7 @@ export const Mission: React.FC<Props> = ({
               {/* <div className="w-full">
                 <Prize />
               </div> */}
+              <AbilityWearables bumpkinParts={bumpkinParts!} />
             </div>
           </div>
 

@@ -28,7 +28,8 @@ import icon_mob5 from "public/world/portal/images/icon_mob_5.webp";
 import icon_boss1 from "public/world/portal/images/icon_boss_1.webp";
 import icon_boss2 from "public/world/portal/images/icon_boss_2.webp";
 import icon_boss3 from "public/world/portal/images/icon_boss_3.webp";
-import { BossTypes, MobTypes, WeaponId } from "../Types";
+import tooltip_icon from "public/world/portal/images/ExpOrb_combined.webp";
+import { BossTypes, MobTypes, WeaponId, PassiveAbilityType } from "../Types";
 
 export const PORTAL_NAME = "festival-of-colors";
 export const PORTAL_TOKEN = "Festival of Colors Token 2026";
@@ -61,6 +62,18 @@ export const RESTOCK_ATTEMPTS = [
 export const BETA_TESTERS: number[] = [];
 
 export const PASSIVE_ABILITY_ITEM: BumpkinWings = "Underworld Stimpack";
+
+export const IMMUNITY_TOOLTIP: {
+  id: PassiveAbilityType;
+  image: string;
+  description: string;
+}[] = [
+  {
+    id: "wings",
+    image: tooltip_icon,
+    description: t(`${PORTAL_NAME}.AbilityDescription`),
+  },
+];
 
 // Guide
 export const INSTRUCTIONS: {
