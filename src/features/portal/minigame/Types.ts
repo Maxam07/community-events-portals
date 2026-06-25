@@ -170,6 +170,7 @@ export type DropItemType =
 export type BossTypes = "boss1" | "boss2" | "boss3";
 export type MobTypes = "mob1" | "mob2" | "mob3" | "mob4" | "mob5";
 export type CodexCategoryName = "Skills" | "Enemies" | "DropItems";
+export type PassiveAbilityType = "wings";
 
 export type EnemyConfig = {
   key: string;
