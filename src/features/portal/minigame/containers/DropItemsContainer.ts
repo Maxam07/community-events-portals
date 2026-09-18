@@ -1,7 +1,7 @@
 import type { Scene } from "../Scene";
 import type { BumpkinContainer } from "../Core/BumpkinContainer";
 import type { DropItemType } from "../Types";
-import { PASSIVE_ABILITY_ITEM, ORB_DEPTH } from "../constants";
+import { PASSIVE_ABILITY_ITEM, ORB_DEPTH, getPerkAmount } from "../constants";
 import { WeaponSfxLimiter } from "../lib/combat/WeaponSfxLimiter";
 
 interface Props {
@@ -43,7 +43,12 @@ export class DropItem extends Phaser.GameObjects.Sprite {
     const magnetRange = this.hasPassiveAbility()
       ? this.magnetRangeWithWings
       : this.defaultMagnetRange;
-    this.targetRangeSq = magnetRange * magnetRange;
+    const pickupRadiusBonus = getPerkAmount(
+      scene.portalService?.state.context.perkLevels,
+      "pickupRadius",
+    );
+    const resolvedMagnetRange = magnetRange * (1 + pickupRadiusBonus);
+    this.targetRangeSq = resolvedMagnetRange * resolvedMagnetRange;
 
     scene.time.delayedCall(this.destroyOrb, () => {
       if (this.active) {

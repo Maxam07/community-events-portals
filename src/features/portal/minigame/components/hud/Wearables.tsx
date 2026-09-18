@@ -29,29 +29,17 @@ import {
   WEARABLES_TAB_ITEMS,
   type WearableBuff,
 } from "../../constants";
-import type { PlayerStatId, WeaponRuntimeStats } from "../../Types";
+import type { WeaponRuntimeStats } from "../../Types";
 import powerupIcon from "assets/icons/level_up.png";
-import speedIcon from "public/world/portal/images/lightning.png";
-import swordIcon from "public/world/portal/images/sword_icon.png";
 import { formatStatValue } from "./weaponStats";
 
 const PANEL_CONTENT_HEIGHT = "h-[442px]";
-
-const STAT_BUFF_ICONS: Record<PlayerStatId, string> = {
-  health: SUNNYSIDE.icons.heart,
-  speed: speedIcon,
-  damage: swordIcon,
-};
 
 const getWearableBuffIcon = (wearable?: BumpkinItem) => {
   if (!wearable) return powerupIcon;
 
   const buff = WEARABLE_BUFFS[wearable];
   if (!buff) return powerupIcon;
-
-  if (buff.target.type === "playerStat") {
-    return STAT_BUFF_ICONS[buff.target.stat] ?? powerupIcon;
-  }
 
   if (buff.target.type === "weaponStat") {
     return WEAPON_ICONS[buff.target.weapon] ?? powerupIcon;

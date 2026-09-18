@@ -6,12 +6,13 @@ import type { MachineInterpreter } from "./lib/Machine";
 import type { EventObject } from "xstate";
 import { isTouchDevice } from "features/world/lib/device";
 import {
-  getPlayerStatValue,
-  PLAYER_STAT_BASE_LEVEL,
   PLAYER_WATER_SPEED_MULTIPLIER,
   PORTAL_NAME,
   WALKING_SPEED,
   GAME_SECONDS,
+  getPerkAmount,
+  rollForRareChest,
+  CHEST_VISUALS,
 } from "./constants";
 import { EventBus } from "./lib/EventBus";
 import { SUNNYSIDE } from "assets/sunnyside";
@@ -23,6 +24,7 @@ import { OBSTACLES_LAYOUT } from "./constants";
 import { SwarmMob } from "./containers/SwarmMobContainer";
 import { SQUARE_WIDTH } from "features/game/lib/constants";
 import { DropItem } from "./containers/DropItemsContainer";
+import { Chest } from "./containers/ChestContainer";
 import type {
   WeaponId,
   WeaponLoadoutItem,
@@ -30,6 +32,7 @@ import type {
   BossTypes,
   MobTypes,
   WeaponLevel,
+  ChestRarity,
 } from "./Types";
 import { BossEnemy } from "./containers/BossEnemyContainer";
 import {
@@ -78,6 +81,8 @@ export class Scene extends BaseScene {
   private enemyGroup!: Phaser.Physics.Arcade.Group;
   private weaponManager?: WeaponManager;
   private seaBeastDefeated = false;
+  private healingElapsedMs = 0;
+  private static readonly HEALING_TICK_MS = 1000;
   waterGroup!: Phaser.Physics.Arcade.StaticGroup;
   swarmEnemies: SwarmMob[] = [];
   swarmGroup!: Phaser.Physics.Arcade.Group;
@@ -136,6 +141,29 @@ export class Scene extends BaseScene {
       frameWidth: 16,
       frameHeight: 32,
     });
+
+    // Chests
+    this.load.spritesheet(
+      "chest_rare",
+      "world/portal/images/placeholder1.png",
+      {
+        frameWidth: 16,
+        frameHeight: 16,
+      },
+    );
+    this.load.spritesheet(
+      "chest_epic",
+      "world/portal/images/placeholder1.png",
+      {
+        frameWidth: 16,
+        frameHeight: 16,
+      },
+    );
+    this.load.spritesheet(
+      "chest_legendary",
+      "world/portal/images/placeholder1.png",
+      { frameWidth: 16, frameHeight: 16 },
+    );
 
     // Boss enemy
     this.load.spritesheet("Boss1", "world/portal/images/BossEnemy1.webp", {
@@ -318,6 +346,12 @@ export class Scene extends BaseScene {
     this.load.audio("sfx_oil_cast", "world/portal/sfx/oil.wav");
     this.load.audio("sfx_pumpkin_roll", "world/portal/sfx/pumpkin.wav");
     this.load.audio("sfx_bee_spawn", "world/portal/sfx/beehive.wav");
+
+    // Critical hit
+    this.load.audio("critical_hit", "world/portal/sfx/hurt.wav");
+
+    //Chest opening
+    this.load.audio("chest_open", "world/portal/sfx/xp.wav");
   }
 
   async create() {
@@ -329,6 +363,7 @@ export class Scene extends BaseScene {
     // Reset listeners
     EventBus.removeAllListeners();
     this.createWeaponAnimations();
+    this.createChestAnimations();
 
     // Initialise
     this.initialiseProperties();
@@ -371,6 +406,44 @@ export class Scene extends BaseScene {
     this.backgroundMusic = this.sound.add("backgroundMusic", {
       loop: true,
       volume: 0.2,
+    });
+  }
+
+  private createChestAnimations() {
+    (Object.keys(CHEST_VISUALS) as ChestRarity[]).forEach((rarity) => {
+      const { textureKey, idleAnimationKey, openAnimationKey } =
+        CHEST_VISUALS[rarity];
+
+      if (!this.textures.exists(textureKey)) return;
+
+      if (!this.anims.exists(idleAnimationKey)) {
+        this.anims.create({
+          key: idleAnimationKey,
+          // TODO: adjust start/end to your idle frame range once the real
+          // spritesheet is loaded.
+          frames: this.anims.generateFrameNumbers(textureKey, {
+            start: 0,
+            end: 1,
+          }),
+          frameRate: 6,
+          repeat: -1,
+        });
+      }
+
+      if (!this.anims.exists(openAnimationKey)) {
+        this.anims.create({
+          key: openAnimationKey,
+          // TODO: adjust start/end to your open frame range. repeat: 0 so
+          // it plays once - Chest.ts listens for "animationcomplete" on
+          // this exact key to know when to offer the upgrades.
+          frames: this.anims.generateFrameNumbers(textureKey, {
+            start: 2,
+            end: 9,
+          }),
+          frameRate: 6,
+          repeat: 0,
+        });
+      }
     });
   }
 
@@ -573,6 +646,7 @@ export class Scene extends BaseScene {
       this.handlePlayerOutOfWater();
       this.weaponManager?.update(time, delta);
       this.processTimeWaves();
+      this.applyHealingTick(delta);
       // this.scoreBaseWave();
       this.swarmEnemies.forEach((mob) => {
         mob.setSwarmMove(true);
@@ -638,6 +712,7 @@ export class Scene extends BaseScene {
     this.swarmEnemies = [];
     this.bossEnemies = [];
     this.seaBeastDefeated = false;
+    this.healingElapsedMs = 0;
     this.waveState.clear();
 
     if (this.physics.world.isPaused) {
@@ -649,15 +724,26 @@ export class Scene extends BaseScene {
     }
   }
 
-  private getPlayerMovementSpeed() {
-    const speedLevel =
-      this.portalService?.state.context.playerStatLevels.speed ??
-      PLAYER_STAT_BASE_LEVEL;
-    const speed = getPlayerStatValue(
-      "speed",
-      speedLevel,
-      this.portalService?.state.context.activeWearables,
+  private applyHealingTick(delta: number) {
+    const healingPerSecond = getPerkAmount(
+      this.portalService?.state.context.perkLevels,
+      "healing",
     );
+    if (healingPerSecond <= 0) return;
+
+    this.healingElapsedMs += delta;
+    if (this.healingElapsedMs < Scene.HEALING_TICK_MS) return;
+
+    this.healingElapsedMs %= Scene.HEALING_TICK_MS;
+    this.portalService?.send("HEAL", { amount: healingPerSecond });
+  }
+
+  private getPlayerMovementSpeed() {
+    const moveSpeedBonus = getPerkAmount(
+      this.portalService?.state.context.perkLevels,
+      "moveSpeed",
+    );
+    const speed = WALKING_SPEED * (1 + moveSpeedBonus);
 
     return this.currentPlayer?.isSwimming
       ? speed * PLAYER_WATER_SPEED_MULTIPLIER
@@ -801,6 +887,7 @@ export class Scene extends BaseScene {
     const portalContext = portalService?.state.context;
     let weaponLoadout = this.createWeaponLoadout(portalContext?.weaponLevels);
     let activeWearables = portalContext?.activeWearables;
+    let perkLevels = portalContext?.perkLevels;
     this.currentPlayer.setEquippedWeapon(
       this.getDisplayedWeapon(weaponLoadout),
     );
@@ -818,17 +905,24 @@ export class Scene extends BaseScene {
         state.context.weaponLevels,
       );
       const nextWearables = state.context.activeWearables;
+      const nextPerkLevels = state.context.perkLevels;
       const hasSameWeaponLoadout =
         JSON.stringify(nextWeaponLoadout) === JSON.stringify(weaponLoadout);
       const hasSameWearables =
         JSON.stringify(nextWearables) === JSON.stringify(activeWearables);
+      // Perks like Attack Speed / Cooldown Reduction / Projectile Speed
+      // change weapon stats without changing the loadout itself, so a
+      // perk-only pick still needs to trigger a weapon stats refresh.
+      const hasSamePerkLevels =
+        JSON.stringify(nextPerkLevels) === JSON.stringify(perkLevels);
 
-      if (hasSameWeaponLoadout && hasSameWearables) {
+      if (hasSameWeaponLoadout && hasSameWearables && hasSamePerkLevels) {
         return;
       }
 
       weaponLoadout = nextWeaponLoadout;
       activeWearables = nextWearables;
+      perkLevels = nextPerkLevels;
       this.currentPlayer?.setEquippedWeapon(
         this.getDisplayedWeapon(nextWeaponLoadout),
       );
@@ -1223,6 +1317,17 @@ export class Scene extends BaseScene {
 
   public handleSwarmMobDefeat(mob: SwarmMob) {
     this.createDropItems({ x: mob.x, y: mob.y, itemKey: mob.config.dropItem });
+
+    if (rollForRareChest(this.portalService?.state.context.perkLevels)) {
+      new Chest({
+        x: mob.x,
+        y: mob.y,
+        scene: this,
+        player: this.currentPlayer,
+        rarity: "rare",
+      });
+    }
+
     this.unregisterSwarmMob(mob);
     mob.destroy();
   }
@@ -1249,6 +1354,15 @@ export class Scene extends BaseScene {
       y: boss.y,
       itemKey: boss.config.dropItem,
     });
+
+    new Chest({
+      x: boss.x,
+      y: boss.y,
+      scene: this,
+      player: this.currentPlayer,
+      rarity: "epic",
+    });
+
     this.unregisterBossEnemy(boss);
     boss.destroy();
   }

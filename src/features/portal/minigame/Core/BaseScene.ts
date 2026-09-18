@@ -1219,16 +1219,14 @@ export abstract class BaseScene extends Phaser.Scene {
     server.state.players.forEach((player, sessionId) => {
       if (this.playerEntities[sessionId]) {
         const nameTag = this.playerEntities[sessionId].getByName("nameTag") as
-          | Phaser.GameObjects.Text
-          | undefined;
+          Phaser.GameObjects.Text | undefined;
 
         if (nameTag && player.username && nameTag.text !== player.username) {
           nameTag.setText(player.username);
         }
       } else if (sessionId === server.sessionId) {
         const nameTag = this.currentPlayer?.getByName("nameTag") as
-          | Phaser.GameObjects.Text
-          | undefined;
+          Phaser.GameObjects.Text | undefined;
 
         if (nameTag && player.username && nameTag.text !== player.username) {
           nameTag.setText(player.username);
@@ -1239,8 +1237,7 @@ export abstract class BaseScene extends Phaser.Scene {
 
   checkAndUpdateNameColor(entity: BumpkinContainer, color: string) {
     const nameTag = entity.getByName("nameTag") as
-      | Phaser.GameObjects.Text
-      | undefined;
+      Phaser.GameObjects.Text | undefined;
 
     if (nameTag && nameTag.style.color !== color) {
       nameTag.setColor(color);

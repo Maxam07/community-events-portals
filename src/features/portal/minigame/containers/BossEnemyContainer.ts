@@ -10,6 +10,10 @@ import { WeaponSfxLimiter } from "../lib/combat/WeaponSfxLimiter";
 
 const MOVEMENT_UPDATE_INTERVAL_MS = 100;
 const FRAME_DURATION_MS = 1000 / 60;
+// Placeholder critical-hit glow: a brief bright tint flash. Swap the tint
+// color for a real VFX/shader later if desired.
+const CRIT_FLASH_DURATION_MS = 1000;
+const CRIT_FLASH_TINT = 0xfff066;
 
 interface Props {
   x: number;
@@ -31,6 +35,8 @@ export class BossEnemy extends Phaser.GameObjects.Container {
   public config: EnemyConfig;
   private isHurting = false;
   private hurtFlashRemainingMs = 0;
+  private isCritFlashing = false;
+  private critFlashRemainingMs = 0;
   private lifeBar: LifeBar;
   public bossType: BossTypes;
 
@@ -108,6 +114,7 @@ export class BossEnemy extends Phaser.GameObjects.Container {
 
   public updateMovement(delta: number) {
     this.updateHurtVisual(delta);
+    this.updateCritVisual(delta);
 
     if (!this.player || !this.active || this.isDead) return;
 
@@ -200,12 +207,33 @@ export class BossEnemy extends Phaser.GameObjects.Container {
     this.isHurting = false;
   }
 
+  private updateCritVisual(delta: number) {
+    if (!this.isCritFlashing) return;
+
+    this.critFlashRemainingMs = Math.max(0, this.critFlashRemainingMs - delta);
+
+    if (this.critFlashRemainingMs > 0) return;
+
+    this.sprite.clearTint();
+    this.isCritFlashing = false;
+  }
+
   public isHurt() {
     if (this.isHurting || this.isDead) return;
 
     this.isHurting = true;
     this.hurtFlashRemainingMs = 120;
     this.sprite.setAlpha(0.3);
+  }
+
+  // Placeholder critical-hit feedback: a brief bright tint flash. The SFX
+  // itself is played by DamageSystem (placeholder key "critical_hit").
+  public onCriticalHit() {
+    if (this.isDead) return;
+
+    this.isCritFlashing = true;
+    this.critFlashRemainingMs = CRIT_FLASH_DURATION_MS;
+    this.sprite.setTint(CRIT_FLASH_TINT);
   }
 
   public takeDamage(damage: number, _payload: DamagePayload) {

@@ -26,12 +26,10 @@ jest.mock("features/game/events/minigames/purchaseMinigameItem", () => ({
 
 jest.mock("../constants", () => {
   const playerLevel = jest.requireActual("../constants/PlayerLevelConstants");
-  const playerStats = jest.requireActual("../constants/PlayerStatConstants");
   const wearables = jest.requireActual("../constants/WearableConstants");
 
   return {
     ...playerLevel,
-    ...playerStats,
     ...wearables,
     DROP_ITEM_XP_VALUES: {
       blueOrb: 1,
@@ -100,9 +98,9 @@ describe("portalMachine progression flow", () => {
     expect(state.matches("playing")).toBe(true);
     expect(state.context.endAt).toBe(0);
     expect(state.context.isGameplayPaused).toBe(true);
-    expect(state.context.pendingLevelUpChoice?.type).toBe("weapon");
+    expect(state.context.pendingLevelUpChoice?.type).toBe("levelUp");
     expect(state.context.pendingLevelUpChoice?.level).toBe(1);
-    expect(state.context.pendingLevelUpChoice?.options).toHaveLength(3);
+    expect(state.context.pendingLevelUpChoice?.options).toHaveLength(5);
   });
 
   it("starts the timer after the initial weapon is chosen", () => {
@@ -115,10 +113,10 @@ describe("portalMachine progression flow", () => {
 
     service.send("START");
 
-    const weapon = service.state.context.pendingLevelUpChoice?.options[0];
-    expect(weapon).toBeDefined();
+    const option = service.state.context.pendingLevelUpChoice?.options[0];
+    expect(option).toBeDefined();
 
-    service.send("SELECT_LEVEL_UP_WEAPON", { weapon: weapon! });
+    service.send("SELECT_LEVEL_UP_OPTION", { option: option! });
 
     expect(service.state.context.pendingLevelUpChoice).toBeUndefined();
     expect(service.state.context.isGameplayPaused).toBe(false);
@@ -195,12 +193,14 @@ describe("portalMachine progression flow", () => {
 
     service.send("COLLECT_ITEM", { itemKey: "purpleOrb" });
 
-    expect(service.state.context.pendingLevelUpChoice?.type).toBe("stat");
+    expect(service.state.context.pendingLevelUpChoice?.type).toBe("levelUp");
     expect(service.state.context.isGameplayPaused).toBe(true);
     expect(service.state.context.gameplayPausedAt).toBe(2000);
 
+    const option = service.state.context.pendingLevelUpChoice?.options[0];
+
     nowSpy.mockReturnValue(7000);
-    service.send("SELECT_LEVEL_UP_STAT", { stat: "damage" });
+    service.send("SELECT_LEVEL_UP_OPTION", { option: option! });
 
     expect(service.state.context.pendingLevelUpChoice).toBeUndefined();
     expect(service.state.context.isGameplayPaused).toBe(false);
@@ -219,9 +219,9 @@ describe("portalMachine progression flow", () => {
         endAt: 301000,
         isGameplayPaused: true,
         pendingLevelUpChoice: {
-          type: "stat",
+          type: "levelUp",
           level: 2,
-          options: ["damage", "speed"],
+          options: [{ kind: "newPerk", perkId: "moveSpeed", toLevel: 1 }],
         },
       }),
     ).start("playing");
@@ -234,6 +234,93 @@ describe("portalMachine progression flow", () => {
 
     service.stop();
     nowSpy.mockRestore();
+  });
+
+  it("walks through an epic chest's 2 picks before resuming gameplay", () => {
+    const service = interpret(
+      portalMachine.withContext({
+        ...portalMachine.initialState.context,
+      }),
+    ).start("playing");
+
+    service.send("CHEST_OPENED", { rarity: "epic" });
+
+    expect(service.state.context.pendingLevelUpChoice?.source).toBe("chest");
+    expect(service.state.context.pendingChestRemainingPicks).toBe(1);
+    expect(service.state.context.isGameplayPaused).toBe(true);
+
+    const firstOption = service.state.context.pendingLevelUpChoice?.options[0];
+    service.send("SELECT_LEVEL_UP_OPTION", { option: firstOption! });
+
+    // One pick left in the queue - still paused, second chest choice shown.
+    expect(service.state.context.pendingLevelUpChoice?.source).toBe("chest");
+    expect(service.state.context.pendingChestRemainingPicks).toBe(0);
+    expect(service.state.context.isGameplayPaused).toBe(true);
+
+    const secondOption =
+      service.state.context.pendingLevelUpChoice?.options[0];
+    service.send("SELECT_LEVEL_UP_OPTION", { option: secondOption! });
+
+    // Queue exhausted - resumes like a normal level-up would.
+    expect(service.state.context.pendingLevelUpChoice).toBeUndefined();
+    expect(service.state.context.pendingChestRemainingPicks).toBeUndefined();
+    expect(service.state.context.isGameplayPaused).toBe(false);
+
+    service.stop();
+  });
+
+  it("increases maxLives and lives immediately when picking the Max HP perk", () => {
+    const newPerkService = interpret(
+      portalMachine.withContext({
+        ...portalMachine.initialState.context,
+        pendingLevelUpChoice: {
+          type: "levelUp",
+          level: 3,
+          options: [{ kind: "newPerk", perkId: "maxHealth", toLevel: 1 }],
+        },
+        isGameplayPaused: true,
+      }),
+    ).start("playing");
+
+    const maxLivesBefore = newPerkService.state.context.maxLives;
+    const livesBefore = newPerkService.state.context.lives;
+
+    newPerkService.send("SELECT_LEVEL_UP_OPTION", {
+      option: { kind: "newPerk", perkId: "maxHealth", toLevel: 1 },
+    });
+
+    expect(newPerkService.state.context.maxLives).toBe(maxLivesBefore + 20);
+    expect(newPerkService.state.context.lives).toBe(livesBefore + 20);
+    expect(newPerkService.state.context.perkLevels.maxHealth).toBe(1);
+
+    newPerkService.stop();
+
+    const upgradePerkService = interpret(
+      portalMachine.withContext({
+        ...portalMachine.initialState.context,
+        perkLevels: { ...newPerkService.state.context.perkLevels },
+        maxLives: newPerkService.state.context.maxLives,
+        lives: newPerkService.state.context.lives,
+        pendingLevelUpChoice: {
+          type: "levelUp",
+          level: 4,
+          options: [{ kind: "upgradePerk", perkId: "maxHealth", toLevel: 2 }],
+        },
+        isGameplayPaused: true,
+      }),
+    ).start("playing");
+
+    upgradePerkService.send("SELECT_LEVEL_UP_OPTION", {
+      option: { kind: "upgradePerk", perkId: "maxHealth", toLevel: 2 },
+    });
+
+    expect(upgradePerkService.state.context.maxLives).toBe(
+      maxLivesBefore + 40,
+    );
+    expect(upgradePerkService.state.context.lives).toBe(livesBefore + 40);
+    expect(upgradePerkService.state.context.perkLevels.maxHealth).toBe(2);
+
+    upgradePerkService.stop();
   });
 
   it("keeps health unchanged when active wearables buff other stats", () => {
@@ -313,7 +400,6 @@ describe("portalMachine progression flow", () => {
         currentXP: Math.max(0, (nextLevelXP ?? 1) - 1),
         nextLevelXP,
         collected: 10,
-        xpPoints: 2,
         pendingLevelUpChoice: undefined,
         isGameplayPaused: false,
       }),
@@ -326,7 +412,6 @@ describe("portalMachine progression flow", () => {
     expect(service.state.context.playerLevel).toBe(PLAYER_MAX_LEVEL);
     expect(service.state.context.currentXP).toBe(0);
     expect(service.state.context.nextLevelXP).toBeUndefined();
-    expect(service.state.context.xpPoints).toBe(3);
     expect(service.state.context.collected).toBe(initialCollected + 5);
 
     service.send("COLLECT_ITEM", { itemKey: "purpleOrb" });
@@ -334,7 +419,6 @@ describe("portalMachine progression flow", () => {
     expect(service.state.context.playerLevel).toBe(PLAYER_MAX_LEVEL);
     expect(service.state.context.currentXP).toBe(0);
     expect(service.state.context.nextLevelXP).toBeUndefined();
-    expect(service.state.context.xpPoints).toBe(3);
     expect(service.state.context.collected).toBe(initialCollected + 10);
 
     service.stop();
@@ -424,8 +508,8 @@ describe("portalMachine progression flow", () => {
     ).start("ready");
 
     service.send("START");
-    const weapon = service.state.context.pendingLevelUpChoice?.options[0];
-    service.send("SELECT_LEVEL_UP_WEAPON", { weapon: weapon! });
+    const option = service.state.context.pendingLevelUpChoice?.options[0];
+    service.send("SELECT_LEVEL_UP_OPTION", { option: option! });
     service.send("COLLECT_ITEM", { itemKey: "purpleOrb" });
     service.send("GAME_OVER");
 

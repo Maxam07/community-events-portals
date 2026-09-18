@@ -12,10 +12,6 @@ import {
 } from "./EnemyConstants";
 import { WEAPON_CONFIGS, WEAPON_UPGRADES } from "./WeaponConstants";
 import { PORTAL_NAME } from "./PortalConstants";
-import {
-  getPlayerStatValue,
-  PLAYER_STAT_BASE_LEVEL,
-} from "./PlayerStatConstants";
 
 import banana_icon from "public/world/portal/images/banana_icon.webp";
 import scythe_icon from "public/world/portal/images/scythe_icon.png";
@@ -56,13 +52,9 @@ export { PORTAL_NAME } from "./PortalConstants";
 
 // Game config
 export const GAME_SECONDS = 300;
-export const GAME_LIVES = getPlayerStatValue("health", PLAYER_STAT_BASE_LEVEL);
-
-// Player
-export const WALKING_SPEED = getPlayerStatValue(
-  "speed",
-  PLAYER_STAT_BASE_LEVEL,
-);
+export const GAME_LIVES = 100;
+export const WALKING_SPEED = 50;
+export const PLAYER_WATER_SPEED_MULTIPLIER = 0.6;
 
 // Attempts
 export const INITIAL_DATE = "2026-07-13"; // YYYY-MM-DD

@@ -12,6 +12,7 @@ import { ColletedItems } from "./CollectedItems";
 import { Codex } from "./Codex";
 import { BumpkinProfile } from "./BumpkinProfile";
 import { HudWeapons } from "./HudWeapons";
+import { HudPerks } from "./HudPerks";
 import { Target } from "./Target";
 
 const _isJoystickActive = (state: PortalMachineState) =>
@@ -78,7 +79,10 @@ export const Hud: React.FC = () => {
             <>
               <Timer />
               <Codex />
-              <HudWeapons />
+              <div className="flex flex-row items-start gap-1">
+                <HudPerks />
+                <HudWeapons />
+              </div>
               <Settings />
             </>
           )}

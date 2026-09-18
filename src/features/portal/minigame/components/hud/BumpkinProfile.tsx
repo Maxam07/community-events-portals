@@ -147,7 +147,6 @@ const _profileState = (state: PortalMachineState) => ({
   playerLevel: state.context.playerLevel,
   currentXP: state.context.currentXP,
   nextLevelXP: state.context.nextLevelXP,
-  xpPoints: state.context.xpPoints,
 });
 
 const isEditableTarget = (target: EventTarget | null) => {
@@ -297,7 +296,6 @@ export const BumpkinProfile: React.FC<BumpkinProfileProps> = ({
     playerLevel,
     currentXP,
     nextLevelXP,
-    xpPoints,
   } = useSelector(portalService, _profileState);
 
   const bumpkinEquipment = gameState?.bumpkin?.equipped as
@@ -606,25 +604,6 @@ export const BumpkinProfile: React.FC<BumpkinProfileProps> = ({
                   percentage={xpPercent}
                   type="health"
                 />
-                <div className="flex w-full items-center justify-center gap-1 text-xxs">
-                  <Label
-                    style={{
-                      fontSize: "20px",
-                      lineHeight: "12px",
-                    }}
-                    type={xpPoints > 0 ? "warning" : "default"}
-                  >
-                    {t(`${PORTAL_NAME}.xpPoints`, {
-                      points: xpPoints,
-                    })}
-                  </Label>
-                  {xpPoints > 0 ? (
-                    <img
-                      src={SUNNYSIDE.icons.expression_alerted}
-                      className="h-4 object-contain pixelated"
-                    />
-                  ) : null}
-                </div>
               </div>
             </InnerPanel>
           </div>

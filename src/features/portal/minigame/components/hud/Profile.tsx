@@ -1,5 +1,4 @@
-import React, { useContext } from "react";
-import { useSelector } from "@xstate/react";
+import React from "react";
 
 import { useAppTranslation } from "lib/i18n/useAppTranslations";
 import { SUNNYSIDE } from "assets/sunnyside";
@@ -11,23 +10,10 @@ import type { BumpkinParts } from "lib/utils/tokenUriBuilder";
 import { BETA_TESTERS, INITIAL_DATE, PORTAL_NAME } from "../../constants";
 import { NPCIcon } from "features/island/bumpkin/components/NPC";
 import { InnerPanel } from "components/ui/Panel";
-import { StatCard } from "./StatCard";
 import { Button } from "components/ui/Button";
 
-import swordIcon from "public/world/portal/images/sword_icon.png";
-import speedIcon from "public/world/portal/images/lightning.png";
-import powerupIcon from "assets/icons/level_up.png";
 import { Label } from "components/ui/Label";
-import { PortalContext } from "../../lib/PortalProvider";
-import type { PortalMachineState } from "../../lib/Machine";
-import {
-  getNextPlayerStatLevel,
-  getPlayerStatValue,
-  getPlayerStatValueIncrease,
-  PLAYER_STAT_IDS,
-  WEARABLE_BUFFS,
-} from "../../constants";
-import type { PlayerStatId } from "../../Types";
+import { WEARABLE_BUFFS } from "../../constants";
 import { LOADOUT_SLOTS, type WearableLoadoutSlot } from "./loadoutStorage";
 export {
   getStorageKey,
@@ -75,13 +61,6 @@ const RIGHT_EQUIPMENT: BumpkinPart[] = [
 
 // const BOTTOM_EQUIPMENT: BumpkinPart[] = ["secondaryTool", "aura"];
 
-const _playerStatsState = (state: PortalMachineState) => ({
-  xpPoints: state.context.xpPoints,
-  selectedStat: state.context.selectedStat,
-  playerStatLevels: state.context.playerStatLevels,
-  activeWearables: state.context.activeWearables,
-});
-
 const isStartDateReached = () =>
   new Date().toISOString().slice(0, 10) >= INITIAL_DATE;
 
@@ -110,108 +89,38 @@ export const Profile: React.FC<{
   equipped,
   selectedBumpkinPart,
   onSelectBumpkinPart,
-  lives,
-  maxLives,
   farmId,
   onStart,
   onStartTraining,
   onBack,
 }) => {
   const { t } = useAppTranslation();
-  const { portalService } = useContext(PortalContext);
-  const { xpPoints, selectedStat, playerStatLevels, activeWearables } =
-    useSelector(portalService, _playerStatsState);
   const canStart = canFarmStart(farmId);
 
-  const statIcons: Record<PlayerStatId, { src: string; width?: number }> = {
-    health: { src: SUNNYSIDE.icons.heart },
-    speed: { src: speedIcon, width: 14 },
-    damage: { src: swordIcon },
-  };
-
-  const statLabelTypes = {
-    health: "danger",
-    speed: "warning",
-    damage: "info",
-  } as const;
-
-  const statTitles = {
-    health: t(`${PORTAL_NAME}.health`),
-    speed: t(`${PORTAL_NAME}.speed`),
-    damage: t(`${PORTAL_NAME}.damage`),
-  };
-
-  const playerStats = (
-    <>
-      <InnerPanel className="flex mt-2 gap-2 w-full">
-        {PLAYER_STAT_IDS.map((stat) => {
-          const level = playerStatLevels[stat];
-          const nextLevel = getNextPlayerStatLevel(level);
-          const canUpgrade =
-            selectedStat === stat && nextLevel !== undefined && xpPoints > 0;
-          const isDisabled = selectedStat !== stat || nextLevel === undefined;
-          const value =
-            stat === "health"
-              ? `${lives}/${maxLives}`
-              : getPlayerStatValue(stat, level, activeWearables);
-          const statIncrease = getPlayerStatValueIncrease(stat, level);
-
-          return (
-            <StatCard
-              key={stat}
-              title={statTitles[stat]}
-              label={{ value, type: statLabelTypes[stat] }}
-              img={statIcons[stat]}
-              warningLabel={
-                nextLevel === undefined ? (
-                  t(`${PORTAL_NAME}.maxShort`)
-                ) : selectedStat === stat && xpPoints > 0 ? (
-                  <span className="flex items-center justify-center gap-1">
-                    <img
-                      src={powerupIcon}
-                      className="h-3 object-contain pixelated"
-                    />
-                    {`+${statIncrease}`}
-                  </span>
-                ) : undefined
-              }
-              disabled={isDisabled}
-              onClick={() => {
-                if (!canUpgrade) return;
-                portalService.send("UPGRADE_PLAYER_STAT", { stat });
-              }}
-              showLabelAboveDisabled
-              className="w-full"
-            />
-          );
-        })}
-      </InnerPanel>
-      {onStart && onStartTraining && onBack && (
-        <InnerPanel className="flex flex-col mt-2 gap-1 w-full">
-          <div className="flex gap-1">
-            <Button
-              className="whitespace-nowrap capitalize"
-              onClick={onStartTraining}
-            >
-              {t(`${PORTAL_NAME}.start.training`)}
-            </Button>
-            <Button
-              className="whitespace-nowrap capitalize"
-              disabled={!canStart}
-              onClick={onStart}
-            >
-              {t("start")}
-            </Button>
-          </div>
-          <Button className="whitespace-nowrap capitalize" onClick={onBack}>
-            <div className="flex items-center justify-center gap-1">
-              <img src={SUNNYSIDE.icons.arrow_left} className="h-5" />
-              {t("back")}
-            </div>
-          </Button>
-        </InnerPanel>
-      )}
-    </>
+  const footer = onStart && onStartTraining && onBack && (
+    <InnerPanel className="flex flex-col mt-2 gap-1 w-full">
+      <div className="flex gap-1">
+        <Button
+          className="whitespace-nowrap capitalize"
+          onClick={onStartTraining}
+        >
+          {t(`${PORTAL_NAME}.start.training`)}
+        </Button>
+        <Button
+          className="whitespace-nowrap capitalize"
+          disabled={!canStart}
+          onClick={onStart}
+        >
+          {t("start")}
+        </Button>
+      </div>
+      <Button className="whitespace-nowrap capitalize" onClick={onBack}>
+        <div className="flex items-center justify-center gap-1">
+          <img src={SUNNYSIDE.icons.arrow_left} className="h-5" />
+          {t("back")}
+        </div>
+      </Button>
+    </InnerPanel>
   );
 
   return (
@@ -224,7 +133,7 @@ export const Profile: React.FC<{
         }))}
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
-        innerPanelFooter={playerStats}
+        innerPanelFooter={footer}
         onClose={onClose}
       >
         <div className="p-1">
@@ -262,9 +171,6 @@ export const Profile: React.FC<{
                   </div>
                 )}
               </div>
-              <Label type={xpPoints > 0 ? "warning" : "default"}>
-                {t(`${PORTAL_NAME}.xpPoints`, { points: xpPoints })}
-              </Label>
             </div>
             <BumpkinPartGroup
               bumpkinParts={RIGHT_EQUIPMENT}

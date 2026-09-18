@@ -1,10 +1,8 @@
 import { WEAPON_UPGRADES } from "features/portal/minigame/constants/WeaponConstants";
 import type {
-  PlayerStatLevel,
   WeaponId,
   WeaponRuntimeStats,
 } from "features/portal/minigame/Types";
-import { resolvePlayerDamage } from "features/portal/minigame/constants/PlayerStatConstants";
 import type { BumpkinParts } from "lib/utils/tokenUriBuilder";
 import { getActiveWearableBuffs } from "features/portal/minigame/constants/WearableConstants";
 import type {
@@ -50,23 +48,6 @@ export const getWeaponDetailStats = (
   return Array.from(
     new Set<keyof WeaponRuntimeStats>([...upgradeStats, ...buffStats]),
   );
-};
-
-export const resolveDisplayedWeaponStatValue = ({
-  stat,
-  value,
-  damageLevel,
-  activeWearables,
-}: {
-  stat: keyof WeaponRuntimeStats;
-  value?: number;
-  damageLevel: PlayerStatLevel;
-  activeWearables?: BumpkinParts;
-}) => {
-  const receivesBaseDamage = stat === "damage" || stat === "dotDamage";
-  if (value === undefined || !receivesBaseDamage) return value;
-
-  return resolvePlayerDamage(value, damageLevel, activeWearables);
 };
 
 const formatNumber = (value: number) => {

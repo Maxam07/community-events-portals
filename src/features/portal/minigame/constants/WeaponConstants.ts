@@ -10,6 +10,8 @@ import type {
 } from "../Types";
 import type { BumpkinParts } from "lib/utils/tokenUriBuilder";
 import { getActiveWearableBuffs } from "./WearableConstants";
+import { getPerkAmount } from "./PerkConstants";
+import type { PerkLevels } from "../Types";
 
 const BASE_WEAPON_STATS = {
   damage: 1,
@@ -33,6 +35,16 @@ const BASE_WEAPON_STATS = {
   homingSpeed: 90,
   hitCooldownMs: 450,
   angularSpeed: 0.003,
+};
+
+export const WEAPON_MAX_LEVEL: WeaponLevel = 8;
+
+export const getNextWeaponLevel = (
+  level: WeaponLevel,
+): WeaponLevel | undefined => {
+  if (level >= WEAPON_MAX_LEVEL) return undefined;
+
+  return (level + 1) as WeaponLevel;
 };
 
 export const WEAPON_UPGRADE_XP_COSTS: Record<WeaponLevel, number | null> = {
@@ -746,6 +758,7 @@ export const resolveWeaponStats = (
   id: WeaponId,
   level: number,
   activeWearables?: BumpkinParts,
+  perkLevels?: PerkLevels,
 ): WeaponRuntimeStats => {
   const stats = { ...WEAPON_CONFIGS[id].baseStats };
 
@@ -769,6 +782,25 @@ export const resolveWeaponStats = (
 
     stats[buff.target.stat] += buff.value;
   });
+
+  // Passive perks (Halloween backlog 1.2) apply last, on top of upgrades
+  // and wearable buffs, as global multipliers.
+  const attackSpeedBonus = getPerkAmount(perkLevels, "attackSpeed");
+  if (attackSpeedBonus > 0) {
+    stats.cooldownMs *= 1 - attackSpeedBonus;
+  }
+
+  const cooldownReductionBonus = getPerkAmount(perkLevels, "cooldownReduction");
+  if (cooldownReductionBonus > 0) {
+    stats.hitCooldownMs *= 1 - cooldownReductionBonus;
+    stats.dotTickMs *= 1 - cooldownReductionBonus;
+  }
+
+  const projectileSpeedBonus = getPerkAmount(perkLevels, "projectileSpeed");
+  if (projectileSpeedBonus > 0) {
+    stats.projectileSpeed *= 1 + projectileSpeedBonus;
+    stats.homingSpeed *= 1 + projectileSpeedBonus;
+  }
 
   return normaliseWeaponStats(stats);
 };

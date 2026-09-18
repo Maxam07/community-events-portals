@@ -2,16 +2,11 @@ import type { BumpkinItem } from "features/game/types/bumpkin";
 import type { BumpkinParts } from "lib/utils/tokenUriBuilder";
 import type {
   DropItemType,
-  PlayerStatId,
   WeaponId,
   WeaponStatKey,
 } from "features/portal/minigame/Types";
 
 export type WearableBuffTarget =
-  | {
-      type: "playerStat";
-      stat: PlayerStatId;
-    }
   | {
       type: "weaponStat";
       weapon: WeaponId;
@@ -136,8 +131,8 @@ export const WEARABLE_BUFFS: Partial<Record<BumpkinItem, WearableBuff>> = {
     descriptionKey: "wearables.buff.glitchAura",
   },
   "Underworld Stimpack": {
-    target: { type: "playerStat", stat: "speed" },
-    value: 1,
+    target: { type: "weaponStat", weapon: "broomScythe", stat: "cooldownMs" },
+    value: -50,
     descriptionKey: "festival-of-colors.AbilityDescription",
   },
   "Slime Wings": {
@@ -156,8 +151,8 @@ export const WEARABLE_BUFFS: Partial<Record<BumpkinItem, WearableBuff>> = {
     descriptionKey: "wearables.buff.sweetDevilWings",
   },
   "Cardboard Wings": {
-    target: { type: "playerStat", stat: "speed" },
-    value: 10,
+    target: { type: "weaponStat", weapon: "tomato", stat: "cooldownMs" },
+    value: -100,
     descriptionKey: "wearables.buff.cardboardWings",
   },
   "Slime Wall Background": {
@@ -181,8 +176,8 @@ export const WEARABLE_BUFFS: Partial<Record<BumpkinItem, WearableBuff>> = {
     descriptionKey: "wearables.buff.carrotPitchfork",
   },
   "Handheld Bunny": {
-    target: { type: "playerStat", stat: "speed" },
-    value: 5,
+    target: { type: "weaponStat", weapon: "beehive", stat: "cooldownMs" },
+    value: -50,
     descriptionKey: "wearables.buff.handheldBunny",
   },
   "Bunny Mask": {
@@ -196,8 +191,8 @@ export const WEARABLE_BUFFS: Partial<Record<BumpkinItem, WearableBuff>> = {
     descriptionKey: "wearables.buff.bunnyPants",
   },
   "Easter Apron": {
-    target: { type: "playerStat", stat: "damage" },
-    value: 0.5,
+    target: { type: "weaponStat", weapon: "corn", stat: "damage" },
+    value: 1,
     descriptionKey: "wearables.buff.easterApron",
   },
   "Slime Hat": {
@@ -240,8 +235,8 @@ export const WEARABLE_BUFFS: Partial<Record<BumpkinItem, WearableBuff>> = {
     descriptionKey: "wearables.buff.sadSlimeHat",
   },
   "Red Jelly Pants": {
-    target: { type: "playerStat", stat: "speed" },
-    value: 5,
+    target: { type: "weaponStat", weapon: "oil", stat: "cooldownMs" },
+    value: -50,
     descriptionKey: "wearables.buff.redJellyPants",
   },
   "Blue Jelly Shoes": {
@@ -283,8 +278,8 @@ export const WEARABLE_BUFFS: Partial<Record<BumpkinItem, WearableBuff>> = {
     descriptionKey: "wearables.buff.paintSprayCan",
   },
   "Moonseeker Potion": {
-    target: { type: "playerStat", stat: "damage" },
-    value: 0.5,
+    target: { type: "weaponStat", weapon: "beehive", stat: "damage" },
+    value: 1,
     descriptionKey: "wearables.buff.moonseekerPotion",
   },
   "Moonseeker Hand Puppet": {
@@ -303,8 +298,8 @@ export const WEARABLE_BUFFS: Partial<Record<BumpkinItem, WearableBuff>> = {
     descriptionKey: "wearables.buff.sweetDevilHorns",
   },
   "Sweet Devil Dress": {
-    target: { type: "playerStat", stat: "damage" },
-    value: 0.5,
+    target: { type: "weaponStat", weapon: "broomScythe", stat: "damage" },
+    value: 1,
     descriptionKey: "wearables.buff.sweetDevilDress",
   },
   "Trick and Treat": {
@@ -353,8 +348,8 @@ export const WEARABLE_BUFFS: Partial<Record<BumpkinItem, WearableBuff>> = {
     descriptionKey: "wearables.buff.snowmanMask",
   },
   "Cozy Reindeer Onesie": {
-    target: { type: "playerStat", stat: "damage" },
-    value: 0.5,
+    target: { type: "weaponStat", weapon: "sunflower", stat: "damage" },
+    value: 1,
     descriptionKey: "wearables.buff.cozyReindeerOnesie",
   },
   "Neon Noiz Jacket": {
@@ -387,8 +382,8 @@ export const WEARABLE_BUFFS: Partial<Record<BumpkinItem, WearableBuff>> = {
     descriptionKey: "wearables.buff.404ChicSkirt",
   },
   "Neon Noiz Shoes": {
-    target: { type: "playerStat", stat: "speed" },
-    value: 5,
+    target: { type: "weaponStat", weapon: "beehive", stat: "cooldownMs" },
+    value: -50,
     descriptionKey: "wearables.buff.neonNoizShoes",
   },
   "404 Chic Boots": {
@@ -446,15 +441,6 @@ export const getActiveWearableBuffs = (
     return buff ? [buff] : [];
   });
 };
-
-export const getActivePlayerStatBuff = (
-  stat: PlayerStatId,
-  activeWearables?: BumpkinParts,
-) =>
-  getActiveWearableBuffs(activeWearables)
-    .filter((buff) => buff.target.type === "playerStat")
-    .filter((buff) => buff.target.stat === stat)
-    .reduce((total, buff) => total + buff.value, 0);
 
 export const getWearableBuffDescriptionKey = (wearable?: BumpkinItem) => {
   if (!wearable) return undefined;

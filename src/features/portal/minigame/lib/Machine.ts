@@ -8,21 +8,23 @@ import {
   GAME_LIVES,
   PORTAL_NAME,
   DROP_ITEM_XP_VALUES,
-  DEFAULT_PLAYER_STAT_LEVELS,
   getLevelUpChoice,
   getNextLevelXP,
-  getNextPlayerStatLevel,
-  getPlayerStatValue,
-  getPlayerStatValueIncrease,
   getUnlockedWeapons,
   isPlayerMaxLevel,
   LEVEL_UP_WEAPON_IDS,
   PLAYER_INITIAL_LEVEL,
-  shouldGrantXPPoint,
   ENEMY_BALANCE_STATS,
   getActiveWearableBuffs,
   NO_WEARABLE_BUFF_SCORE_MULTIPLIER,
 } from "../constants";
+import {
+  CHEST_BONUS_LEVEL_CHANCES,
+  DEFAULT_PERK_LEVELS,
+  getPerkAmount,
+} from "../constants/PerkConstants";
+import { CHEST_LEVELS } from "../constants/ChestConstants";
+import { getChestLevelUpChoice } from "../constants/PlayerLevelConstants";
 import type { GameState } from "features/game/types/game";
 import type { BumpkinParts } from "lib/utils/tokenUriBuilder";
 import { purchaseMinigameItem } from "features/game/events/minigames/purchaseMinigameItem";
@@ -32,11 +34,12 @@ import { submitScore, startAttempt } from "features/portal/lib/portalUtil";
 import { getUrl, loadPortal } from "features/portal/actions/loadPortal";
 import { getAttemptsLeft, getUnlimitedAttemptsSfl } from "./Utils";
 import type {
+  ChestRarity,
   DropItemType,
   EnemyType,
   LevelUpChoice,
-  PlayerStatId,
-  PlayerStatLevels,
+  LevelUpOption,
+  PerkLevels,
   WeaponId,
   WeaponLevel,
 } from "../Types";
@@ -63,10 +66,8 @@ const getFinalRunScore = (context: Context) => {
   };
 };
 
-const getMaxLives = (
-  playerStatLevels: PlayerStatLevels,
-  activeWearables?: BumpkinParts,
-) => getPlayerStatValue("health", playerStatLevels.health, activeWearables);
+const getMaxLives = (perkLevels?: PerkLevels) =>
+  GAME_LIVES + getPerkAmount(perkLevels, "maxHealth");
 
 export interface Context {
   id: number;
@@ -89,14 +90,18 @@ export interface Context {
   playerLevel: number;
   currentXP: number;
   nextLevelXP?: number;
-  xpPoints: number;
-  selectedStat?: PlayerStatId;
   pendingLevelUpChoice?: LevelUpChoice;
+  // How many more chest choice screens remain after the current one (only
+  // set while pendingLevelUpChoice.source === "chest"). An epic chest (2
+  // levels) starts this at 1, a legendary (3 levels) at 2; each resolved
+  // chest choice decrements it until it hits 0, at which point gameplay
+  // resumes instead of showing another choice.
+  pendingChoiceQueue: ("levelUp" | "chest")[];
   isGameplayPaused: boolean;
   gameplayPausedAt?: number;
   weaponLevels: Record<WeaponId, WeaponLevel>;
   hudWeapons: WeaponId[];
-  playerStatLevels: PlayerStatLevels;
+  perkLevels: PerkLevels;
   activeWearables?: BumpkinParts;
 }
 
@@ -109,22 +114,18 @@ const DEFAULT_WEAPON_LEVELS: Record<WeaponId, WeaponLevel> =
     {} as Record<WeaponId, WeaponLevel>,
   );
 
-const getNextWeaponLevel = (level: WeaponLevel) => {
-  if (level >= 8) return undefined;
-
-  return (level + 1) as WeaponLevel;
-};
-
 const getInitialProgression = ({
   withInitialWeaponChoice = false,
 }: {
   withInitialWeaponChoice?: boolean;
 } = {}) => {
   const weaponLevels = { ...DEFAULT_WEAPON_LEVELS };
+  const perkLevels = { ...DEFAULT_PERK_LEVELS };
   const pendingLevelUpChoice = withInitialWeaponChoice
     ? getLevelUpChoice({
         level: PLAYER_INITIAL_LEVEL,
         weaponLevels,
+        perkLevels,
       })
     : undefined;
 
@@ -133,14 +134,13 @@ const getInitialProgression = ({
     playerLevel: PLAYER_INITIAL_LEVEL,
     currentXP: 0,
     nextLevelXP: getNextLevelXP(PLAYER_INITIAL_LEVEL),
-    xpPoints: 0,
-    selectedStat: undefined,
     pendingLevelUpChoice,
+    pendingChoiceQueue: [] as ("levelUp" | "chest")[],
     isGameplayPaused: !!pendingLevelUpChoice,
     gameplayPausedAt: undefined,
     weaponLevels,
     hudWeapons: [] as WeaponId[],
-    playerStatLevels: { ...DEFAULT_PLAYER_STAT_LEVELS },
+    perkLevels,
   };
 };
 
@@ -149,6 +149,43 @@ const pauseGameplayClock = (context: Context): Partial<Context> => ({
   gameplayPausedAt:
     context.endAt > 0 ? (context.gameplayPausedAt ?? Date.now()) : undefined,
 });
+
+const resolveNextQueuedChoice = ({
+  queue,
+  playerLevel,
+  weaponLevels,
+  perkLevels,
+}: {
+  queue: ("levelUp" | "chest")[];
+  playerLevel: number;
+  weaponLevels: Record<WeaponId, WeaponLevel>;
+  perkLevels: PerkLevels;
+}): {
+  pendingLevelUpChoice?: LevelUpChoice;
+  pendingChoiceQueue: ("levelUp" | "chest")[];
+} => {
+  const remaining = [...queue];
+
+  while (remaining.length > 0) {
+    const source = remaining.shift();
+
+    const choice =
+      source === "chest"
+        ? getChestLevelUpChoice({
+            level: playerLevel,
+            weaponLevels,
+            perkLevels,
+            bonusLevelChances: CHEST_BONUS_LEVEL_CHANCES,
+          })
+        : getLevelUpChoice({ level: playerLevel, weaponLevels, perkLevels });
+
+    if (choice) {
+      return { pendingLevelUpChoice: choice, pendingChoiceQueue: remaining };
+    }
+  }
+
+  return { pendingLevelUpChoice: undefined, pendingChoiceQueue: [] };
+};
 
 const resumeGameplayClock = (context: Context): Partial<Context> => {
   const pausedDuration =
@@ -170,55 +207,59 @@ const resolveXPProgression = ({
   context: Context;
   gainedXP: number;
 }): Partial<Context> => {
-  if (context.pendingLevelUpChoice) return {};
+  const xpGainBonus = getPerkAmount(context.perkLevels, "xpGain");
+  const adjustedXP =
+    xpGainBonus > 0 ? Math.round(gainedXP * (1 + xpGainBonus)) : gainedXP;
+
   if (isPlayerMaxLevel(context.playerLevel)) {
     return {
-      collected: context.collected + gainedXP,
+      collected: context.collected + adjustedXP,
     };
   }
 
   let playerLevel = context.playerLevel;
-  let currentXP = context.currentXP + gainedXP;
+  let currentXP = context.currentXP + adjustedXP;
   let nextLevelXP = getNextLevelXP(playerLevel);
-  let xpPoints = context.xpPoints;
-  let pendingLevelUpChoice: LevelUpChoice | undefined;
+  const queue = [...context.pendingChoiceQueue];
 
-  while (
-    nextLevelXP !== undefined &&
-    currentXP >= nextLevelXP &&
-    !pendingLevelUpChoice
-  ) {
+  while (nextLevelXP !== undefined && currentXP >= nextLevelXP) {
     currentXP -= nextLevelXP;
     playerLevel += 1;
     nextLevelXP = getNextLevelXP(playerLevel);
 
-    const choice = getLevelUpChoice({
-      level: playerLevel,
-      weaponLevels: context.weaponLevels,
-    });
-
-    if (choice) {
-      pendingLevelUpChoice = choice;
-    } else if (shouldGrantXPPoint(playerLevel)) {
-      xpPoints += 1;
-    }
-
     if (isPlayerMaxLevel(playerLevel)) {
       currentXP = 0;
-      pendingLevelUpChoice = undefined;
       break;
     }
+
+    queue.push("levelUp");
   }
 
-  return {
-    collected: context.collected + gainedXP,
+  const progression = {
+    collected: context.collected + adjustedXP,
     playerLevel,
     currentXP,
     nextLevelXP,
-    xpPoints,
-    pendingLevelUpChoice,
-    isGameplayPaused: pendingLevelUpChoice ? true : context.isGameplayPaused,
-    gameplayPausedAt: pendingLevelUpChoice
+  };
+
+  if (context.pendingLevelUpChoice) {
+    return { ...progression, pendingChoiceQueue: queue };
+  }
+
+  const nextChoice = resolveNextQueuedChoice({
+    queue,
+    playerLevel,
+    weaponLevels: context.weaponLevels,
+    perkLevels: context.perkLevels,
+  });
+
+  return {
+    ...progression,
+    ...nextChoice,
+    isGameplayPaused: nextChoice.pendingLevelUpChoice
+      ? true
+      : context.isGameplayPaused,
+    gameplayPausedAt: nextChoice.pendingLevelUpChoice
       ? context.endAt > 0
         ? (context.gameplayPausedAt ?? Date.now())
         : undefined
@@ -266,24 +307,19 @@ type SetValidationsEvent = {
   validation: string;
 };
 
-type UpgradeWeaponEvent = {
-  type: "UPGRADE_WEAPON";
-  weapon: WeaponId;
+type SelectLevelUpOptionEvent = {
+  type: "SELECT_LEVEL_UP_OPTION";
+  option: LevelUpOption;
 };
 
-type UpgradePlayerStatEvent = {
-  type: "UPGRADE_PLAYER_STAT";
-  stat: PlayerStatId;
+type HealEvent = {
+  type: "HEAL";
+  amount: number;
 };
 
-type SelectLevelUpWeaponEvent = {
-  type: "SELECT_LEVEL_UP_WEAPON";
-  weapon: WeaponId;
-};
-
-type SelectLevelUpStatEvent = {
-  type: "SELECT_LEVEL_UP_STAT";
-  stat: PlayerStatId;
+type ChestOpenedEvent = {
+  type: "CHEST_OPENED";
+  rarity: ChestRarity;
 };
 
 type SetGameplayPausedEvent = {
@@ -312,10 +348,9 @@ export type PortalEvent =
   | LoseLifeEvent
   | SetValidationsEvent
   | CollectItemEvent
-  | UpgradeWeaponEvent
-  | UpgradePlayerStatEvent
-  | SelectLevelUpWeaponEvent
-  | SelectLevelUpStatEvent
+  | SelectLevelUpOptionEvent
+  | HealEvent
+  | ChestOpenedEvent
   | SetGameplayPausedEvent
   | SetActiveWearablesEvent;
 
@@ -353,10 +388,7 @@ const resetGameTransition = {
     target: "starting",
     actions: assign((context: Context): Partial<Context> => {
       const progression = getInitialProgression();
-      const maxLives = getMaxLives(
-        progression.playerStatLevels,
-        context.activeWearables,
-      );
+      const maxLives = getMaxLives(progression.perkLevels);
 
       return {
         score: 0,
@@ -414,10 +446,7 @@ export const portalMachine = createMachine<Context, PortalEvent, PortalState>({
           context: Context,
           event: SetActiveWearablesEvent,
         ): Partial<Context> => {
-          const maxLives = getMaxLives(
-            context.playerStatLevels,
-            event.wearables,
-          );
+          const maxLives = getMaxLives(context.perkLevels);
           const maxLivesDelta = maxLives - context.maxLives;
 
           return {
@@ -441,51 +470,6 @@ export const portalMachine = createMachine<Context, PortalEvent, PortalState>({
           if (event.isPaused) return pauseGameplayClock(context);
 
           return resumeGameplayClock(context);
-        },
-      ),
-    },
-    UPGRADE_WEAPON: {
-      actions: assign((context: Context, event: UpgradeWeaponEvent) => {
-        const currentLevel = context.weaponLevels[event.weapon];
-        const nextLevel = getNextWeaponLevel(currentLevel);
-        const canUpgrade =
-          currentLevel > 0 && nextLevel !== undefined && context.xpPoints > 0;
-        if (!canUpgrade) return {};
-
-        return {
-          xpPoints: context.xpPoints - 1,
-          weaponLevels: {
-            ...context.weaponLevels,
-            [event.weapon]: nextLevel,
-          },
-        };
-      }),
-    },
-    UPGRADE_PLAYER_STAT: {
-      actions: assign(
-        (context: Context, event: UpgradePlayerStatEvent): Partial<Context> => {
-          const level = context.playerStatLevels[event.stat];
-          const nextLevel = getNextPlayerStatLevel(level);
-          const canUpgrade =
-            context.selectedStat === event.stat &&
-            nextLevel !== undefined &&
-            context.xpPoints > 0;
-          if (!canUpgrade) return {};
-
-          const healthIncrease =
-            event.stat === "health"
-              ? getPlayerStatValueIncrease("health", level)
-              : 0;
-
-          return {
-            xpPoints: context.xpPoints - 1,
-            playerStatLevels: {
-              ...context.playerStatLevels,
-              [event.stat]: nextLevel,
-            },
-            maxLives: context.maxLives + healthIncrease,
-            lives: context.lives + healthIncrease,
-          };
         },
       ),
     },
@@ -642,10 +626,7 @@ export const portalMachine = createMachine<Context, PortalEvent, PortalState>({
             const progression = getInitialProgression({
               withInitialWeaponChoice: true,
             });
-            const maxLives = getMaxLives(
-              progression.playerStatLevels,
-              context.activeWearables,
-            );
+            const maxLives = getMaxLives(progression.perkLevels);
             const state = (() => {
               if (context.isTraining) return context.state;
               startAttempt();
@@ -682,70 +663,190 @@ export const portalMachine = createMachine<Context, PortalEvent, PortalState>({
 
     playing: {
       on: {
-        SELECT_LEVEL_UP_WEAPON: {
+        SELECT_LEVEL_UP_OPTION: {
           actions: assign(
             (
               context: Context,
-              event: SelectLevelUpWeaponEvent,
+              event: SelectLevelUpOptionEvent,
             ): Partial<Context> => {
               const choice = context.pendingLevelUpChoice;
-              if (choice?.type !== "weapon") return {};
-              if (!choice.options.includes(event.weapon)) return {};
-              if (context.weaponLevels[event.weapon] > 0) return {};
+              if (choice?.type !== "levelUp") return {};
 
-              const weaponLevels = {
-                ...context.weaponLevels,
-                [event.weapon]: 1 as WeaponLevel,
+              const { option } = event;
+              const isSameOption = (candidate: LevelUpOption) => {
+                if (candidate.kind !== option.kind) return false;
+
+                switch (candidate.kind) {
+                  case "newWeapon":
+                    return (
+                      option.kind === "newWeapon" &&
+                      candidate.weaponId === option.weaponId
+                    );
+                  case "upgradeWeapon":
+                    return (
+                      option.kind === "upgradeWeapon" &&
+                      candidate.weaponId === option.weaponId
+                    );
+                  case "newPerk":
+                    return (
+                      option.kind === "newPerk" &&
+                      candidate.perkId === option.perkId
+                    );
+                  case "upgradePerk":
+                    return (
+                      option.kind === "upgradePerk" &&
+                      candidate.perkId === option.perkId
+                    );
+                  default:
+                    return false;
+                }
               };
-              const hudWeapons = getUnlockedWeapons(weaponLevels);
 
-              return {
-                weaponLevels,
-                hudWeapons,
-                pendingLevelUpChoice: undefined,
-                ...(context.endAt > 0
+              if (!choice.options.some(isSameOption)) return {};
+
+              // Resolve the picked option into a weaponLevels/perkLevels
+              // (+ maxLives/lives for Max HP) delta. `option.toLevel`
+              // already accounts for any rolled bonus (2-3 levels at once).
+              let loadoutUpdate: Partial<Context> = {};
+
+              if (option.kind === "newWeapon") {
+                if (context.weaponLevels[option.weaponId] > 0) return {};
+
+                const weaponLevels = {
+                  ...context.weaponLevels,
+                  [option.weaponId]: option.toLevel,
+                };
+                loadoutUpdate = {
+                  weaponLevels,
+                  hudWeapons: getUnlockedWeapons(weaponLevels),
+                };
+              } else if (option.kind === "upgradeWeapon") {
+                if (context.weaponLevels[option.weaponId] === 0) return {};
+
+                loadoutUpdate = {
+                  weaponLevels: {
+                    ...context.weaponLevels,
+                    [option.weaponId]: option.toLevel,
+                  },
+                };
+              } else if (option.kind === "newPerk") {
+                if (context.perkLevels[option.perkId] > 0) return {};
+
+                const perkLevels = {
+                  ...context.perkLevels,
+                  [option.perkId]: option.toLevel,
+                };
+                // Max HP is a flat bonus, not a stat multiplier, so picking
+                // (or upgrading, below) it needs to bump maxLives/lives the
+                // same turn it's granted - otherwise the extra HP is only
+                // "real" the next time something else happens to trigger a
+                // maxLives recalculation (e.g. a wearable swap).
+                const maxHealthIncrease =
+                  option.perkId === "maxHealth"
+                    ? getPerkAmount(perkLevels, "maxHealth") -
+                      getPerkAmount(context.perkLevels, "maxHealth")
+                    : 0;
+
+                loadoutUpdate = {
+                  perkLevels,
+                  maxLives: context.maxLives + maxHealthIncrease,
+                  lives: context.lives + maxHealthIncrease,
+                };
+              } else {
+                // upgradePerk
+                if (context.perkLevels[option.perkId] === 0) return {};
+
+                const perkLevels = {
+                  ...context.perkLevels,
+                  [option.perkId]: option.toLevel,
+                };
+                const maxHealthIncrease =
+                  option.perkId === "maxHealth"
+                    ? getPerkAmount(perkLevels, "maxHealth") -
+                      getPerkAmount(context.perkLevels, "maxHealth")
+                    : 0;
+
+                loadoutUpdate = {
+                  perkLevels,
+                  maxLives: context.maxLives + maxHealthIncrease,
+                  lives: context.lives + maxHealthIncrease,
+                };
+              }
+
+              const nextChoice = resolveNextQueuedChoice({
+                queue: context.pendingChoiceQueue,
+                playerLevel: context.playerLevel,
+                weaponLevels:
+                  loadoutUpdate.weaponLevels ?? context.weaponLevels,
+                perkLevels: loadoutUpdate.perkLevels ?? context.perkLevels,
+              });
+
+              if (nextChoice.pendingLevelUpChoice) {
+                return {
+                  ...loadoutUpdate,
+                  ...nextChoice,
+                  isGameplayPaused: true,
+                  gameplayPausedAt:
+                    context.endAt > 0
+                      ? (context.gameplayPausedAt ?? Date.now())
+                      : undefined,
+                };
+              }
+
+              const resumeState: Partial<Context> =
+                context.endAt > 0
                   ? resumeGameplayClock(context)
                   : {
                       isGameplayPaused: false,
                       gameplayPausedAt: undefined,
                       endAt: Date.now() + GAME_SECONDS * 1000,
-                    }),
+                    };
+
+              return {
+                ...loadoutUpdate,
+                ...nextChoice,
+                pendingChoiceQueue: [],
+                ...resumeState,
               };
             },
           ),
         },
-        SELECT_LEVEL_UP_STAT: {
+        CHEST_OPENED: {
           actions: assign(
-            (
-              context: Context,
-              event: SelectLevelUpStatEvent,
-            ): Partial<Context> => {
-              const choice = context.pendingLevelUpChoice;
-              if (choice?.type !== "stat") return {};
-              if (!choice.options.includes(event.stat)) return {};
+            (context: Context, event: ChestOpenedEvent): Partial<Context> => {
+              // A chest still counts as an interruption like a normal
+              // level-up: pause the run, then walk through
+              // CHEST_LEVELS[rarity] choice screens (contents are always
+              // rolled at the fixed CHEST_BONUS_LEVEL_CHANCES odds -
+              // Luck never affects what's inside a chest).
+              const totalPicks = CHEST_LEVELS[event.rarity];
+              const queue = [
+                ...context.pendingChoiceQueue,
+                ...Array(totalPicks).fill("chest" as const),
+              ];
 
-              const level = context.playerStatLevels[event.stat];
-              const nextLevel = getNextPlayerStatLevel(level);
-              if (nextLevel === undefined) return {};
+              if (context.pendingLevelUpChoice) {
+                return { pendingChoiceQueue: queue };
+              }
 
-              const healthIncrease =
-                event.stat === "health"
-                  ? getPlayerStatValueIncrease("health", level)
-                  : 0;
+              const nextChoice = resolveNextQueuedChoice({
+                queue,
+                playerLevel: context.playerLevel,
+                weaponLevels: context.weaponLevels,
+                perkLevels: context.perkLevels,
+              });
 
-              return {
-                selectedStat: event.stat,
-                playerStatLevels: {
-                  ...context.playerStatLevels,
-                  [event.stat]: nextLevel,
-                },
-                maxLives: context.maxLives + healthIncrease,
-                lives: context.lives + healthIncrease,
-                pendingLevelUpChoice: undefined,
-                ...resumeGameplayClock(context),
-              };
+              if (!nextChoice.pendingLevelUpChoice) return nextChoice;
+
+              return { ...nextChoice, ...pauseGameplayClock(context) };
             },
           ),
+        },
+        HEAL: {
+          actions: assign({
+            lives: (context: Context, event: HealEvent) =>
+              Math.min(context.maxLives, context.lives + event.amount),
+          }),
         },
         GAIN_POINTS: {
           actions: assign({
@@ -814,10 +915,7 @@ export const portalMachine = createMachine<Context, PortalEvent, PortalState>({
             const { baseScore, bonusApplied, score } =
               getFinalRunScore(context);
             const progression = getInitialProgression();
-            const maxLives = getMaxLives(
-              progression.playerStatLevels,
-              context.activeWearables,
-            );
+            const maxLives = getMaxLives(progression.perkLevels);
 
             return {
               endAt: 0,

@@ -27,31 +27,71 @@ export type WeaponId =
 
 export type WeaponLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
-export type PlayerStatId = "health" | "speed" | "damage";
+// Passive perks. The former health/speed/damage
+// PlayerStatId track has been removed entirely; perks are the
+// in-run, slot-limited picks players collect through the level-up pool.
+export type PerkId =
+  | "moveSpeed"
+  | "attackSpeed"
+  | "criticalChance"
+  | "projectileSpeed"
+  | "xpGain"
+  | "luck"
+  | "pickupRadius"
+  | "cooldownReduction"
+  | "healing"
+  | "maxHealth";
 
-export type PlayerStatLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+export type PerkLevel = 0 | 1 | 2 | 3 | 4 | 5;
 
-export type PlayerStatLevels = Record<PlayerStatId, PlayerStatLevel>;
+export type PerkLevels = Record<PerkId, PerkLevel>;
 
-export type LevelUpChoice =
+export type PerkConfig = {
+  id: PerkId;
+  name: string;
+  description: string;
+  maxLevel: PerkLevel;
+  weight: number;
+  valuesPerLevel: number[];
+};
+
+export type LevelUpOption =
   | {
-      type: "weapon";
-      level: number;
-      options: WeaponId[];
+      kind: "newWeapon";
+      weaponId: WeaponId;
+      toLevel: WeaponLevel;
+      bonusLevels?: 2 | 3;
     }
   | {
-      type: "stat";
-      level: number;
-      options: PlayerStatId[];
+      kind: "upgradeWeapon";
+      weaponId: WeaponId;
+      toLevel: WeaponLevel;
+      bonusLevels?: 2 | 3;
+    }
+  | {
+      kind: "newPerk";
+      perkId: PerkId;
+      toLevel: PerkLevel;
+      bonusLevels?: 2 | 3;
+    }
+  | {
+      kind: "upgradePerk";
+      perkId: PerkId;
+      toLevel: PerkLevel;
+      bonusLevels?: 2 | 3;
     };
 
+export type LevelUpChoice = {
+  type: "levelUp";
+  level: number;
+  options: LevelUpOption[];
+  source: "levelUp" | "chest";
+};
+
+export type ChestRarity = "rare" | "epic" | "legendary";
+
 export type DamageType =
-  | "physical"
-  | "water"
-  | "explosion"
-  | "light"
-  | "dot"
-  | "summon";
+  "physical" | "water" | "explosion" | "light" | "dot" | "summon";
 
 export type TargetingMode =
   | "nearest"
@@ -122,11 +162,7 @@ export type WeaponUpgrade = {
 };
 
 export type ProjectileBehavior =
-  | "linear"
-  | "exploding"
-  | "bouncing"
-  | "light"
-  | "rolling";
+  "linear" | "exploding" | "bouncing" | "light" | "rolling";
 
 export type ProjectileConfig = {
   texture: string;
@@ -163,6 +199,7 @@ export type EnemyLike = Phaser.GameObjects.GameObject & {
   statusEffects?: Partial<Record<StatusEffectId, number>>;
   takeDamage?: (damage: number, payload: DamagePayload) => void;
   onDeath?: () => void;
+  onCriticalHit?: () => void;
   setMovementMultiplier?: (multiplier: number) => void;
 };
 
@@ -190,11 +227,7 @@ export type CombatConfig = {
 };
 
 export type DropItemType =
-  | "blueOrb"
-  | "greenOrb"
-  | "grayOrb"
-  | "yellowOrb"
-  | "purpleOrb";
+  "blueOrb" | "greenOrb" | "grayOrb" | "yellowOrb" | "purpleOrb";
 
 export type BossTypes = "boss1" | "boss2" | "boss3";
 export type MobTypes = "mob1" | "mob2" | "mob3" | "mob4" | "mob5";

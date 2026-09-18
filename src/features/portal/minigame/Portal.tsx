@@ -19,10 +19,8 @@ import { Phaser } from "./Phaser";
 import { BumpkinProfile } from "./components/hud/BumpkinProfile";
 import { StatCard } from "./components/hud/StatCard";
 import { PORTAL_NAME, WEAPON_ICONS, WEAPON_NAMES } from "./constants";
-import type { PlayerStatId } from "./Types";
-import { SUNNYSIDE } from "assets/sunnyside";
-import swordIcon from "public/world/portal/images/sword_icon.png";
-import speedIcon from "public/world/portal/images/lightning.png";
+import { PERK_ICONS, PERK_NAMES } from "./constants/PerkUIConstants";
+import type { LevelUpOption } from "./Types";
 
 const _sflBalance = (state: PortalMachineState) => state.context.state?.balance;
 const _isError = (state: PortalMachineState) => state.matches("error");
@@ -39,12 +37,6 @@ const _isComplete = (state: PortalMachineState) => state.matches("complete");
 const _isTraining = (state: PortalMachineState) => state.context.isTraining;
 const _pendingLevelUpChoice = (state: PortalMachineState) =>
   state.context.pendingLevelUpChoice;
-
-const STAT_ICONS: Record<PlayerStatId, { src: string; width?: number }> = {
-  health: { src: SUNNYSIDE.icons.heart },
-  speed: { src: speedIcon, width: 14 },
-  damage: { src: swordIcon },
-};
 
 /**
  * A Portal Example which demonstrates basic state management
@@ -211,39 +203,65 @@ export const Portal: React.FC = () => {
         dialogClassName="max-w-[620px]"
       >
         <div className="flex items-center justify-center gap-3 p-2">
-          {pendingLevelUpChoice?.type === "weapon"
-            ? pendingLevelUpChoice.options.map((weapon) => (
-                <StatCard
-                  key={weapon}
-                  title={t(WEAPON_NAMES[weapon])}
-                  label={{
-                    value: t(`${PORTAL_NAME}.weaponLevel`, { level: 1 }),
-                    type: "info",
-                  }}
-                  img={{ src: WEAPON_ICONS[weapon] }}
-                  className="min-h-[96px] w-[150px]"
-                  onClick={() =>
-                    portalService.send("SELECT_LEVEL_UP_WEAPON", { weapon })
-                  }
-                />
-              ))
-            : pendingLevelUpChoice?.options.map((stat) => (
-                <StatCard
-                  key={stat}
-                  title={t(
-                    `${PORTAL_NAME}.${stat === "health" ? "lives" : stat}`,
-                  )}
-                  label={{
-                    value: t(`${PORTAL_NAME}.weaponLevel`, { level: 1 }),
-                    type: "info",
-                  }}
-                  img={STAT_ICONS[stat]}
-                  className="min-h-[96px] w-[150px]"
-                  onClick={() =>
-                    portalService.send("SELECT_LEVEL_UP_STAT", { stat })
-                  }
-                />
-              ))}
+          {pendingLevelUpChoice?.options.map((option: LevelUpOption) => {
+            const card = (() => {
+              switch (option.kind) {
+                case "newWeapon":
+                  return {
+                    key: `newWeapon-${option.weaponId}`,
+                    title: t(WEAPON_NAMES[option.weaponId]),
+                    level: option.toLevel,
+                    icon: WEAPON_ICONS[option.weaponId],
+                  };
+                case "upgradeWeapon":
+                  return {
+                    key: `upgradeWeapon-${option.weaponId}`,
+                    title: t(WEAPON_NAMES[option.weaponId]),
+                    level: option.toLevel,
+                    icon: WEAPON_ICONS[option.weaponId],
+                  };
+                case "newPerk":
+                  return {
+                    key: `newPerk-${option.perkId}`,
+                    title: t(PERK_NAMES[option.perkId]),
+                    level: option.toLevel,
+                    icon: PERK_ICONS[option.perkId],
+                  };
+                case "upgradePerk":
+                  return {
+                    key: `upgradePerk-${option.perkId}`,
+                    title: t(PERK_NAMES[option.perkId]),
+                    level: option.toLevel,
+                    icon: PERK_ICONS[option.perkId],
+                  };
+              }
+            })();
+
+            const labelType =
+              option.bonusLevels === 2
+                ? "vibrant"
+                : option.bonusLevels === 3
+                  ? "warning"
+                  : "info";
+
+            return (
+              <StatCard
+                key={card.key}
+                title={card.title}
+                label={{
+                  value: t(`${PORTAL_NAME}.weaponLevel`, {
+                    level: card.level,
+                  }),
+                  type: labelType,
+                }}
+                img={{ src: card.icon }}
+                className="min-h-[96px] w-[150px]"
+                onClick={() =>
+                  portalService.send("SELECT_LEVEL_UP_OPTION", { option })
+                }
+              />
+            );
+          })}
         </div>
       </Modal>
 

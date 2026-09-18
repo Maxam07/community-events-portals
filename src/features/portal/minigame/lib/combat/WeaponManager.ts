@@ -1,4 +1,5 @@
 import type Phaser from "phaser";
+import type { Scene } from "../../Scene";
 import {
   COMBAT_CONFIG,
   resolveWeaponStats,
@@ -130,7 +131,10 @@ export class WeaponManager {
       runChildUpdate: false,
     });
 
-    this.damageSystem = new DamageSystem(props.portalService);
+    this.damageSystem = new DamageSystem(
+      props.portalService,
+      props.scene as Scene,
+    );
     this.damageSystem.setStatusEffectSystem(this.statusEffectSystem);
     this.statusEffectSystem.setDamageApplier(
       this.damageSystem.applyDamage.bind(this.damageSystem),
@@ -180,6 +184,7 @@ export class WeaponManager {
         id,
         level,
         this.props.portalService?.state.context.activeWearables,
+        this.props.portalService?.state.context.perkLevels,
       ),
     });
   }
