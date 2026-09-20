@@ -1,4 +1,4 @@
-import mapJson from "assets/map/emptyMap.json";
+import mapJson from "assets/map/emptyMap4.json";
 // import tilesetconfig from "assets/map/tileset.json";
 import type { SceneId } from "features/world/mmoMachine";
 import { BaseScene } from "./Core/BaseScene";
@@ -327,6 +327,12 @@ export class Scene extends BaseScene {
     // this.load.image("weapon_oil", "/world/portal/images/weapons/oil.png");
     // this.load.image("weapon_bee", "/world/portal/images/weapons/bee.png");
 
+    // Biomes
+    this.load.image("galaxy_biome", SUNNYSIDE.seasons.winter.galaxyLevel42);
+    this.load.image("crystal_biome", SUNNYSIDE.seasons.winter.crystalLevel42);
+    this.load.image("spooky_biome", SUNNYSIDE.seasons.winter.spookyLevel42);
+    this.load.image("marble_biome", SUNNYSIDE.seasons.spring.marbleLevel42);
+
     // Music
     // Background
     this.load.audio("backgroundMusic", "/world/portal/music/bg_music.mp3");
@@ -401,6 +407,12 @@ export class Scene extends BaseScene {
         }
       }
     }
+
+    const centerX = 20.5 * SQUARE_WIDTH;
+    this.add.image(centerX, 131 * SQUARE_WIDTH, "galaxy_biome").setDepth(4);
+    this.add.image(centerX, 94 * SQUARE_WIDTH, "crystal_biome").setDepth(3);
+    this.add.image(centerX, 57 * SQUARE_WIDTH, "spooky_biome").setDepth(2);
+    this.add.image(centerX, 20 * SQUARE_WIDTH, "marble_biome").setDepth(1);
 
     // Background music
     this.backgroundMusic = this.sound.add("backgroundMusic", {
