@@ -38,6 +38,7 @@ export class Chest extends Phaser.GameObjects.Sprite {
     this.rarity = rarity;
 
     scene.add.existing(this);
+    this.setDepth(100000);
     this.playIdleAnimation();
   }
 
