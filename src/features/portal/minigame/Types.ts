@@ -91,12 +91,7 @@ export type LevelUpChoice = {
 export type ChestRarity = "rare" | "epic" | "legendary";
 
 export type DamageType =
-  | "physical"
-  | "water"
-  | "explosion"
-  | "light"
-  | "dot"
-  | "summon";
+  "physical" | "water" | "explosion" | "light" | "dot" | "summon";
 
 export type TargetingMode =
   | "nearest"
@@ -167,11 +162,7 @@ export type WeaponUpgrade = {
 };
 
 export type ProjectileBehavior =
-  | "linear"
-  | "exploding"
-  | "bouncing"
-  | "light"
-  | "rolling";
+  "linear" | "exploding" | "bouncing" | "light" | "rolling";
 
 export type ProjectileConfig = {
   texture: string;
@@ -236,11 +227,7 @@ export type CombatConfig = {
 };
 
 export type DropItemType =
-  | "blueOrb"
-  | "greenOrb"
-  | "grayOrb"
-  | "yellowOrb"
-  | "purpleOrb";
+  "blueOrb" | "greenOrb" | "grayOrb" | "yellowOrb" | "purpleOrb";
 
 export type MiniBossWeaponType = "chasing" | "orbiting" | "summoning";
 export type MiniBossType = "miniBoss1" | "miniBoss2" | "miniBoss3";
@@ -249,16 +236,10 @@ export type PhasingEnemyTypes = "mob1" | "mob2" | "mob3" | "mob4" | "mob5";
 export type CodexCategoryName = "Skills" | "Enemies" | "DropItems";
 export type PassiveAbilityType = "wings";
 export type EnemyType =
-  | PhasingEnemyTypes
-  | MeleeEnemyTypes
-  | BossTypes
-  | MiniBossType;
+  PhasingEnemyTypes | MeleeEnemyTypes | BossTypes | MiniBossType;
 export type WeaponEnemyType = BossTypes | MiniBossType;
 export type EnemyFormation =
-  | "vertical line"
-  | "horizontal line"
-  | "circle"
-  | "surround";
+  "vertical line" | "horizontal line" | "circle" | "surround";
 export type PhasingEnemyType =
   // Area 1
   | "bat"

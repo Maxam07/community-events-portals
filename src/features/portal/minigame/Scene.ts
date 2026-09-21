@@ -1144,10 +1144,7 @@ export class Scene extends BaseScene {
         this.enemyGroup,
         (_player, enemyObj) => {
           const enemy = enemyObj as
-            | PhasingEnemy
-            | MeleeEnemy
-            | BossEnemy
-            | MiniBoss;
+            PhasingEnemy | MeleeEnemy | BossEnemy | MiniBoss;
           enemy.handlePlayerContact();
         },
       );
@@ -1732,6 +1729,15 @@ export class Scene extends BaseScene {
       y: miniBoss.y,
       itemKey: miniBoss.config.dropItem,
     });
+
+    new Chest({
+      x: miniBoss.x,
+      y: miniBoss.y,
+      scene: this,
+      player: this.currentPlayer,
+      rarity: "epic",
+    });
+
     this.unregisterMiniBossEnemy(miniBoss);
     miniBoss.destroy();
   }
@@ -1764,7 +1770,7 @@ export class Scene extends BaseScene {
       y: boss.y,
       scene: this,
       player: this.currentPlayer,
-      rarity: "epic",
+      rarity: "legendary",
     });
 
     this.unregisterBossEnemy(boss);
