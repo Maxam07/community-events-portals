@@ -1,11 +1,12 @@
 import type { Scene } from "../Scene";
 import type { BumpkinContainer } from "../Core/BumpkinContainer";
 import type { MachineInterpreter } from "../lib/Machine";
-import type { DamagePayload, MobTypes } from "../Types";
+import type { DamagePayload, PhasingEnemyTypes } from "../Types";
 import type { EnemyConfig } from "../Types";
-import { MOB_CONFIGS } from "../constants/EnemyConstants";
+import { PHASING_CONFIGS } from "../constants/EnemyConstants";
 import { WEAPON_SFX, WEAPON_SFX_VOL } from "../constants";
 import { WeaponSfxLimiter } from "../lib/combat/WeaponSfxLimiter";
+import { SQUARE_WIDTH } from "features/game/lib/constants";
 
 const MOVEMENT_UPDATE_INTERVAL_MS = 100;
 const FRAME_DURATION_MS = 1000 / 60;
@@ -19,10 +20,10 @@ interface Props {
   y: number;
   scene: Scene;
   player?: BumpkinContainer;
-  mobType: MobTypes;
+  mobType: PhasingEnemyTypes;
 }
 
-export class SwarmMob extends Phaser.GameObjects.Container {
+export class PhasingEnemy extends Phaser.GameObjects.Container {
   scene: Scene;
   private player?: BumpkinContainer;
   private sprite!: Phaser.GameObjects.Sprite;
@@ -37,7 +38,7 @@ export class SwarmMob extends Phaser.GameObjects.Container {
   private isCritFlashing = false;
   private critFlashRemainingMs = 0;
   public deSpawnState = false;
-  private mobType: MobTypes;
+  private mobType: PhasingEnemyTypes;
 
   private avoidX = 0;
   private avoidY = 0;
@@ -47,6 +48,7 @@ export class SwarmMob extends Phaser.GameObjects.Container {
     0,
     MOVEMENT_UPDATE_INTERVAL_MS,
   );
+  private readonly OBSTACLE_AVOID_RANGE = SQUARE_WIDTH * 2;
 
   constructor({ scene, x, y, player, mobType }: Props) {
     super(scene, x, y);
@@ -55,7 +57,7 @@ export class SwarmMob extends Phaser.GameObjects.Container {
 
     scene.physics.add.existing(this);
     this.mobType = mobType;
-    this.config = MOB_CONFIGS[mobType];
+    this.config = PHASING_CONFIGS[mobType];
 
     this.hp = this.config.hp;
     this.maxHp = this.config.maxHp;
@@ -65,7 +67,8 @@ export class SwarmMob extends Phaser.GameObjects.Container {
 
   public get portalService() {
     return this.scene.registry.get("portalService") as
-      MachineInterpreter | undefined;
+      | MachineInterpreter
+      | undefined;
   }
 
   createEnemy() {
@@ -144,13 +147,18 @@ export class SwarmMob extends Phaser.GameObjects.Container {
     if (this.avoidTimer > 0) {
       moveX += this.avoidX * 2;
       moveY += this.avoidY * 2;
+    }
 
-      const moveDistanceSq = moveX * moveX + moveY * moveY;
-      if (moveDistanceSq > 0) {
-        const inverseMoveDistance = 1 / Math.sqrt(moveDistanceSq);
-        moveX *= inverseMoveDistance;
-        moveY *= inverseMoveDistance;
-      }
+    const moveDistanceSq = moveX * moveX + moveY * moveY;
+    const MIN_MOVE_THRESHOLD_SQ = 0.2;
+
+    if (moveDistanceSq > MIN_MOVE_THRESHOLD_SQ) {
+      const inverseMoveDistance = 1 / Math.sqrt(moveDistanceSq);
+      moveX *= inverseMoveDistance;
+      moveY *= inverseMoveDistance;
+    } else {
+      moveX = -dy * inverseDistance;
+      moveY = dx * inverseDistance;
     }
 
     const velocityX = moveX * this.config.speed;
@@ -165,40 +173,9 @@ export class SwarmMob extends Phaser.GameObjects.Container {
     }
   }
 
-  setSwarmMove(value: boolean) {
+  setPhasingMove(value: boolean) {
     this.swarmMove = value;
     if (!value) this.enemyBody.setVelocity(0, 0);
-  }
-
-  separateFrom(enemy: SwarmMob) {
-    const dx = this.x - enemy.x;
-    const dy = this.y - enemy.y;
-
-    const distance = Math.sqrt(dx * dx + dy * dy) || 1;
-
-    this.avoidX = dx / distance;
-    this.avoidY = dy / distance;
-
-    this.avoidTimer = 20 * FRAME_DURATION_MS;
-  }
-
-  changeDirection() {
-    if (!this.player) return;
-
-    const dx = this.player.x - this.x;
-    const dy = this.player.y - this.y;
-
-    const distance = Math.sqrt(dx * dx + dy * dy) || 1;
-
-    const dirX = dx / distance;
-    const dirY = dy / distance;
-
-    const side = Math.random() < 0.5 ? -2 : 2;
-
-    this.avoidX = -dirY * side;
-    this.avoidY = dirX * side;
-
-    this.avoidTimer = 30 * FRAME_DURATION_MS;
   }
 
   public handlePlayerContact() {
@@ -260,7 +237,7 @@ export class SwarmMob extends Phaser.GameObjects.Container {
     this.isDead = this.hp <= 0;
 
     if (this.isDead) {
-      this.setSwarmMove(false);
+      this.setPhasingMove(false);
     }
   }
 
@@ -268,6 +245,6 @@ export class SwarmMob extends Phaser.GameObjects.Container {
     if (this.deathHandled) return;
 
     this.deathHandled = true;
-    this.scene.handleSwarmMobDefeat(this);
+    this.scene.handlePhasingMobDefeat(this);
   }
 }

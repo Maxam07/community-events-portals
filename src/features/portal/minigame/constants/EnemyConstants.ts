@@ -1,14 +1,16 @@
+import { SQUARE_WIDTH } from "features/game/lib/constants";
 import type {
   BossTypes,
-  BossWaveConfig,
   DropItemType,
   EnemyConfig,
-  MobTypes,
-  MobWaveConfig,
+  MeleeEnemyTypes,
+  MiniBossType,
+  PhasingEnemyTypes,
 } from "../Types";
 
 export const BOSS_DEPTH = 100;
 export const ORB_DEPTH = 70;
+export const OBSTACLE_SPAWN_BUFFER = SQUARE_WIDTH * 1.5;
 
 // XP values for each drop item type
 export const DROP_ITEM_XP_VALUES: Record<DropItemType, number> = {
@@ -19,156 +21,6 @@ export const DROP_ITEM_XP_VALUES: Record<DropItemType, number> = {
   purpleOrb: 125,
 };
 
-export const BOSS_WAVE_THRESHOLDS: BossWaveConfig[] = [
-  { triggerAt: 30, bossType: "boss1", totalEnemy: 1, flag: "bossWave1" },
-  { triggerAt: 60, bossType: "boss2", totalEnemy: 1, flag: "bossWave2" },
-  { triggerAt: 90, bossType: "boss3", totalEnemy: 1, flag: "bossWave3" },
-  { triggerAt: 120, bossType: "boss1", totalEnemy: 2, flag: "bossWave4" },
-  { triggerAt: 150, bossType: "boss2", totalEnemy: 2, flag: "bossWave5" },
-  { triggerAt: 180, bossType: "boss3", totalEnemy: 2, flag: "bossWave6" },
-
-  { triggerAt: 210, bossType: "boss1", totalEnemy: 1, flag: "bossWave7_a" },
-  { triggerAt: 210, bossType: "boss2", totalEnemy: 1, flag: "bossWave7_b" },
-
-  { triggerAt: 240, bossType: "boss2", totalEnemy: 2, flag: "bossWave8_a" },
-  { triggerAt: 240, bossType: "boss3", totalEnemy: 1, flag: "bossWave8_b" },
-
-  { triggerAt: 270, bossType: "boss1", totalEnemy: 2, flag: "bossWave9_a" },
-  { triggerAt: 270, bossType: "boss3", totalEnemy: 2, flag: "bossWave9_b" },
-
-  { triggerAt: 275, bossType: "boss2", totalEnemy: 4, flag: "bossWave10_a" },
-  { triggerAt: 275, bossType: "boss3", totalEnemy: 4, flag: "bossWave10_b" },
-
-  { triggerAt: 280, bossType: "boss1", totalEnemy: 10, flag: "bossWave11_a" },
-  { triggerAt: 280, bossType: "boss2", totalEnemy: 5, flag: "bossWave11_b" },
-  { triggerAt: 280, bossType: "boss3", totalEnemy: 3, flag: "bossWave11_c" },
-
-  { triggerAt: 285, bossType: "boss1", totalEnemy: 10, flag: "bossWave12_a" },
-  { triggerAt: 285, bossType: "boss2", totalEnemy: 7, flag: "bossWave12_b" },
-  { triggerAt: 285, bossType: "boss3", totalEnemy: 3, flag: "bossWave12_c" },
-
-  { triggerAt: 290, bossType: "boss1", totalEnemy: 10, flag: "bossWave13_a" },
-  { triggerAt: 290, bossType: "boss2", totalEnemy: 10, flag: "bossWave13_b" },
-  { triggerAt: 290, bossType: "boss3", totalEnemy: 10, flag: "bossWave13_c" },
-];
-
-export const MOB_WAVE_THRESHOLDS: MobWaveConfig[] = [
-  {
-    triggerAt: 0,
-    mobType: "mob1",
-    totalEnemy: 40,
-    batchSize: 2,
-    delay: 2000,
-    flag: "wave1",
-  },
-  {
-    triggerAt: 30,
-    mobType: "mob2",
-    totalEnemy: 60,
-    batchSize: 3,
-    delay: 1800,
-    flag: "wave2",
-  },
-  {
-    triggerAt: 60,
-    mobType: "mob1",
-    totalEnemy: 70,
-    batchSize: 3,
-    delay: 1400,
-    flag: "wave3",
-  },
-  {
-    triggerAt: 90,
-    mobType: "mob3",
-    totalEnemy: 85,
-    batchSize: 4,
-    delay: 1200,
-    flag: "wave4",
-  },
-  {
-    triggerAt: 120,
-    mobType: "mob2",
-    totalEnemy: 110,
-    batchSize: 4,
-    delay: 1000,
-    flag: "wave5",
-  },
-  {
-    triggerAt: 150,
-    mobType: "mob4",
-    totalEnemy: 110,
-    batchSize: 4,
-    delay: 900,
-    flag: "wave6",
-  },
-  {
-    triggerAt: 180,
-    mobType: "mob3",
-    totalEnemy: 180,
-    batchSize: 5,
-    delay: 800,
-    flag: "wave7",
-  },
-  {
-    triggerAt: 210,
-    mobType: "mob4",
-    totalEnemy: 150,
-    batchSize: 6,
-    delay: 800,
-    flag: "wave8",
-  },
-  {
-    triggerAt: 240,
-    mobType: "mob5",
-    totalEnemy: 180,
-    batchSize: 7,
-    delay: 700,
-    flag: "wave9",
-  },
-  // Endless
-  {
-    triggerAt: 290,
-    mobType: "mob1",
-    totalEnemy: 100,
-    batchSize: 3,
-    delay: 2500,
-    flag: "endless",
-  },
-  {
-    triggerAt: 290,
-    mobType: "mob2",
-    totalEnemy: 120,
-    batchSize: 3,
-    delay: 2200,
-    flag: "endless",
-  },
-  {
-    triggerAt: 290,
-    mobType: "mob3",
-    totalEnemy: 150,
-    batchSize: 4,
-    delay: 1290,
-    flag: "endless",
-  },
-  {
-    triggerAt: 290,
-    mobType: "mob4",
-    totalEnemy: 180,
-    batchSize: 4,
-    delay: 1400,
-    flag: "endless",
-  },
-  {
-    triggerAt: 290,
-    mobType: "mob5",
-    totalEnemy: 250,
-    batchSize: 5,
-    delay: 1000,
-    flag: "endless",
-  },
-];
-
-// Balance enemy stats
 export const ENEMY_BALANCE_STATS = {
   mob1: { HP: 4, SPEED: 20, DAMAGE: 1 },
   mob2: { HP: 8, SPEED: 25, DAMAGE: 3 },
@@ -176,13 +28,71 @@ export const ENEMY_BALANCE_STATS = {
   mob4: { HP: 30, SPEED: 20, DAMAGE: 7 },
   mob5: { HP: 50, SPEED: 35, DAMAGE: 10 },
 
+  carnivore_plant: {
+    HP: 8,
+    SPEED: 15,
+    DAMAGE: 2,
+  },
+  rat: {
+    HP: 3,
+    SPEED: 35,
+    DAMAGE: 1,
+  },
+  zombie: {
+    HP: 10,
+    SPEED: 18,
+    DAMAGE: 3,
+  },
+  // Area 2
+  imp: {
+    HP: 12,
+    SPEED: 25,
+    DAMAGE: 3,
+  },
+  slime: {
+    HP: 15,
+    SPEED: 14,
+    DAMAGE: 4,
+  },
+  // Area 3
+  vampire: {
+    HP: 18,
+    SPEED: 32,
+    DAMAGE: 5,
+  },
+  frankenstein: {
+    HP: 35,
+    SPEED: 12,
+    DAMAGE: 8,
+  },
+  werewolf: {
+    HP: 25,
+    SPEED: 38,
+    DAMAGE: 6,
+  },
+  // Area 4
+  hellHound: {
+    HP: 6,
+    SPEED: 15,
+    DAMAGE: 8,
+  },
+  demon: {
+    HP: 45,
+    SPEED: 25,
+    DAMAGE: 10,
+  },
+
+  miniBoss1: { HP: 300, SPEED: 20, DAMAGE: 10 },
+  miniBoss2: { HP: 300, SPEED: 25, DAMAGE: 10 },
+  miniBoss3: { HP: 100, SPEED: 25, DAMAGE: 10 },
+
   boss1: { HP: 150, SPEED: 25, DAMAGE: 10 },
   boss2: { HP: 350, SPEED: 30, DAMAGE: 12 },
   boss3: { HP: 600, SPEED: 30, DAMAGE: 15 },
 } as const;
 
-// Mob configurations
-export const MOB_CONFIGS: Record<MobTypes, EnemyConfig> = {
+// Phasing configurations
+export const PHASING_CONFIGS: Record<PhasingEnemyTypes, EnemyConfig> = {
   mob1: {
     key: "Mob1",
     scale: 0.8,
@@ -265,6 +175,171 @@ export const MOB_CONFIGS: Record<MobTypes, EnemyConfig> = {
   },
 };
 
+// Melee configurations
+export const MELEE_CONFIGS: Record<MeleeEnemyTypes, EnemyConfig> = {
+  carnivore_plant: {
+    key: "hell_hound",
+    scale: 1,
+    bodyWidth: 16,
+    bodyHeight: 16,
+    offsetX: 0,
+    offsetY: 0,
+    frameStart: 0,
+    frameEnd: 5,
+    frameRate: 10,
+    depth: 1,
+    speed: 20,
+    hp: 4,
+    maxHp: 4,
+    dropItem: "blueOrb",
+  },
+  rat: {
+    key: "hell_hound",
+    scale: 1,
+    bodyWidth: 16,
+    bodyHeight: 16,
+    offsetX: 0,
+    offsetY: 0,
+    frameStart: 0,
+    frameEnd: 5,
+    frameRate: 10,
+    depth: 1,
+    speed: 20,
+    hp: 4,
+    maxHp: 4,
+    dropItem: "blueOrb",
+  },
+  zombie: {
+    key: "hell_hound",
+    scale: 1,
+    bodyWidth: 16,
+    bodyHeight: 16,
+    offsetX: 0,
+    offsetY: 0,
+    frameStart: 0,
+    frameEnd: 5,
+    frameRate: 10,
+    depth: 1,
+    speed: 20,
+    hp: 4,
+    maxHp: 4,
+    dropItem: "blueOrb",
+  },
+  imp: {
+    key: "hell_hound",
+    scale: 1,
+    bodyWidth: 16,
+    bodyHeight: 16,
+    offsetX: 0,
+    offsetY: 0,
+    frameStart: 0,
+    frameEnd: 5,
+    frameRate: 10,
+    depth: 1,
+    speed: 20,
+    hp: 4,
+    maxHp: 4,
+    dropItem: "blueOrb",
+  },
+  slime: {
+    key: "hell_hound",
+    scale: 1,
+    bodyWidth: 16,
+    bodyHeight: 16,
+    offsetX: 0,
+    offsetY: 0,
+    frameStart: 0,
+    frameEnd: 5,
+    frameRate: 10,
+    depth: 1,
+    speed: 20,
+    hp: 4,
+    maxHp: 4,
+    dropItem: "blueOrb",
+  },
+  vampire: {
+    key: "hell_hound",
+    scale: 1,
+    bodyWidth: 16,
+    bodyHeight: 16,
+    offsetX: 0,
+    offsetY: 0,
+    frameStart: 0,
+    frameEnd: 5,
+    frameRate: 10,
+    depth: 1,
+    speed: 20,
+    hp: 4,
+    maxHp: 4,
+    dropItem: "blueOrb",
+  },
+  frankenstein: {
+    key: "hell_hound",
+    scale: 1,
+    bodyWidth: 16,
+    bodyHeight: 16,
+    offsetX: 0,
+    offsetY: 0,
+    frameStart: 0,
+    frameEnd: 5,
+    frameRate: 10,
+    depth: 1,
+    speed: 20,
+    hp: 4,
+    maxHp: 4,
+    dropItem: "blueOrb",
+  },
+  werewolf: {
+    key: "hell_hound",
+    scale: 1,
+    bodyWidth: 16,
+    bodyHeight: 16,
+    offsetX: 0,
+    offsetY: 0,
+    frameStart: 0,
+    frameEnd: 5,
+    frameRate: 10,
+    depth: 1,
+    speed: 20,
+    hp: 4,
+    maxHp: 4,
+    dropItem: "blueOrb",
+  },
+  hellHound: {
+    key: "hellHound_walk",
+    attackKey: "hellHound",
+    scale: 0.6,
+    bodyWidth: 38,
+    bodyHeight: 32,
+    offsetX: -19,
+    offsetY: -16,
+    frameStart: 0,
+    frameEnd: 4,
+    frameRate: 10,
+    depth: 70,
+    speed: ENEMY_BALANCE_STATS.hellHound.SPEED,
+    hp: ENEMY_BALANCE_STATS.hellHound.HP,
+    maxHp: ENEMY_BALANCE_STATS.hellHound.HP,
+    dropItem: "blueOrb",
+  },
+  demon: {
+    key: "hell_hound",
+    scale: 1,
+    bodyWidth: 16,
+    bodyHeight: 16,
+    offsetX: 0,
+    offsetY: 0,
+    frameStart: 0,
+    frameEnd: 5,
+    frameRate: 10,
+    depth: 1,
+    speed: 20,
+    hp: 4,
+    maxHp: 4,
+    dropItem: "blueOrb",
+  },
+};
+
 // Boss enemy configurations
 export const BOSS_CONFIGS: Record<BossTypes, EnemyConfig> = {
   boss1: {
@@ -314,5 +389,59 @@ export const BOSS_CONFIGS: Record<BossTypes, EnemyConfig> = {
     hp: ENEMY_BALANCE_STATS.boss3.HP,
     maxHp: ENEMY_BALANCE_STATS.boss3.HP,
     dropItem: "purpleOrb",
+  },
+};
+
+export const MINIBOSS_CONFIGS: Record<MiniBossType, EnemyConfig> = {
+  miniBoss1: {
+    key: "MiniBoss1",
+    attackKey: "MiniBoss1_Attack",
+    scale: 0.5,
+    bodyWidth: 64,
+    bodyHeight: 64,
+    offsetX: -32,
+    offsetY: -32,
+    frameStart: 0,
+    frameEnd: 8,
+    frameRate: 10,
+    depth: 80,
+    speed: ENEMY_BALANCE_STATS.miniBoss1.SPEED,
+    hp: ENEMY_BALANCE_STATS.miniBoss1.HP,
+    maxHp: ENEMY_BALANCE_STATS.miniBoss1.HP,
+    dropItem: "blueOrb",
+  },
+  miniBoss2: {
+    key: "MiniBoss2",
+    attackKey: "MiniBoss2_Attack",
+    scale: 0.5,
+    bodyWidth: 64,
+    bodyHeight: 64,
+    offsetX: -32,
+    offsetY: -32,
+    frameStart: 0,
+    frameEnd: 8,
+    frameRate: 10,
+    depth: 85,
+    speed: ENEMY_BALANCE_STATS.miniBoss2.SPEED,
+    hp: ENEMY_BALANCE_STATS.miniBoss2.HP,
+    maxHp: ENEMY_BALANCE_STATS.miniBoss2.HP,
+    dropItem: "blueOrb",
+  },
+  miniBoss3: {
+    key: "MiniBoss2",
+    attackKey: "MiniBoss1_Attack",
+    scale: 0.5,
+    bodyWidth: 64,
+    bodyHeight: 64,
+    offsetX: -32,
+    offsetY: -32,
+    frameStart: 0,
+    frameEnd: 8,
+    frameRate: 10,
+    depth: 85,
+    speed: ENEMY_BALANCE_STATS.miniBoss2.SPEED,
+    hp: ENEMY_BALANCE_STATS.miniBoss2.HP,
+    maxHp: ENEMY_BALANCE_STATS.miniBoss2.HP,
+    dropItem: "blueOrb",
   },
 };

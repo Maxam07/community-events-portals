@@ -5,7 +5,7 @@ import type {
 } from "features/game/types/bumpkin";
 import { translate as t } from "lib/i18n/translate";
 import {
-  MOB_CONFIGS,
+  // MOB_CONFIGS,
   BOSS_CONFIGS,
   DROP_ITEM_XP_VALUES,
   ENEMY_BALANCE_STATS,
@@ -29,11 +29,6 @@ import grayOrb from "public/world/portal/images/dropItem3.webp";
 import yellowOrb from "public/world/portal/images/dropItem4.webp";
 import purpleOrb from "public/world/portal/images/dropItem5.webp";
 
-import icon_mob1 from "public/world/portal/images/icon_mob_1.webp";
-import icon_mob2 from "public/world/portal/images/icon_mob_2.webp";
-import icon_mob3 from "public/world/portal/images/icon_mob_3.webp";
-import icon_mob4 from "public/world/portal/images/icon_mob_4.webp";
-import icon_mob5 from "public/world/portal/images/icon_mob_5.webp";
 import icon_boss1 from "public/world/portal/images/icon_boss_1.webp";
 import icon_boss2 from "public/world/portal/images/icon_boss_2.webp";
 import icon_boss3 from "public/world/portal/images/icon_boss_3.webp";
@@ -42,7 +37,7 @@ import swordIcon from "public/world/portal/images/sword_icon.png";
 import speedIcon from "public/world/portal/images/lightning.png";
 import type {
   BossTypes,
-  MobTypes,
+  // MobTypes,
   WeaponId,
   PassiveAbilityType,
 } from "../Types";
@@ -163,7 +158,7 @@ export const RESOURCES_TABLE: {
   // },
 ];
 
-const mob_config = MOB_CONFIGS;
+// const mob_config = MOB_CONFIGS;
 const boss_config = BOSS_CONFIGS;
 const skill_config = WEAPON_CONFIGS;
 
@@ -175,13 +170,13 @@ export const DROP_ITEM_ASSETS: Record<string, string> = {
   purpleOrb,
 };
 
-const MOB_NAMES: Record<MobTypes, string> = {
-  mob1: "Potted Slime",
-  mob2: "Flappy",
-  mob3: "Slime",
-  mob4: "Blobert",
-  mob5: "Balloon slime",
-};
+// const MOB_NAMES: Record<MobTypes, string> = {
+//   mob1: "Potted Slime",
+//   mob2: "Flappy",
+//   mob3: "Slime",
+//   mob4: "Blobert",
+//   mob5: "Balloon slime",
+// };
 
 const BOSS_NAMES: Record<BossTypes, string> = {
   boss1: "Daisy",
@@ -217,41 +212,41 @@ export const ENEMIES_TABLE: {
     damage: ENEMY_BALANCE_STATS.boss3.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[boss_config.boss3.dropItem],
   },
-  {
-    image: icon_mob1,
-    type: MOB_NAMES.mob1,
-    hp: mob_config.mob1.hp,
-    damage: ENEMY_BALANCE_STATS.mob1.DAMAGE,
-    itemIcon: DROP_ITEM_ASSETS[mob_config.mob1.dropItem],
-  },
-  {
-    image: icon_mob2,
-    type: MOB_NAMES.mob2,
-    hp: mob_config.mob2.hp,
-    damage: ENEMY_BALANCE_STATS.mob2.DAMAGE,
-    itemIcon: DROP_ITEM_ASSETS[mob_config.mob2.dropItem],
-  },
-  {
-    image: icon_mob3,
-    type: MOB_NAMES.mob3,
-    hp: mob_config.mob3.hp,
-    damage: ENEMY_BALANCE_STATS.mob3.DAMAGE,
-    itemIcon: DROP_ITEM_ASSETS[mob_config.mob3.dropItem],
-  },
-  {
-    image: icon_mob4,
-    type: MOB_NAMES.mob4,
-    hp: mob_config.mob4.hp,
-    damage: ENEMY_BALANCE_STATS.mob4.DAMAGE,
-    itemIcon: DROP_ITEM_ASSETS[mob_config.mob4.dropItem],
-  },
-  {
-    image: icon_mob5,
-    type: MOB_NAMES.mob5,
-    hp: mob_config.mob5.hp,
-    damage: ENEMY_BALANCE_STATS.mob5.DAMAGE,
-    itemIcon: DROP_ITEM_ASSETS[mob_config.mob5.dropItem],
-  },
+  // {
+  //   image: icon_mob1,
+  //   type: MOB_NAMES.mob1,
+  //   hp: mob_config.mob1.hp,
+  //   damage: ENEMY_BALANCE_STATS.mob1.DAMAGE,
+  //   itemIcon: DROP_ITEM_ASSETS[mob_config.mob1.dropItem],
+  // },
+  // {
+  //   image: icon_mob2,
+  //   type: MOB_NAMES.mob2,
+  //   hp: mob_config.mob2.hp,
+  //   damage: ENEMY_BALANCE_STATS.mob2.DAMAGE,
+  //   itemIcon: DROP_ITEM_ASSETS[mob_config.mob2.dropItem],
+  // },
+  // {
+  //   image: icon_mob3,
+  //   type: MOB_NAMES.mob3,
+  //   hp: mob_config.mob3.hp,
+  //   damage: ENEMY_BALANCE_STATS.mob3.DAMAGE,
+  //   itemIcon: DROP_ITEM_ASSETS[mob_config.mob3.dropItem],
+  // },
+  // {
+  //   image: icon_mob4,
+  //   type: MOB_NAMES.mob4,
+  //   hp: mob_config.mob4.hp,
+  //   damage: ENEMY_BALANCE_STATS.mob4.DAMAGE,
+  //   itemIcon: DROP_ITEM_ASSETS[mob_config.mob4.dropItem],
+  // },
+  // {
+  //   image: icon_mob5,
+  //   type: MOB_NAMES.mob5,
+  //   hp: mob_config.mob5.hp,
+  //   damage: ENEMY_BALANCE_STATS.mob5.DAMAGE,
+  //   itemIcon: DROP_ITEM_ASSETS[mob_config.mob5.dropItem],
+  // },
 ];
 
 function getWeaponMaxDamage(weaponId: WeaponId) {
