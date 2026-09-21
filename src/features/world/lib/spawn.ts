@@ -24,8 +24,8 @@ export const SPAWNS: () => SpawnLocation = () => ({
   },
   "colors-2026": {
     default: {
-      x: 30 * SQUARE_WIDTH,
-      y: 30 * SQUARE_WIDTH,
+      x: 20.5 * SQUARE_WIDTH,
+      y: 120 * SQUARE_WIDTH,
     },
   },
   love_island: {

@@ -91,7 +91,12 @@ export type LevelUpChoice = {
 export type ChestRarity = "rare" | "epic" | "legendary";
 
 export type DamageType =
-  "physical" | "water" | "explosion" | "light" | "dot" | "summon";
+  | "physical"
+  | "water"
+  | "explosion"
+  | "light"
+  | "dot"
+  | "summon";
 
 export type TargetingMode =
   | "nearest"
@@ -162,7 +167,11 @@ export type WeaponUpgrade = {
 };
 
 export type ProjectileBehavior =
-  "linear" | "exploding" | "bouncing" | "light" | "rolling";
+  | "linear"
+  | "exploding"
+  | "bouncing"
+  | "light"
+  | "rolling";
 
 export type ProjectileConfig = {
   texture: string;
@@ -227,16 +236,84 @@ export type CombatConfig = {
 };
 
 export type DropItemType =
-  "blueOrb" | "greenOrb" | "grayOrb" | "yellowOrb" | "purpleOrb";
+  | "blueOrb"
+  | "greenOrb"
+  | "grayOrb"
+  | "yellowOrb"
+  | "purpleOrb";
 
+export type MiniBossWeaponType = "chasing" | "orbiting" | "summoning";
+export type MiniBossType = "miniBoss1" | "miniBoss2" | "miniBoss3";
 export type BossTypes = "boss1" | "boss2" | "boss3";
-export type MobTypes = "mob1" | "mob2" | "mob3" | "mob4" | "mob5";
+export type PhasingEnemyTypes = "mob1" | "mob2" | "mob3" | "mob4" | "mob5";
 export type CodexCategoryName = "Skills" | "Enemies" | "DropItems";
 export type PassiveAbilityType = "wings";
-export type EnemyType = MobTypes | BossTypes;
+export type EnemyType =
+  | PhasingEnemyTypes
+  | MeleeEnemyTypes
+  | BossTypes
+  | MiniBossType;
+export type WeaponEnemyType = BossTypes | MiniBossType;
+export type EnemyFormation =
+  | "vertical line"
+  | "horizontal line"
+  | "circle"
+  | "surround";
+export type PhasingEnemyType =
+  // Area 1
+  | "bat"
+  // Area 2
+  | "crow"
+  | "ghost"
+  // Area 3
+  | "gargoyle"
+  // Area 4
+  | "shade";
+export type MeleeEnemyTypes =
+  // Area 1
+  | "carnivore_plant"
+  | "rat"
+  | "zombie"
+  // Area 2
+  | "imp"
+  | "slime"
+  // Area 3
+  | "vampire"
+  | "frankenstein"
+  | "werewolf"
+  // Area 4
+  | "hellHound"
+  | "demon";
+export type RangeEnemyTypes =
+  // Area 1
+  | "scarecrow"
+  // Area 2
+  | "skeleton"
+  // Area 3
+  | "cultist";
 
 export type EnemyConfig = {
   key: string;
+  attackKey?: string;
+  deathKey?: string;
+  scale: number;
+  bodyWidth: number;
+  bodyHeight: number;
+  offsetX: number;
+  offsetY: number;
+  frameStart: number;
+  frameEnd: number;
+  frameRate: number;
+  depth: number;
+  speed: number;
+  hp: number;
+  maxHp: number;
+  dropItem: DropItemType;
+};
+
+export type MiniBossConfig = {
+  key: string;
+  attackKey: string;
   scale: number;
   bodyWidth: number;
   bodyHeight: number;
@@ -254,10 +331,29 @@ export type EnemyConfig = {
 
 export type MobWaveConfig = {
   triggerAt: number;
-  mobType: MobTypes;
+  mobType: PhasingEnemyTypes;
   totalEnemy: number;
   batchSize: number;
   delay: number;
+  formation: EnemyFormation;
+  flag: string;
+};
+
+export type MeleeWaveConfig = {
+  triggerAt: number;
+  mobType: MeleeEnemyTypes;
+  totalEnemy: number;
+  batchSize: number;
+  delay: number;
+  formation: EnemyFormation;
+  flag: string;
+};
+
+export type MiniBossWaveConfig = {
+  triggerAt: number;
+  miniBossType: MiniBossType;
+  totalEnemy: number;
+  weaponType: MiniBossWeaponType[];
   flag: string;
 };
 
@@ -266,4 +362,25 @@ export type BossWaveConfig = {
   bossType: BossTypes;
   totalEnemy: number;
   flag: string;
+};
+
+export type WeaponStats = {
+  chasing?: {
+    TEXTURE: string;
+    SPEED: number;
+    DURATION_MS: number;
+  };
+
+  orbiting?: {
+    TEXTURE: string;
+    RADIUS: number;
+    SPEED_DEG_PER_SEC: number;
+  };
+
+  summoning?: {
+    TEXTURE: string;
+    DELAY_MS: number;
+    WARNING_DURATION_MS: number;
+    DURATION_MS: number;
+  };
 };

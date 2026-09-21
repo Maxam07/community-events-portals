@@ -1,0 +1,207 @@
+import type {
+  MobWaveConfig,
+  MiniBossWaveConfig,
+  BossWaveConfig,
+  MeleeWaveConfig,
+} from "../../Types";
+
+export const BOSS_WAVE_THRESHOLDS: BossWaveConfig[] = [
+  { triggerAt: 30, bossType: "boss1", totalEnemy: 1, flag: "bossWave1" },
+  { triggerAt: 60, bossType: "boss2", totalEnemy: 1, flag: "bossWave2" },
+  { triggerAt: 90, bossType: "boss3", totalEnemy: 1, flag: "bossWave3" },
+  { triggerAt: 120, bossType: "boss1", totalEnemy: 2, flag: "bossWave4" },
+  { triggerAt: 150, bossType: "boss2", totalEnemy: 2, flag: "bossWave5" },
+  { triggerAt: 180, bossType: "boss3", totalEnemy: 2, flag: "bossWave6" },
+
+  { triggerAt: 210, bossType: "boss1", totalEnemy: 1, flag: "bossWave7_a" },
+  { triggerAt: 210, bossType: "boss2", totalEnemy: 1, flag: "bossWave7_b" },
+
+  { triggerAt: 240, bossType: "boss2", totalEnemy: 2, flag: "bossWave8_a" },
+  { triggerAt: 240, bossType: "boss3", totalEnemy: 1, flag: "bossWave8_b" },
+
+  { triggerAt: 270, bossType: "boss1", totalEnemy: 2, flag: "bossWave9_a" },
+  { triggerAt: 270, bossType: "boss3", totalEnemy: 2, flag: "bossWave9_b" },
+
+  { triggerAt: 275, bossType: "boss2", totalEnemy: 4, flag: "bossWave10_a" },
+  { triggerAt: 275, bossType: "boss3", totalEnemy: 4, flag: "bossWave10_b" },
+
+  { triggerAt: 280, bossType: "boss1", totalEnemy: 10, flag: "bossWave11_a" },
+  { triggerAt: 280, bossType: "boss2", totalEnemy: 5, flag: "bossWave11_b" },
+  { triggerAt: 280, bossType: "boss3", totalEnemy: 3, flag: "bossWave11_c" },
+
+  { triggerAt: 285, bossType: "boss1", totalEnemy: 10, flag: "bossWave12_a" },
+  { triggerAt: 285, bossType: "boss2", totalEnemy: 7, flag: "bossWave12_b" },
+  { triggerAt: 285, bossType: "boss3", totalEnemy: 3, flag: "bossWave12_c" },
+
+  { triggerAt: 290, bossType: "boss1", totalEnemy: 10, flag: "bossWave13_a" },
+  { triggerAt: 290, bossType: "boss2", totalEnemy: 10, flag: "bossWave13_b" },
+  { triggerAt: 290, bossType: "boss3", totalEnemy: 10, flag: "bossWave13_c" },
+];
+
+export const MINIBOSS_WAVE_THRESHOLDS: MiniBossWaveConfig[] = [
+  {
+    triggerAt: 55,
+    miniBossType: "miniBoss1",
+    totalEnemy: 1,
+    weaponType: ["summoning"],
+    flag: "area1_1",
+  },
+  {
+    triggerAt: 50,
+    miniBossType: "miniBoss2",
+    totalEnemy: 1,
+    weaponType: ["orbiting"],
+    flag: "area1_2",
+  },
+];
+
+export const PHASING_WAVE_THRESHOLDS: MobWaveConfig[] = [
+  {
+    triggerAt: 0,
+    mobType: "mob1",
+    totalEnemy: 20,
+    batchSize: 4,
+    delay: 3000,
+    formation: "vertical line",
+    flag: "miniBossWave1",
+  },
+  {
+    triggerAt: 30,
+    mobType: "mob2",
+    totalEnemy: 20,
+    batchSize: 4,
+    delay: 1800,
+    formation: "horizontal line",
+    flag: "wave2",
+  },
+  // {
+  //   triggerAt: 60,
+  //   mobType: "mob1",
+  //   totalEnemy: 70,
+  //   batchSize: 3,
+  //   delay: 1400,
+  //   formation: "line",
+  //   flag: "wave3",
+  // },
+  // {
+  //   triggerAt: 40,
+  //   mobType: "mob3",
+  //   totalEnemy: 85,
+  //   batchSize: 4,
+  //   delay: 1200,
+  //   formation: "horizontal line",
+  //   flag: "wave4",
+  // },
+  // {
+  //   triggerAt: 120,
+  //   mobType: "mob2",
+  //   totalEnemy: 110,
+  //   batchSize: 4,
+  //   delay: 1000,
+  //   formation: "line",
+  //   flag: "wave5",
+  // },
+  // {
+  //   triggerAt: 150,
+  //   mobType: "mob4",
+  //   totalEnemy: 110,
+  //   batchSize: 4,
+  //   delay: 900,
+  //   formation: "line",
+  //   flag: "wave6",
+  // },
+  // {
+  //   triggerAt: 180,
+  //   mobType: "mob3",
+  //   totalEnemy: 180,
+  //   batchSize: 5,
+  //   delay: 800,
+  //   formation: "line",
+  //   flag: "wave7",
+  // },
+  // {
+  //   triggerAt: 210,
+  //   mobType: "mob4",
+  //   totalEnemy: 150,
+  //   batchSize: 6,
+  //   delay: 800,
+  //   formation: "line",
+  //   flag: "wave8",
+  // },
+  // {
+  //   triggerAt: 240,
+  //   mobType: "mob5",
+  //   totalEnemy: 180,
+  //   batchSize: 7,
+  //   delay: 700,
+  //   formation: "line",
+  //   flag: "wave9",
+  // },
+  // // Endless
+  // {
+  //   triggerAt: 290,
+  //   mobType: "mob1",
+  //   totalEnemy: 100,
+  //   batchSize: 3,
+  //   delay: 2500,
+  //   formation: "line",
+  //   flag: "endless",
+  // },
+  // {
+  //   triggerAt: 290,
+  //   mobType: "mob2",
+  //   totalEnemy: 120,
+  //   batchSize: 3,
+  //   delay: 2200,
+  //   formation: "line",
+  //   flag: "endless",
+  // },
+  // {
+  //   triggerAt: 290,
+  //   mobType: "mob3",
+  //   totalEnemy: 150,
+  //   batchSize: 4,
+  //   delay: 1290,
+  //   formation: "line",
+  //   flag: "endless",
+  // },
+  // {
+  //   triggerAt: 290,
+  //   mobType: "mob4",
+  //   totalEnemy: 180,
+  //   batchSize: 4,
+  //   delay: 1400,
+  //   formation: "line",
+  //   flag: "endless",
+  // },
+  // {
+  //   triggerAt: 290,
+  //   mobType: "mob5",
+  //   totalEnemy: 250,
+  //   batchSize: 5,
+  //   delay: 1000,
+  //   formation: "line",
+  //   flag: "endless",
+  // },
+];
+
+export const MELEE_WAVE_THRESHOLDS: MeleeWaveConfig[] = [
+  {
+    triggerAt: 10,
+    mobType: "hellHound",
+    totalEnemy: 15,
+    batchSize: 3,
+    delay: 3000,
+    formation: "horizontal line",
+    flag: "meleeWave1",
+  },
+  // {
+  //   triggerAt: 30,
+  //   mobType: "hellHound",
+  //   totalEnemy: 60,
+  //   batchSize: 5,
+  //   delay: 1800,
+  //   formation: "surround",
+  //   flag: "meleeWave2",
+  // },
+];
