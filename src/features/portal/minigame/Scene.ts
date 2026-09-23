@@ -39,7 +39,6 @@ import type {
   MeleeEnemyTypes,
 } from "./Types";
 import { BossEnemy } from "./containers/BossEnemyContainer";
-import { OBSTACLE_SPAWN_BUFFER } from "./constants/EnemyConstants";
 import {
   BOSS_WAVE_THRESHOLDS,
   MELEE_WAVE_THRESHOLDS,
@@ -178,6 +177,10 @@ export class Scene extends BaseScene {
         frameHeight: 32,
       },
     );
+    this.load.spritesheet("demon1", "world/portal/halloween/meleeDemon1.webp", {
+      frameWidth: 32,
+      frameHeight: 32,
+    });
 
     // Chests
     this.load.spritesheet(
@@ -1144,7 +1147,10 @@ export class Scene extends BaseScene {
         this.enemyGroup,
         (_player, enemyObj) => {
           const enemy = enemyObj as
-            PhasingEnemy | MeleeEnemy | BossEnemy | MiniBoss;
+            | PhasingEnemy
+            | MeleeEnemy
+            | BossEnemy
+            | MiniBoss;
           enemy.handlePlayerContact();
         },
       );
@@ -1329,123 +1335,87 @@ export class Scene extends BaseScene {
     }
   }
 
-  // Spawning helpers
-  private isNearObstacle(x: number, y: number, buffer: number): boolean {
-    return this.obstacles.some((obstacle) => {
-      if (!obstacle.hasHitbox) return false; // skip decorative/non-blocking obstacles
-      if (!obstacle.sprite) return false;
+  // Spawning helper
+  private getSpawnPositions(
+    formation: EnemyFormation,
+    count: number,
+  ): { x: number; y: number }[] {
+    if (!this.currentPlayer) return [];
+    const minSpawnDistance = 5 * SQUARE_WIDTH;
+    const positions = getFormationPositions(
+      formation,
+      count,
+      this.currentPlayer.x,
+      this.currentPlayer.y,
+    );
 
-      const halfWidth = (obstacle.width * SQUARE_WIDTH) / 2;
-      const halfHeight = (obstacle.height * SQUARE_WIDTH) / 2;
-      const obstacleX = obstacle.sprite.x;
-      const obstacleY = obstacle.sprite.y;
+    const px = this.currentPlayer.x;
+    const py = this.currentPlayer.y;
+    const minDist = minSpawnDistance;
 
-      return (
-        x > obstacleX - halfWidth - buffer &&
-        x < obstacleX + halfWidth + buffer &&
-        y > obstacleY - halfHeight - buffer &&
-        y < obstacleY + halfHeight + buffer
-      );
+    return positions.map(({ x, y }) => {
+      let spawnX = x;
+      let spawnY = y;
+
+      const dx = spawnX - px;
+      const dy = spawnY - py;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist < minDist) {
+        // Pick a direction to push the spawn point out along.
+        // If it landed exactly on the player, pick a random angle instead of dividing by zero.
+        const angle =
+          dist > 0 ? Math.atan2(dy, dx) : Math.random() * Math.PI * 2;
+        spawnX = px + Math.cos(angle) * minDist;
+        spawnY = py + Math.sin(angle) * minDist;
+      }
+
+      return { x: spawnX, y: spawnY };
     });
-  }
-
-  private getSpawnPosition(
-    preferredX: number,
-    preferredY: number,
-    enemies: Phaser.GameObjects.Container[],
-  ): { x: number; y: number } | null {
-    const maxAttempts = 20;
-    const minDistance = 20;
-    const spawnRadius = 5 * SQUARE_WIDTH;
-
-    const isValidPosition = (x: number, y: number): boolean => {
-      if (this.isNearObstacle(x, y, OBSTACLE_SPAWN_BUFFER)) {
-        return false;
-      }
-
-      return !enemies.some((enemy) => {
-        return (
-          Phaser.Math.Distance.Between(x, y, enemy.x, enemy.y) < minDistance
-        );
-      });
-    };
-
-    if (isValidPosition(preferredX, preferredY)) {
-      return { x: preferredX, y: preferredY };
-    }
-
-    if (!this.currentPlayer) return null;
-
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
-      const distance = Phaser.Math.Between(10 * SQUARE_WIDTH, spawnRadius);
-
-      const x = this.currentPlayer.x + Math.cos(angle) * distance;
-      const y = this.currentPlayer.y + Math.sin(angle) * distance;
-
-      if (isValidPosition(x, y)) {
-        return { x, y };
-      }
-    }
-
-    return null;
   }
 
   // Create Enemies
   private createMiniBossEnemy(
     miniBossType: MiniBossType,
+    formation: EnemyFormation,
     weaponTypes: MiniBossWeaponType[],
+    count = 1,
   ) {
-    if (!this.currentPlayer) return;
-    const maxAttempts = 20;
-    const minDistance = 20;
-    const spawnRadius = 5 * SQUARE_WIDTH;
-    let x = 0;
-    let y = 0;
-    let placed = false;
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
-      const distance = Phaser.Math.Between(10 * SQUARE_WIDTH, spawnRadius);
-      x = this.currentPlayer.x + Math.cos(angle) * distance;
-      y = this.currentPlayer.y + Math.sin(angle) * distance;
-      const tooClose = this.bossEnemies.some((enemy) => {
-        const dist = Phaser.Math.Distance.Between(x, y, enemy.x, enemy.y);
-        return dist < minDistance;
-      });
-      if (!tooClose) {
-        placed = true;
-        break;
-      }
-    }
+    if (!this.currentPlayer) return 0;
+    const positions = this.getSpawnPositions(formation, count);
 
-    const miniBoss = new MiniBoss({
-      x,
-      y,
-      scene: this,
-      player: this.currentPlayer,
-      miniBossType,
-      weaponTypes,
-    });
+    positions.forEach(({ x: spawnX, y: spawnY }) => {
+      if (!this.currentPlayer) return;
 
-    for (const weaponType of weaponTypes) {
-      const weapon = createMiniBossWeapon({
+      const miniBoss = new MiniBoss({
+        x: spawnX,
+        y: spawnY,
         scene: this,
-        target: miniBoss,
         player: this.currentPlayer,
-        enemyType: miniBossType,
-        weaponType,
+        miniBossType,
+        weaponTypes,
       });
 
-      this.enemyWeapons.push(weapon);
-      this.weaponGroup.add(weapon);
-    }
+      for (const weaponType of weaponTypes) {
+        const weapon = createMiniBossWeapon({
+          scene: this,
+          target: miniBoss,
+          player: this.currentPlayer,
+          enemyType: miniBossType,
+          weaponType,
+        });
 
-    this.miniBosses.push(miniBoss);
-    this.miniBossGroup.add(miniBoss);
-    this.enemyGroup.add(miniBoss);
+        this.enemyWeapons.push(weapon);
+        this.weaponGroup.add(weapon);
+      }
 
-    miniBoss.once("destroy", () => {
-      this.unregisterMiniBossEnemy(miniBoss);
+      this.miniBosses.push(miniBoss);
+      this.miniBossGroup.add(miniBoss);
+      this.enemyGroup.add(miniBoss);
+
+      miniBoss.once("destroy", () => {
+        this.unregisterMiniBossEnemy(miniBoss);
+      });
     });
   }
 
@@ -1455,28 +1425,13 @@ export class Scene extends BaseScene {
     count: number,
   ): number {
     if (!this.currentPlayer) return 0;
-
-    const positions = getFormationPositions(
-      formation,
-      count,
-      this.currentPlayer.x,
-      this.currentPlayer.y,
-    );
-
+    const positions = this.getSpawnPositions(formation, count);
     let spawned = 0;
 
-    positions.forEach(({ x: formationX, y: formationY }) => {
-      const position = this.getSpawnPosition(
-        formationX,
-        formationY,
-        this.meleeEnemies,
-      );
-
-      if (!position) return;
-
+    positions.forEach(({ x: spawnX, y: spawnY }) => {
       const mob = new MeleeEnemy({
-        x: position.x,
-        y: position.y,
+        x: spawnX,
+        y: spawnY,
         scene: this,
         player: this.currentPlayer!,
         mobType,
@@ -1502,28 +1457,13 @@ export class Scene extends BaseScene {
     count: number,
   ): number {
     if (!this.currentPlayer) return 0;
-
-    const positions = getFormationPositions(
-      formation,
-      count,
-      this.currentPlayer.x,
-      this.currentPlayer.y,
-    );
-
+    const positions = this.getSpawnPositions(formation, count);
     let spawned = 0;
 
-    positions.forEach(({ x: formationX, y: formationY }) => {
-      const position = this.getSpawnPosition(
-        formationX,
-        formationY,
-        this.phasingEnemies,
-      );
-
-      if (!position) return;
-
+    positions.forEach(({ x: spawnX, y: spawnY }) => {
       const mob = new PhasingEnemy({
-        x: position.x,
-        y: position.y,
+        x: spawnX,
+        y: spawnY,
         scene: this,
         player: this.currentPlayer!,
         mobType,
@@ -1543,7 +1483,6 @@ export class Scene extends BaseScene {
     return spawned;
   }
 
-  // Enemy total + batch size
   private mobWaveHelper(
     total: number,
     batchSize: number,
@@ -1596,9 +1535,10 @@ export class Scene extends BaseScene {
     miniBossType: MiniBossType,
     total: number,
     weaponType: MiniBossWeaponType[],
+    formation: EnemyFormation,
   ) {
     for (let i = 0; i < total; i++) {
-      this.createMiniBossEnemy(miniBossType, weaponType);
+      this.createMiniBossEnemy(miniBossType, formation, weaponType);
     }
   }
 
@@ -1609,7 +1549,12 @@ export class Scene extends BaseScene {
       if (triggerAt >= wave.triggerAt && !this.waveState.get(key)) {
         this.waveState.set(key, true);
 
-        this.miniBossWave(wave.miniBossType, wave.totalEnemy, wave.weaponType);
+        this.miniBossWave(
+          wave.miniBossType,
+          wave.totalEnemy,
+          wave.weaponType,
+          wave.formation,
+        );
       }
     }
   }
