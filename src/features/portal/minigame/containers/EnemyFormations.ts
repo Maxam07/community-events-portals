@@ -1,6 +1,9 @@
 import { SQUARE_WIDTH } from "features/game/lib/constants";
 import type { EnemyFormation } from "../Types";
 
+// Minimum distance any spawned enemy can be from the player.
+const MIN_SPAWN_DISTANCE = 4 * SQUARE_WIDTH;
+
 export function getFormationPositions(
   formation: EnemyFormation,
   count: number,
@@ -34,10 +37,14 @@ const getVerticalFormation = (
   const spacing = 3 * SQUARE_WIDTH;
 
   const startY = centerY - ((count - 1) * spacing) / 2;
-  const ranX = Phaser.Math.Between(
-    centerX - 10 * SQUARE_WIDTH,
-    centerX + 10 * SQUARE_WIDTH,
-  );
+
+  // Pick ranX from one of two bands so the line is always at least
+  // MIN_SPAWN_DISTANCE away from centerX on the x-axis (closest point
+  // on the line to the player is (ranX, centerY), distance = |ranX - centerX|).
+  const maxOffset = 10 * SQUARE_WIDTH;
+  const side = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
+  const ranX =
+    centerX + side * Phaser.Math.Between(MIN_SPAWN_DISTANCE, maxOffset);
 
   for (let i = 0; i < count; i++) {
     positions.push({
@@ -59,10 +66,10 @@ const getHorizontalFormation = (
 
   const startX = centerX - ((count - 1) * spacing) / 2;
 
-  const ranY = Phaser.Math.Between(
-    centerY - 10 * SQUARE_WIDTH,
-    centerY + 10 * SQUARE_WIDTH,
-  );
+  const maxOffset = 10 * SQUARE_WIDTH;
+  const side = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
+  const ranY =
+    centerY + side * Phaser.Math.Between(MIN_SPAWN_DISTANCE, maxOffset);
 
   for (let i = 0; i < count; i++) {
     positions.push({
@@ -80,7 +87,7 @@ const getCircleFormation = (
   centerY: number,
 ) => {
   const positions = [];
-  const radius = 8 * SQUARE_WIDTH;
+  const radius = Math.max(4 * SQUARE_WIDTH, MIN_SPAWN_DISTANCE);
 
   for (let i = 0; i < count; i++) {
     const angle = (Math.PI * 2 * i) / count;
@@ -100,13 +107,14 @@ const getSurroundFormation = (
   centerY: number,
 ) => {
   const positions = [];
-  const radius = 5 * SQUARE_WIDTH;
+  const maxRadius = 10 * SQUARE_WIDTH;
+  const minRadius = Math.min(MIN_SPAWN_DISTANCE, maxRadius);
 
   for (let i = 0; i < count; i++) {
     const angle =
       (Math.PI * 2 * i) / count + Phaser.Math.FloatBetween(-0.15, 0.15);
 
-    const distance = Phaser.Math.Between(4 * SQUARE_WIDTH, radius);
+    const distance = Phaser.Math.Between(minRadius, maxRadius);
 
     positions.push({
       x: centerX + Math.cos(angle) * distance,
