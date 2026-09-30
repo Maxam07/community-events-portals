@@ -62,7 +62,7 @@ export class ChasingWeapon extends Phaser.GameObjects.Sprite {
     texture,
     offsetX = 20,
     offsetY = 20,
-    scale = 1,
+    scale = 0.7,
     depth = 1001,
     chaseDelayMs = 2000,
     chaseSpeed = 400,
@@ -138,6 +138,12 @@ export class ChasingWeapon extends Phaser.GameObjects.Sprite {
     const dx = this.player.x - this.x;
     const dy = this.player.y - this.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dx < 0) {
+      this.setFlipX(false);
+    } else if (dx > 0) {
+      this.setFlipX(true);
+    }
 
     if (dist > 1) {
       const moveDist = this.chaseSpeed * (delta / 1000);

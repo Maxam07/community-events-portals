@@ -1,8 +1,8 @@
 import type {
-  MobWaveConfig,
   MiniBossWaveConfig,
   BossWaveConfig,
   MeleeWaveConfig,
+  PhasingeWaveConfig,
 } from "../../Types";
 
 export const BOSS_WAVE_THRESHOLDS: BossWaveConfig[] = [
@@ -38,28 +38,10 @@ export const BOSS_WAVE_THRESHOLDS: BossWaveConfig[] = [
   { triggerAt: 290, bossType: "boss3", totalEnemy: 10, flag: "bossWave13_c" },
 ];
 
-export const MINIBOSS_WAVE_THRESHOLDS: MiniBossWaveConfig[] = [
+// Phasing
+export const PHASING_WAVE_THRESHOLDS: PhasingeWaveConfig[] = [
   {
-    triggerAt: 190,
-    miniBossType: "miniBoss1",
-    totalEnemy: 1,
-    weaponType: ["summoning"],
-    formation: "vertical line",
-    flag: "area1_1",
-  },
-  {
-    triggerAt: 200,
-    miniBossType: "miniBoss2",
-    totalEnemy: 1,
-    weaponType: ["orbiting"],
-    formation: "horizontal line",
-    flag: "area1_2",
-  },
-];
-
-export const PHASING_WAVE_THRESHOLDS: MobWaveConfig[] = [
-  {
-    triggerAt: 0,
+    triggerAt: 10,
     mobType: "mob1",
     totalEnemy: 50,
     batchSize: 5,
@@ -68,33 +50,52 @@ export const PHASING_WAVE_THRESHOLDS: MobWaveConfig[] = [
     flag: "miniBossWave1",
   },
   {
-    triggerAt: 0,
+    triggerAt: 30,
     mobType: "mob2",
     totalEnemy: 50,
     batchSize: 5,
-    delay: 5000,
+    delay: 6000,
     formation: "circle",
     flag: "wave2",
   },
 ];
-
+// Melee
 export const MELEE_WAVE_THRESHOLDS: MeleeWaveConfig[] = [
   {
-    triggerAt: 40,
-    mobType: "demon",
-    totalEnemy: 50,
+    triggerAt: 0,
+    mobType: "demon2",
+    totalEnemy: 30,
     batchSize: 5,
     delay: 8000,
     formation: "horizontal line",
     flag: "meleeWave1",
   },
   {
-    triggerAt: 40,
-    mobType: "hellHound",
-    totalEnemy: 50,
-    batchSize: 5,
+    triggerAt: 20,
+    mobType: "demon1",
+    totalEnemy: 30,
+    batchSize: 3,
     delay: 4000,
     formation: "vertical line",
     flag: "meleeWave2",
+  },
+];
+// MiniBoss
+export const MINIBOSS_WAVE_THRESHOLDS: MiniBossWaveConfig[] = [
+  {
+    triggerAt: 130,
+    miniBossType: "mummy",
+    totalEnemy: 1,
+    weaponType: ["summoning"],
+    formation: "vertical line",
+    flag: "area1_1",
+  },
+  {
+    triggerAt: 160,
+    miniBossType: "golem",
+    totalEnemy: 1,
+    weaponType: ["orbiting", "chasing"],
+    formation: "horizontal line",
+    flag: "area1_2",
   },
 ];

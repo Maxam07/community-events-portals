@@ -4,12 +4,7 @@ import type {
   Equipped,
 } from "features/game/types/bumpkin";
 import { translate as t } from "lib/i18n/translate";
-import {
-  // MOB_CONFIGS,
-  BOSS_CONFIGS,
-  DROP_ITEM_XP_VALUES,
-  ENEMY_BALANCE_STATS,
-} from "./EnemyConstants";
+import { DROP_ITEM_XP_VALUES } from "./EnemyConstants";
 import { WEAPON_CONFIGS, WEAPON_UPGRADES } from "./WeaponConstants";
 import { PORTAL_NAME } from "./PortalConstants";
 
@@ -29,14 +24,11 @@ import grayOrb from "public/world/portal/images/dropItem3.webp";
 import yellowOrb from "public/world/portal/images/dropItem4.webp";
 import purpleOrb from "public/world/portal/images/dropItem5.webp";
 
-import icon_boss1 from "public/world/portal/images/icon_boss_1.webp";
-import icon_boss2 from "public/world/portal/images/icon_boss_2.webp";
 import icon_boss3 from "public/world/portal/images/icon_boss_3.webp";
 import tooltip_icon from "public/world/portal/images/ExpOrb_combined.webp";
 import swordIcon from "public/world/portal/images/sword_icon.png";
 import speedIcon from "public/world/portal/images/lightning.png";
 import type {
-  BossTypes,
   // MobTypes,
   WeaponId,
   PassiveAbilityType,
@@ -159,7 +151,7 @@ export const RESOURCES_TABLE: {
 ];
 
 // const mob_config = MOB_CONFIGS;
-const boss_config = BOSS_CONFIGS;
+// const boss_config = BOSS_CONFIGS;
 const skill_config = WEAPON_CONFIGS;
 
 export const DROP_ITEM_ASSETS: Record<string, string> = {
@@ -178,11 +170,11 @@ export const DROP_ITEM_ASSETS: Record<string, string> = {
 //   mob5: "Balloon slime",
 // };
 
-const BOSS_NAMES: Record<BossTypes, string> = {
-  boss1: "Daisy",
-  boss2: "Pierrot",
-  boss3: "Sharky",
-};
+// const BOSS_NAMES: Record<BossTypes, string> = {
+//   boss1: "Daisy",
+//   boss2: "Pierrot",
+//   boss3: "Sharky",
+// };
 
 export const ENEMIES_TABLE: {
   image: string;
@@ -191,27 +183,27 @@ export const ENEMIES_TABLE: {
   damage: number;
   itemIcon: string;
 }[] = [
-  {
-    image: icon_boss1,
-    type: BOSS_NAMES.boss1,
-    hp: boss_config.boss1.hp,
-    damage: ENEMY_BALANCE_STATS.boss1.DAMAGE,
-    itemIcon: DROP_ITEM_ASSETS[boss_config.boss1.dropItem],
-  },
-  {
-    image: icon_boss2,
-    type: BOSS_NAMES.boss2,
-    hp: boss_config.boss2.hp,
-    damage: ENEMY_BALANCE_STATS.boss2.DAMAGE,
-    itemIcon: DROP_ITEM_ASSETS[boss_config.boss2.dropItem],
-  },
-  {
-    image: icon_boss3,
-    type: BOSS_NAMES.boss3,
-    hp: boss_config.boss3.hp,
-    damage: ENEMY_BALANCE_STATS.boss3.DAMAGE,
-    itemIcon: DROP_ITEM_ASSETS[boss_config.boss3.dropItem],
-  },
+  // {
+  //   image: icon_boss1,
+  //   type: BOSS_NAMES.boss1,
+  //   hp: boss_config.boss1.hp,
+  //   damage: ENEMY_BALANCE_STATS.boss1.DAMAGE,
+  //   itemIcon: DROP_ITEM_ASSETS[boss_config.boss1.dropItem],
+  // },
+  // {
+  //   image: icon_boss2,
+  //   type: BOSS_NAMES.boss2,
+  //   hp: boss_config.boss2.hp,
+  //   damage: ENEMY_BALANCE_STATS.boss2.DAMAGE,
+  //   itemIcon: DROP_ITEM_ASSETS[boss_config.boss2.dropItem],
+  // },
+  // {
+  //   image: icon_boss3,
+  //   type: BOSS_NAMES.boss3,
+  //   hp: boss_config.boss3.hp,
+  //   damage: ENEMY_BALANCE_STATS.boss3.DAMAGE,
+  //   itemIcon: DROP_ITEM_ASSETS[boss_config.boss3.dropItem],
+  // },
   // {
   //   image: icon_mob1,
   //   type: MOB_NAMES.mob1,

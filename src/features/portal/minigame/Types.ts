@@ -10,7 +10,8 @@ export type ObstacleName =
   | "deco_1"
   | "deco_2"
   | "deco_3"
-  | "deco_4";
+  | "deco_4"
+  | "cultist";
 
 export type Obstacle = { name: ObstacleName; x: number; y: number };
 
@@ -242,23 +243,24 @@ export type DropItemType =
   | "yellowOrb"
   | "purpleOrb";
 
-export type MiniBossWeaponType = "chasing" | "orbiting" | "summoning";
-export type MiniBossType = "miniBoss1" | "miniBoss2" | "miniBoss3";
+export type WeaponType = "chasing" | "orbiting" | "summoning" | "staticRange";
 export type BossTypes = "boss1" | "boss2" | "boss3";
 export type PhasingEnemyTypes = "mob1" | "mob2" | "mob3" | "mob4" | "mob5";
 export type CodexCategoryName = "Skills" | "Enemies" | "DropItems";
 export type PassiveAbilityType = "wings";
 export type EnemyType =
+  | StaticRangeEnemyTypes
   | PhasingEnemyTypes
   | MeleeEnemyTypes
   | BossTypes
   | MiniBossType;
-export type WeaponEnemyType = BossTypes | MiniBossType;
+export type WeaponEnemyType = BossTypes | MiniBossType | StaticRangeEnemyTypes;
 export type EnemyFormation =
   | "vertical line"
   | "horizontal line"
   | "circle"
   | "surround";
+
 export type PhasingEnemyType =
   // Area 1
   | "bat"
@@ -269,6 +271,7 @@ export type PhasingEnemyType =
   | "gargoyle"
   // Area 4
   | "shade";
+
 export type MeleeEnemyTypes =
   // Area 1
   | "carnivore_plant"
@@ -283,14 +286,28 @@ export type MeleeEnemyTypes =
   | "werewolf"
   // Area 4
   | "hellHound"
-  | "demon";
-export type RangeEnemyTypes =
+  | "demon1"
+  | "demon2";
+
+export type StaticRangeEnemyTypes =
   // Area 1
   | "scarecrow"
   // Area 2
   | "skeleton"
   // Area 3
   | "cultist";
+
+export type MiniBossType =
+  // Area 1
+  | "golem"
+  | "ent"
+  // Area 2
+  | "mummy"
+  | "living_armor"
+  // Area 3
+  | "headless_horseman"
+  | "medusa";
+// Area 4 - spawn the mini bosses from area 1 to 3
 
 export type EnemyConfig = {
   key: string;
@@ -311,19 +328,12 @@ export type EnemyConfig = {
   dropItem: DropItemType;
 };
 
-export type MobWaveConfig = {
-  triggerAt: number;
-  mobType: PhasingEnemyTypes;
-  totalEnemy: number;
-  batchSize: number;
-  delay: number;
-  formation: EnemyFormation;
-  flag: string;
-};
+export type PhasingeWaveConfig = WaveConfig<PhasingEnemyTypes>;
+export type MeleeWaveConfig = WaveConfig<MeleeEnemyTypes>;
 
-export type MeleeWaveConfig = {
+export type WaveConfig<TMobTypes> = {
   triggerAt: number;
-  mobType: MeleeEnemyTypes;
+  mobType: TMobTypes;
   totalEnemy: number;
   batchSize: number;
   delay: number;
@@ -335,7 +345,7 @@ export type MiniBossWaveConfig = {
   triggerAt: number;
   miniBossType: MiniBossType;
   totalEnemy: number;
-  weaponType: MiniBossWeaponType[];
+  weaponType: WeaponType[];
   formation: EnemyFormation;
   flag: string;
 };
@@ -364,6 +374,15 @@ export type WeaponStats = {
     TEXTURE: string;
     DELAY_MS: number;
     WARNING_DURATION_MS: number;
+    DURATION_MS: number;
+  };
+
+  staticRange?: {
+    TEXTURE: string;
+    FRAME_END: number;
+    RANGE: number;
+    SPEED: number;
+    COOLDOWN_MS: number;
     DURATION_MS: number;
   };
 };

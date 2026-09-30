@@ -1,5 +1,15 @@
 import type { Obstacle } from "../Types";
 
+export const STATIC_RANGE_POS = [
+  { x: 10, y: 126 },
+  { x: 15, y: 142 },
+  { x: 3, y: 136 },
+  { x: 34, y: 121 },
+  { x: 35, y: 142 },
+  { x: 25, y: 113 },
+  { x: 3, y: 112 },
+];
+
 export const OBSTACLES_LAYOUT = {
   obstacle1: [
     // trees
@@ -28,8 +38,15 @@ export const OBSTACLES_LAYOUT = {
     { name: "tree_stump", x: 26, y: 130 },
     { name: "tree_stump", x: 34, y: 135 },
     { name: "tree_stump", x: 26, y: 140 },
+    // cultist
+    { name: "cultist", x: 10, y: 126 },
+    { name: "cultist", x: 15, y: 142 },
+    { name: "cultist", x: 3, y: 136 },
+    { name: "cultist", x: 34, y: 121 },
+    { name: "cultist", x: 35, y: 142 },
+    { name: "cultist", x: 25, y: 113 },
+    { name: "cultist", x: 3, y: 112 },
     // clouds
-
     // rocks
     // { name: "rock", x: 20, y: 5 },
     // { name: "rock", x: 29, y: 13 },
@@ -45,36 +62,5 @@ export const OBSTACLES_LAYOUT = {
     // { name: "rock", x: 3, y: 4 },
     // { name: "rock", x: 12, y: 40 },
     // { name: "rock", x: 45, y: 45 },
-    // water
-    // { name: "water", x: 1, y: 21 },
-    // { name: "water", x: 5, y: 21 },
-    // { name: "water", x: 9, y: 21 },
-    // { name: "water", x: 17, y: 21 },
-    // { name: "water", x: 13, y: 21 },
-    // { name: "water", x: 13, y: 25 },
-    // { name: "water", x: 17, y: 25 },
-    // { name: "water", x: 21, y: 25 },
-    // { name: "water", x: 25, y: 25 },
-    // { name: "water", x: 29, y: 25 },
-    // { name: "water", x: 29, y: 21 },
-    // { name: "water", x: 29, y: 17 },
-    // { name: "water", x: 33, y: 17 },
-    // { name: "water", x: 37, y: 17 },
-    // { name: "water", x: 41, y: 17 },
-    // { name: "water", x: 45, y: 17 },
-    // { name: "water", x: 49, y: 17 },
-    // { name: "water", x: 53, y: 17 },
-    // { name: "water", x: 57, y: 17 },
-    // { name: "water", x: 61, y: 17 },
-    // { name: "water", x: 31, y: 50 },
-    // { name: "water", x: 35, y: 50 },
-    // huge deco
-    // { name: "deco_1", x: 5, y: 5 },
-    // { name: "deco_2", x: 50, y: 50 },
-    // { name: "deco_3", x: 50, y: 5 },
-    // { name: "deco_1", x: 10, y: 135 },
-    // { name: "deco_2", x: 30, y: 130 },
-    // { name: "deco_3", x: 10, y: 120 },
-    // { name: "deco_4", x: 30, y: 115 },
   ] as Obstacle[],
 };
