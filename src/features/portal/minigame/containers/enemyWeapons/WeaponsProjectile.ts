@@ -1,28 +1,30 @@
 import type { Scene } from "../../Scene";
 import type { BumpkinContainer } from "../../Core/BumpkinContainer";
-import type { MiniBossWeaponType, WeaponEnemyType } from "../../Types";
+import type { WeaponType, WeaponEnemyType } from "../../Types";
 import { ChasingWeapon } from "./ChasingWeapon";
 import { OrbitingWeapon } from "./OrbitingWeapon";
 import type { MiniBoss } from "../MiniBossContainer";
 import { SummoningWeapon } from "./SummoningWeapon";
 import type { EnemyWeapon } from "./EnemyWeapons";
 import { WEAPON_BALANCE_STATS } from "../BalanceEnemy/WeaponStatConfig";
+import { StaticRangeWeapon } from "./StaticRangeWeapon";
+import type { StaticRangeEnemy } from "../StaticRangeEnemyContainer";
 
-interface MiniBossWeaponProps {
+interface WeaponProps {
   scene: Scene;
-  target: MiniBoss;
+  target: MiniBoss | StaticRangeEnemy;
   player: BumpkinContainer;
   enemyType: WeaponEnemyType;
-  weaponType: MiniBossWeaponType;
+  weaponType: WeaponType;
 }
 
-export const createMiniBossWeapon = ({
+export const createEnemyWeapon = ({
   scene,
   target,
   player,
   enemyType,
   weaponType,
-}: MiniBossWeaponProps): EnemyWeapon => {
+}: WeaponProps): EnemyWeapon => {
   const stats = WEAPON_BALANCE_STATS[enemyType];
 
   switch (weaponType) {
@@ -84,6 +86,28 @@ export const createMiniBossWeapon = ({
         warningTexture: "tree_stump",
         delayMs: weaponStats.DELAY_MS,
         warningDurationMs: weaponStats.WARNING_DURATION_MS,
+        durationMs: weaponStats.DURATION_MS,
+        player,
+        enemyType,
+      });
+    }
+
+    case "staticRange": {
+      const weaponStats = stats.staticRange;
+      if (!weaponStats) {
+        throw new Error(
+          `${enemyType} does not have a static range weapon configured`,
+        );
+      }
+
+      return new StaticRangeWeapon({
+        scene,
+        target,
+        texture: weaponStats.TEXTURE,
+        frame_end: weaponStats.FRAME_END,
+        range: weaponStats.RANGE,
+        speed: weaponStats.SPEED,
+        cooldownMs: weaponStats.COOLDOWN_MS,
         durationMs: weaponStats.DURATION_MS,
         player,
         enemyType,

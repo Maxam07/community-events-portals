@@ -10,7 +10,7 @@ import { SQUARE_WIDTH } from "features/game/lib/constants";
 import type { BoundingBox } from "../lib/collisionDetection";
 
 const MOVEMENT_UPDATE_INTERVAL_MS = 100;
-const FRAME_DURATION_MS = 1000 / 60;
+// const FRAME_DURATION_MS = 1000 / 60;
 // Placeholder critical-hit glow: a brief bright tint flash. Swap the tint
 // color for a real VFX/shader later if desired.
 const CRIT_FLASH_DURATION_MS = 150;

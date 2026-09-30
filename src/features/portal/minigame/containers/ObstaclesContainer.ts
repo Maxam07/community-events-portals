@@ -22,6 +22,8 @@ const obstacleConfig: Record<
     destructible: boolean;
     hp: number;
     hasHitbox: boolean;
+    setVisible: boolean;
+    setScale: number;
   }
 > = {
   rock: {
@@ -30,6 +32,8 @@ const obstacleConfig: Record<
     destructible: true,
     hp: Infinity,
     hasHitbox: true,
+    setVisible: true,
+    setScale: 1,
   },
   water: {
     width: 4,
@@ -37,6 +41,8 @@ const obstacleConfig: Record<
     destructible: false,
     hp: Infinity,
     hasHitbox: false,
+    setVisible: true,
+    setScale: 1,
   },
   tree: {
     width: 2,
@@ -44,6 +50,8 @@ const obstacleConfig: Record<
     destructible: true,
     hp: 3,
     hasHitbox: true,
+    setVisible: true,
+    setScale: 1,
   },
   cloud: {
     width: 4,
@@ -51,6 +59,8 @@ const obstacleConfig: Record<
     destructible: true,
     hp: Infinity,
     hasHitbox: false,
+    setVisible: true,
+    setScale: 1,
   },
   cloud1: {
     width: 2,
@@ -58,6 +68,8 @@ const obstacleConfig: Record<
     destructible: true,
     hp: Infinity,
     hasHitbox: false,
+    setVisible: true,
+    setScale: 1,
   },
   tree_stump: {
     width: 1,
@@ -65,6 +77,8 @@ const obstacleConfig: Record<
     destructible: true,
     hp: Infinity,
     hasHitbox: true,
+    setVisible: true,
+    setScale: 1,
   },
   deco_1: {
     width: 5,
@@ -72,6 +86,8 @@ const obstacleConfig: Record<
     destructible: true,
     hp: Infinity,
     hasHitbox: true,
+    setVisible: true,
+    setScale: 1,
   },
   deco_2: {
     width: 4,
@@ -79,6 +95,8 @@ const obstacleConfig: Record<
     destructible: true,
     hp: Infinity,
     hasHitbox: true,
+    setVisible: true,
+    setScale: 1,
   },
   deco_3: {
     width: 7,
@@ -86,6 +104,8 @@ const obstacleConfig: Record<
     destructible: true,
     hp: Infinity,
     hasHitbox: true,
+    setVisible: true,
+    setScale: 1,
   },
   deco_4: {
     width: 7,
@@ -93,6 +113,17 @@ const obstacleConfig: Record<
     destructible: true,
     hp: Infinity,
     hasHitbox: true,
+    setVisible: true,
+    setScale: 1,
+  },
+  cultist: {
+    width: 1,
+    height: 1.5,
+    destructible: true,
+    hp: Infinity,
+    hasHitbox: true,
+    setVisible: false,
+    setScale: 0.6,
   },
 };
 
@@ -106,7 +137,8 @@ export function addStaticObstacle({
   currentPlayer,
   obstacles,
 }: Props) {
-  const { width, height, destructible, hp, hasHitbox } = obstacleConfig[name];
+  const { width, height, destructible, hp, hasHitbox, setVisible, setScale } =
+    obstacleConfig[name];
 
   const WATER_DEPTH = 5;
   const OBSTACLES_DEPTH = 60;
@@ -134,9 +166,11 @@ export function addStaticObstacle({
     worldY += SQUARE_WIDTH / 2;
   }
 
-  const obstacle = scene.add.sprite(worldX, worldY, name);
+  const obstacle = scene.add.sprite(worldX - 8, worldY, name);
 
   obstacle.setDepth(OBSTACLES_DEPTH);
+  obstacle.setVisible(setVisible);
+  obstacle.setScale(setScale);
 
   if (hasHitbox) {
     scene.physics.add.existing(obstacle, true);

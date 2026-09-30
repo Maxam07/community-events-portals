@@ -13,6 +13,7 @@ import {
   getPerkAmount,
   rollForRareChest,
   CHEST_VISUALS,
+  STATIC_RANGE_POS,
 } from "./constants";
 import { EventBus } from "./lib/EventBus";
 import { SUNNYSIDE } from "assets/sunnyside";
@@ -34,9 +35,10 @@ import type {
   WeaponLevel,
   EnemyFormation,
   MiniBossType,
-  MiniBossWeaponType,
+  WeaponType,
   ChestRarity,
   MeleeEnemyTypes,
+  StaticRangeEnemyTypes,
 } from "./Types";
 import { BossEnemy } from "./containers/BossEnemyContainer";
 import {
@@ -47,9 +49,10 @@ import {
 } from "./containers/BalanceEnemy/WaveConfig";
 import { getFormationPositions } from "./containers/EnemyFormations";
 import { MiniBoss } from "./containers/MiniBossContainer";
-import { createMiniBossWeapon } from "./containers/enemyWeapons/MiniBossWeapons";
+import { createEnemyWeapon } from "./containers/enemyWeapons/WeaponsProjectile";
 import type { EnemyWeapon } from "./containers/enemyWeapons/EnemyWeapons";
 import { MeleeEnemy } from "./containers/MeleeEnemyContainer";
+import { StaticRangeEnemy } from "./containers/StaticRangeEnemyContainer";
 
 // export const NPCS: NPCBumpkin[] = [
 //   {
@@ -96,6 +99,8 @@ export class Scene extends BaseScene {
   private static readonly HEALING_TICK_MS = 1000;
   private waveState = new Map<string, boolean>();
   waterGroup!: Phaser.Physics.Arcade.StaticGroup;
+  staticRangeEnemies: StaticRangeEnemy[] = [];
+  staticRangeGroup!: Phaser.Physics.Arcade.Group;
   phasingEnemies: PhasingEnemy[] = [];
   phasingGroup!: Phaser.Physics.Arcade.Group;
   meleeEnemies: MeleeEnemy[] = [];
@@ -138,7 +143,7 @@ export class Scene extends BaseScene {
     super.preload();
 
     // Minigame assets
-    // Swarm Mobs
+    // Phasing mobs
     this.load.spritesheet("Mob1", "world/portal/images/mob1.webp", {
       frameWidth: 32,
       frameHeight: 32,
@@ -160,7 +165,25 @@ export class Scene extends BaseScene {
       frameHeight: 32,
     });
 
-    // Melee
+    // Static range mobs
+    this.load.spritesheet(
+      "cultist",
+      "world/portal/halloween/cultist_idle_Sheet.webp",
+      {
+        frameWidth: 32,
+        frameHeight: 32,
+      },
+    );
+    this.load.spritesheet(
+      "cultist_attack",
+      "world/portal/halloween/cultist_attack_Sheet.webp",
+      {
+        frameWidth: 32,
+        frameHeight: 32,
+      },
+    );
+
+    // Melee mobs
     this.load.spritesheet(
       "hellHound",
       "world/portal/halloween/HellHound_melee-Sheet.webp",
@@ -181,6 +204,72 @@ export class Scene extends BaseScene {
       frameWidth: 32,
       frameHeight: 32,
     });
+    this.load.spritesheet("demon2", "world/portal/halloween/meleeDemon2.webp", {
+      frameWidth: 66,
+      frameHeight: 48,
+    });
+
+    // MiniBoss
+    this.load.spritesheet(
+      "mummy_walk",
+      "world/portal/halloween/dungeonMummy-walk.webp",
+      {
+        frameWidth: 64,
+        frameHeight: 64,
+      },
+    );
+    this.load.spritesheet(
+      "mummy_attack",
+      "world/portal/halloween/dungeonMummy-attack.webp",
+      {
+        frameWidth: 64,
+        frameHeight: 64,
+      },
+    );
+    this.load.spritesheet(
+      "golem_walk",
+      "world/portal/halloween/dungeonGolem-walking.webp",
+      {
+        frameWidth: 64,
+        frameHeight: 64,
+      },
+    );
+    this.load.spritesheet(
+      "golem_attack",
+      "world/portal/halloween/dungeonGolem-attack.webp",
+      {
+        frameWidth: 64,
+        frameHeight: 64,
+      },
+    );
+
+    // Boss enemy
+    this.load.spritesheet("Boss1", "world/portal/images/BossEnemy1.webp", {
+      frameWidth: 55,
+      frameHeight: 71,
+    });
+    this.load.spritesheet("Boss2", "world/portal/images/BossEnemy2.webp", {
+      frameWidth: 71,
+      frameHeight: 64,
+    });
+    this.load.spritesheet("Boss3", "world/portal/images/BossEnemy3.webp", {
+      frameWidth: 55,
+      frameHeight: 50,
+    });
+
+    // Enemy weapon
+    this.load.spritesheet("Fire", "world/portal/halloween/fire.webp", {
+      frameWidth: 10,
+      frameHeight: 15,
+    });
+    this.load.spritesheet(
+      "fireBall",
+      "world/portal/halloween/fireball-Sheet.webp",
+      {
+        frameWidth: 16,
+        frameHeight: 16,
+      },
+    );
 
     // Chests
     this.load.spritesheet(
@@ -203,60 +292,6 @@ export class Scene extends BaseScene {
       "chest_legendary",
       "world/portal/images/placeholder1.png",
       { frameWidth: 16, frameHeight: 16 },
-    );
-
-    // Boss enemy
-    this.load.spritesheet("Boss1", "world/portal/images/BossEnemy1.webp", {
-      frameWidth: 55,
-      frameHeight: 71,
-    });
-    this.load.spritesheet("Boss2", "world/portal/images/BossEnemy2.webp", {
-      frameWidth: 71,
-      frameHeight: 64,
-    });
-    this.load.spritesheet("Boss3", "world/portal/images/BossEnemy3.webp", {
-      frameWidth: 55,
-      frameHeight: 50,
-    });
-
-    // enemy weapon
-    this.load.spritesheet("Fire", "world/portal/halloween/fire.webp", {
-      frameWidth: 10,
-      frameHeight: 15,
-    });
-
-    // mini boss
-    this.load.spritesheet(
-      "MiniBoss1",
-      "world/portal/halloween/dungeonMummy-walk.webp",
-      {
-        frameWidth: 64,
-        frameHeight: 64,
-      },
-    );
-    this.load.spritesheet(
-      "MiniBoss1_Attack",
-      "world/portal/halloween/dungeonMummy-attack.webp",
-      {
-        frameWidth: 64,
-        frameHeight: 64,
-      },
-    );
-    this.load.spritesheet(
-      "MiniBoss2",
-      "world/portal/halloween/dungeonGolem-walking.webp",
-      {
-        frameWidth: 64,
-        frameHeight: 64,
-      },
-    );
-    this.load.spritesheet(
-      "MiniBoss2_Attack",
-      "world/portal/halloween/dungeonGolem-attack.webp",
-      {
-        frameWidth: 64,
-        frameHeight: 64,
-      },
     );
 
     // Drop items
@@ -469,6 +504,14 @@ export class Scene extends BaseScene {
     this.initialiseWearables();
 
     // DEBUG
+    // const texture = this.textures.get("fireBall");
+
+    // console.log("Debug spritesheet:", {
+    //   width: texture.getSourceImage().width,
+    //   height: texture.getSourceImage().height,
+    //   frames: texture.getFrameNames(),
+    // });
+
     if (!this.physics.world.debugGraphic) {
       this.physics.world.createDebugGraphic();
     }
@@ -742,7 +785,7 @@ export class Scene extends BaseScene {
       this.weaponManager?.update(time, delta);
       this.applyHealingTick(delta);
       this.processTimeWaves();
-      this.scoreBaseWave();
+      this.killBaseWave();
       this.phasingEnemies.forEach((mob) => {
         mob.setPhasingMove(true);
       });
@@ -757,6 +800,9 @@ export class Scene extends BaseScene {
       });
       this.enemyWeapons.forEach((weapon) => {
         weapon.update(delta);
+      });
+      this.staticRangeEnemies.forEach((mob) => {
+        mob.updateMovement(delta);
       });
     } else if (this.isGamePlaying && this.isGameplayPaused) {
       this.velocity = 0;
@@ -774,6 +820,9 @@ export class Scene extends BaseScene {
       });
       this.miniBosses.forEach((miniBoss) => {
         miniBoss.setMiniBossMove(false);
+      });
+      this.staticRangeEnemies.forEach((mob) => {
+        mob.updateMovement(delta);
       });
     } else if (this.isGameReady) {
       this.portalService?.send("START");
@@ -1047,6 +1096,7 @@ export class Scene extends BaseScene {
       );
       this.weaponManager?.reset(nextWeaponLoadout);
     });
+    this.createStationaryEnemy("cultist", ["staticRange"]);
 
     this.events.once("shutdown", () => {
       subscription?.unsubscribe();
@@ -1055,6 +1105,7 @@ export class Scene extends BaseScene {
       this.enemyGroup?.destroy(false);
       this.phasingGroup?.destroy(false);
       this.meleeGroup?.destroy(false);
+      this.staticRangeGroup?.destroy(false);
       this.bossGroup?.destroy(false);
       this.miniBossGroup?.destroy(false);
     });
@@ -1126,6 +1177,7 @@ export class Scene extends BaseScene {
   private groupPhysics() {
     this.obstacleGroup = this.physics.add.staticGroup();
     this.waterGroup = this.physics.add.staticGroup();
+    this.staticRangeGroup = this.physics.add.group();
     this.phasingGroup = this.physics.add.group();
     this.meleeGroup = this.physics.add.group();
     this.enemyGroup = this.physics.add.group();
@@ -1147,6 +1199,7 @@ export class Scene extends BaseScene {
         this.enemyGroup,
         (_player, enemyObj) => {
           const enemy = enemyObj as
+            | StaticRangeEnemy
             | PhasingEnemy
             | MeleeEnemy
             | BossEnemy
@@ -1168,7 +1221,7 @@ export class Scene extends BaseScene {
     }
   }
 
-  private scoreBaseWave() {
+  private killBaseWave() {
     this.portalService?.onTransition((state) => {
       if (!state.changed) return;
 
@@ -1187,10 +1240,10 @@ export class Scene extends BaseScene {
     const secondsLeft = Math.max(endAt - Date.now(), 0) / 1000;
     const elapsedTime = GAME_SECONDS - secondsLeft;
 
-    // this.spawnBoss(elapsedTime);
     this.spawnPhasingMob(elapsedTime);
     this.spawnMeleeMob(elapsedTime);
     // this.spawnMiniBoss(elapsedTime);
+    // this.spawnBoss(elapsedTime);
   }
 
   private createObstacles() {
@@ -1254,7 +1307,6 @@ export class Scene extends BaseScene {
 
     let x = 0;
     let y = 0;
-    let placed = false;
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
@@ -1269,6 +1321,7 @@ export class Scene extends BaseScene {
       });
 
       if (!tooClose) {
+        let placed = false;
         placed = true;
         break;
       }
@@ -1378,7 +1431,7 @@ export class Scene extends BaseScene {
   private createMiniBossEnemy(
     miniBossType: MiniBossType,
     formation: EnemyFormation,
-    weaponTypes: MiniBossWeaponType[],
+    weaponTypes: WeaponType[],
     count = 1,
   ) {
     if (!this.currentPlayer) return 0;
@@ -1397,7 +1450,7 @@ export class Scene extends BaseScene {
       });
 
       for (const weaponType of weaponTypes) {
-        const weapon = createMiniBossWeapon({
+        const weapon = createEnemyWeapon({
           scene: this,
           target: miniBoss,
           player: this.currentPlayer,
@@ -1415,6 +1468,46 @@ export class Scene extends BaseScene {
 
       miniBoss.once("destroy", () => {
         this.unregisterMiniBossEnemy(miniBoss);
+      });
+    });
+  }
+
+  private createStationaryEnemy(
+    mobType: StaticRangeEnemyTypes,
+    weaponTypes: WeaponType[],
+  ) {
+    STATIC_RANGE_POS.forEach(({ x, y }) => {
+      if (!this.currentPlayer) return;
+      const spawnX = x * SQUARE_WIDTH;
+      const spawnY = y * SQUARE_WIDTH;
+
+      const mob = new StaticRangeEnemy({
+        x: spawnX,
+        y: spawnY,
+        scene: this,
+        player: this.currentPlayer,
+        mobType,
+        weaponTypes,
+      });
+
+      for (const weaponType of weaponTypes) {
+        const weapon = createEnemyWeapon({
+          scene: this,
+          target: mob,
+          player: this.currentPlayer,
+          enemyType: mobType,
+          weaponType,
+        });
+
+        this.enemyWeapons.push(weapon);
+        this.weaponGroup.add(weapon);
+      }
+
+      this.staticRangeEnemies.push(mob);
+      this.staticRangeGroup.add(mob);
+      this.enemyGroup.add(mob);
+      mob.once("destroy", () => {
+        this.unregisterStaticRangeMob(mob);
       });
     });
   }
@@ -1534,7 +1627,7 @@ export class Scene extends BaseScene {
   private miniBossWave(
     miniBossType: MiniBossType,
     total: number,
-    weaponType: MiniBossWeaponType[],
+    weaponType: WeaponType[],
     formation: EnemyFormation,
   ) {
     for (let i = 0; i < total; i++) {
@@ -1622,6 +1715,17 @@ export class Scene extends BaseScene {
     });
   }
 
+  public handleStatciMobDefeat(mob: StaticRangeEnemy) {
+    this.createDropItems({
+      x: mob.x,
+      y: mob.y - 15,
+      itemKey: mob.config.dropItem,
+    });
+
+    this.unregisterStaticRangeMob(mob);
+    // mob.destroy();
+  }
+
   public handlePhasingMobDefeat(mob: PhasingEnemy) {
     this.createDropItems({ x: mob.x, y: mob.y, itemKey: mob.config.dropItem });
 
@@ -1654,6 +1758,14 @@ export class Scene extends BaseScene {
 
     this.unregisterMeleeMobs(mob);
     mob.destroy();
+  }
+
+  private unregisterStaticRangeMob(mob: StaticRangeEnemy) {
+    this.staticRangeEnemies = this.staticRangeEnemies.filter(
+      (enemy) => enemy !== mob,
+    );
+    this.staticRangeGroup?.remove(mob, false, false);
+    this.enemyGroup?.remove(mob, false, false);
   }
 
   private unregisterSwarmMob(mob: PhasingEnemy) {

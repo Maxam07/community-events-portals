@@ -6,7 +6,7 @@ import { MiniBoss } from "../MiniBossContainer";
 
 interface SummonigWeaponProps {
   scene: Scene;
-  target: MiniBoss;
+  target: Phaser.GameObjects.Container;
   texture: string;
   warningTexture?: string;
   offsetX?: number;
@@ -38,7 +38,9 @@ export class SummoningWeapon extends Phaser.GameObjects.Sprite {
   private enemyType: EnemyType;
 
   private isWaitingForNextSpawn = true;
-  private phase: "tree_stump" | "fire" | "waiting" = "waiting";
+  private phase: "warning" | "summon" | "waiting" = "waiting";
+  private weapontexture: string;
+  private warningTexture: string;
 
   constructor({
     scene,
@@ -47,7 +49,7 @@ export class SummoningWeapon extends Phaser.GameObjects.Sprite {
     warningTexture = "tree_stump",
     offsetX = 0,
     offsetY = 0,
-    scale = 1,
+    scale,
     depth = 1001,
     delayMs = 3000,
     warningDurationMs = 1000,
@@ -55,7 +57,7 @@ export class SummoningWeapon extends Phaser.GameObjects.Sprite {
     player,
     enemyType,
   }: SummonigWeaponProps) {
-    super(scene, target.x + offsetX, target.y + offsetY, warningTexture);
+    super(scene, target.x + offsetX, target.y + offsetY, texture);
 
     this.target = target;
     this.offsetX = offsetX;
@@ -67,6 +69,8 @@ export class SummoningWeapon extends Phaser.GameObjects.Sprite {
 
     this.player = player;
     this.enemyType = enemyType;
+    this.weapontexture = texture;
+    this.warningTexture = warningTexture;
 
     scene.add.existing(this);
 
@@ -86,7 +90,7 @@ export class SummoningWeapon extends Phaser.GameObjects.Sprite {
 
     this.scene.anims.create({
       key: animationKey,
-      frames: this.scene.anims.generateFrameNumbers("Fire", {
+      frames: this.scene.anims.generateFrameNumbers(this.weapontexture, {
         start: 0,
         end: 7,
       }),
@@ -117,16 +121,13 @@ export class SummoningWeapon extends Phaser.GameObjects.Sprite {
     this.elapsedMs += delta;
 
     // Warning finished -> turn into fire
-    if (
-      this.phase === "tree_stump" &&
-      this.elapsedMs >= this.warningDurationMs
-    ) {
+    if (this.phase === "warning" && this.elapsedMs >= this.warningDurationMs) {
       this.spawnFire();
       return;
     }
 
     // Fire duration finished
-    if (this.phase === "fire" && this.elapsedMs >= this.durationMs) {
+    if (this.phase === "summon" && this.elapsedMs >= this.durationMs) {
       this.resetToWait();
     }
   }
@@ -144,11 +145,11 @@ export class SummoningWeapon extends Phaser.GameObjects.Sprite {
     this.y = this.player.y + gap;
 
     this.elapsedMs = 0;
-    this.phase = "tree_stump";
+    this.phase = "warning";
     this.isWaitingForNextSpawn = false;
 
     this.stop();
-    this.setTexture("tree_stump");
+    this.setTexture(this.warningTexture);
     this.setVisible(true);
 
     if (this.target instanceof MiniBoss) {
@@ -161,9 +162,9 @@ export class SummoningWeapon extends Phaser.GameObjects.Sprite {
    */
   private spawnFire() {
     this.elapsedMs = 0;
-    this.phase = "fire";
+    this.phase = "summon";
 
-    this.setTexture("Fire");
+    this.setTexture(this.weapontexture);
     this.play("Fire_summon");
 
     if (this.target instanceof MiniBoss) {
@@ -178,7 +179,7 @@ export class SummoningWeapon extends Phaser.GameObjects.Sprite {
   public handlePlayerContact() {
     if (!this.active || this.isDead) return;
 
-    if (this.phase !== "fire") {
+    if (this.phase !== "summon") {
       return;
     }
 
