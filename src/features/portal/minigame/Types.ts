@@ -260,6 +260,15 @@ export type EnemyFormation =
   | "horizontal line"
   | "circle"
   | "surround";
+export type AreaEnemyType =
+  | PhasingEnemyTypes
+  | PhasingEnemyType
+  | MeleeEnemyTypes
+  | StaticRangeEnemyTypes
+  | MiniBossType
+  | BossTypes;
+
+export type SpawnArea = 1 | 2 | 3 | 4;
 
 export type PhasingEnemyType =
   // Area 1

@@ -62,5 +62,17 @@ export const OBSTACLES_LAYOUT = {
     // { name: "rock", x: 3, y: 4 },
     // { name: "rock", x: 12, y: 40 },
     // { name: "rock", x: 45, y: 45 },
+    // water
+    { name: "water", x: 2, y: 109 },
+    { name: "water", x: 6, y: 109 },
+    { name: "water", x: 10, y: 109 },
+    // add bridge
+    { name: "water", x: 18, y: 109 },
+    { name: "water", x: 22, y: 109 },
+    { name: "water", x: 26, y: 109 },
+    { name: "water", x: 30, y: 109 },
+    { name: "water", x: 34, y: 109 },
+    { name: "water", x: 38, y: 109 },
+    { name: "water", x: 42, y: 109 },
   ] as Obstacle[],
 };

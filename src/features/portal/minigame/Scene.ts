@@ -1,4 +1,4 @@
-import mapJson from "assets/map/emptyMap4.json";
+import mapJson from "assets/map/empty_Map.json";
 // import tilesetconfig from "assets/map/tileset.json";
 import type { SceneId } from "features/world/mmoMachine";
 import { BaseScene } from "./Core/BaseScene";
@@ -39,6 +39,7 @@ import type {
   ChestRarity,
   MeleeEnemyTypes,
   StaticRangeEnemyTypes,
+  EnemyType,
 } from "./Types";
 import { BossEnemy } from "./containers/BossEnemyContainer";
 import {
@@ -53,6 +54,10 @@ import { createEnemyWeapon } from "./containers/enemyWeapons/WeaponsProjectile";
 import type { EnemyWeapon } from "./containers/enemyWeapons/EnemyWeapons";
 import { MeleeEnemy } from "./containers/MeleeEnemyContainer";
 import { StaticRangeEnemy } from "./containers/StaticRangeEnemyContainer";
+import {
+  ENEMY_SPAWN_AREAS,
+  ENEMY_AREAS,
+} from "./containers/BalanceEnemy/SpawnAreaLimit";
 
 // export const NPCS: NPCBumpkin[] = [
 //   {
@@ -781,7 +786,7 @@ export class Scene extends BaseScene {
       // The game has started
       this.velocity = this.getPlayerMovementSpeed();
       this.loadBumpkinAnimations();
-      this.handlePlayerOutOfWater();
+      // this.handlePlayerOutOfWater();
       this.weaponManager?.update(time, delta);
       this.applyHealingTick(delta);
       this.processTimeWaves();
@@ -1176,7 +1181,7 @@ export class Scene extends BaseScene {
 
   private groupPhysics() {
     this.obstacleGroup = this.physics.add.staticGroup();
-    this.waterGroup = this.physics.add.staticGroup();
+    // this.waterGroup = this.physics.add.staticGroup();
     this.staticRangeGroup = this.physics.add.group();
     this.phasingGroup = this.physics.add.group();
     this.meleeGroup = this.physics.add.group();
@@ -1240,7 +1245,7 @@ export class Scene extends BaseScene {
     const secondsLeft = Math.max(endAt - Date.now(), 0) / 1000;
     const elapsedTime = GAME_SECONDS - secondsLeft;
 
-    this.spawnPhasingMob(elapsedTime);
+    // this.spawnPhasingMob(elapsedTime);
     this.spawnMeleeMob(elapsedTime);
     // this.spawnMiniBoss(elapsedTime);
     // this.spawnBoss(elapsedTime);
@@ -1392,9 +1397,15 @@ export class Scene extends BaseScene {
   private getSpawnPositions(
     formation: EnemyFormation,
     count: number,
+    enemyType: EnemyType,
   ): { x: number; y: number }[] {
     if (!this.currentPlayer) return [];
+
     const minSpawnDistance = 5 * SQUARE_WIDTH;
+
+    const area = ENEMY_AREAS[enemyType];
+    const spawnArea = ENEMY_SPAWN_AREAS[area];
+
     const positions = getFormationPositions(
       formation,
       count,
@@ -1404,7 +1415,6 @@ export class Scene extends BaseScene {
 
     const px = this.currentPlayer.x;
     const py = this.currentPlayer.y;
-    const minDist = minSpawnDistance;
 
     return positions.map(({ x, y }) => {
       let spawnX = x;
@@ -1414,16 +1424,22 @@ export class Scene extends BaseScene {
       const dy = spawnY - py;
       const dist = Math.hypot(dx, dy);
 
-      if (dist < minDist) {
-        // Pick a direction to push the spawn point out along.
-        // If it landed exactly on the player, pick a random angle instead of dividing by zero.
+      if (dist < minSpawnDistance) {
         const angle =
           dist > 0 ? Math.atan2(dy, dx) : Math.random() * Math.PI * 2;
-        spawnX = px + Math.cos(angle) * minDist;
-        spawnY = py + Math.sin(angle) * minDist;
+
+        spawnX = px + Math.cos(angle) * minSpawnDistance;
+        spawnY = py + Math.sin(angle) * minSpawnDistance;
       }
 
-      return { x: spawnX, y: spawnY };
+      // Restrict enemy to its area
+      spawnX = Phaser.Math.Clamp(spawnX, spawnArea.minX, spawnArea.maxX);
+      spawnY = Phaser.Math.Clamp(spawnY, spawnArea.minY, spawnArea.maxY);
+
+      return {
+        x: spawnX,
+        y: spawnY,
+      };
     });
   }
 
@@ -1435,7 +1451,7 @@ export class Scene extends BaseScene {
     count = 1,
   ) {
     if (!this.currentPlayer) return 0;
-    const positions = this.getSpawnPositions(formation, count);
+    const positions = this.getSpawnPositions(formation, count, miniBossType);
 
     positions.forEach(({ x: spawnX, y: spawnY }) => {
       if (!this.currentPlayer) return;
@@ -1518,7 +1534,7 @@ export class Scene extends BaseScene {
     count: number,
   ): number {
     if (!this.currentPlayer) return 0;
-    const positions = this.getSpawnPositions(formation, count);
+    const positions = this.getSpawnPositions(formation, count, mobType);
     let spawned = 0;
 
     positions.forEach(({ x: spawnX, y: spawnY }) => {
@@ -1550,7 +1566,7 @@ export class Scene extends BaseScene {
     count: number,
   ): number {
     if (!this.currentPlayer) return 0;
-    const positions = this.getSpawnPositions(formation, count);
+    const positions = this.getSpawnPositions(formation, count, mobType);
     let spawned = 0;
 
     positions.forEach(({ x: spawnX, y: spawnY }) => {

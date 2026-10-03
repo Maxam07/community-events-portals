@@ -40,7 +40,7 @@ const obstacleConfig: Record<
     height: 4,
     destructible: false,
     hp: Infinity,
-    hasHitbox: false,
+    hasHitbox: true,
     setVisible: true,
     setScale: 1,
   },
@@ -187,10 +187,10 @@ export function addStaticObstacle({
     obstacle.alpha = 0.8;
   }
 
-  if (name === "water") {
-    waterGroup.add(obstacle);
-    waterGroup.setDepth(WATER_DEPTH);
-  }
+  // if (name === "water") {
+  //   waterGroup.add(obstacle);
+  //   waterGroup.setDepth(WATER_DEPTH);
+  // }
 
   obstacles.push({
     x: coordinates.x,
