@@ -5,7 +5,6 @@ import item from "public/world/portal/images/ExpOrb_combined.webp";
 import Decimal from "decimal.js-light";
 import { useSelector } from "@xstate/react";
 import { PortalContext } from "../../lib/PortalProvider";
-import { PORTAL_NAME } from "../../constants";
 import { useAppTranslation } from "lib/i18n/useAppTranslations";
 import { Label } from "components/ui/Label";
 
@@ -18,7 +17,7 @@ export const ColletedItems: React.FC = () => {
   const itemCount = useSelector(portalService, _item);
   return (
     <>
-      <Label type="default">{t(`${PORTAL_NAME}.scoreTitle`)}</Label>
+      <Label type="default">{t("minigame.scoreTitle")}</Label>
       <Box
         image={item}
         count={new Decimal(itemCount)}

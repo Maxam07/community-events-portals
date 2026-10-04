@@ -6,7 +6,6 @@ import type {
 import { translate as t } from "lib/i18n/translate";
 import { DROP_ITEM_XP_VALUES } from "./EnemyConstants";
 import { WEAPON_CONFIGS, WEAPON_UPGRADES } from "./WeaponConstants";
-import { PORTAL_NAME } from "./PortalConstants";
 
 import banana_icon from "public/world/portal/images/banana_icon.webp";
 import scythe_icon from "public/world/portal/images/scythe_icon.png";
@@ -91,7 +90,7 @@ export const IMMUNITY_TOOLTIP: {
   {
     id: "wings",
     image: tooltip_icon,
-    description: t(`${PORTAL_NAME}.AbilityDescription`),
+    description: t("minigame.AbilityDescription"),
   },
 ];
 
@@ -103,27 +102,27 @@ export const INSTRUCTIONS: {
 }[] = [
   {
     image: icon_boss3,
-    description: t(`${PORTAL_NAME}.instructions1`),
+    description: t("minigame.instructions1"),
   },
   {
     image: purpleOrb,
-    description: t(`${PORTAL_NAME}.instructions2`),
+    description: t("minigame.instructions2"),
   },
   {
     image: watering_can_icon,
-    description: t(`${PORTAL_NAME}.instructions3`),
+    description: t("minigame.instructions3"),
   },
   // {
   //   image: getWearableImage(`${PASSIVE_ABILITY_ITEM}`),
-  //   description: t(`${PORTAL_NAME}.instructions8`),
+  //   description: t("minigame.instructions8"),
   // },
   {
     image: SUNNYSIDE.icons.xpIcon,
-    description: t(`${PORTAL_NAME}.instructions7`),
+    description: t("minigame.instructions7"),
   },
   {
     image: SUNNYSIDE.icons.upgrade_disc,
-    description: t(`${PORTAL_NAME}.instructions4`),
+    description: t("minigame.instructions4"),
   },
 ];
 
@@ -134,19 +133,19 @@ export const RESOURCES_TABLE: {
 }[] = [
   {
     image: SUNNYSIDE.icons.heart,
-    description: t(`${PORTAL_NAME}.resource1`),
+    description: t("minigame.resource1"),
   },
   {
     image: speedIcon,
-    description: t(`${PORTAL_NAME}.resource2`),
+    description: t("minigame.resource2"),
   },
   {
     image: swordIcon,
-    description: t(`${PORTAL_NAME}.resource3`),
+    description: t("minigame.resource3"),
   },
   // {
   //   image: getWearableImage(`${PASSIVE_ABILITY_ITEM}`),
-  //   description: t(`${PORTAL_NAME}.AbilityDescription`),
+  //   description: t("minigame.AbilityDescription"),
   // },
 ];
 
@@ -263,64 +262,64 @@ export const SKILLS_TABLE: {
 }[] = [
   {
     image: banana_icon,
-    skillName: t(`${PORTAL_NAME}.weapon.banana`),
-    description: t(`${PORTAL_NAME}.enemy2`),
+    skillName: t("minigame.weapon.banana"),
+    description: t("minigame.enemy2"),
     minDamage: skill_config.banana.baseStats.damage,
     maxDamage: getWeaponMaxDamage("banana"),
   },
   {
     image: scythe_icon,
-    skillName: t(`${PORTAL_NAME}.weapon.broomScythe`),
-    description: t(`${PORTAL_NAME}.enemy3`),
+    skillName: t("minigame.weapon.broomScythe"),
+    description: t("minigame.enemy3"),
     minDamage: skill_config.broomScythe.baseStats.damage,
     maxDamage: getWeaponMaxDamage("broomScythe"),
   },
   {
     image: watering_can_icon,
-    skillName: t(`${PORTAL_NAME}.weapon.wateringCan`),
-    description: t(`${PORTAL_NAME}.enemy1`),
+    skillName: t("minigame.weapon.wateringCan"),
+    description: t("minigame.enemy1"),
     minDamage: skill_config.wateringCan.baseStats.damage,
     maxDamage: getWeaponMaxDamage("wateringCan"),
   },
   {
     image: corn_bomb_icon,
-    skillName: t(`${PORTAL_NAME}.weapon.corn`),
-    description: t(`${PORTAL_NAME}.enemy3`),
+    skillName: t("minigame.weapon.corn"),
+    description: t("minigame.enemy3"),
     minDamage: skill_config.corn.baseStats.damage,
     maxDamage: getWeaponMaxDamage("corn"),
   },
   {
     image: tomato_icon,
-    skillName: t(`${PORTAL_NAME}.weapon.tomato`),
-    description: t(`${PORTAL_NAME}.enemy3`),
+    skillName: t("minigame.weapon.tomato"),
+    description: t("minigame.enemy3"),
     minDamage: skill_config.tomato.baseStats.damage,
     maxDamage: getWeaponMaxDamage("tomato"),
   },
   {
     image: sunflower_icon,
-    skillName: t(`${PORTAL_NAME}.weapon.sunflower`),
-    description: t(`${PORTAL_NAME}.enemy3`),
+    skillName: t("minigame.weapon.sunflower"),
+    description: t("minigame.enemy3"),
     minDamage: skill_config.sunflower.baseStats.damage,
     maxDamage: getWeaponMaxDamage("sunflower"),
   },
   {
     image: oil_icon,
-    skillName: t(`${PORTAL_NAME}.weapon.oil`),
-    description: t(`${PORTAL_NAME}.enemy3`),
+    skillName: t("minigame.weapon.oil"),
+    description: t("minigame.enemy3"),
     minDamage: skill_config.oil.baseStats.damage,
     maxDamage: getWeaponMaxDamage("oil"),
   },
   {
     image: pumpkin_icon,
-    skillName: t(`${PORTAL_NAME}.weapon.pumpkin`),
-    description: t(`${PORTAL_NAME}.enemy3`),
+    skillName: t("minigame.weapon.pumpkin"),
+    description: t("minigame.enemy3"),
     minDamage: skill_config.pumpkin.baseStats.damage,
     maxDamage: getWeaponMaxDamage("pumpkin"),
   },
   {
     image: beehive_icon,
-    skillName: t(`${PORTAL_NAME}.weapon.beehive`),
-    description: t(`${PORTAL_NAME}.enemy3`),
+    skillName: t("minigame.weapon.beehive"),
+    description: t("minigame.enemy3"),
     minDamage: skill_config.beehive.baseStats.damage,
     maxDamage: getWeaponMaxDamage("beehive"),
   },
@@ -333,27 +332,27 @@ export const DROP_ITEMS_XP_TABLE: {
 }[] = [
   {
     image: blueOrb,
-    description: t(`${PORTAL_NAME}.enemy1`),
+    description: t("minigame.enemy1"),
     xp: DROP_ITEM_XP_VALUES.blueOrb,
   },
   {
     image: greenOrb,
-    description: t(`${PORTAL_NAME}.enemy2`),
+    description: t("minigame.enemy2"),
     xp: DROP_ITEM_XP_VALUES.greenOrb,
   },
   {
     image: grayOrb,
-    description: t(`${PORTAL_NAME}.enemy2`),
+    description: t("minigame.enemy2"),
     xp: DROP_ITEM_XP_VALUES.grayOrb,
   },
   {
     image: yellowOrb,
-    description: t(`${PORTAL_NAME}.enemy2`),
+    description: t("minigame.enemy2"),
     xp: DROP_ITEM_XP_VALUES.yellowOrb,
   },
   {
     image: purpleOrb,
-    description: t(`${PORTAL_NAME}.enemy2`),
+    description: t("minigame.enemy2"),
     xp: DROP_ITEM_XP_VALUES.purpleOrb,
   },
 ];

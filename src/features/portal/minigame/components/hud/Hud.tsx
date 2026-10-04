@@ -14,6 +14,7 @@ import { BumpkinProfile } from "./BumpkinProfile";
 import { HudWeapons } from "./HudWeapons";
 import { HudPerks } from "./HudPerks";
 import { Target } from "./Target";
+import { SpecialPowerButton } from "./SpecialPowerButton";
 
 const _isJoystickActive = (state: PortalMachineState) =>
   state.context.isJoystickActive;
@@ -84,6 +85,7 @@ export const Hud: React.FC = () => {
                 <HudWeapons />
               </div>
               <Settings />
+              <SpecialPowerButton />
             </>
           )}
         </div>

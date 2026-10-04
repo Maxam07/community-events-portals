@@ -3,8 +3,8 @@ import React from "react";
 import { useAppTranslation } from "lib/i18n/useAppTranslations";
 import { SquareIcon } from "components/ui/SquareIcon";
 import { Label } from "components/ui/Label";
-import { PORTAL_NAME, INSTRUCTIONS, RESOURCES_TABLE } from "../../constants";
-import { Enemies, Skills } from "./CodexCategories";
+import { INSTRUCTIONS, RESOURCES_TABLE } from "../../constants";
+import { Categories, Enemies, Skills } from "./CodexCategories";
 import { DropItemsXP } from "./CodexCategories";
 
 export const Guide = () => {
@@ -15,20 +15,20 @@ export const Guide = () => {
       {/* title */}
       <div className="flex flex-col gap-1">
         <div className="flex text-center">
-          {/* <div className="grow mb-3 text-lg">{t(`${PORTAL_NAME}.guide`)}</div> */}
+          {/* <div className="grow mb-3 text-lg">{t("minigame.guide")}</div> */}
         </div>
       </div>
 
       {/* content */}
       <div className="flex flex-col gap-1 overflow-y-auto scrollable pr-1">
         {/* Instructions */}
-        <Label type="default">{t(`${PORTAL_NAME}.instructions`)}</Label>
+        <Label type="default">{t("minigame.instructions")}</Label>
         {INSTRUCTIONS.map(({ image, description, width = 10 }, index) => (
           <div key={index}>
             <div className="flex items-center mb-3 mx-2">
               <SquareIcon icon={image} width={width} />
               <p className="text-xs ml-3 flex-1">
-                {t(`${PORTAL_NAME}.guideDescription`, {
+                {t("minigame.guideDescription", {
                   description: description,
                 })}
               </p>
@@ -36,7 +36,7 @@ export const Guide = () => {
           </div>
         ))}
         {/* Resources */}
-        <Label type="default">{t(`${PORTAL_NAME}.resources`)}</Label>
+        <Label type="default">{t("minigame.resources")}</Label>
         <table className="w-full text-xs table-fixed border-collapse">
           <tbody>
             {RESOURCES_TABLE.map(
@@ -54,7 +54,7 @@ export const Guide = () => {
                     style={{ border: "1px solid #b96f50" }}
                     className="p-1.5 w-5/6"
                   >
-                    {t(`${PORTAL_NAME}.guideDescription`, {
+                    {t("minigame.guideDescription", {
                       description: description,
                     })}
                   </td>
@@ -65,6 +65,8 @@ export const Guide = () => {
         </table>
         {/* Skills */}
         <Skills />
+        {/* Weapon categories + Special Power */}
+        <Categories />
         {/* Enemies */}
         <Enemies />
         {/* Drop Items XP */}

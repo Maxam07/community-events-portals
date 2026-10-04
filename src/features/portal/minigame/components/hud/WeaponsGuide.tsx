@@ -2,13 +2,15 @@ import React, { useMemo, useState } from "react";
 import classNames from "classnames";
 
 import { ModalOverlay } from "components/ui/ModalOverlay";
-import { Label } from "components/ui/Label";
+import { Label, LABEL_STYLES } from "components/ui/Label";
 import { ButtonPanel, InnerPanel, OuterPanel } from "components/ui/Panel";
 import { SquareIcon } from "components/ui/SquareIcon";
 import { useAppTranslation } from "lib/i18n/useAppTranslations";
 import {
-  PORTAL_NAME,
+  CATEGORY_CONFIGS,
   resolveWeaponStats,
+  WEAPON_CATEGORIES,
+  WEAPON_CATEGORY_IDS,
   WEAPON_DESCRIPTIONS,
   WEAPON_ICONS,
   WEAPON_IDS,
@@ -38,27 +40,55 @@ export const WeaponsGuide: React.FC = () => {
     }));
   }, [selectedLevel, selectedWeapon]);
 
+  const category = CATEGORY_CONFIGS[WEAPON_CATEGORIES[selectedWeapon]];
+
   return (
     <div className={`relative flex ${PANEL_CONTENT_HEIGHT} pl-4 sm:pl-0`}>
       <div className="flex h-full w-12 flex-col items-center justify-center">
-        <div className="flex max-h-full flex-col gap-1 overflow-y-auto scrollable">
-          {WEAPON_IDS.map((weapon) => (
-            <OuterPanel
-              key={weapon}
-              className={classNames(
-                "flex h-9 w-9 cursor-pointer items-center justify-center p-0.5 hover:brightness-110",
-              )}
-              style={{
-                background: selectedWeapon === weapon ? "#ead4aa" : undefined,
-              }}
-              onClick={() => {
-                setSelectedWeapon(weapon);
-                setSelectedLevel(1);
-              }}
-            >
-              <SquareIcon icon={WEAPON_ICONS[weapon]} width={9} />
-            </OuterPanel>
-          ))}
+        <div className="flex max-h-full flex-col gap-3 overflow-y-auto scrollable p-1">
+          {/* Weapons grouped by category; buttons use the category Label style */}
+          {WEAPON_CATEGORY_IDS.map((weaponCategory) => {
+            const config = CATEGORY_CONFIGS[weaponCategory];
+            const labelStyle = LABEL_STYLES[config.labelType];
+            const weapons = WEAPON_IDS.filter(
+              (weapon) => WEAPON_CATEGORIES[weapon] === weaponCategory,
+            );
+
+            if (weapons.length === 0) return null;
+
+            return (
+              <div
+                key={weaponCategory}
+                className="flex flex-col gap-1"
+                title={t(config.name)}
+              >
+                {weapons.map((weapon) => {
+                  const isSelected = selectedWeapon === weapon;
+
+                  return (
+                    <div
+                      key={weapon}
+                      className={classNames(
+                        "flex h-9 w-9 cursor-pointer items-center justify-center p-0.5 hover:brightness-110",
+                        { "brightness-125": isSelected },
+                      )}
+                      style={{
+                        ...labelStyle.borderStyle,
+                        background: labelStyle.background,
+                        boxShadow: isSelected ? "0 0 0 2px #ffffff" : undefined,
+                      }}
+                      onClick={() => {
+                        setSelectedWeapon(weapon);
+                        setSelectedLevel(1);
+                      }}
+                    >
+                      <SquareIcon icon={WEAPON_ICONS[weapon]} width={9} />
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -97,7 +127,7 @@ export const WeaponsGuide: React.FC = () => {
                 className="flex flex-col h-12 w-100 items-center justify-center text-xs text-center"
                 onClick={() => setSelectedLevel(level)}
               >
-                <span>{t(`${PORTAL_NAME}.level`)}</span>
+                <span>{t("minigame.level")}</span>
                 <span>{`${level}`}</span>
               </ButtonPanel>
             ))}
@@ -118,7 +148,7 @@ export const WeaponsGuide: React.FC = () => {
                   style={{ border: "1px solid #352e22" }}
                   className="px-[2px] py-[1px] text-center leading-none"
                 >
-                  {t(`festival-of-colors.weaponLevel`, {
+                  {t("minigame.weaponLevel", {
                     level: selectedLevel,
                   })}
                 </th>
@@ -161,6 +191,19 @@ export const WeaponsGuide: React.FC = () => {
               ))}
             </tbody>
           </table>
+
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="flex flex-col items-center gap-1">
+              <Label type="info">{t("minigame.weaponGuide.category")}</Label>
+              <Label type={category.labelType} className="text-center">
+                {t(category.name)}
+              </Label>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <Label type="info">{t("minigame.weaponGuide.power")}</Label>
+              <Label type={category.labelType}>{t(category.effectName)}</Label>
+            </div>
+          </div>
         </div>
       </OuterPanel>
 

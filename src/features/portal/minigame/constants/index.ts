@@ -10,3 +10,4 @@ export * from "./WearableConstants";
 export * from "./PerkConstants";
 export * from "./PerkUIConstants";
 export * from "./ChestConstants";
+export * from "./CategoryConstants";

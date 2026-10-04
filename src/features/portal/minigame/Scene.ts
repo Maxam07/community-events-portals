@@ -21,7 +21,7 @@ import type { BoundingBox } from "./lib/collisionDetection";
 import { addStaticObstacle } from "./containers/ObstaclesContainer";
 import { WeaponManager } from "./lib/combat/WeaponManager";
 import type { BumpkinContainer } from "./Core/BumpkinContainer";
-import { OBSTACLES_LAYOUT } from "./constants";
+import { OBSTACLES_LAYOUT, resolveSpecialPower } from "./constants";
 import { PhasingEnemy } from "./containers/PhasingEnemyContainer";
 import { SQUARE_WIDTH } from "features/game/lib/constants";
 import { DropItem } from "./containers/DropItemsContainer";
@@ -99,6 +99,8 @@ export class Scene extends BaseScene {
   private obstacleGroup!: Phaser.Physics.Arcade.StaticGroup;
   private enemyGroup!: Phaser.Physics.Arcade.Group;
   private weaponManager?: WeaponManager;
+  // Active Special Power categories already pushed to WeaponManager.
+  private appliedSpecialPowerKey = "";
   private seaBeastDefeated = false;
   private healingElapsedMs = 0;
   private static readonly HEALING_TICK_MS = 1000;
@@ -787,6 +789,7 @@ export class Scene extends BaseScene {
       this.velocity = this.getPlayerMovementSpeed();
       this.loadBumpkinAnimations();
       // this.handlePlayerOutOfWater();
+      this.syncSpecialPower();
       this.weaponManager?.update(time, delta);
       this.applyHealingTick(delta);
       this.processTimeWaves();
@@ -1053,8 +1056,42 @@ export class Scene extends BaseScene {
       .setAlpha(0);
   }
 
+  // Mirrors the XState Special Power window into the combat systems. Runs
+  // every playing frame because expiry is time-based (no state change).
+  private syncSpecialPower() {
+    const context = this.portalService?.state.context;
+    if (!context) return;
+
+    const now = Date.now();
+    const activeUntil = context.specialPowerActiveUntil;
+    const power =
+      now < activeUntil ? resolveSpecialPower(context.weaponLevels) : null;
+
+    // Each category power lasts its own window (hybrid powers end apart).
+    // activeUntil is the longest window, so it also gives the activation
+    // time - and stays correct after pauses shift it forward.
+    const activatedAt = power ? activeUntil - power.activeMs : 0;
+    const activeCategories =
+      power?.categories.filter(
+        (category) =>
+          now < activatedAt + (power.activeMsByCategory[category] ?? 0),
+      ) ?? [];
+    const key = activeCategories.join(",");
+
+    if (key === this.appliedSpecialPowerKey) return;
+
+    this.appliedSpecialPowerKey = key;
+    this.weaponManager?.setSpecialPower(
+      power && activeCategories.length > 0
+        ? { ...power, categories: activeCategories }
+        : null,
+    );
+  }
+
   private initialiseCombat() {
     if (!this.currentPlayer) return;
+
+    this.appliedSpecialPowerKey = "";
 
     const portalService = this.portalService;
     const portalContext = portalService?.state.context;
@@ -1204,11 +1241,7 @@ export class Scene extends BaseScene {
         this.enemyGroup,
         (_player, enemyObj) => {
           const enemy = enemyObj as
-            | StaticRangeEnemy
-            | PhasingEnemy
-            | MeleeEnemy
-            | BossEnemy
-            | MiniBoss;
+            StaticRangeEnemy | PhasingEnemy | MeleeEnemy | BossEnemy | MiniBoss;
           enemy.handlePlayerContact();
         },
       );

@@ -33,6 +33,8 @@ export class MiniBoss extends Phaser.GameObjects.Container {
   public isDead = false;
   public config: EnemyConfig;
   private isHurting = false;
+  // Status effects (slow/stun) scale movement speed; 1 = normal speed.
+  private movementMultiplier = 1;
   private hurtFlashRemainingMs = 0;
   public deSpawnState = false;
   private miniBossType: MiniBossType;
@@ -77,8 +79,7 @@ export class MiniBoss extends Phaser.GameObjects.Container {
 
   public get portalService() {
     return this.scene.registry.get("portalService") as
-      | MachineInterpreter
-      | undefined;
+      MachineInterpreter | undefined;
   }
 
   createEnemy() {
@@ -144,8 +145,7 @@ export class MiniBoss extends Phaser.GameObjects.Container {
 
   private avoidObstacles(): { x: number; y: number } {
     const obstacles = (this.scene as any).obstacles as
-      | BoundingBox[]
-      | undefined;
+      BoundingBox[] | undefined;
     if (!obstacles || obstacles.length === 0) return { x: 0, y: 0 };
 
     let pushX = 0;
@@ -272,8 +272,8 @@ export class MiniBoss extends Phaser.GameObjects.Container {
       moveY = dx * inverseDistance;
     }
 
-    const velocityX = moveX * this.config.speed;
-    const velocityY = moveY * this.config.speed;
+    const velocityX = moveX * this.config.speed * this.movementMultiplier;
+    const velocityY = moveY * this.config.speed * this.movementMultiplier;
 
     this.enemyBody.setVelocity(velocityX, velocityY);
 
@@ -287,6 +287,25 @@ export class MiniBoss extends Phaser.GameObjects.Container {
   setMiniBossMove(value: boolean) {
     this.miniBossMove = value;
     if (!value) this.enemyBody.setVelocity(0, 0);
+  }
+
+  public setMovementMultiplier(multiplier: number) {
+    if (multiplier === this.movementMultiplier) return;
+
+    const previous = this.movementMultiplier;
+    this.movementMultiplier = multiplier;
+
+    // Destroyed/dead enemies keep the value but have no body/anims to touch.
+    if (!this.scene || this.isDead || !this.sprite?.anims) return;
+
+    // Apply right away instead of waiting for the next movement update.
+    if (previous > 0) this.enemyBody?.velocity.scale(multiplier / previous);
+
+    if (multiplier === 0) {
+      this.sprite.anims.pause();
+    } else if (previous === 0) {
+      this.sprite.anims.resume();
+    }
   }
 
   public handlePlayerContact() {

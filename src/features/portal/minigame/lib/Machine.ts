@@ -17,6 +17,8 @@ import {
   ENEMY_BALANCE_STATS,
   getActiveWearableBuffs,
   NO_WEARABLE_BUFF_SCORE_MULTIPLIER,
+  resolveSpecialPower,
+  SPECIAL_POWER_CONFIG,
 } from "../constants";
 import {
   CHEST_BONUS_LEVEL_CHANCES,
@@ -69,6 +71,17 @@ const getFinalRunScore = (context: Context) => {
 const getMaxLives = (perkLevels?: PerkLevels) =>
   GAME_LIVES + getPerkAmount(perkLevels, "maxHealth");
 
+export const canActivateSpecialPower = (
+  context: Pick<
+    Context,
+    "isGameplayPaused" | "weaponLevels" | "specialPowerCooldownUntil"
+  >,
+  now = Date.now(),
+) =>
+  !context.isGameplayPaused &&
+  resolveSpecialPower(context.weaponLevels).kind !== "none" &&
+  now >= context.specialPowerCooldownUntil;
+
 export interface Context {
   id: number;
   jwt: string | null;
@@ -103,6 +116,9 @@ export interface Context {
   hudWeapons: WeaponId[];
   perkLevels: PerkLevels;
   activeWearables?: BumpkinParts;
+  // Special Power timestamps (Date.now() based, shifted while paused).
+  specialPowerActiveUntil: number;
+  specialPowerCooldownUntil: number;
 }
 
 const DEFAULT_WEAPON_LEVELS: Record<WeaponId, WeaponLevel> =
@@ -141,6 +157,8 @@ const getInitialProgression = ({
     weaponLevels,
     hudWeapons: [] as WeaponId[],
     perkLevels,
+    specialPowerActiveUntil: 0,
+    specialPowerCooldownUntil: 0,
   };
 };
 
@@ -193,10 +211,21 @@ const resumeGameplayClock = (context: Context): Partial<Context> => {
       ? Date.now() - context.gameplayPausedAt
       : 0;
 
+  // Only timers still running when the pause started are pushed forward.
+  const shiftIfRunning = (timestamp: number) =>
+    context.gameplayPausedAt !== undefined &&
+    timestamp > context.gameplayPausedAt
+      ? timestamp + pausedDuration
+      : timestamp;
+
   return {
     isGameplayPaused: false,
     gameplayPausedAt: undefined,
     endAt: context.endAt > 0 ? context.endAt + pausedDuration : context.endAt,
+    specialPowerActiveUntil: shiftIfRunning(context.specialPowerActiveUntil),
+    specialPowerCooldownUntil: shiftIfRunning(
+      context.specialPowerCooldownUntil,
+    ),
   };
 };
 
@@ -352,7 +381,8 @@ export type PortalEvent =
   | HealEvent
   | ChestOpenedEvent
   | SetGameplayPausedEvent
-  | SetActiveWearablesEvent;
+  | SetActiveWearablesEvent
+  | { type: "ACTIVATE_SPECIAL_POWER" };
 
 export type PortalState = {
   value:
@@ -841,6 +871,20 @@ export const portalMachine = createMachine<Context, PortalEvent, PortalState>({
               return { ...nextChoice, ...pauseGameplayClock(context) };
             },
           ),
+        },
+        ACTIVATE_SPECIAL_POWER: {
+          cond: (context: Context) => canActivateSpecialPower(context),
+          actions: assign((context: Context): Partial<Context> => {
+            const now = Date.now();
+            const { activeMs } = resolveSpecialPower(context.weaponLevels);
+
+            // activeUntil marks the longest power window (Scene splits it per
+            // category); the button cooldown starts right on activation.
+            return {
+              specialPowerActiveUntil: now + activeMs,
+              specialPowerCooldownUntil: now + SPECIAL_POWER_CONFIG.cooldownMs,
+            };
+          }),
         },
         HEAL: {
           actions: assign({

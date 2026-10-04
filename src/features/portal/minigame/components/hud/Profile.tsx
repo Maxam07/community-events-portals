@@ -7,7 +7,7 @@ import { DynamicNFT } from "features/bumpkins/components/DynamicNFT";
 import { BumpkinPartGroup } from "features/bumpkins/components/BumpkinPartGroup";
 import type { BumpkinItem, BumpkinPart } from "features/game/types/bumpkin";
 import type { BumpkinParts } from "lib/utils/tokenUriBuilder";
-import { BETA_TESTERS, INITIAL_DATE, PORTAL_NAME } from "../../constants";
+import { BETA_TESTERS, INITIAL_DATE } from "../../constants";
 import { NPCIcon } from "features/island/bumpkin/components/NPC";
 import { InnerPanel } from "components/ui/Panel";
 import { Button } from "components/ui/Button";
@@ -104,7 +104,7 @@ export const Profile: React.FC<{
           className="whitespace-nowrap capitalize"
           onClick={onStartTraining}
         >
-          {t(`${PORTAL_NAME}.start.training`)}
+          {t("minigame.start.training")}
         </Button>
         <Button
           className="whitespace-nowrap capitalize"

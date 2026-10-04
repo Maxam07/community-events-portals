@@ -134,7 +134,7 @@ export const AchievementsList: React.FC<Props> = ({ onBack }) => {
                       </div>
                     </div>
                     <Label type="success" className="text-xs">
-                      {t(`${PORTAL_NAME}.achievementUnlockedAt`, {
+                      {t("minigame.achievementUnlockedAt", {
                         time: new Date(unlockedAt).toLocaleString(),
                       })}
                     </Label>

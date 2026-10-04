@@ -21,7 +21,6 @@ import {
   NEW_WEARABLES,
   NO_WEARABLE_BUFF_SCORE_MULTIPLIER,
   PASSIVE_ABILITY_ITEM,
-  PORTAL_NAME,
   WEAPON_ICONS,
   WEAPON_NAMES,
   WEAPON_STAT_LABELS,
@@ -122,8 +121,8 @@ export const WearablesTab: React.FC<{
   const selectedWearableDescriptionKey =
     getWearableBuffDescriptionKey(effectiveSelectedWearable) ??
     (effectiveSelectedWearable === PASSIVE_ABILITY_ITEM
-      ? `${PORTAL_NAME}.AbilityDescription`
-      : `${PORTAL_NAME}.wearablePowerComingSoon`);
+      ? "minigame.AbilityDescription"
+      : "minigame.wearablePowerComingSoon");
   const getWearableBuffDescription = (buff: WearableBuff) => {
     if (buff.target.type === "weaponStat") {
       const weaponName = t(WEAPON_NAMES[buff.target.weapon]);
@@ -189,7 +188,7 @@ export const WearablesTab: React.FC<{
         </OuterPanel>
 
         <Label type="info" className="w-full">
-          {t(`${PORTAL_NAME}.noWearableBuffScoreBonus`, {
+          {t("minigame.noWearableBuffScoreBonus", {
             multiplier: NO_WEARABLE_BUFF_SCORE_MULTIPLIER,
           })}
         </Label>
@@ -208,7 +207,7 @@ export const WearablesTab: React.FC<{
         </div>
         {isSelectedWearableNew && (
           <Label type="info" className="mt-2 sm:text-xs">
-            {t("wearables.new")}
+            {t("minigame.wearables.new")}
           </Label>
         )}
         {selectedWearableBuff ? (
@@ -235,7 +234,7 @@ export const WearablesTab: React.FC<{
         >
           {isSelectedWearableEquipped
             ? t("unequip")
-            : t(`${PORTAL_NAME}.equip`)}
+            : t("minigame.equip")}
         </Button>
       </OuterPanel>
     </div>

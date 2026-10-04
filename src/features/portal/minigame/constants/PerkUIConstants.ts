@@ -1,6 +1,5 @@
 import type { TranslationKeys } from "lib/i18n/dictionaries/types";
 import type { PerkId } from "../Types";
-import { PORTAL_NAME } from "./PortalConstants";
 import { SUNNYSIDE } from "assets/sunnyside";
 
 import swordIcon from "public/world/portal/images/sword_icon.png";
@@ -22,27 +21,27 @@ export const PERK_ICONS: Record<PerkId, string> = {
 };
 
 export const PERK_NAMES: Record<PerkId, TranslationKeys> = {
-  moveSpeed: `${PORTAL_NAME}.perk.moveSpeed`,
-  attackSpeed: `${PORTAL_NAME}.perk.attackSpeed`,
-  criticalChance: `${PORTAL_NAME}.perk.criticalChance`,
-  projectileSpeed: `${PORTAL_NAME}.perk.projectileSpeed`,
-  xpGain: `${PORTAL_NAME}.perk.xpGain`,
-  luck: `${PORTAL_NAME}.perk.luck`,
-  pickupRadius: `${PORTAL_NAME}.perk.pickupRadius`,
-  cooldownReduction: `${PORTAL_NAME}.perk.cooldownReduction`,
-  healing: `${PORTAL_NAME}.perk.healing`,
-  maxHealth: `${PORTAL_NAME}.perk.maxHealth`,
+  moveSpeed: "minigame.perk.moveSpeed",
+  attackSpeed: "minigame.perk.attackSpeed",
+  criticalChance: "minigame.perk.criticalChance",
+  projectileSpeed: "minigame.perk.projectileSpeed",
+  xpGain: "minigame.perk.xpGain",
+  luck: "minigame.perk.luck",
+  pickupRadius: "minigame.perk.pickupRadius",
+  cooldownReduction: "minigame.perk.cooldownReduction",
+  healing: "minigame.perk.healing",
+  maxHealth: "minigame.perk.maxHealth",
 };
 
 export const PERK_DESCRIPTIONS: Record<PerkId, TranslationKeys> = {
-  moveSpeed: `${PORTAL_NAME}.perk.description.moveSpeed`,
-  attackSpeed: `${PORTAL_NAME}.perk.description.attackSpeed`,
-  criticalChance: `${PORTAL_NAME}.perk.description.criticalChance`,
-  projectileSpeed: `${PORTAL_NAME}.perk.description.projectileSpeed`,
-  xpGain: `${PORTAL_NAME}.perk.description.xpGain`,
-  luck: `${PORTAL_NAME}.perk.description.luck`,
-  pickupRadius: `${PORTAL_NAME}.perk.description.pickupRadius`,
-  cooldownReduction: `${PORTAL_NAME}.perk.description.cooldownReduction`,
-  healing: `${PORTAL_NAME}.perk.description.healing`,
-  maxHealth: `${PORTAL_NAME}.perk.description.maxHealth`,
+  moveSpeed: "minigame.perk.description.moveSpeed",
+  attackSpeed: "minigame.perk.description.attackSpeed",
+  criticalChance: "minigame.perk.description.criticalChance",
+  projectileSpeed: "minigame.perk.description.projectileSpeed",
+  xpGain: "minigame.perk.description.xpGain",
+  luck: "minigame.perk.description.luck",
+  pickupRadius: "minigame.perk.description.pickupRadius",
+  cooldownReduction: "minigame.perk.description.cooldownReduction",
+  healing: "minigame.perk.description.healing",
+  maxHealth: "minigame.perk.description.maxHealth",
 };

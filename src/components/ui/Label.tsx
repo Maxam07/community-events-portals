@@ -12,6 +12,8 @@ import {
 } from "features/game/lib/style";
 import { SquareIcon } from "./SquareIcon";
 import { useAppTranslation } from "lib/i18n/useAppTranslations";
+// Minigame weapon category colors live in CategoryConstants (single source).
+import { CATEGORY_CONFIGS } from "features/portal/minigame/constants/CategoryConstants";
 
 export type LabelType =
   | "default"
@@ -22,7 +24,11 @@ export type LabelType =
   | "warning"
   | "vibrant"
   | "formula"
-  | "chill";
+  | "chill"
+  | "The Plague"
+  | "The Curse"
+  | "The Frost"
+  | "The Bloody Harvest";
 
 export const LABEL_STYLES: Record<
   LabelType,
@@ -75,6 +81,26 @@ export const LABEL_STYLES: Record<
   formula: {
     background: "#3c4665",
     borderStyle: pixelFormulaBorderStyle,
+    textColour: "#ffffff",
+  },
+  "The Plague": {
+    background: CATEGORY_CONFIGS.plague.color,
+    borderStyle: pixelGreenBorderStyle,
+    textColour: "#ffffff",
+  },
+  "The Curse": {
+    background: CATEGORY_CONFIGS.curse.color,
+    borderStyle: pixelFormulaBorderStyle,
+    textColour: "#ffffff",
+  },
+  "The Frost": {
+    background: CATEGORY_CONFIGS.frost.color,
+    borderStyle: pixelBlueBorderStyle,
+    textColour: "#3e2731",
+  },
+  "The Bloody Harvest": {
+    background: CATEGORY_CONFIGS.bloodyHarvest.color,
+    borderStyle: pixelRedBorderStyle,
     textColour: "#ffffff",
   },
 };

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useAppTranslation } from "lib/i18n/useAppTranslations";
 import { CloseButtonPanel } from "features/game/components/CloseablePanel";
 import { Mission } from "./Mission";
-import { PANEL_NPC_WEARABLES, PORTAL_NAME } from "../../constants";
+import { PANEL_NPC_WEARABLES } from "../../constants";
 import { Guide } from "./Guide";
 
 import misionIcon from "public/world/portal/images/banana_icon.webp";
@@ -44,7 +44,7 @@ export const RulesPanel: React.FC<Props> = ({
       tabs={[
         {
           icon: misionIcon,
-          name: t(`${PORTAL_NAME}.mission`),
+          name: t("minigame.mission"),
           id: "mission",
         },
         {

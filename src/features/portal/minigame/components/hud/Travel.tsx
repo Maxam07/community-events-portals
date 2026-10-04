@@ -11,7 +11,7 @@ import type { PortalMachineState } from "../../lib/Machine";
 import { useSound } from "lib/utils/hooks/useSound";
 import classNames from "classnames";
 import { isTouchDevice } from "features/world/lib/device";
-import { PANEL_NPC_WEARABLES, PORTAL_NAME } from "../../constants";
+import { PANEL_NPC_WEARABLES } from "../../constants";
 
 const _isPlaying = (state: PortalMachineState) => state.matches("playing");
 const _isJoystickActive = (state: PortalMachineState) =>
@@ -86,13 +86,13 @@ export const Travel: React.FC = () => {
         bumpkinParts={PANEL_NPC_WEARABLES}
         show={showExitConfirmation}
         onHide={() => setShowExitConfirmation(false)}
-        messages={[t(`${PORTAL_NAME}.endGameConfirmation`)]}
+        messages={[t("minigame.endGameConfirmation")]}
         onCancel={() => setShowExitConfirmation(false)}
         onConfirm={() => {
           portalService.send("GAME_OVER");
           setShowExitConfirmation(false);
         }}
-        confirmButtonLabel={t(`${PORTAL_NAME}.endGame`)}
+        confirmButtonLabel={t("minigame.endGame")}
       />
     </>
   );

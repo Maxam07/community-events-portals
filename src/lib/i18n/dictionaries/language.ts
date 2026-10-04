@@ -9,7 +9,8 @@ import ITALIAN_TERMS from "./it.json";
 import SPANISH_TERMS from "./es.json";
 import GERMAN_TERMS from "./de.json";
 import JAPANESE_TERMS from "./ja.json";
-import type { TranslationKeys } from "./types";
+import MINIGAME_TERMS from "features/portal/minigame/i18n/dictionaryMinigame.json";
+import { MINIGAME_TRANSLATION_NAMESPACE, type TranslationKeys } from "./types";
 
 import britishFlag from "assets/sfts/flags/british_flag.webp";
 import usaFlag from "assets/sfts/flags/usa_flag.webp";
@@ -40,27 +41,16 @@ export type LanguageCode =
 
 export type TranslationResource = Partial<Record<TranslationKeys, string>>;
 
-const MINIGAME_TRANSLATION_ALIASES = [
-  { from: "festival-of-colors", to: "colors-2026" },
-] as const;
-
-const withMinigameAliases = (
-  terms: TranslationResource,
-): TranslationResource => {
+// Minigame terms (src/features/portal/minigame/i18n/dictionaryMinigame.json)
+// use project-agnostic keys; they are concatenated with the main dictionary
+// under the fixed "minigame." namespace so they never collide with game keys.
+// Only English source text exists, other languages fall back to "en".
+const withMinigameTerms = (terms: TranslationResource): TranslationResource => {
   const translation: TranslationResource = { ...terms };
 
-  Object.entries(terms).forEach(([key, value]) => {
-    MINIGAME_TRANSLATION_ALIASES.forEach(({ from, to }) => {
-      const prefix = `${from}.`;
-
-      if (!key.startsWith(prefix)) {
-        return;
-      }
-
-      const aliasKey = key.replace(prefix, `${to}.`) as TranslationKeys;
-
-      translation[aliasKey] ??= value;
-    });
+  Object.entries(MINIGAME_TERMS).forEach(([key, value]) => {
+    translation[`${MINIGAME_TRANSLATION_NAMESPACE}.${key}` as TranslationKeys] =
+      value;
   });
 
   return translation;
@@ -133,15 +123,15 @@ export const LANGUAGE_DETAILS: Record<LanguageCode, LanguageDetails> = {
 export const resources: Partial<
   Record<LanguageCode, { translation: TranslationResource }>
 > = {
-  en: { translation: withMinigameAliases(ENGLISH_TERMS) },
-  de: { translation: withMinigameAliases(GERMAN_TERMS) },
-  es: { translation: withMinigameAliases(SPANISH_TERMS) },
-  fr: { translation: withMinigameAliases(FRENCH_TERMS) },
-  id: { translation: withMinigameAliases(INDONESIAN_TERMS) },
-  it: { translation: withMinigameAliases(ITALIAN_TERMS) },
-  ja: { translation: withMinigameAliases(JAPANESE_TERMS) },
-  "pt-BR": { translation: withMinigameAliases(PORTUGUESE_TERMS) },
-  ru: { translation: withMinigameAliases(RUSSIAN_TERMS) },
-  tr: { translation: withMinigameAliases(TURKISH_TERMS) },
-  "zh-CN": { translation: withMinigameAliases(CHINESE_SIMPLIFIED_TERMS) },
+  en: { translation: withMinigameTerms(ENGLISH_TERMS) },
+  de: { translation: GERMAN_TERMS },
+  es: { translation: SPANISH_TERMS },
+  fr: { translation: FRENCH_TERMS },
+  id: { translation: INDONESIAN_TERMS },
+  it: { translation: ITALIAN_TERMS },
+  ja: { translation: JAPANESE_TERMS },
+  "pt-BR": { translation: PORTUGUESE_TERMS },
+  ru: { translation: RUSSIAN_TERMS },
+  tr: { translation: TURKISH_TERMS },
+  "zh-CN": { translation: CHINESE_SIMPLIFIED_TERMS },
 };

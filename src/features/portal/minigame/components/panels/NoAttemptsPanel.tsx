@@ -10,7 +10,6 @@ import type { PortalMachineState } from "../../lib/Machine";
 import { CloseButtonPanel } from "features/game/components/CloseablePanel";
 import {
   PANEL_NPC_WEARABLES,
-  PORTAL_NAME,
   RESTOCK_ATTEMPTS,
   UNLIMITED_ATTEMPTS_AURA_DISCOUNT_SFL,
   UNLIMITED_ATTEMPTS_DISCOUNT_AURAS,
@@ -45,22 +44,18 @@ export const NoAttemptsPanel: React.FC = () => {
       <div className="p-2">
         <div className="flex gap-1 justify-between items-center mb-2">
           <Label icon={SUNNYSIDE.icons.lock} type="danger">
-            {t(`${PORTAL_NAME}.noAttemptsRemaining`)}
+            {t("minigame.noAttemptsRemaining")}
           </Label>
           <Label
             icon={flowerIcon}
             type={sflBalance.lt(RESTOCK_ATTEMPTS[0].sfl) ? "danger" : "default"}
           >
-            {t(`${PORTAL_NAME}.flowerRequired`)}
+            {t("minigame.flowerRequired")}
           </Label>
         </div>
 
-        <p className="text-sm mb-2">
-          {t(`${PORTAL_NAME}.youHaveRunOutOfAttempts`)}
-        </p>
-        <p className="text-sm mb-2">
-          {t(`${PORTAL_NAME}.wouldYouLikeToUnlock`)}
-        </p>
+        <p className="text-sm mb-2">{t("minigame.youHaveRunOutOfAttempts")}</p>
+        <p className="text-sm mb-2">{t("minigame.wouldYouLikeToUnlock")}</p>
         <Label type="info" className="mb-2">
           {`Hold one of these Auras in your inventory to unlock unlimited attempts for ${UNLIMITED_ATTEMPTS_AURA_DISCOUNT_SFL} FLOWER: ${UNLIMITED_ATTEMPTS_DISCOUNT_AURAS.join(", ")}.`}
         </Label>
@@ -91,7 +86,7 @@ export const NoAttemptsPanel: React.FC = () => {
               })
             }
           >
-            {t(`${PORTAL_NAME}.buyAttempts`, {
+            {t("minigame.buyAttempts", {
               attempts: option.attempts,
               sfl: option.sfl,
             })}
@@ -108,7 +103,7 @@ export const NoAttemptsPanel: React.FC = () => {
             }
           >
             <span className="flex items-center justify-center gap-1">
-              <span>{"Unlock unlimited attempts ("}</span>
+              <span>{t("minigame.unlockUnlimitedAttempts")}</span>
               {hasAuraDiscount && (
                 <>
                   <span className="line-through opacity-70">

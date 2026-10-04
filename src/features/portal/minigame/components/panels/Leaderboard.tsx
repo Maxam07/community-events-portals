@@ -72,17 +72,17 @@ export const Leaderboard: React.FC = () => {
   let validationMessage: string | undefined;
 
   if (!hasCompleteDateRange) {
-    validationMessage = t(`${PORTAL_NAME}.leaderboard.validation.required`, {
+    validationMessage = t("minigame.leaderboard.validation.required", {
       min: minDateLabel,
       max: maxDateLabel,
     });
   } else if (hasStartDateAfterEndDate) {
-    validationMessage = t(`${PORTAL_NAME}.leaderboard.validation.order`, {
+    validationMessage = t("minigame.leaderboard.validation.order", {
       min: minDateLabel,
       max: maxDateLabel,
     });
   } else if (hasDatesOutsideRange) {
-    validationMessage = t(`${PORTAL_NAME}.leaderboard.validation.bounds`, {
+    validationMessage = t("minigame.leaderboard.validation.bounds", {
       min: minDateLabel,
       max: maxDateLabel,
     });
@@ -100,20 +100,20 @@ export const Leaderboard: React.FC = () => {
       <div className="flex flex-col gap-2 px-2 pt-2">
         <div className="grid grid-cols-2 gap-1">
           <Label type="default" className="w-full text-xs text-left">
-            {t(`${PORTAL_NAME}.competition.startDate`, {
+            {t("minigame.competition.startDate", {
               date: toDisplayDate(INITIAL_DATE_LEADERBOARD),
             })}
           </Label>
           <Label type="default" className="w-full text-xs text-right">
-            {t(`${PORTAL_NAME}.competition.endDate`, {
+            {t("minigame.competition.endDate", {
               date: toDisplayDate(FINAL_DATE_LEADERBOARD),
             })}
           </Label>
         </div>
-        <p>{t(`${PORTAL_NAME}.competition.description1`)}</p>
-        <p>{t(`${PORTAL_NAME}.competition.description2`)}</p>
+        <p>{t("minigame.competition.description1")}</p>
+        <p>{t("minigame.competition.description2")}</p>
         <Label type="info" className="w-full">
-          {t(`${PORTAL_NAME}.noWearableBuffScoreBonus`, {
+          {t("minigame.noWearableBuffScoreBonus", {
             multiplier: NO_WEARABLE_BUFF_SCORE_MULTIPLIER,
           })}
         </Label>
@@ -127,7 +127,7 @@ export const Leaderboard: React.FC = () => {
         >
           <div className="flex items-center justify-center">
             <span className="text-xs">
-              {t(`${PORTAL_NAME}.leaderboard.accumulate`)}
+              {t("minigame.leaderboard.accumulate")}
             </span>
           </div>
         </ButtonPanel>
@@ -138,7 +138,7 @@ export const Leaderboard: React.FC = () => {
         >
           <div className="flex items-center justify-center">
             <span className="text-xs">
-              {t(`${PORTAL_NAME}.leaderboard.highscore`)}
+              {t("minigame.leaderboard.highscore")}
             </span>
           </div>
         </ButtonPanel>
@@ -159,7 +159,7 @@ export const Leaderboard: React.FC = () => {
         ) : (
           <div className="px-2">
             <Label type="info" className="text-xs">
-              {t(`${PORTAL_NAME}.leaderboard.competitionNotStarted`, {
+              {t("minigame.leaderboard.competitionNotStarted", {
                 date: toDisplayDate(INITIAL_DATE_LEADERBOARD),
               })}
             </Label>
@@ -170,7 +170,7 @@ export const Leaderboard: React.FC = () => {
           <div className="grid grid-cols-2 gap-2">
             <div className="flex flex-col gap-1">
               <Label type="default">
-                {t(`${PORTAL_NAME}.leaderboard.startDate`)}
+                {t("minigame.leaderboard.startDate")}
               </Label>
               <TextInput
                 type="date"
@@ -181,9 +181,7 @@ export const Leaderboard: React.FC = () => {
               />
             </div>
             <div className="flex flex-col gap-1">
-              <Label type="default">
-                {t(`${PORTAL_NAME}.leaderboard.endDate`)}
-              </Label>
+              <Label type="default">{t("minigame.leaderboard.endDate")}</Label>
               <TextInput
                 type="date"
                 min={INITIAL_DATE}
@@ -204,7 +202,7 @@ export const Leaderboard: React.FC = () => {
             disabled={!isHighScoreRangeValid}
             onClick={handleApplyHighScoreRange}
           >
-            {t(`${PORTAL_NAME}.leaderboard.update`)}
+            {t("minigame.leaderboard.update")}
           </Button>
 
           <PortalLeaderboard

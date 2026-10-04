@@ -45,7 +45,7 @@ export const Prize: React.FC = () => {
       <OuterPanel>
         <div className="px-1">
           <Label type="danger" icon={SUNNYSIDE.icons.sad}>
-            {t(`${PORTAL_NAME}.noPrizesAvailable`)}
+            {t("minigame.noPrizesAvailable")}
           </Label>
         </div>
       </OuterPanel>
@@ -56,7 +56,7 @@ export const Prize: React.FC = () => {
     <OuterPanel>
       <div className="px-1">
         <span className="text-xs mb-2">
-          {t(`${PORTAL_NAME}.portal.missionObjectives`, {
+          {t("minigame.portal.missionObjectives", {
             targetScore: prize.score,
           })}
         </span>
@@ -67,7 +67,7 @@ export const Prize: React.FC = () => {
           <div className="flex items-center space-x-2">
             {!!prize.items[PORTAL_TOKEN as keyof typeof prize.items] && (
               <Label icon={colorsToken2026} type="warning">
-                {t(`${PORTAL_NAME}.eventToken`, {
+                {t("minigame.eventToken", {
                   token:
                     prize.items[PORTAL_TOKEN as keyof typeof prize.items] ?? 0,
                   tokenName: PORTAL_TOKEN,

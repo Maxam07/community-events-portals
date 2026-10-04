@@ -10,6 +10,7 @@ import type {
   DamagePayload,
   EnemyLike,
   ProjectileConfig,
+  SpecialPower,
   WeaponConfig,
   WeaponId,
   WeaponLevel,
@@ -27,6 +28,7 @@ import { CooldownTracker } from "./CooldownTracker";
 import { DamageSystem } from "./DamageSystem";
 import { StatusEffectSystem } from "./StatusEffectSystem";
 import { TargetingSystem } from "./TargetingSystem";
+import { SpecialPowerEffects } from "./SpecialPowerEffects";
 import {
   FALLBACK_AIM_VECTOR,
   enemyCenter,
@@ -87,6 +89,7 @@ export class WeaponManager {
   private readonly damageSystem: DamageSystem;
   private readonly statusEffectSystem = new StatusEffectSystem();
   private readonly targetingSystem: TargetingSystem;
+  private readonly specialPowerEffects: SpecialPowerEffects;
   private readonly activeWeapons = new Map<WeaponId, RuntimeWeapon>();
   private readonly wateringCanSelectedTargets = new Set<EnemyLike>();
   private lastAimVector: Vector = { ...FALLBACK_AIM_VECTOR };
@@ -144,6 +147,28 @@ export class WeaponManager {
       COMBAT_CONFIG.targetScanMs,
     );
 
+    this.specialPowerEffects = new SpecialPowerEffects({
+      scene: props.scene,
+      player: props.player,
+    });
+    this.statusEffectSystem.setListeners({
+      onApply: (enemy, effectId) =>
+        this.specialPowerEffects.showStatus(enemy, effectId),
+      onTick: (enemy, effectId) => {
+        if (effectId === "plaguePoison") {
+          this.specialPowerEffects.playPoisonTick(enemy);
+        }
+      },
+      onExpire: (enemy, effectId) =>
+        this.specialPowerEffects.hideStatus(enemy, effectId),
+    });
+    this.damageSystem.setLifestealListener((enemy) =>
+      this.specialPowerEffects.playLifesteal(enemy),
+    );
+    this.damageSystem.setHealListener((amount) =>
+      this.specialPowerEffects.playHeartGain(amount),
+    );
+
     this.setupOverlaps(props.enemyGroup);
     this.reset(props.loadout ?? COMBAT_CONFIG.defaultWeaponLoadout);
   }
@@ -153,6 +178,8 @@ export class WeaponManager {
 
     this.targetingSystem.update(time);
     this.statusEffectSystem.update(time);
+    this.damageSystem.update(time);
+    this.specialPowerEffects.update(time);
     this.updateAimVector();
     this.updatePooledObjects(time);
 
@@ -189,6 +216,15 @@ export class WeaponManager {
     });
   }
 
+  // Active Special Power (null when inactive). Kept across loadout resets;
+  // Scene drives it from the XState special power timestamps.
+  public setSpecialPower(power: SpecialPower | null) {
+    if (this.isShutDown) return;
+
+    this.damageSystem.setSpecialPower(power);
+    this.specialPowerEffects.setActivePower(power);
+  }
+
   public reset(loadout = COMBAT_CONFIG.defaultWeaponLoadout) {
     if (this.isShutDown) return;
 
@@ -212,6 +248,10 @@ export class WeaponManager {
     this.isShutDown = true;
     this.targetingSystem.shutdown();
     this.statusEffectSystem.shutdown();
+    this.damageSystem.reset();
+    this.damageSystem.setLifestealListener(undefined);
+    this.damageSystem.setHealListener(undefined);
+    this.specialPowerEffects.shutdown();
     this.destroyGroup(this.weaponCollisionGroup, false);
     this.destroyGroup(this.projectileGroup);
     this.destroyGroup(this.rollingProjectileGroup);

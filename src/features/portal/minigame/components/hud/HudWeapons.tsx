@@ -4,8 +4,14 @@ import { useSelector } from "@xstate/react";
 
 import { Box } from "components/ui/Box";
 import { PortalContext } from "../../lib/PortalProvider";
+import { useAppTranslation } from "lib/i18n/useAppTranslations";
 import type { PortalMachineState } from "../../lib/Machine";
-import { WEAPON_ICONS } from "../../constants";
+import { PIXEL_SCALE } from "features/game/lib/constants";
+import {
+  CATEGORY_CONFIGS,
+  WEAPON_CATEGORIES,
+  WEAPON_ICONS,
+} from "../../constants";
 
 const _weaponsState = (state: PortalMachineState) => ({
   hudWeapons: state.context.hudWeapons,
@@ -14,6 +20,7 @@ const _weaponsState = (state: PortalMachineState) => ({
 
 export const HudWeapons: React.FC = () => {
   const { portalService } = useContext(PortalContext);
+  const { t } = useAppTranslation();
   const { hudWeapons, weaponLevels } = useSelector(
     portalService,
     _weaponsState,
@@ -25,14 +32,21 @@ export const HudWeapons: React.FC = () => {
         const level = weaponLevels[weapon];
         const isLocked = level === 0;
 
+        const category = CATEGORY_CONFIGS[WEAPON_CATEGORIES[weapon]];
+
         return (
-          <Box
+          <div
             key={weapon}
-            image={WEAPON_ICONS[weapon]}
-            count={new Decimal(level)}
-            countLabelType="info"
-            locked={isLocked}
-          />
+            className="flex flex-row items-center gap-0.5"
+            title={t(category.name)}
+          >
+            <Box
+              image={WEAPON_ICONS[weapon]}
+              count={new Decimal(level)}
+              countLabelType={category.labelType}
+              locked={isLocked}
+            />
+          </div>
         );
       })}
     </div>

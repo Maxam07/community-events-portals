@@ -34,6 +34,8 @@ export class BossEnemy extends Phaser.GameObjects.Container {
   public isDead = false;
   public config: EnemyConfig;
   private isHurting = false;
+  // Status effects (slow/stun) scale movement speed; 1 = normal speed.
+  private movementMultiplier = 1;
   private hurtFlashRemainingMs = 0;
   private isCritFlashing = false;
   private critFlashRemainingMs = 0;
@@ -155,8 +157,8 @@ export class BossEnemy extends Phaser.GameObjects.Container {
       }
     }
 
-    const velocityX = moveX * this.config.speed;
-    const velocityY = moveY * this.config.speed;
+    const velocityX = moveX * this.config.speed * this.movementMultiplier;
+    const velocityY = moveY * this.config.speed * this.movementMultiplier;
 
     this.enemyBody.setVelocity(velocityX, velocityY);
 
@@ -170,6 +172,25 @@ export class BossEnemy extends Phaser.GameObjects.Container {
   setMove(value: boolean) {
     this.swarmMove = value;
     if (!value) this.enemyBody.setVelocity(0, 0);
+  }
+
+  public setMovementMultiplier(multiplier: number) {
+    if (multiplier === this.movementMultiplier) return;
+
+    const previous = this.movementMultiplier;
+    this.movementMultiplier = multiplier;
+
+    // Destroyed/dead enemies keep the value but have no body/anims to touch.
+    if (!this.scene || this.isDead || !this.sprite?.anims) return;
+
+    // Apply right away instead of waiting for the next movement update.
+    if (previous > 0) this.enemyBody?.velocity.scale(multiplier / previous);
+
+    if (multiplier === 0) {
+      this.sprite.anims.pause();
+    } else if (previous === 0) {
+      this.sprite.anims.resume();
+    }
   }
 
   changeDirection() {

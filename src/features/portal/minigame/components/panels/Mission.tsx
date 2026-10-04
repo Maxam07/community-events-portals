@@ -105,22 +105,22 @@ export const Mission: React.FC<Props> = ({
                 >
                   <div className="flex flex-row gap-1 justify-center items-center">
                     <img src={key} className="h-5 mt-1" />
-                    {t(`${PORTAL_NAME}.controls`)}
+                    {t("minigame.controls")}
                   </div>
                 </Button>
               </div>
             </div>
 
             <div className="w-full mt-1 mb-3 flex flex-col gap-2">
-              <p>{t(`${PORTAL_NAME}.intro.description1`)}</p>
-              <p>{t(`${PORTAL_NAME}.intro.description2`)}</p>
+              <p>{t("minigame.intro.description1")}</p>
+              <p>{t("minigame.intro.description2")}</p>
             </div>
 
             <div className="w-full flex flex-col gap-1 mb-3">
               {showScore && (
                 <>
                   <Label type="info" className="w-full">
-                    {t(`${PORTAL_NAME}.noWearableBuffScoreBonus`, {
+                    {t("minigame.noWearableBuffScoreBonus", {
                       multiplier: NO_WEARABLE_BUFF_SCORE_MULTIPLIER,
                     })}
                   </Label>
@@ -138,14 +138,12 @@ export const Mission: React.FC<Props> = ({
                   {!showOnlyScore && (
                     <div className="flex gap-1">
                       <OuterPanel className="w-full flex flex-col items-center">
-                        <Label type="default">
-                          {t(`${PORTAL_NAME}.bestToday`)}
-                        </Label>
+                        <Label type="default">{t("minigame.bestToday")}</Label>
                         <div>{formattedBestToday()}</div>
                       </OuterPanel>
                       <OuterPanel className="w-full flex flex-col items-center">
                         <Label type="default">
-                          {t(`${PORTAL_NAME}.bestAllTime`)}
+                          {t("minigame.bestAllTime")}
                         </Label>
                         <div>{formattedBestAllTime()}</div>
                       </OuterPanel>

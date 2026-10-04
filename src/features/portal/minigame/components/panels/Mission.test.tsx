@@ -127,9 +127,9 @@ describe("Mission", () => {
 
     expect(html).toContain("leaderboard.score");
     expect(html).toContain("42");
-    expect(html).not.toContain("colors-2026.noWearableBuffScoreBonus");
-    expect(html).not.toContain("colors-2026.bestToday");
-    expect(html).not.toContain("colors-2026.bestAllTime");
+    expect(html).not.toContain("minigame.noWearableBuffScoreBonus");
+    expect(html).not.toContain("minigame.bestToday");
+    expect(html).not.toContain("minigame.bestAllTime");
     expect(html).not.toContain("ability-wearables");
     expect(html).not.toContain("prize");
   });

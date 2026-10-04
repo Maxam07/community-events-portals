@@ -5,7 +5,7 @@ import type { Equipped } from "features/game/types/bumpkin";
 import { OuterPanel } from "components/ui/Panel";
 import { Label } from "components/ui/Label";
 import { useAppTranslation } from "lib/i18n/useAppTranslations";
-import { PASSIVE_ABILITY_ITEM, PORTAL_NAME } from "../../constants";
+import { PASSIVE_ABILITY_ITEM } from "../../constants";
 import { AbilityTooltip } from "./AbilityTooltip";
 
 export const AbilityWearables: React.FC<{ bumpkinParts: Equipped }> = ({
@@ -24,7 +24,7 @@ export const AbilityWearables: React.FC<{ bumpkinParts: Equipped }> = ({
 
   return (
     <OuterPanel className="w-full flex flex-col items-center">
-      <Label type="default">{t(`${PORTAL_NAME}.passiveAbility`)}</Label>
+      <Label type="default">{t("minigame.passiveAbility")}</Label>
       <div className="flex flex-row mb-5 text-sm">
         {wings && (
           <AbilityTooltip

@@ -18,7 +18,14 @@ import { Hud } from "./components/hud/Hud";
 import { Phaser } from "./Phaser";
 import { BumpkinProfile } from "./components/hud/BumpkinProfile";
 import { StatCard } from "./components/hud/StatCard";
-import { PORTAL_NAME, WEAPON_ICONS, WEAPON_NAMES } from "./constants";
+import {
+  CATEGORY_CONFIGS,
+  getSpecialPowerPreview,
+  WEAPON_CATEGORIES,
+  WEAPON_DESCRIPTIONS,
+  WEAPON_ICONS,
+  WEAPON_NAMES,
+} from "./constants";
 import { PERK_ICONS, PERK_NAMES } from "./constants/PerkUIConstants";
 import type { LevelUpOption } from "./Types";
 
@@ -37,6 +44,26 @@ const _isComplete = (state: PortalMachineState) => state.matches("complete");
 const _isTraining = (state: PortalMachineState) => state.context.isTraining;
 const _pendingLevelUpChoice = (state: PortalMachineState) =>
   state.context.pendingLevelUpChoice;
+const _weaponLevels = (state: PortalMachineState) => state.context.weaponLevels;
+
+// Level-up cards: weapons on the top row, perks below. Empty rows are skipped
+// so a weapons-only (or perks-only) choice keeps a single row.
+const getLevelUpRows = (options: LevelUpOption[] = []) =>
+  [
+    {
+      key: "weapons",
+      options: options.filter(
+        (option) =>
+          option.kind === "newWeapon" || option.kind === "upgradeWeapon",
+      ),
+    },
+    {
+      key: "perks",
+      options: options.filter(
+        (option) => option.kind === "newPerk" || option.kind === "upgradePerk",
+      ),
+    },
+  ].filter((row) => row.options.length > 0);
 
 /**
  * A Portal Example which demonstrates basic state management
@@ -60,6 +87,7 @@ export const Portal: React.FC = () => {
     portalService,
     _pendingLevelUpChoice,
   );
+  const weaponLevels = useSelector(portalService, _weaponLevels);
 
   useEffect(() => {
     // If a player tries to quit while playing, mark it as an attempt
@@ -200,68 +228,139 @@ export const Portal: React.FC = () => {
       <Modal
         show={!!pendingLevelUpChoice}
         backdrop="static"
-        dialogClassName="max-w-[620px]"
+        dialogClassName="max-w-[960px]"
       >
-        <div className="flex items-center justify-center gap-3 p-2">
-          {pendingLevelUpChoice?.options.map((option: LevelUpOption) => {
-            const card = (() => {
-              switch (option.kind) {
-                case "newWeapon":
-                  return {
-                    key: `newWeapon-${option.weaponId}`,
-                    title: t(WEAPON_NAMES[option.weaponId]),
-                    level: option.toLevel,
-                    icon: WEAPON_ICONS[option.weaponId],
-                  };
-                case "upgradeWeapon":
-                  return {
-                    key: `upgradeWeapon-${option.weaponId}`,
-                    title: t(WEAPON_NAMES[option.weaponId]),
-                    level: option.toLevel,
-                    icon: WEAPON_ICONS[option.weaponId],
-                  };
-                case "newPerk":
-                  return {
-                    key: `newPerk-${option.perkId}`,
-                    title: t(PERK_NAMES[option.perkId]),
-                    level: option.toLevel,
-                    icon: PERK_ICONS[option.perkId],
-                  };
-                case "upgradePerk":
-                  return {
-                    key: `upgradePerk-${option.perkId}`,
-                    title: t(PERK_NAMES[option.perkId]),
-                    level: option.toLevel,
-                    icon: PERK_ICONS[option.perkId],
-                  };
-              }
-            })();
+        <div className="flex flex-col items-center gap-8 p-2 pb-4">
+          {/* Weapons on the top row, perks on the bottom row */}
+          {getLevelUpRows(pendingLevelUpChoice?.options).map((row) => (
+            <div
+              key={row.key}
+              className="flex flex-wrap items-stretch justify-center gap-3"
+            >
+              {row.options.map((option: LevelUpOption) => {
+                const card = (() => {
+                  switch (option.kind) {
+                    case "newWeapon":
+                      return {
+                        key: `newWeapon-${option.weaponId}`,
+                        title: t(WEAPON_NAMES[option.weaponId]),
+                        level: option.toLevel,
+                        icon: WEAPON_ICONS[option.weaponId],
+                      };
+                    case "upgradeWeapon":
+                      return {
+                        key: `upgradeWeapon-${option.weaponId}`,
+                        title: t(WEAPON_NAMES[option.weaponId]),
+                        level: option.toLevel,
+                        icon: WEAPON_ICONS[option.weaponId],
+                      };
+                    case "newPerk":
+                      return {
+                        key: `newPerk-${option.perkId}`,
+                        title: t(PERK_NAMES[option.perkId]),
+                        level: option.toLevel,
+                        icon: PERK_ICONS[option.perkId],
+                      };
+                    case "upgradePerk":
+                      return {
+                        key: `upgradePerk-${option.perkId}`,
+                        title: t(PERK_NAMES[option.perkId]),
+                        level: option.toLevel,
+                        icon: PERK_ICONS[option.perkId],
+                      };
+                  }
+                })();
 
-            const labelType =
-              option.bonusLevels === 2
-                ? "vibrant"
-                : option.bonusLevels === 3
-                  ? "warning"
-                  : "info";
+                // Weapon cards: description, category label (always) and the
+                // Special Power(s) the pick unlocks/changes, with their duration.
+                const isWeaponOption =
+                  option.kind === "newWeapon" ||
+                  option.kind === "upgradeWeapon";
+                const category = isWeaponOption
+                  ? CATEGORY_CONFIGS[WEAPON_CATEGORIES[option.weaponId]]
+                  : undefined;
+                const powerPreview = getSpecialPowerPreview(
+                  weaponLevels,
+                  option,
+                );
+                const showPowerTags =
+                  powerPreview.changed && powerPreview.next.kind !== "none";
 
-            return (
-              <StatCard
-                key={card.key}
-                title={card.title}
-                label={{
-                  value: t(`${PORTAL_NAME}.weaponLevel`, {
-                    level: card.level,
-                  }),
-                  type: labelType,
-                }}
-                img={{ src: card.icon }}
-                className="min-h-[96px] w-[150px]"
-                onClick={() =>
-                  portalService.send("SELECT_LEVEL_UP_OPTION", { option })
-                }
-              />
-            );
-          })}
+                const labelType =
+                  option.bonusLevels === 2
+                    ? "vibrant"
+                    : option.bonusLevels === 3
+                      ? "warning"
+                      : "info";
+
+                return (
+                  <StatCard
+                    key={card.key}
+                    title={card.title}
+                    label={{
+                      value: t("minigame.weaponLevel", {
+                        level: card.level,
+                      }),
+                      type: labelType,
+                    }}
+                    img={{ src: card.icon }}
+                    description={
+                      isWeaponOption
+                        ? t(WEAPON_DESCRIPTIONS[option.weaponId])
+                        : undefined
+                    }
+                    tags={
+                      showPowerTags
+                        ? powerPreview.next.categories.map((powerCategory) => {
+                            const config = CATEGORY_CONFIGS[powerCategory];
+
+                            return (
+                              <Label
+                                key={powerCategory}
+                                type={config.labelType}
+                              >
+                                {t("minigame.specialPower.effectDuration", {
+                                  effect: t(config.effectName),
+                                  // Each power has its own duration
+                                  seconds: Number(
+                                    (
+                                      (powerPreview.next.activeMsByCategory[
+                                        powerCategory
+                                      ] ?? 0) / 1000
+                                    ).toFixed(1),
+                                  ),
+                                })}
+                              </Label>
+                            );
+                          })
+                        : undefined
+                    }
+                    glowColors={
+                      showPowerTags
+                        ? powerPreview.next.categories.map(
+                            (powerCategory) =>
+                              CATEGORY_CONFIGS[powerCategory].glowColor,
+                          )
+                        : undefined
+                    }
+                    bottomLabel={
+                      category
+                        ? { text: t(category.name), type: category.labelType }
+                        : undefined
+                    }
+                    className={
+                      isWeaponOption
+                        ? "min-h-[160px] w-[170px]"
+                        : "min-h-[96px] w-[150px]"
+                    }
+                    onClick={() =>
+                      portalService.send("SELECT_LEVEL_UP_OPTION", { option })
+                    }
+                  />
+                );
+              })}
+            </div>
+          ))}
         </div>
       </Modal>
 

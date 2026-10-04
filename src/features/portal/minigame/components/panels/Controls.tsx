@@ -13,7 +13,6 @@ import joystick from "public/world/minigame/base/joystick.png";
 import spaceKey from "public/world/minigame/base/space_key.png";
 import vKey from "public/world/minigame/base/v_key.png";
 import bumpkinAvatar from "public/world/portal/images/bumpkin_avatar.png";
-import { PORTAL_NAME } from "../../constants";
 import { Label } from "components/ui/Label";
 // import useToolButton from "public/world/use_tool_button.webp";
 // import changeToolButton from "public/world/change_tool_button.webp";
@@ -54,9 +53,7 @@ export const Controls: React.FC<Props> = ({ onBack }) => {
               }}
             />
           </div>
-          <div className="grow mb-3 text-lg">
-            {t(`${PORTAL_NAME}.controls`)}
-          </div>
+          <div className="grow mb-3 text-lg">{t("minigame.controls")}</div>
           <div className="flex-none">
             <div
               style={{
@@ -72,7 +69,7 @@ export const Controls: React.FC<Props> = ({ onBack }) => {
       <div className="flex flex-col gap-1 overflow-y-auto scrollable pr-1">
         <div className="w-full flex flex-row gap-1 mb-3">
           <OuterPanel className="w-full flex flex-col items-center gap-2">
-            <Label type="default">{t(`${PORTAL_NAME}.controls.move`)}</Label>
+            <Label type="default">{t("minigame.controls.move")}</Label>
             <div className="h-100 flex-1 flex flex-col items-center justify-center">
               {isTouch ? (
                 <img src={joystick} className="h-20 my-3" />
@@ -85,7 +82,7 @@ export const Controls: React.FC<Props> = ({ onBack }) => {
             </div>
           </OuterPanel>
           <OuterPanel className="w-full flex flex-col items-center gap-2">
-            <Label type="default">{t(`${PORTAL_NAME}.controls.profile`)}</Label>
+            <Label type="default">{t("minigame.controls.profile")}</Label>
             <div className="h-100 flex-1 flex flex-col items-center justify-center">
               {isTouch ? (
                 <img src={bumpkinAvatar} className="h-20 my-3" />

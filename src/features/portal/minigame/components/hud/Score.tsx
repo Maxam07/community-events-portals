@@ -3,7 +3,6 @@ import { useSelector } from "@xstate/react";
 import { PortalContext } from "../../lib/PortalProvider";
 import type { PortalMachineState } from "../../lib/Machine";
 import { useAppTranslation } from "lib/i18n/useAppTranslations";
-import { PORTAL_NAME } from "../../constants";
 
 const _score = (state: PortalMachineState) => state.context.score;
 
@@ -17,7 +16,7 @@ export const Score: React.FC = () => {
   return (
     <>
       <div className="bg-blueGray-900 bg-opacity-80 text-white flex flex-col text-shadow rounded-md min-w-[90px] w-fit p-2">
-        <span className="text-xs">{t(`${PORTAL_NAME}.scoreTitle`)}</span>
+        <span className="text-xs">{t("minigame.scoreTitle")}</span>
         <div className="flex gap-5 items-center">
           <span className="text-lg">{Math.round(score)}</span>
         </div>

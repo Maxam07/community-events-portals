@@ -26,11 +26,7 @@ import { INITIAL_EQUIPMENT } from "features/game/lib/constants";
 import { InnerPanel } from "components/ui/Panel";
 import { ResizableBar } from "components/ui/ProgressBar";
 import { useAppTranslation } from "lib/i18n/useAppTranslations";
-import {
-  isPlayerMaxLevel,
-  PORTAL_NAME,
-  WEARABLES_TAB_ITEMS,
-} from "../../constants";
+import { isPlayerMaxLevel, WEARABLES_TAB_ITEMS } from "../../constants";
 import { Label } from "components/ui/Label";
 import { isTouchDevice } from "features/world/lib/device";
 import { Button } from "components/ui/Button";
@@ -428,7 +424,7 @@ export const BumpkinProfile: React.FC<BumpkinProfileProps> = ({
         ? (currentXP / nextLevelXP) * 100
         : 0;
   const xpValue = isMaxLevel
-    ? t(`${PORTAL_NAME}.maxLevel`)
+    ? t("minigame.maxLevel")
     : `${currentXP} / ${nextLevelXP}`;
   const bumpkinParts = activeWearables ?? bumpkin?.equipped;
   const isControlled = showModal !== undefined;

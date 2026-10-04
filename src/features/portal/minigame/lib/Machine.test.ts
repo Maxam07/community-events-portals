@@ -27,10 +27,12 @@ jest.mock("features/game/events/minigames/purchaseMinigameItem", () => ({
 jest.mock("../constants", () => {
   const playerLevel = jest.requireActual("../constants/PlayerLevelConstants");
   const wearables = jest.requireActual("../constants/WearableConstants");
+  const categories = jest.requireActual("../constants/CategoryConstants");
 
   return {
     ...playerLevel,
     ...wearables,
+    ...categories,
     DROP_ITEM_XP_VALUES: {
       blueOrb: 1,
       greenOrb: 2,
@@ -668,5 +670,80 @@ describe("portalMachine progression flow", () => {
     expect(service.state.context.lastScoreBonusApplied).toBe(false);
 
     service.stop();
+  });
+});
+
+describe("portalMachine special power", () => {
+  const PLAGUE_PAIR = { oil: 1, corn: 1 };
+
+  const startPlaying = (weaponLevels: Record<string, number>) =>
+    interpret(
+      portalMachine.withContext({
+        ...portalMachine.initialState.context,
+        endAt: 301000,
+        isGameplayPaused: false,
+        pendingLevelUpChoice: undefined,
+        weaponLevels: {
+          ...portalMachine.initialState.context.weaponLevels,
+          ...weaponLevels,
+        },
+      }),
+    ).start("playing");
+
+  it("activates the power and starts the cooldown right away", () => {
+    const nowSpy = jest.spyOn(Date, "now").mockReturnValue(1000);
+    const service = startPlaying(PLAGUE_PAIR);
+
+    service.send("ACTIVATE_SPECIAL_POWER");
+
+    // 2 plague weapons -> partial power at 70% of 5000ms; the cooldown
+    // starts right on activation
+    expect(service.state.context.specialPowerActiveUntil).toBe(1000 + 3500);
+    expect(service.state.context.specialPowerCooldownUntil).toBe(1000 + 30000);
+
+    service.stop();
+    nowSpy.mockRestore();
+  });
+
+  it("ignores activation while on cooldown", () => {
+    const nowSpy = jest.spyOn(Date, "now").mockReturnValue(1000);
+    const service = startPlaying(PLAGUE_PAIR);
+
+    service.send("ACTIVATE_SPECIAL_POWER");
+    nowSpy.mockReturnValue(10000);
+    service.send("ACTIVATE_SPECIAL_POWER");
+
+    expect(service.state.context.specialPowerActiveUntil).toBe(4500);
+
+    service.stop();
+    nowSpy.mockRestore();
+  });
+
+  it("ignores activation without a special power", () => {
+    const service = startPlaying({ oil: 1, banana: 1 });
+
+    service.send("ACTIVATE_SPECIAL_POWER");
+
+    expect(service.state.context.specialPowerActiveUntil).toBe(0);
+    expect(service.state.context.specialPowerCooldownUntil).toBe(0);
+
+    service.stop();
+  });
+
+  it("shifts running power timers by the paused duration", () => {
+    const nowSpy = jest.spyOn(Date, "now").mockReturnValue(1000);
+    const service = startPlaying(PLAGUE_PAIR);
+
+    service.send("ACTIVATE_SPECIAL_POWER");
+    nowSpy.mockReturnValue(2000);
+    service.send("SET_GAMEPLAY_PAUSED", { isPaused: true });
+    nowSpy.mockReturnValue(7000);
+    service.send("SET_GAMEPLAY_PAUSED", { isPaused: false });
+
+    expect(service.state.context.specialPowerActiveUntil).toBe(4500 + 5000);
+    expect(service.state.context.specialPowerCooldownUntil).toBe(31000 + 5000);
+
+    service.stop();
+    nowSpy.mockRestore();
   });
 });

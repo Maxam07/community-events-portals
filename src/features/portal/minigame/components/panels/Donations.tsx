@@ -9,7 +9,6 @@ import { ITEM_DETAILS } from "features/game/types/images";
 import { NumberInput } from "components/ui/NumberInput";
 import Decimal from "decimal.js-light";
 import { donate } from "features/portal/lib/portalUtil";
-import { PORTAL_NAME } from "../../constants";
 
 const CONTRIBUTORS = [""];
 
@@ -43,9 +42,7 @@ export const Donations: React.FC = () => {
 
   return (
     <div className="flex flex-col mb-1 p-2 text-sm">
-      <p className="mb-2 text-center">
-        {t(`${PORTAL_NAME}.donationDescription`)}
-      </p>
+      <p className="mb-2 text-center">{t("minigame.donationDescription")}</p>
 
       <div className="flex flex-wrap mt-1 mb-4 gap-x-3 gap-y-1 justify-center">
         {CONTRIBUTORS.map((name) => (

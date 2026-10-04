@@ -28,6 +28,22 @@ export type WeaponId =
 
 export type WeaponLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
+// Weapon categories drive the Special Power: the category composition of
+// the equipped loadout decides which power (and at what duration) is ready.
+export type WeaponCategoryId = "plague" | "frost" | "curse" | "bloodyHarvest";
+
+export type SpecialPowerKind = "pure" | "hybrid" | "partial" | "none";
+
+export type SpecialPower = {
+  kind: SpecialPowerKind;
+  categories: WeaponCategoryId[];
+  durationMultiplier: number;
+  // Longest active window among the categories.
+  activeMs: number;
+  // Active window of each category power.
+  activeMsByCategory: Partial<Record<WeaponCategoryId, number>>;
+};
+
 // Passive perks. The former health/speed/damage
 // PlayerStatId track has been removed entirely; perks are the
 // in-run, slot-limited picks players collect through the level-up pool.
@@ -187,7 +203,12 @@ export type ProjectileConfig = {
   ricochetTexture?: string;
 };
 
-export type StatusEffectId = "rooted" | "oilDot";
+export type StatusEffectId =
+  | "rooted"
+  | "oilDot"
+  | "plaguePoison"
+  | "frostSlow"
+  | "curseStun";
 
 export type StatusEffectConfig = {
   id: StatusEffectId;
@@ -196,6 +217,8 @@ export type StatusEffectConfig = {
   damagePerTick?: number;
   speedMultiplier?: number;
   refreshMode: "refresh" | "stack";
+  // Weapon credited for damage-over-time ticks (defaults to "oil").
+  sourceWeaponId?: WeaponId;
 };
 
 export type EnemyLike = Phaser.GameObjects.GameObject & {

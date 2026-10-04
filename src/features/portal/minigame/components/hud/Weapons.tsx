@@ -7,7 +7,6 @@ import { useAppTranslation } from "lib/i18n/useAppTranslations";
 import { PortalContext } from "../../lib/PortalProvider";
 import type { PortalMachineState } from "../../lib/Machine";
 import {
-  PORTAL_NAME,
   resolveWeaponStats,
   WEAPON_ICONS,
   WEAPON_NAMES,
@@ -57,11 +56,9 @@ export const WeaponsTab: React.FC = () => {
   return (
     <div className={`flex flex-col gap-1 sm:gap-2 ${PANEL_CONTENT_HEIGHT}`}>
       <InnerPanel className="flex h-1/2 flex-col gap-1 overflow-y-auto p-2 scrollable">
-        <Label type="default">{t(`${PORTAL_NAME}.weapons`)}</Label>
+        <Label type="default">{t("minigame.weapons")}</Label>
         {unlockedWeapons.length === 0 ? (
-          <span className="ml-1 text-xs">
-            {t(`${PORTAL_NAME}.noWeaponsChosen`)}
-          </span>
+          <span className="ml-1 text-xs">{t("minigame.noWeaponsChosen")}</span>
         ) : (
           unlockedWeapons.map((weaponId: WeaponId) => {
             const level = weaponLevels[weaponId];
@@ -83,7 +80,7 @@ export const WeaponsTab: React.FC = () => {
                     {t(WEAPON_NAMES[weaponId])}
                   </span>
                   <span className="leading-none text-[#645d57]">
-                    {t(`${PORTAL_NAME}.weaponLevel`, { level })}
+                    {t("minigame.weaponLevel", { level })}
                     {" \u00b7 "}
                     {SUMMARY_WEAPON_STATS.map((stat) =>
                       stats[stat] === undefined
@@ -104,11 +101,9 @@ export const WeaponsTab: React.FC = () => {
       </InnerPanel>
 
       <InnerPanel className="flex h-1/2 flex-col gap-1 overflow-y-auto p-2 scrollable">
-        <Label type="default">{t(`${PORTAL_NAME}.perks`)}</Label>
+        <Label type="default">{t("minigame.perks")}</Label>
         {unlockedPerks.length === 0 ? (
-          <span className="ml-1 text-xs">
-            {t(`${PORTAL_NAME}.noPerksChosen`)}
-          </span>
+          <span className="ml-1 text-xs">{t("minigame.noPerksChosen")}</span>
         ) : (
           unlockedPerks.map((perkId) => {
             const level = perkLevels[perkId];
@@ -122,7 +117,7 @@ export const WeaponsTab: React.FC = () => {
                 <div className="flex flex-1 flex-col">
                   <span className="leading-none">{t(PERK_NAMES[perkId])}</span>
                   <span className="leading-none text-[#645d57]">
-                    {t(`${PORTAL_NAME}.weaponLevel`, { level })}
+                    {t("minigame.weaponLevel", { level })}
                     {" \u00b7 "}
                     {formatPerkValue(perkId, level)}
                   </span>

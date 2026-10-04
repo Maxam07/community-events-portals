@@ -5,7 +5,6 @@ import { SUNNYSIDE } from "assets/sunnyside";
 import { useAppTranslation } from "lib/i18n/useAppTranslations";
 import type { BumpkinItem, BumpkinPart } from "features/game/types/bumpkin";
 import type { BumpkinParts } from "lib/utils/tokenUriBuilder";
-import { PORTAL_NAME } from "../../constants";
 import { WeaponsTab } from "./Weapons";
 import { WeaponsGuide } from "./WeaponsGuide";
 import { WearablesTab } from "./Wearables";
@@ -40,17 +39,17 @@ export const ProfilePanel: React.FC<{
     {
       id: "wearables" as const,
       icon: SUNNYSIDE.icons.player,
-      name: t(`${PORTAL_NAME}.wearables`),
+      name: t("minigame.wearables"),
     },
     {
       id: "weapons" as const,
       icon: bananaIcon,
-      name: t(`${PORTAL_NAME}.weapons`),
+      name: t("minigame.weapons"),
     },
     {
       id: "guide" as const,
       icon: guideIcon,
-      name: t(`${PORTAL_NAME}.weaponGuide`),
+      name: t("minigame.weaponGuide"),
     },
   ].filter((tab) => tabs.includes(tab.id));
 

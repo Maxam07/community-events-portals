@@ -29,7 +29,7 @@ export const Target: React.FC = () => {
       type={isTargetReached ? "success" : "vibrant"}
       className="mb-3"
     >
-      {t(`${PORTAL_NAME}.targetScore`, {
+      {t("minigame.targetScore", {
         target: target,
       })}
     </Label>
