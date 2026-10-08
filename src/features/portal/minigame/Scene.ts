@@ -40,6 +40,8 @@ import type {
   MeleeEnemyTypes,
   StaticRangeEnemyTypes,
   EnemyType,
+  SpawnArea,
+  MiniBossWaveConfig
 } from "./Types";
 import { BossEnemy } from "./containers/BossEnemyContainer";
 import {
@@ -118,6 +120,17 @@ export class Scene extends BaseScene {
   miniBossGroup!: Phaser.Physics.Arcade.Group;
   weaponGroup!: Phaser.Physics.Arcade.Group;
   enemyWeapons: EnemyWeapon[] = [];
+  area1Blockade?: Phaser.GameObjects.Image;
+  area2Blockade?: Phaser.GameObjects.Image;
+  area3Blockade?: Phaser.GameObjects.Image;
+  defeatedMiniBosses = new Set<MiniBossType>();
+  enteredAreas = new Set<number>();
+  enemyKillsByArea: Record<SpawnArea, number> = {
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+  };
   sceneId: SceneId = PORTAL_NAME;
 
   constructor() {
@@ -151,28 +164,56 @@ export class Scene extends BaseScene {
 
     // Minigame assets
     // Phasing mobs
-    this.load.spritesheet("Mob1", "world/portal/images/mob1.webp", {
+    this.load.spritesheet("bat1", "world/portal/halloween/bat1_phasing.webp", {
+      frameWidth: 34,
+      frameHeight: 32,
+    });
+    this.load.spritesheet("crow", "world/portal/halloween/enemy-crow.webp", {
       frameWidth: 32,
       frameHeight: 32,
     });
-    this.load.spritesheet("Mob2", "world/portal/images/mob2.webp", {
-      frameWidth: 32,
+    this.load.spritesheet("ghost", "world/portal/halloween/ghost.webp", {
+      frameWidth: 37,
+      frameHeight: 40,
+    });
+    this.load.spritesheet("gargoyle", "world/portal/halloween/gargoyle.webp", {
+      frameWidth: 48,
       frameHeight: 48,
     });
-    this.load.spritesheet("Mob3", "world/portal/images/mob3.webp", {
+    this.load.spritesheet("shade", "world/portal/halloween/shade-Sheet.webp", {
       frameWidth: 32,
-      frameHeight: 32,
-    });
-    this.load.spritesheet("Mob4", "world/portal/images/mob4.webp", {
-      frameWidth: 32,
-      frameHeight: 32,
-    });
-    this.load.spritesheet("Mob5", "world/portal/images/mob5.webp", {
-      frameWidth: 16,
       frameHeight: 32,
     });
 
     // Static range mobs
+    this.load.spritesheet(
+      "scarecrow",
+      "world/portal/halloween/scarecrow.webp",
+      {
+        frameWidth: 32,
+        frameHeight: 32,
+      },
+    );
+    this.load.spritesheet(
+      "scarecrow_attack",
+      "world/portal/halloween/scarecrow_attack.webp",
+      {
+        frameWidth: 32,
+        frameHeight: 32,
+      },
+    );
+    this.load.spritesheet("imp", "world/portal/halloween/imp.webp", {
+      frameWidth: 32,
+      frameHeight: 32,
+    });
+    this.load.spritesheet(
+      "imp_attack",
+      "world/portal/halloween/imp_attack.webp",
+      {
+        frameWidth: 32,
+        frameHeight: 32,
+      },
+    );
     this.load.spritesheet(
       "cultist",
       "world/portal/halloween/cultist_idle_Sheet.webp",
@@ -189,8 +230,92 @@ export class Scene extends BaseScene {
         frameHeight: 32,
       },
     );
+    this.load.spritesheet(
+      "red_stone",
+      "world/portal/halloween/area4_static.webp",
+      {
+        frameWidth: 32,
+        frameHeight: 32,
+      },
+    );
+    this.load.spritesheet(
+      "red_stone_attack",
+      "world/portal/halloween/area4_static_attack.webp",
+      {
+        frameWidth: 32,
+        frameHeight: 32,
+      },
+    );
 
     // Melee mobs
+    this.load.spritesheet(
+      "carnivore_plant",
+      "world/portal/halloween/carnivore_plant-Sheet.webp",
+      {
+        frameWidth: 32,
+        frameHeight: 32,
+      },
+    );
+    this.load.spritesheet("rat", "world/portal/halloween/rat.webp", {
+      frameWidth: 22,
+      frameHeight: 16,
+    });
+    this.load.spritesheet("zombie", "world/portal/halloween/zombie.webp", {
+      frameWidth: 96,
+      frameHeight: 64,
+    });
+    this.load.spritesheet(
+      "skeleton",
+      "world/portal/halloween/SkeletonNormal-Sheet.webp",
+      {
+        frameWidth: 14,
+        frameHeight: 17,
+      },
+    );
+    this.load.spritesheet(
+      "slime_red",
+      "world/portal/halloween/slime_red.webp",
+      {
+        frameWidth: 18,
+        frameHeight: 16,
+      },
+    );
+    this.load.spritesheet(
+      "slime_green",
+      "world/portal/halloween/slime_green.webp",
+      {
+        frameWidth: 18,
+        frameHeight: 16,
+      },
+    );
+    this.load.spritesheet(
+      "slime_blue",
+      "world/portal/halloween/slime_blue.webp",
+      {
+        frameWidth: 18,
+        frameHeight: 16,
+      },
+    );
+    this.load.spritesheet("vampire", "world/portal/halloween/vampire.webp", {
+      frameWidth: 32,
+      frameHeight: 32,
+    });
+    this.load.spritesheet(
+      "frankenstein",
+      "world/portal/halloween/frankenstein-Sheet.webp",
+      {
+        frameWidth: 39,
+        frameHeight: 50,
+      },
+    );
+    this.load.spritesheet(
+      "werewolf",
+      "world/portal/halloween/Enemy_Werewolf.webp",
+      {
+        frameWidth: 48,
+        frameHeight: 48,
+      },
+    );
     this.load.spritesheet(
       "hellHound",
       "world/portal/halloween/HellHound_melee-Sheet.webp",
@@ -218,22 +343,6 @@ export class Scene extends BaseScene {
 
     // MiniBoss
     this.load.spritesheet(
-      "mummy_walk",
-      "world/portal/halloween/dungeonMummy-walk.webp",
-      {
-        frameWidth: 64,
-        frameHeight: 64,
-      },
-    );
-    this.load.spritesheet(
-      "mummy_attack",
-      "world/portal/halloween/dungeonMummy-attack.webp",
-      {
-        frameWidth: 64,
-        frameHeight: 64,
-      },
-    );
-    this.load.spritesheet(
       "golem_walk",
       "world/portal/halloween/dungeonGolem-walking.webp",
       {
@@ -242,27 +351,67 @@ export class Scene extends BaseScene {
       },
     );
     this.load.spritesheet(
-      "golem_attack",
-      "world/portal/halloween/dungeonGolem-attack.webp",
+      "ent",
+      "world/portal/halloween/ent_miniBoss-Sheet.webp",
+      {
+        frameWidth: 48,
+        frameHeight: 49,
+      },
+    );
+    this.load.spritesheet(
+      "mummy_walk",
+      "world/portal/halloween/dungeonMummy-walk.webp",
       {
         frameWidth: 64,
         frameHeight: 64,
       },
     );
+    this.load.spritesheet(
+      "living_armor",
+      "world/portal/halloween/Living-armor.webp",
+      {
+        frameWidth: 48,
+        frameHeight: 48,
+      },
+    );
+    this.load.spritesheet(
+      "headless_horseman",
+      "world/portal/halloween/HeadlessHorseman.webp",
+      {
+        frameWidth: 48,
+        frameHeight: 48,
+      },
+    );
+    this.load.spritesheet("medusa", "world/portal/halloween/medusa.webp", {
+      frameWidth: 48,
+      frameHeight: 48,
+    });
 
     // Boss enemy
-    this.load.spritesheet("Boss1", "world/portal/images/BossEnemy1.webp", {
-      frameWidth: 55,
-      frameHeight: 71,
+    this.load.spritesheet(
+      "minotaur",
+      "world/portal/halloween/minotaur-Sheet.webp",
+      {
+        frameWidth: 48,
+        frameHeight: 48,
+      },
+    );
+    this.load.spritesheet("witch", "world/portal/halloween/boss_witch.webp", {
+      frameWidth: 32,
+      frameHeight: 36,
     });
-    this.load.spritesheet("Boss2", "world/portal/images/BossEnemy2.webp", {
-      frameWidth: 71,
-      frameHeight: 64,
+    this.load.spritesheet("cerberus", "world/portal/halloween/cerberus.webp", {
+      frameWidth: 48,
+      frameHeight: 48,
     });
-    this.load.spritesheet("Boss3", "world/portal/images/BossEnemy3.webp", {
-      frameWidth: 55,
-      frameHeight: 50,
-    });
+    this.load.spritesheet(
+      "sorcerer",
+      "world/portal/halloween/sorcerer-Sheet.webp",
+      {
+        frameWidth: 48,
+        frameHeight: 48,
+      },
+    );
 
     // Enemy weapon
     this.load.spritesheet("Fire", "world/portal/halloween/fire.webp", {
@@ -270,8 +419,24 @@ export class Scene extends BaseScene {
       frameHeight: 15,
     });
     this.load.spritesheet(
-      "fireBall",
+      "cultist_fireBall",
       "world/portal/halloween/fireball-Sheet.webp",
+      {
+        frameWidth: 16,
+        frameHeight: 16,
+      },
+    );
+    this.load.spritesheet(
+      "imp_fireball",
+      "world/portal/halloween/imp_fireball.webp",
+      {
+        frameWidth: 13,
+        frameHeight: 10,
+      },
+    );
+    this.load.spritesheet(
+      "red_stone_fireball",
+      "world/portal/halloween/area4_static_fireball.webp",
       {
         frameWidth: 16,
         frameHeight: 16,
@@ -315,11 +480,13 @@ export class Scene extends BaseScene {
     this.load.image("rock", "world/portal/images/TematicRock.webp");
     this.load.image("tree", "world/portal/images/TematicTree.webp");
     this.load.image("tree_stump", SUNNYSIDE.decorations.spookyTree);
-    this.load.image("water", SUNNYSIDE.decorations.ocean);
+    this.load.image("water1", SUNNYSIDE.decorations.ocean);
+    this.load.image("water", "world/portal/halloween/ocean1.webp");
     this.load.image("deco_1", "world/portal/images/deco_1.webp");
     this.load.image("deco_2", "world/portal/images/deco_2.webp");
     this.load.image("deco_3", "world/portal/images/deco_3.webp");
     this.load.image("deco_4", "world/portal/images/deco_4.webp");
+    this.load.image("blockade1", "world/goblin_exchange.png");
 
     // Boss icons
     this.load.image("icon_boss_1", "world/portal/images/icon_boss_1.webp");
@@ -510,8 +677,9 @@ export class Scene extends BaseScene {
     this.initialiseCombat();
     this.initialiseWearables();
 
+    this.createBlockade();
     // DEBUG
-    // const texture = this.textures.get("fireBall");
+    const texture = this.textures.get("skeleton");
 
     // console.log("Debug spritesheet:", {
     //   width: texture.getSourceImage().width,
@@ -542,9 +710,13 @@ export class Scene extends BaseScene {
     }
 
     const centerX = 20.5 * SQUARE_WIDTH;
+    // Area 1
     this.add.image(centerX, 131 * SQUARE_WIDTH, "galaxy_biome").setDepth(4);
+    // Area 2
     this.add.image(centerX, 94 * SQUARE_WIDTH, "crystal_biome").setDepth(3);
+    // Area 3
     this.add.image(centerX, 57 * SQUARE_WIDTH, "spooky_biome").setDepth(2);
+    // Area 4
     this.add.image(centerX, 20 * SQUARE_WIDTH, "marble_biome").setDepth(1);
 
     // Background music
@@ -792,8 +964,8 @@ export class Scene extends BaseScene {
       this.syncSpecialPower();
       this.weaponManager?.update(time, delta);
       this.applyHealingTick(delta);
-      this.processTimeWaves();
-      this.killBaseWave();
+      this.updateEnteredArea();
+      this.areaBaseSpawn();
       this.phasingEnemies.forEach((mob) => {
         mob.setPhasingMove(true);
       });
@@ -1138,7 +1310,7 @@ export class Scene extends BaseScene {
       );
       this.weaponManager?.reset(nextWeaponLoadout);
     });
-    this.createStationaryEnemy("cultist", ["staticRange"]);
+    this.createStationaryEnemies(["staticRange"]);
 
     this.events.once("shutdown", () => {
       subscription?.unsubscribe();
@@ -1231,9 +1403,7 @@ export class Scene extends BaseScene {
   private groupCollision() {
     this.physics.add.collider(this.bossGroup, this.bossGroup);
     this.physics.add.collider(this.miniBossGroup, this.miniBossGroup);
-    this.physics.add.collider(this.phasingGroup, this.miniBossGroup);
     this.physics.add.collider(this.meleeGroup, this.meleeGroup);
-    this.physics.add.collider(this.meleeGroup, this.miniBossGroup);
 
     if (this.currentPlayer) {
       this.physics.add.overlap(
@@ -1241,7 +1411,11 @@ export class Scene extends BaseScene {
         this.enemyGroup,
         (_player, enemyObj) => {
           const enemy = enemyObj as
-            StaticRangeEnemy | PhasingEnemy | MeleeEnemy | BossEnemy | MiniBoss;
+            | StaticRangeEnemy
+            | PhasingEnemy
+            | MeleeEnemy
+            | BossEnemy
+            | MiniBoss;
           enemy.handlePlayerContact();
         },
       );
@@ -1257,31 +1431,6 @@ export class Scene extends BaseScene {
         },
       );
     }
-  }
-
-  private killBaseWave() {
-    this.portalService?.onTransition((state) => {
-      if (!state.changed) return;
-
-      const triggerAt = state.context.score;
-
-      // this.spawnBoss(triggerAt);
-      // this.spawnSwarmMob(triggerAt);
-      this.spawnMiniBoss(triggerAt);
-    });
-  }
-
-  private processTimeWaves() {
-    const endAt = this.portalService?.state.context.endAt ?? 0;
-    if (!endAt) return;
-
-    const secondsLeft = Math.max(endAt - Date.now(), 0) / 1000;
-    const elapsedTime = GAME_SECONDS - secondsLeft;
-
-    // this.spawnPhasingMob(elapsedTime);
-    this.spawnMeleeMob(elapsedTime);
-    // this.spawnMiniBoss(elapsedTime);
-    // this.spawnBoss(elapsedTime);
   }
 
   private createObstacles() {
@@ -1309,9 +1458,6 @@ export class Scene extends BaseScene {
           player.isSwimming = true;
           player.swim?.();
           this.velocity = this.getPlayerMovementSpeed();
-          if (!this.seaBeastDefeated) {
-            this.createBossEnemy("boss3");
-          }
         }
       },
     );
@@ -1330,103 +1476,80 @@ export class Scene extends BaseScene {
       player.isSwimming = false;
       player.walk?.();
       this.velocity = this.getPlayerMovementSpeed();
-      const boss = this.bossEnemies.find((b) => b.bossType === "boss3");
-      if (boss) {
-        this.dismissBoss(boss);
+
+    }
+  }
+
+  // Enemy area base spawning
+  private areaBaseSpawn(){
+    this.spawnPhasingMob();
+    this.spawnMeleeMob();
+  };
+
+  private handleEnemyKill(mobType: EnemyType) {
+    const area = ENEMY_AREAS[mobType];
+
+    this.enemyKillsByArea[area]++;
+
+    this.checkMiniBossSpawn(area);
+  }
+
+  private checkMiniBossSpawn(area: SpawnArea) {
+    const requiredKills =
+      PHASING_WAVE_THRESHOLDS
+        .filter((wave) => wave.area === area)
+        .reduce((total, wave) => total + wave.totalEnemy, 0) +
+      MELEE_WAVE_THRESHOLDS
+        .filter((wave) => wave.area === area)
+        .reduce((total, wave) => total + wave.totalEnemy, 0);
+
+    if (this.enemyKillsByArea[area] < requiredKills) {
+      return;
+    }
+
+    const miniBosses = MINIBOSS_WAVE_THRESHOLDS.filter(
+      (miniBoss) => miniBoss.area === area,
+    );
+
+    for (const miniBoss of miniBosses) {
+      const flag = miniBoss.flag;
+
+      if (this.waveState.get(flag)) {
+        continue;
+      }
+
+      this.waveState.set(flag, true);
+
+      this.spawnMiniBoss(miniBoss);
+    }
+  }
+
+  // Check if the player is in a specific area
+  private isPlayerInArea(area: number): boolean {
+    if (!this.currentPlayer) return false;
+    const spawnArea = ENEMY_SPAWN_AREAS[area as keyof typeof ENEMY_SPAWN_AREAS];
+
+    if (!spawnArea) return false;
+
+    return (
+      this.currentPlayer.x >= spawnArea.minX &&
+      this.currentPlayer.x <= spawnArea.maxX &&
+      this.currentPlayer.y >= spawnArea.minY &&
+      this.currentPlayer.y <= spawnArea.maxY
+    );
+  }
+   
+  private updateEnteredArea() {
+    for (const area of Object.keys(ENEMY_SPAWN_AREAS)) {
+      const areaNumber = Number(area);
+
+      if (this.isPlayerInArea(areaNumber)) {
+        this.enteredAreas.add(areaNumber);
       }
     }
   }
 
-  private createBossEnemy(bossType: BossTypes) {
-    if (!this.currentPlayer) return;
-    const maxAttempts = 20;
-    const minDistance = 20;
-    const spawnRadius = 5 * SQUARE_WIDTH;
-
-    let x = 0;
-    let y = 0;
-
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
-      const distance = Phaser.Math.Between(10 * SQUARE_WIDTH, spawnRadius);
-
-      x = this.currentPlayer.x + Math.cos(angle) * distance;
-      y = this.currentPlayer.y + Math.sin(angle) * distance;
-
-      const tooClose = this.bossEnemies.some((enemy) => {
-        const dist = Phaser.Math.Distance.Between(x, y, enemy.x, enemy.y);
-        return dist < minDistance;
-      });
-
-      if (!tooClose) {
-        let placed = false;
-        placed = true;
-        break;
-      }
-    }
-
-    const boss = new BossEnemy({
-      x,
-      y,
-      scene: this,
-      player: this.currentPlayer,
-      bossType,
-    });
-
-    this.enemyGroup.add(boss);
-    this.bossEnemies.push(boss);
-    this.bossGroup.add(boss);
-    boss.once("destroy", () => {
-      this.unregisterBossEnemy(boss);
-    });
-  }
-
-  private bossWarning(bossType: BossTypes) {
-    if (!this.currentPlayer) return;
-
-    const BOSS_ICONS: Record<BossTypes, string> = {
-      boss1: "icon_boss_1",
-      boss2: "icon_boss_2",
-      boss3: "icon_boss_3",
-    };
-
-    const key = BOSS_ICONS[bossType];
-    if (!key) return;
-
-    const icon = this.add
-      .image(this.currentPlayer.x, this.currentPlayer.y - 20, key)
-      .setDepth(9999)
-      .setAlpha(0);
-    icon.setScale(0.8);
-
-    const followPlayer = () => {
-      if (!this.currentPlayer || !icon.active) return;
-      icon.setPosition(this.currentPlayer.x, this.currentPlayer.y - 20);
-    };
-    this.events.on("update", followPlayer);
-
-    this.tweens.add({
-      targets: icon,
-      alpha: 1,
-      duration: 400,
-      yoyo: true,
-      repeat: 1,
-      onComplete: () => {
-        icon.setVisible(false);
-        this.events.off("update", followPlayer);
-        icon.destroy();
-      },
-    });
-  }
-
-  private bossSpawnWave(bossType: BossTypes, total: number) {
-    for (let i = 0; i < total; i++) {
-      this.bossWarning(bossType);
-      this.createBossEnemy(bossType);
-    }
-  }
-
-  // Spawning helper
+  // spawning helper
   private getSpawnPositions(
     formation: EnemyFormation,
     count: number,
@@ -1477,6 +1600,118 @@ export class Scene extends BaseScene {
   }
 
   // Create Enemies
+  private createStationaryEnemies(weaponTypes: WeaponType[]) {
+    const enemies: StaticRangeEnemyTypes[] = [
+      // "scarecrow",
+      "cultist",
+      "imp",
+      // "red_stone",
+    ];
+
+    enemies.forEach((mobType, areaIndex) => {
+      const startIndex = areaIndex * 7;
+      const positions = STATIC_RANGE_POS.slice(startIndex, startIndex + 7);
+
+      positions.forEach(({ x, y }) => {
+        if (!this.currentPlayer) return;
+
+        const mob = new StaticRangeEnemy({
+          x: x * SQUARE_WIDTH,
+          y: y * SQUARE_WIDTH,
+          scene: this,
+          player: this.currentPlayer,
+          mobType,
+          weaponTypes,
+        });
+
+        for (const weaponType of weaponTypes) {
+          const weapon = createEnemyWeapon({
+            scene: this,
+            target: mob,
+            player: this.currentPlayer,
+            enemyType: mobType,
+            weaponType,
+          });
+
+          this.enemyWeapons.push(weapon);
+          this.weaponGroup.add(weapon);
+        }
+
+        this.staticRangeEnemies.push(mob);
+        this.staticRangeGroup.add(mob);
+        this.enemyGroup.add(mob);
+
+        mob.once("destroy", () => {
+          this.unregisterStaticRangeMob(mob);
+        });
+      });
+    });
+  }
+
+  private createPhasingEnemy(
+    mobType: PhasingEnemyTypes,
+    formation: EnemyFormation,
+    count: number,
+  ): number {
+    if (!this.currentPlayer) return 0;
+    const positions = this.getSpawnPositions(formation, count, mobType);
+    let spawned = 0;
+
+    positions.forEach(({ x: spawnX, y: spawnY }) => {
+      const mob = new PhasingEnemy({
+        x: spawnX,
+        y: spawnY,
+        scene: this,
+        player: this.currentPlayer!,
+        mobType,
+      });
+
+      this.phasingEnemies.push(mob);
+      this.phasingGroup.add(mob);
+      this.enemyGroup.add(mob);
+
+      mob.once("destroy", () => {
+        this.unregisterPhasingMob(mob);
+      });
+
+      spawned++;
+    });
+
+    return spawned;
+  }
+
+  private createMeleeEnemy(
+    mobType: MeleeEnemyTypes,
+    formation: EnemyFormation,
+    count: number,
+  ): number {
+    if (!this.currentPlayer) return 0;
+    const positions = this.getSpawnPositions(formation, count, mobType);
+    let spawned = 0;
+
+    positions.forEach(({ x: spawnX, y: spawnY }) => {
+      const mob = new MeleeEnemy({
+        x: spawnX,
+        y: spawnY,
+        scene: this,
+        player: this.currentPlayer!,
+        mobType,
+      });
+
+      this.meleeEnemies.push(mob);
+      this.meleeGroup.add(mob);
+      this.enemyGroup.add(mob);
+
+      mob.once("destroy", () => {
+        this.unregisterMeleeMobs(mob);
+      });
+
+      spawned++;
+    });
+
+    return spawned;
+  }
+
   private createMiniBossEnemy(
     miniBossType: MiniBossType,
     formation: EnemyFormation,
@@ -1521,30 +1756,33 @@ export class Scene extends BaseScene {
     });
   }
 
-  private createStationaryEnemy(
-    mobType: StaticRangeEnemyTypes,
+  private createBossEnemy(
+    bossType: BossTypes,
+    formation: EnemyFormation,
     weaponTypes: WeaponType[],
+    count = 1,
   ) {
-    STATIC_RANGE_POS.forEach(({ x, y }) => {
-      if (!this.currentPlayer) return;
-      const spawnX = x * SQUARE_WIDTH;
-      const spawnY = y * SQUARE_WIDTH;
+    if (!this.currentPlayer) return 0;
+    const positions = this.getSpawnPositions(formation, count, bossType);
 
-      const mob = new StaticRangeEnemy({
+    positions.forEach(({ x: spawnX, y: spawnY }) => {
+      if (!this.currentPlayer) return;
+
+      const boss = new BossEnemy({
         x: spawnX,
         y: spawnY,
         scene: this,
         player: this.currentPlayer,
-        mobType,
+        bossType,
         weaponTypes,
       });
 
       for (const weaponType of weaponTypes) {
         const weapon = createEnemyWeapon({
           scene: this,
-          target: mob,
+          target: boss,
           player: this.currentPlayer,
-          enemyType: mobType,
+          enemyType: bossType,
           weaponType,
         });
 
@@ -1552,79 +1790,17 @@ export class Scene extends BaseScene {
         this.weaponGroup.add(weapon);
       }
 
-      this.staticRangeEnemies.push(mob);
-      this.staticRangeGroup.add(mob);
-      this.enemyGroup.add(mob);
-      mob.once("destroy", () => {
-        this.unregisterStaticRangeMob(mob);
+      this.bossEnemies.push(boss);
+      this.bossGroup.add(boss);
+      this.enemyGroup.add(boss);
+
+      boss.once("destroy", () => {
+        this.unregisterBossEnemy(boss);
       });
     });
   }
 
-  private createMeleeEnemy(
-    mobType: MeleeEnemyTypes,
-    formation: EnemyFormation,
-    count: number,
-  ): number {
-    if (!this.currentPlayer) return 0;
-    const positions = this.getSpawnPositions(formation, count, mobType);
-    let spawned = 0;
-
-    positions.forEach(({ x: spawnX, y: spawnY }) => {
-      const mob = new MeleeEnemy({
-        x: spawnX,
-        y: spawnY,
-        scene: this,
-        player: this.currentPlayer!,
-        mobType,
-      });
-
-      this.meleeEnemies.push(mob);
-      this.meleeGroup.add(mob);
-      this.enemyGroup.add(mob);
-
-      mob.once("destroy", () => {
-        this.unregisterMeleeMobs(mob);
-      });
-
-      spawned++;
-    });
-
-    return spawned;
-  }
-
-  private createPhasingEnemy(
-    mobType: PhasingEnemyTypes,
-    formation: EnemyFormation,
-    count: number,
-  ): number {
-    if (!this.currentPlayer) return 0;
-    const positions = this.getSpawnPositions(formation, count, mobType);
-    let spawned = 0;
-
-    positions.forEach(({ x: spawnX, y: spawnY }) => {
-      const mob = new PhasingEnemy({
-        x: spawnX,
-        y: spawnY,
-        scene: this,
-        player: this.currentPlayer!,
-        mobType,
-      });
-
-      this.phasingEnemies.push(mob);
-      this.phasingGroup.add(mob);
-      this.enemyGroup.add(mob);
-
-      mob.once("destroy", () => {
-        this.unregisterSwarmMob(mob);
-      });
-
-      spawned++;
-    });
-
-    return spawned;
-  }
-
+  // Enemy batch spawn delays
   private mobWaveHelper(
     total: number,
     batchSize: number,
@@ -1649,18 +1825,6 @@ export class Scene extends BaseScene {
     });
   }
 
-  private meleeWave(
-    mobType: MeleeEnemyTypes,
-    total: number,
-    batchSize: number,
-    delay: number,
-    formation: EnemyFormation,
-  ) {
-    this.mobWaveHelper(total, batchSize, delay, (amount) =>
-      this.createMeleeEnemy(mobType, formation, amount),
-    );
-  }
-
   private phasingWave(
     mobType: PhasingEnemyTypes,
     total: number,
@@ -1670,6 +1834,18 @@ export class Scene extends BaseScene {
   ) {
     this.mobWaveHelper(total, batchSize, delay, (amount) =>
       this.createPhasingEnemy(mobType, formation, amount),
+    );
+  }
+
+  private meleeWave(
+    mobType: MeleeEnemyTypes,
+    total: number,
+    batchSize: number,
+    delay: number,
+    formation: EnemyFormation,
+  ) {
+    this.mobWaveHelper(total, batchSize, delay, (amount) =>
+      this.createMeleeEnemy(mobType, formation, amount),
     );
   }
 
@@ -1684,27 +1860,24 @@ export class Scene extends BaseScene {
     }
   }
 
-  // Spawn enemy using trigger
-  private spawnMiniBoss(triggerAt: number) {
-    for (const wave of MINIBOSS_WAVE_THRESHOLDS) {
-      const key = wave.flag;
-      if (triggerAt >= wave.triggerAt && !this.waveState.get(key)) {
-        this.waveState.set(key, true);
-
-        this.miniBossWave(
-          wave.miniBossType,
-          wave.totalEnemy,
-          wave.weaponType,
-          wave.formation,
-        );
-      }
+  private bossWave(
+    bossType: BossTypes,
+    total: number,
+    weaponType: WeaponType[],
+    formation: EnemyFormation,
+  ) {
+    for (let i = 0; i < total; i++) {
+      // this.bossWarning(bossType);
+      this.createBossEnemy(bossType, formation, weaponType);
     }
   }
 
-  private spawnPhasingMob(triggerAt: number) {
+  // Enemy spawn triggers
+  private spawnPhasingMob() {
     for (const wave of PHASING_WAVE_THRESHOLDS) {
       const key = wave.flag;
-      if (triggerAt >= wave.triggerAt && !this.waveState.get(key)) {
+
+      if (!this.waveState.get(key) && this.isPlayerInArea(wave.area)) {
         this.waveState.set(key, true);
 
         this.phasingWave(
@@ -1718,10 +1891,11 @@ export class Scene extends BaseScene {
     }
   }
 
-  private spawnMeleeMob(triggerAt: number) {
+  private spawnMeleeMob() {
     for (const wave of MELEE_WAVE_THRESHOLDS) {
       const key = wave.flag;
-      if (triggerAt >= wave.triggerAt && !this.waveState.get(key)) {
+
+      if (!this.waveState.get(key) && this.isPlayerInArea(wave.area)) {
         this.waveState.set(key, true);
 
         this.meleeWave(
@@ -1735,17 +1909,48 @@ export class Scene extends BaseScene {
     }
   }
 
-  private spawnBoss(triggerAt: number) {
-    for (const wave of BOSS_WAVE_THRESHOLDS) {
-      const key = wave.flag;
-      if (triggerAt >= wave.triggerAt && !this.waveState.get(key)) {
-        this.waveState.set(key, true);
-
-        this.bossSpawnWave(wave.bossType, wave.totalEnemy);
-      }
-    }
+  private spawnMiniBoss(config: MiniBossWaveConfig) {
+        this.miniBossWave(
+          config.miniBossType,
+          config.totalEnemy,
+          config.weaponType,
+          config.formation,
+        );
   }
 
+  private spawnBoss(bossType: BossTypes) {
+    const bossWave = BOSS_WAVE_THRESHOLDS.find(
+      (wave) => wave.bossType === bossType,
+    );
+
+    if (!bossWave) return;
+
+    if (this.waveState.get(bossWave.flag)) return;
+
+    this.waveState.set(bossWave.flag, true);
+
+    this.bossWave(
+      bossWave.bossType,
+      bossWave.totalEnemy,
+      bossWave.weaponType,
+      bossWave.formation,
+    );
+  }
+
+  private checkMiniBossProgression() {
+    const defeatedCount = this.defeatedMiniBosses.size;
+
+    if (defeatedCount === 2) {
+      this.spawnBoss("minotaur");
+    } else if (defeatedCount === 4) {
+      this.spawnBoss("witch");
+    } else if (defeatedCount === 6) {
+      this.spawnBoss("cerberus");
+    } else if (defeatedCount === 8) {
+      this.spawnBoss("sorcerer");
+    }
+  }
+  // Create drop items when enemies are defeated
   public createDropItems({
     x,
     y,
@@ -1763,8 +1968,38 @@ export class Scene extends BaseScene {
       itemKey,
     });
   }
+  // Create blockade to restrict player movement until boss is defeated
+  private createBlockade() {
+    const area1Blockade = this.add
+      .image(14 * SQUARE_WIDTH, 109 * SQUARE_WIDTH, "blockade1")
+      .setDepth(5);
 
-  public handleStatciMobDefeat(mob: StaticRangeEnemy) {
+    const area2Blockade = this.add
+      .image(14 * SQUARE_WIDTH, 73 * SQUARE_WIDTH, "water1")
+      .setDepth(5);
+
+    const area3Blockade = this.add
+      .image(14 * SQUARE_WIDTH, 36 * SQUARE_WIDTH, "water1")
+      .setDepth(5);
+
+    for (const blockade of [area1Blockade, area2Blockade, area3Blockade]) {
+      this.physics.add.existing(blockade, true);
+
+      const body = blockade.body as Phaser.Physics.Arcade.StaticBody;
+      body.setSize(4 * SQUARE_WIDTH, 4 * SQUARE_WIDTH);
+
+      if (this.currentPlayer) {
+        this.physics.add.collider(this.currentPlayer, blockade);
+      }
+    }
+
+    this.area1Blockade = area1Blockade;
+    this.area2Blockade = area2Blockade;
+    this.area3Blockade = area3Blockade;
+  }
+
+  // Handle enemy defeat
+  public handleStaticMobDefeat(mob: StaticRangeEnemy) {
     this.createDropItems({
       x: mob.x,
       y: mob.y - 15,
@@ -1788,8 +2023,11 @@ export class Scene extends BaseScene {
       });
     }
 
-    this.unregisterSwarmMob(mob);
+    this.unregisterPhasingMob(mob);
     mob.destroy();
+
+
+    this.handleEnemyKill(mob.mobType);
   }
 
   public handleMeleeMobDefeat(mob: MeleeEnemy) {
@@ -1807,26 +2045,8 @@ export class Scene extends BaseScene {
 
     this.unregisterMeleeMobs(mob);
     mob.destroy();
-  }
 
-  private unregisterStaticRangeMob(mob: StaticRangeEnemy) {
-    this.staticRangeEnemies = this.staticRangeEnemies.filter(
-      (enemy) => enemy !== mob,
-    );
-    this.staticRangeGroup?.remove(mob, false, false);
-    this.enemyGroup?.remove(mob, false, false);
-  }
-
-  private unregisterSwarmMob(mob: PhasingEnemy) {
-    this.phasingEnemies = this.phasingEnemies.filter((enemy) => enemy !== mob);
-    this.phasingGroup?.remove(mob, false, false);
-    this.enemyGroup?.remove(mob, false, false);
-  }
-
-  private unregisterMeleeMobs(mob: MeleeEnemy) {
-    this.meleeEnemies = this.meleeEnemies.filter((enemy) => enemy !== mob);
-    this.meleeGroup?.remove(mob, false, false);
-    this.enemyGroup?.remove(mob, false, false);
+    this.handleEnemyKill(mob.mobType);
   }
 
   public handleMiniBossDefeat(miniBoss: MiniBoss) {
@@ -1846,25 +2066,12 @@ export class Scene extends BaseScene {
 
     this.unregisterMiniBossEnemy(miniBoss);
     miniBoss.destroy();
-  }
 
-  private unregisterMiniBossEnemy(miniBoss: MiniBoss) {
-    this.miniBosses = this.miniBosses.filter((enemy) => enemy !== miniBoss);
-    this.miniBossGroup?.remove(miniBoss, false, false);
-    this.enemyGroup?.remove(miniBoss, false, false);
+    this.defeatedMiniBosses.add(miniBoss.miniBossType);
+    this.checkMiniBossProgression();
   }
 
   public handleBossDefeat(boss: BossEnemy) {
-    if (boss.bossType === "boss3") {
-      this.seaBeastDefeated = true;
-      this.bossEnemies.forEach((boss) => {
-        boss.setMove(false);
-      });
-      this.phasingEnemies.forEach((mob) => {
-        mob.setPhasingMove(false);
-      });
-    }
-
     this.createDropItems({
       x: boss.x,
       y: boss.y,
@@ -1879,14 +2086,42 @@ export class Scene extends BaseScene {
       rarity: "legendary",
     });
 
+    if (boss.bossType === "minotaur") {
+      this.area1Blockade?.destroy();
+    } else if (boss.bossType === "witch") {
+      this.area2Blockade?.destroy();
+    } else if (boss.bossType === "cerberus") {
+      this.area3Blockade?.destroy();
+    }
+
     this.unregisterBossEnemy(boss);
     boss.destroy();
   }
+  // Unregister enemies from the scene
+  private unregisterStaticRangeMob(mob: StaticRangeEnemy) {
+    this.staticRangeEnemies = this.staticRangeEnemies.filter(
+      (enemy) => enemy !== mob,
+    );
+    this.staticRangeGroup?.remove(mob, false, false);
+    this.enemyGroup?.remove(mob, false, false);
+  }
 
-  private dismissBoss(boss: BossEnemy) {
-    if (!boss || !boss.active) return;
-    this.unregisterBossEnemy(boss);
-    boss.destroy();
+  private unregisterPhasingMob(mob: PhasingEnemy) {
+    this.phasingEnemies = this.phasingEnemies.filter((enemy) => enemy !== mob);
+    this.phasingGroup?.remove(mob, false, false);
+    this.enemyGroup?.remove(mob, false, false);
+  }
+
+  private unregisterMeleeMobs(mob: MeleeEnemy) {
+    this.meleeEnemies = this.meleeEnemies.filter((enemy) => enemy !== mob);
+    this.meleeGroup?.remove(mob, false, false);
+    this.enemyGroup?.remove(mob, false, false);
+  }
+
+  private unregisterMiniBossEnemy(miniBoss: MiniBoss) {
+    this.miniBosses = this.miniBosses.filter((enemy) => enemy !== miniBoss);
+    this.miniBossGroup?.remove(miniBoss, false, false);
+    this.enemyGroup?.remove(miniBoss, false, false);
   }
 
   private unregisterBossEnemy(boss: BossEnemy) {
