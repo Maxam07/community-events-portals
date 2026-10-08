@@ -107,7 +107,7 @@ const getSurroundFormation = (
   centerY: number,
 ) => {
   const positions = [];
-  const maxRadius = 10 * SQUARE_WIDTH;
+  const maxRadius = 15 * SQUARE_WIDTH;
   const minRadius = Math.min(MIN_SPAWN_DISTANCE, maxRadius);
 
   for (let i = 0; i < count; i++) {

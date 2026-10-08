@@ -2,7 +2,6 @@ import type { BumpkinContainer } from "../../Core/BumpkinContainer";
 import type { EnemyType } from "../../Types";
 import type { Scene } from "../../Scene";
 import { SQUARE_WIDTH } from "features/game/lib/constants";
-import { MiniBoss } from "../MiniBossContainer";
 
 interface SummonigWeaponProps {
   scene: Scene;
@@ -122,7 +121,7 @@ export class SummoningWeapon extends Phaser.GameObjects.Sprite {
 
     // Warning finished -> turn into fire
     if (this.phase === "warning" && this.elapsedMs >= this.warningDurationMs) {
-      this.spawnFire();
+      this.summon();
       return;
     }
 
@@ -152,24 +151,24 @@ export class SummoningWeapon extends Phaser.GameObjects.Sprite {
     this.setTexture(this.warningTexture);
     this.setVisible(true);
 
-    if (this.target instanceof MiniBoss) {
-      this.target.playSummonAnimation();
-    }
+    // if (this.target instanceof MiniBoss) {
+    //   this.target.playAttackAnimation();
+    // }
   }
 
   /**
    * Replace the warning with the damaging fire.
    */
-  private spawnFire() {
+  private summon() {
     this.elapsedMs = 0;
     this.phase = "summon";
 
     this.setTexture(this.weapontexture);
     this.play("Fire_summon");
 
-    if (this.target instanceof MiniBoss) {
-      this.target.playMovementAnimation();
-    }
+    // if (this.target instanceof MiniBoss) {
+    //   this.target.playMovementAnimation();
+    // }
   }
 
   /**

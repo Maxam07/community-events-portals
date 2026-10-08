@@ -9,10 +9,12 @@ import type { EnemyWeapon } from "./EnemyWeapons";
 import { WEAPON_BALANCE_STATS } from "../BalanceEnemy/WeaponStatConfig";
 import { StaticRangeWeapon } from "./StaticRangeWeapon";
 import type { StaticRangeEnemy } from "../StaticRangeEnemyContainer";
+import type { BossEnemy } from "../BossEnemyContainer";
+import { SlashWeapon } from "./SlashWeapon";
 
 interface WeaponProps {
   scene: Scene;
-  target: MiniBoss | StaticRangeEnemy;
+  target: BossEnemy | MiniBoss | StaticRangeEnemy;
   player: BumpkinContainer;
   enemyType: WeaponEnemyType;
   weaponType: WeaponType;
@@ -107,6 +109,26 @@ export const createEnemyWeapon = ({
         frame_end: weaponStats.FRAME_END,
         range: weaponStats.RANGE,
         speed: weaponStats.SPEED,
+        cooldownMs: weaponStats.COOLDOWN_MS,
+        durationMs: weaponStats.DURATION_MS,
+        player,
+        enemyType,
+      });
+    }
+
+    case "slash": {
+      const weaponStats = stats.slash;
+
+      if (!weaponStats) {
+        throw new Error(`${enemyType} does not have a slash weapon configured`);
+      }
+
+      return new SlashWeapon({
+        scene,
+        target,
+        texture: weaponStats.TEXTURE,
+        range: weaponStats.RANGE,
+        arcDegrees: weaponStats.ARC_DEGREES,
         cooldownMs: weaponStats.COOLDOWN_MS,
         durationMs: weaponStats.DURATION_MS,
         player,

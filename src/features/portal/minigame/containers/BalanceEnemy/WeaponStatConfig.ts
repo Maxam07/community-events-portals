@@ -4,56 +4,45 @@ import type { WeaponEnemyType, WeaponStats } from "../../Types";
 export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
   // Miniboss
   golem: {
-    chasing: {
-      TEXTURE: "hellHound",
-      SPEED: 60,
-      DURATION_MS: 4000,
-    },
     orbiting: {
-      TEXTURE: "weapon_sunflower",
+      TEXTURE: "Fire",
       RADIUS: 50,
       SPEED_DEG_PER_SEC: 100,
     },
   },
   ent: {
-    chasing: {
-      TEXTURE: "FIRE",
-      SPEED: 70,
-      DURATION_MS: 4000,
+    orbiting: {
+      TEXTURE: "Fire",
+      RADIUS: 50,
+      SPEED_DEG_PER_SEC: 100,
     },
   },
   mummy: {
     orbiting: {
-      TEXTURE: "weapon_sunflower",
+      TEXTURE: "Fire",
       RADIUS: 50,
       SPEED_DEG_PER_SEC: 100,
     },
-    summoning: {
-      TEXTURE: "Fire",
-      DELAY_MS: 1000,
-      WARNING_DURATION_MS: 500,
-      DURATION_MS: 2000,
-    },
   },
   living_armor: {
-    chasing: {
-      TEXTURE: "FIRE",
-      SPEED: 70,
-      DURATION_MS: 4000,
+    orbiting: {
+      TEXTURE: "Fire",
+      RADIUS: 50,
+      SPEED_DEG_PER_SEC: 100,
     },
   },
   headless_horseman: {
-    chasing: {
-      TEXTURE: "FIRE",
-      SPEED: 70,
-      DURATION_MS: 4000,
+    orbiting: {
+      TEXTURE: "Fire",
+      RADIUS: 50,
+      SPEED_DEG_PER_SEC: 100,
     },
   },
   medusa: {
-    chasing: {
-      TEXTURE: "FIRE",
-      SPEED: 70,
-      DURATION_MS: 4000,
+    orbiting: {
+      TEXTURE: "Fire",
+      RADIUS: 50,
+      SPEED_DEG_PER_SEC: 100,
     },
   },
   // Static range
@@ -67,19 +56,29 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
       DURATION_MS: 2000,
     },
   },
-  skeleton: {
+  imp: {
     staticRange: {
-      TEXTURE: "Fire",
-      FRAME_END: 4,
+      TEXTURE: "imp_fireball",
+      FRAME_END: 3,
       RANGE: SQUARE_WIDTH * 5,
-      SPEED: 400,
+      SPEED: 100,
       COOLDOWN_MS: 1000,
-      DURATION_MS: 4000,
+      DURATION_MS: 2000,
     },
   },
   cultist: {
     staticRange: {
-      TEXTURE: "fireBall",
+      TEXTURE: "cultist_fireBall",
+      FRAME_END: 4,
+      RANGE: SQUARE_WIDTH * 6,
+      SPEED: 100,
+      COOLDOWN_MS: 1000,
+      DURATION_MS: 2000,
+    },
+  },
+  red_stone: {
+    staticRange: {
+      TEXTURE: "red_stone_fireball",
       FRAME_END: 4,
       RANGE: SQUARE_WIDTH * 6,
       SPEED: 100,
@@ -88,23 +87,33 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
     },
   },
   // Boss
-  boss1: {
-    chasing: {
-      TEXTURE: "FIRE",
-      SPEED: 80,
-      DURATION_MS: 4000,
+  minotaur: {
+    slash: {
+      TEXTURE: "weapon_scythe",
+      RANGE: 80,
+      ARC_DEGREES: 90,
+      COOLDOWN_MS: 2000,
+      DURATION_MS: 500,
     },
   },
-  boss2: {
+  witch: {
     orbiting: {
-      TEXTURE: "FIRE",
+      TEXTURE: "Fire",
       RADIUS: 70,
       SPEED_DEG_PER_SEC: 120,
     },
   },
-  boss3: {
+  cerberus: {
     summoning: {
-      TEXTURE: "FIRE",
+      TEXTURE: "Fire",
+      DELAY_MS: 500,
+      WARNING_DURATION_MS: 300,
+      DURATION_MS: 4000,
+    },
+  },
+  sorcerer: {
+    summoning: {
+      TEXTURE: "Fire",
       DELAY_MS: 500,
       WARNING_DURATION_MS: 300,
       DURATION_MS: 4000,

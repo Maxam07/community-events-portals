@@ -1,19 +1,17 @@
 import type { Scene } from "../Scene";
 import type { BumpkinContainer } from "../Core/BumpkinContainer";
 import type { MachineInterpreter } from "../lib/Machine";
-import type { BossTypes, DamagePayload } from "../Types";
+import type { BossTypes, DamagePayload, WeaponType } from "../Types";
 import type { EnemyConfig } from "../Types";
 import { BOSS_CONFIGS } from "../constants/EnemyConstants";
-import { LifeBar } from "./LifeBar";
 import { WEAPON_SFX, WEAPON_SFX_VOL } from "../constants";
 import { WeaponSfxLimiter } from "../lib/combat/WeaponSfxLimiter";
+import { SQUARE_WIDTH } from "features/game/lib/constants";
+import type { BoundingBox } from "../lib/collisionDetection";
+import { LifeBar } from "./LifeBar";
 
 const MOVEMENT_UPDATE_INTERVAL_MS = 100;
-const FRAME_DURATION_MS = 1000 / 60;
-// Placeholder critical-hit glow: a brief bright tint flash. Swap the tint
-// color for a real VFX/shader later if desired.
-const CRIT_FLASH_DURATION_MS = 1000;
-const CRIT_FLASH_TINT = 0xfff066;
+// const FRAME_DURATION_MS = 1000 / 60;
 
 interface Props {
   x: number;
@@ -21,6 +19,7 @@ interface Props {
   scene: Scene;
   player?: BumpkinContainer;
   bossType: BossTypes;
+  weaponTypes: WeaponType[];
 }
 
 export class BossEnemy extends Phaser.GameObjects.Container {
@@ -28,7 +27,7 @@ export class BossEnemy extends Phaser.GameObjects.Container {
   private player?: BumpkinContainer;
   private sprite!: Phaser.GameObjects.Sprite;
   private enemyBody!: Phaser.Physics.Arcade.Body;
-  swarmMove: boolean = false;
+  miniBossMove: boolean = false;
   public hp: number;
   public maxHp: number;
   public isDead = false;
@@ -37,11 +36,13 @@ export class BossEnemy extends Phaser.GameObjects.Container {
   // Status effects (slow/stun) scale movement speed; 1 = normal speed.
   private movementMultiplier = 1;
   private hurtFlashRemainingMs = 0;
-  private isCritFlashing = false;
-  private critFlashRemainingMs = 0;
-  private lifeBar: LifeBar;
+  public deSpawnState = false;
   public bossType: BossTypes;
+  private lifeBar: LifeBar;
 
+  private static readonly STOP_DISTANCE_SQ = 25;
+  private static readonly AVOID_DIRECTION_WEIGHT = 2;
+  private static readonly OBSTACLE_AVOID_WEIGHT = 3;
   private avoidX = 0;
   private avoidY = 0;
   private avoidTimer = 0;
@@ -50,15 +51,15 @@ export class BossEnemy extends Phaser.GameObjects.Container {
     0,
     MOVEMENT_UPDATE_INTERVAL_MS,
   );
+  private readonly OBSTACLE_AVOID_RANGE = SQUARE_WIDTH * 2;
 
   constructor({ scene, x, y, player, bossType }: Props) {
     super(scene, x, y);
     this.scene = scene;
     this.player = player;
-    this.bossType = bossType;
 
     scene.physics.add.existing(this);
-
+    this.bossType = bossType;
     this.config = BOSS_CONFIGS[bossType];
 
     this.hp = this.config.hp;
@@ -78,7 +79,8 @@ export class BossEnemy extends Phaser.GameObjects.Container {
 
   public get portalService() {
     return this.scene.registry.get("portalService") as
-      MachineInterpreter | undefined;
+      | MachineInterpreter
+      | undefined;
   }
 
   createEnemy() {
@@ -111,16 +113,122 @@ export class BossEnemy extends Phaser.GameObjects.Container {
       });
     }
 
+    if (this.config.attackKey) {
+      const attackAnimKey = `${this.config.attackKey}_anim`;
+
+      if (!this.scene.anims.exists(attackAnimKey)) {
+        this.scene.anims.create({
+          key: attackAnimKey,
+          frames: this.scene.anims.generateFrameNumbers(this.config.attackKey, {
+            start: 0,
+            end: 7,
+          }),
+          frameRate: 10,
+          repeat: 0,
+        });
+      }
+    }
+
     this.sprite.play(animKey);
+  }
+
+  // public playAttackAnimation() {
+  //   if (this.isDead || !this.active) return;
+
+  //   this.sprite.play(`${this.config.attackKey}_anim`, true);
+  // }
+
+  // public playMovementAnimation() {
+  //   if (this.isDead || !this.active) return;
+
+  //   this.sprite.play(`${this.config.key}_anim`, true);
+  // }
+
+  private avoidObstacles(): { x: number; y: number } {
+    const obstacles = (this.scene as any).obstacles as
+      | BoundingBox[]
+      | undefined;
+    if (!obstacles || obstacles.length === 0) return { x: 0, y: 0 };
+
+    let pushX = 0;
+    let pushY = 0;
+    let contributingCount = 0;
+
+    const rangeSq = this.OBSTACLE_AVOID_RANGE * this.OBSTACLE_AVOID_RANGE;
+
+    for (const obstacle of obstacles) {
+      if (!obstacle.hasHitbox || !obstacle.sprite) continue;
+
+      const obstacleX = obstacle.sprite.x;
+      const obstacleY = obstacle.sprite.y;
+      const halfWidth = (obstacle.width * SQUARE_WIDTH) / 2;
+      const halfHeight = (obstacle.height * SQUARE_WIDTH) / 2;
+
+      const closestX = Phaser.Math.Clamp(
+        this.x,
+        obstacleX - halfWidth,
+        obstacleX + halfWidth,
+      );
+      const closestY = Phaser.Math.Clamp(
+        this.y,
+        obstacleY - halfHeight,
+        obstacleY + halfHeight,
+      );
+
+      let dx = this.x - closestX;
+      let dy = this.y - closestY;
+      let distSq = dx * dx + dy * dy;
+
+      if (distSq === 0) {
+        dx = this.x - obstacleX;
+        dy = this.y - obstacleY;
+        distSq = dx * dx + dy * dy;
+        if (distSq === 0) {
+          dx = 1;
+          dy = 0;
+          distSq = 1;
+        }
+        const dist = Math.sqrt(distSq);
+        pushX += dx / dist;
+        pushY += dy / dist;
+        contributingCount++;
+        continue;
+      }
+
+      if (distSq >= rangeSq) continue;
+
+      const dist = Math.sqrt(distSq);
+      const t = 1 - dist / this.OBSTACLE_AVOID_RANGE;
+      const strength = t * t;
+
+      pushX += (dx / dist) * strength;
+      pushY += (dy / dist) * strength;
+      contributingCount++;
+    }
+
+    if (contributingCount > 0) {
+      pushX /= contributingCount;
+      pushY /= contributingCount;
+    }
+
+    return { x: pushX, y: pushY };
   }
 
   public updateMovement(delta: number) {
     this.updateHurtVisual(delta);
-    this.updateCritVisual(delta);
 
     if (!this.player || !this.active || this.isDead) return;
 
-    if (!this.swarmMove) {
+    if (this.deSpawnState) {
+      const camera = this.scene.cameras.main;
+
+      if (!camera.worldView.contains(this.x, this.y)) {
+        this.destroy();
+        return;
+      }
+    }
+
+    if (!this.miniBossMove) {
       this.enemyBody.setVelocity(0, 0);
       return;
     }
@@ -148,13 +256,22 @@ export class BossEnemy extends Phaser.GameObjects.Container {
     if (this.avoidTimer > 0) {
       moveX += this.avoidX * 2;
       moveY += this.avoidY * 2;
+    }
 
-      const moveDistanceSq = moveX * moveX + moveY * moveY;
-      if (moveDistanceSq > 0) {
-        const inverseMoveDistance = 1 / Math.sqrt(moveDistanceSq);
-        moveX *= inverseMoveDistance;
-        moveY *= inverseMoveDistance;
-      }
+    const obstacleAvoid = this.avoidObstacles();
+    moveX += obstacleAvoid.x * 3;
+    moveY += obstacleAvoid.y * 3;
+
+    const moveDistanceSq = moveX * moveX + moveY * moveY;
+    const MIN_MOVE_THRESHOLD_SQ = 0.2;
+
+    if (moveDistanceSq > MIN_MOVE_THRESHOLD_SQ) {
+      const inverseMoveDistance = 1 / Math.sqrt(moveDistanceSq);
+      moveX *= inverseMoveDistance;
+      moveY *= inverseMoveDistance;
+    } else {
+      moveX = -dy * inverseDistance;
+      moveY = dx * inverseDistance;
     }
 
     const velocityX = moveX * this.config.speed * this.movementMultiplier;
@@ -163,14 +280,14 @@ export class BossEnemy extends Phaser.GameObjects.Container {
     this.enemyBody.setVelocity(velocityX, velocityY);
 
     if (velocityX < 0) {
-      this.sprite.setFlipX(true);
-    } else if (velocityX > 0) {
       this.sprite.setFlipX(false);
+    } else if (velocityX > 0) {
+      this.sprite.setFlipX(true);
     }
   }
 
   setMove(value: boolean) {
-    this.swarmMove = value;
+    this.miniBossMove = value;
     if (!value) this.enemyBody.setVelocity(0, 0);
   }
 
@@ -193,25 +310,6 @@ export class BossEnemy extends Phaser.GameObjects.Container {
     }
   }
 
-  changeDirection() {
-    if (!this.player) return;
-
-    const dx = this.player.x - this.x;
-    const dy = this.player.y - this.y;
-
-    const distance = Math.sqrt(dx * dx + dy * dy) || 1;
-
-    const dirX = dx / distance;
-    const dirY = dy / distance;
-
-    const side = Math.random() < 0.5 ? -2 : 2;
-
-    this.avoidX = -dirY * side;
-    this.avoidY = dirX * side;
-
-    this.avoidTimer = 30 * FRAME_DURATION_MS;
-  }
-
   public handlePlayerContact() {
     if (!this.active || this.isDead) return;
     this.player?.hurt(this.bossType);
@@ -228,33 +326,12 @@ export class BossEnemy extends Phaser.GameObjects.Container {
     this.isHurting = false;
   }
 
-  private updateCritVisual(delta: number) {
-    if (!this.isCritFlashing) return;
-
-    this.critFlashRemainingMs = Math.max(0, this.critFlashRemainingMs - delta);
-
-    if (this.critFlashRemainingMs > 0) return;
-
-    this.sprite.clearTint();
-    this.isCritFlashing = false;
-  }
-
   public isHurt() {
     if (this.isHurting || this.isDead) return;
 
     this.isHurting = true;
     this.hurtFlashRemainingMs = 120;
     this.sprite.setAlpha(0.3);
-  }
-
-  // Placeholder critical-hit feedback: a brief bright tint flash. The SFX
-  // itself is played by DamageSystem (placeholder key "critical_hit").
-  public onCriticalHit() {
-    if (this.isDead) return;
-
-    this.isCritFlashing = true;
-    this.critFlashRemainingMs = CRIT_FLASH_DURATION_MS;
-    this.sprite.setTint(CRIT_FLASH_TINT);
   }
 
   public takeDamage(damage: number, _payload: DamagePayload) {
@@ -279,8 +356,6 @@ export class BossEnemy extends Phaser.GameObjects.Container {
 
   public onDeath() {
     if (this.deathHandled) return;
-
-    WeaponSfxLimiter.play(this.scene, "bossDeath", 0.3, 250);
 
     this.deathHandled = true;
     this.scene.handleBossDefeat(this);

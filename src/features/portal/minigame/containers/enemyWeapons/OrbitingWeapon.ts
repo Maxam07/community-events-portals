@@ -93,8 +93,6 @@ export class OrbitingWeapon extends Phaser.GameObjects.Sprite {
   private createAnimation() {
     const animationKey = `${this.texture.key}_orbit`;
 
-    if (this.scene.anims.exists(animationKey)) return;
-
     this.scene.anims.create({
       key: animationKey,
       frames: this.scene.anims.generateFrameNumbers(this.texture.key, {

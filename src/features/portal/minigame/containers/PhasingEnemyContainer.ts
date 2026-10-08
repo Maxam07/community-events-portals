@@ -40,7 +40,7 @@ export class PhasingEnemy extends Phaser.GameObjects.Container {
   private isCritFlashing = false;
   private critFlashRemainingMs = 0;
   public deSpawnState = false;
-  private mobType: PhasingEnemyTypes;
+  public mobType: PhasingEnemyTypes;
 
   private avoidX = 0;
   private avoidY = 0;

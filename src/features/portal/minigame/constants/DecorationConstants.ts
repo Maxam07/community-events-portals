@@ -1,6 +1,7 @@
 import type { Obstacle } from "../Types";
 
 export const STATIC_RANGE_POS = [
+  // area 1
   { x: 10, y: 126 },
   { x: 15, y: 142 },
   { x: 3, y: 136 },
@@ -8,7 +9,17 @@ export const STATIC_RANGE_POS = [
   { x: 35, y: 142 },
   { x: 25, y: 113 },
   { x: 3, y: 112 },
+  // area 2
+  { x: 10, y: 79 },
+  { x: 15, y: 90 },
+  { x: 3, y: 95 },
+  { x: 34, y: 102 },
+  { x: 35, y: 85 },
+  { x: 25, y: 104 },
+  { x: 3, y: 77 },
 ];
+
+const enemy = STATIC_RANGE_POS;
 
 export const OBSTACLES_LAYOUT = {
   obstacle1: [
@@ -39,13 +50,21 @@ export const OBSTACLES_LAYOUT = {
     { name: "tree_stump", x: 34, y: 135 },
     { name: "tree_stump", x: 26, y: 140 },
     // cultist
-    { name: "cultist", x: 10, y: 126 },
-    { name: "cultist", x: 15, y: 142 },
-    { name: "cultist", x: 3, y: 136 },
-    { name: "cultist", x: 34, y: 121 },
-    { name: "cultist", x: 35, y: 142 },
-    { name: "cultist", x: 25, y: 113 },
-    { name: "cultist", x: 3, y: 112 },
+    { name: "cultist", x: enemy[0].x, y: enemy[0].y },
+    { name: "cultist", x: enemy[1].x, y: enemy[1].y },
+    { name: "cultist", x: enemy[2].x, y: enemy[2].y },
+    { name: "cultist", x: enemy[3].x, y: enemy[3].y },
+    { name: "cultist", x: enemy[4].x, y: enemy[4].y },
+    { name: "cultist", x: enemy[5].x, y: enemy[5].y },
+    { name: "cultist", x: enemy[6].x, y: enemy[6].y },
+    // red_stone
+    { name: "imp", x: enemy[7].x, y: enemy[7].y },
+    { name: "imp", x: enemy[8].x, y: enemy[8].y },
+    { name: "imp", x: enemy[9].x, y: enemy[9].y },
+    { name: "imp", x: enemy[10].x, y: enemy[10].y },
+    { name: "imp", x: enemy[11].x, y: enemy[11].y },
+    { name: "imp", x: enemy[12].x, y: enemy[12].y },
+    { name: "imp", x: enemy[13].x, y: enemy[13].y },
     // clouds
     // rocks
     // { name: "rock", x: 20, y: 5 },

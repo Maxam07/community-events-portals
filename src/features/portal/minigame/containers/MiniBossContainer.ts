@@ -37,7 +37,7 @@ export class MiniBoss extends Phaser.GameObjects.Container {
   private movementMultiplier = 1;
   private hurtFlashRemainingMs = 0;
   public deSpawnState = false;
-  private miniBossType: MiniBossType;
+  public miniBossType: MiniBossType;
   private lifeBar: LifeBar;
 
   private static readonly STOP_DISTANCE_SQ = 25;
@@ -79,7 +79,8 @@ export class MiniBoss extends Phaser.GameObjects.Container {
 
   public get portalService() {
     return this.scene.registry.get("portalService") as
-      MachineInterpreter | undefined;
+      | MachineInterpreter
+      | undefined;
   }
 
   createEnemy() {
@@ -131,21 +132,22 @@ export class MiniBoss extends Phaser.GameObjects.Container {
     this.sprite.play(animKey);
   }
 
-  public playSummonAnimation() {
-    if (this.isDead || !this.active) return;
+  // public playAttackAnimation() {
+  //   if (this.isDead || !this.active) return;
 
-    this.sprite.play(`${this.config.attackKey}_anim`, true);
-  }
+  //   this.sprite.play(`${this.config.attackKey}_anim`, true);
+  // }
 
-  public playMovementAnimation() {
-    if (this.isDead || !this.active) return;
+  // public playMovementAnimation() {
+  //   if (this.isDead || !this.active) return;
 
-    this.sprite.play(`${this.config.key}_anim`, true);
-  }
+  //   this.sprite.play(`${this.config.key}_anim`, true);
+  // }
 
   private avoidObstacles(): { x: number; y: number } {
     const obstacles = (this.scene as any).obstacles as
-      BoundingBox[] | undefined;
+      | BoundingBox[]
+      | undefined;
     if (!obstacles || obstacles.length === 0) return { x: 0, y: 0 };
 
     let pushX = 0;

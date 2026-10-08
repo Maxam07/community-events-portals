@@ -217,6 +217,6 @@ export class StaticRangeEnemy extends Phaser.GameObjects.Container {
     if (this.deathHandled) return;
 
     this.deathHandled = true;
-    this.scene.handleStatciMobDefeat(this);
+    this.scene.handleStaticMobDefeat(this);
   }
 }

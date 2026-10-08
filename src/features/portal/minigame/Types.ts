@@ -11,7 +11,10 @@ export type ObstacleName =
   | "deco_2"
   | "deco_3"
   | "deco_4"
-  | "cultist";
+  | "scarecrow"
+  | "imp"
+  | "cultist"
+  | "red_stone";
 
 export type Obstacle = { name: ObstacleName; x: number; y: number };
 
@@ -266,9 +269,12 @@ export type DropItemType =
   | "yellowOrb"
   | "purpleOrb";
 
-export type WeaponType = "chasing" | "orbiting" | "summoning" | "staticRange";
-export type BossTypes = "boss1" | "boss2" | "boss3";
-export type PhasingEnemyTypes = "mob1" | "mob2" | "mob3" | "mob4" | "mob5";
+export type WeaponType =
+  | "chasing"
+  | "orbiting"
+  | "summoning"
+  | "staticRange"
+  | "slash";
 export type CodexCategoryName = "Skills" | "Enemies" | "DropItems";
 export type PassiveAbilityType = "wings";
 export type EnemyType =
@@ -285,7 +291,6 @@ export type EnemyFormation =
   | "surround";
 export type AreaEnemyType =
   | PhasingEnemyTypes
-  | PhasingEnemyType
   | MeleeEnemyTypes
   | StaticRangeEnemyTypes
   | MiniBossType
@@ -293,7 +298,7 @@ export type AreaEnemyType =
 
 export type SpawnArea = 1 | 2 | 3 | 4;
 
-export type PhasingEnemyType =
+export type PhasingEnemyTypes =
   // Area 1
   | "bat"
   // Area 2
@@ -304,14 +309,26 @@ export type PhasingEnemyType =
   // Area 4
   | "shade";
 
+export type StaticRangeEnemyTypes =
+  // Area 1
+  | "scarecrow"
+  // Area 2
+  | "imp"
+  // Area 3
+  | "cultist"
+  /// Area 4
+  | "red_stone";
+
 export type MeleeEnemyTypes =
   // Area 1
   | "carnivore_plant"
   | "rat"
   | "zombie"
   // Area 2
-  | "imp"
-  | "slime"
+  | "skeleton"
+  | "slime_green"
+  | "slime_blue"
+  | "slime_red"
   // Area 3
   | "vampire"
   | "frankenstein"
@@ -320,14 +337,6 @@ export type MeleeEnemyTypes =
   | "hellHound"
   | "demon1"
   | "demon2";
-
-export type StaticRangeEnemyTypes =
-  // Area 1
-  | "scarecrow"
-  // Area 2
-  | "skeleton"
-  // Area 3
-  | "cultist";
 
 export type MiniBossType =
   // Area 1
@@ -340,6 +349,16 @@ export type MiniBossType =
   | "headless_horseman"
   | "medusa";
 // Area 4 - spawn the mini bosses from area 1 to 3
+
+export type BossTypes =
+  // Area 1
+  | "minotaur"
+  // Area 2
+  | "witch"
+  // Area 3
+  | "cerberus"
+  // Area 4
+  | "sorcerer";
 
 export type EnemyConfig = {
   key: string;
@@ -364,28 +383,29 @@ export type PhasingeWaveConfig = WaveConfig<PhasingEnemyTypes>;
 export type MeleeWaveConfig = WaveConfig<MeleeEnemyTypes>;
 
 export type WaveConfig<TMobTypes> = {
-  triggerAt: number;
   mobType: TMobTypes;
   totalEnemy: number;
   batchSize: number;
   delay: number;
   formation: EnemyFormation;
   flag: string;
+  area: number;
 };
 
 export type MiniBossWaveConfig = {
-  triggerAt: number;
   miniBossType: MiniBossType;
   totalEnemy: number;
   weaponType: WeaponType[];
   formation: EnemyFormation;
   flag: string;
+  area: number;
 };
 
 export type BossWaveConfig = {
-  triggerAt: number;
   bossType: BossTypes;
   totalEnemy: number;
+  weaponType: WeaponType[];
+  formation: EnemyFormation;
   flag: string;
 };
 
@@ -414,6 +434,14 @@ export type WeaponStats = {
     FRAME_END: number;
     RANGE: number;
     SPEED: number;
+    COOLDOWN_MS: number;
+    DURATION_MS: number;
+  };
+
+  slash?: {
+    TEXTURE: string;
+    RANGE: number;
+    ARC_DEGREES: number;
     COOLDOWN_MS: number;
     DURATION_MS: number;
   };

@@ -41,7 +41,7 @@ export class MeleeEnemy extends Phaser.GameObjects.Container {
   private isCritFlashing = false;
   private critFlashRemainingMs = 0;
   public deSpawnState = false;
-  private mobType: MeleeEnemyTypes;
+  public mobType: MeleeEnemyTypes;
   private isAttacking = false;
   private attackAnimKey = "";
   private walkAnimKey = "";
