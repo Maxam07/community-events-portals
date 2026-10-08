@@ -17,6 +17,14 @@ export const STATIC_RANGE_POS = [
   { x: 35, y: 85 },
   { x: 25, y: 104 },
   { x: 3, y: 77 },
+  // area 3
+  { x: 10, y: 41 },
+  { x: 15, y: 58 },
+  { x: 3, y: 52 },
+  { x: 34, y: 43 },
+  { x: 35, y: 65 },
+  { x: 25, y: 70 },
+  { x: 3, y: 68 },
 ];
 
 const enemy = STATIC_RANGE_POS;
@@ -49,15 +57,15 @@ export const OBSTACLES_LAYOUT = {
     { name: "tree_stump", x: 26, y: 130 },
     { name: "tree_stump", x: 34, y: 135 },
     { name: "tree_stump", x: 26, y: 140 },
-    // cultist
-    { name: "cultist", x: enemy[0].x, y: enemy[0].y },
-    { name: "cultist", x: enemy[1].x, y: enemy[1].y },
-    { name: "cultist", x: enemy[2].x, y: enemy[2].y },
-    { name: "cultist", x: enemy[3].x, y: enemy[3].y },
-    { name: "cultist", x: enemy[4].x, y: enemy[4].y },
-    { name: "cultist", x: enemy[5].x, y: enemy[5].y },
-    { name: "cultist", x: enemy[6].x, y: enemy[6].y },
-    // red_stone
+    // area 1 temporary red_stone
+    { name: "red_stone", x: enemy[0].x, y: enemy[0].y },
+    { name: "red_stone", x: enemy[1].x, y: enemy[1].y },
+    { name: "red_stone", x: enemy[2].x, y: enemy[2].y },
+    { name: "red_stone", x: enemy[3].x, y: enemy[3].y },
+    { name: "red_stone", x: enemy[4].x, y: enemy[4].y },
+    { name: "red_stone", x: enemy[5].x, y: enemy[5].y },
+    { name: "red_stone", x: enemy[6].x, y: enemy[6].y },
+    // area 2
     { name: "imp", x: enemy[7].x, y: enemy[7].y },
     { name: "imp", x: enemy[8].x, y: enemy[8].y },
     { name: "imp", x: enemy[9].x, y: enemy[9].y },
@@ -65,33 +73,49 @@ export const OBSTACLES_LAYOUT = {
     { name: "imp", x: enemy[11].x, y: enemy[11].y },
     { name: "imp", x: enemy[12].x, y: enemy[12].y },
     { name: "imp", x: enemy[13].x, y: enemy[13].y },
-    // clouds
-    // rocks
-    // { name: "rock", x: 20, y: 5 },
-    // { name: "rock", x: 29, y: 13 },
-    // { name: "rock", x: 10, y: 9 },
-    // { name: "rock", x: 38, y: 4 },
-    // { name: "rock", x: 10, y: 2 },
-    // { name: "rock", x: 35, y: 22 },
-    // { name: "rock", x: 35, y: 10 },
-    // { name: "rock", x: 40, y: 2 },
-    // { name: "rock", x: 52, y: 4 },
-    // { name: "rock", x: 52, y: 18 },
-    // { name: "rock", x: 18, y: 20 },
-    // { name: "rock", x: 3, y: 4 },
-    // { name: "rock", x: 12, y: 40 },
-    // { name: "rock", x: 45, y: 45 },
-    // water
+    // area 3
+    { name: "imp", x: enemy[14].x, y: enemy[14].y },
+    { name: "imp", x: enemy[15].x, y: enemy[15].y },
+    { name: "imp", x: enemy[16].x, y: enemy[16].y },
+    { name: "imp", x: enemy[17].x, y: enemy[17].y },
+    { name: "imp", x: enemy[18].x, y: enemy[18].y },
+    { name: "imp", x: enemy[19].x, y: enemy[19].y },
+    { name: "imp", x: enemy[20].x, y: enemy[20].y },
+    // area 1
     { name: "water", x: 2, y: 109 },
     { name: "water", x: 6, y: 109 },
     { name: "water", x: 10, y: 109 },
-    // add bridge
+    { name: "water", x: 14, y: 109 },
     { name: "water", x: 18, y: 109 },
-    { name: "water", x: 22, y: 109 },
+    // add blockade
     { name: "water", x: 26, y: 109 },
     { name: "water", x: 30, y: 109 },
     { name: "water", x: 34, y: 109 },
     { name: "water", x: 38, y: 109 },
     { name: "water", x: 42, y: 109 },
+    // area 2
+    { name: "water", x: 2, y: 73 },
+    { name: "water", x: 6, y: 73 },
+    { name: "water", x: 10, y: 73 },
+    { name: "water", x: 14, y: 73 },
+    { name: "water", x: 18, y: 73 },
+    // add blockade
+    { name: "water", x: 26, y: 73 },
+    { name: "water", x: 30, y: 73 },
+    { name: "water", x: 34, y: 73 },
+    { name: "water", x: 38, y: 73 },
+    { name: "water", x: 42, y: 73 },
+    // area 3
+    { name: "water", x: 2, y: 36 },
+    { name: "water", x: 6, y: 36 },
+    { name: "water", x: 10, y: 36 },
+    { name: "water", x: 14, y: 36 },
+    { name: "water", x: 18, y: 36 },
+    // add blockade
+    { name: "water", x: 26, y: 36 },
+    { name: "water", x: 30, y: 36 },
+    { name: "water", x: 34, y: 36 },
+    { name: "water", x: 38, y: 36 },
+    { name: "water", x: 42, y: 36 },
   ] as Obstacle[],
 };

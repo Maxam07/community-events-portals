@@ -9,7 +9,6 @@ import {
   PLAYER_WATER_SPEED_MULTIPLIER,
   PORTAL_NAME,
   WALKING_SPEED,
-  GAME_SECONDS,
   getPerkAmount,
   rollForRareChest,
   CHEST_VISUALS,
@@ -41,7 +40,7 @@ import type {
   StaticRangeEnemyTypes,
   EnemyType,
   SpawnArea,
-  MiniBossWaveConfig
+  MiniBossWaveConfig,
 } from "./Types";
 import { BossEnemy } from "./containers/BossEnemyContainer";
 import {
@@ -1476,15 +1475,14 @@ export class Scene extends BaseScene {
       player.isSwimming = false;
       player.walk?.();
       this.velocity = this.getPlayerMovementSpeed();
-
     }
   }
 
   // Enemy area base spawning
-  private areaBaseSpawn(){
+  private areaBaseSpawn() {
     this.spawnPhasingMob();
     this.spawnMeleeMob();
-  };
+  }
 
   private handleEnemyKill(mobType: EnemyType) {
     const area = ENEMY_AREAS[mobType];
@@ -1496,12 +1494,14 @@ export class Scene extends BaseScene {
 
   private checkMiniBossSpawn(area: SpawnArea) {
     const requiredKills =
-      PHASING_WAVE_THRESHOLDS
-        .filter((wave) => wave.area === area)
-        .reduce((total, wave) => total + wave.totalEnemy, 0) +
-      MELEE_WAVE_THRESHOLDS
-        .filter((wave) => wave.area === area)
-        .reduce((total, wave) => total + wave.totalEnemy, 0);
+      PHASING_WAVE_THRESHOLDS.filter((wave) => wave.area === area).reduce(
+        (total, wave) => total + wave.totalEnemy,
+        0,
+      ) +
+      MELEE_WAVE_THRESHOLDS.filter((wave) => wave.area === area).reduce(
+        (total, wave) => total + wave.totalEnemy,
+        0,
+      );
 
     if (this.enemyKillsByArea[area] < requiredKills) {
       return;
@@ -1538,7 +1538,7 @@ export class Scene extends BaseScene {
       this.currentPlayer.y <= spawnArea.maxY
     );
   }
-   
+
   private updateEnteredArea() {
     for (const area of Object.keys(ENEMY_SPAWN_AREAS)) {
       const areaNumber = Number(area);
@@ -1603,9 +1603,9 @@ export class Scene extends BaseScene {
   private createStationaryEnemies(weaponTypes: WeaponType[]) {
     const enemies: StaticRangeEnemyTypes[] = [
       // "scarecrow",
-      "cultist",
+      "red_stone", // temporary
       "imp",
-      // "red_stone",
+      "cultist",
     ];
 
     enemies.forEach((mobType, areaIndex) => {
@@ -1910,12 +1910,12 @@ export class Scene extends BaseScene {
   }
 
   private spawnMiniBoss(config: MiniBossWaveConfig) {
-        this.miniBossWave(
-          config.miniBossType,
-          config.totalEnemy,
-          config.weaponType,
-          config.formation,
-        );
+    this.miniBossWave(
+      config.miniBossType,
+      config.totalEnemy,
+      config.weaponType,
+      config.formation,
+    );
   }
 
   private spawnBoss(bossType: BossTypes) {
@@ -1971,15 +1971,15 @@ export class Scene extends BaseScene {
   // Create blockade to restrict player movement until boss is defeated
   private createBlockade() {
     const area1Blockade = this.add
-      .image(14 * SQUARE_WIDTH, 109 * SQUARE_WIDTH, "blockade1")
+      .image(21.5 * SQUARE_WIDTH, 109 * SQUARE_WIDTH, "water1")
       .setDepth(5);
 
     const area2Blockade = this.add
-      .image(14 * SQUARE_WIDTH, 73 * SQUARE_WIDTH, "water1")
+      .image(21.5 * SQUARE_WIDTH, 73 * SQUARE_WIDTH, "water1")
       .setDepth(5);
 
     const area3Blockade = this.add
-      .image(14 * SQUARE_WIDTH, 36 * SQUARE_WIDTH, "water1")
+      .image(21.5 * SQUARE_WIDTH, 36 * SQUARE_WIDTH, "water1")
       .setDepth(5);
 
     for (const blockade of [area1Blockade, area2Blockade, area3Blockade]) {
@@ -2025,7 +2025,6 @@ export class Scene extends BaseScene {
 
     this.unregisterPhasingMob(mob);
     mob.destroy();
-
 
     this.handleEnemyKill(mob.mobType);
   }

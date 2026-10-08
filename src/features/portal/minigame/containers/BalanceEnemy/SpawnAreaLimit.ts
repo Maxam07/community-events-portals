@@ -57,14 +57,14 @@ export const ENEMY_SPAWN_AREAS = {
   2: {
     minX: minX,
     maxX: maxX,
-    minY: 74 * SQUARE_WIDTH,
+    minY: 76 * SQUARE_WIDTH,
     maxY: 106 * SQUARE_WIDTH,
   },
   3: {
     minX: minX,
     maxX: maxX,
-    minY: 36 * SQUARE_WIDTH,
-    maxY: 72 * SQUARE_WIDTH,
+    minY: 38 * SQUARE_WIDTH,
+    maxY: 70 * SQUARE_WIDTH,
   },
   4: {
     minX: minX,
