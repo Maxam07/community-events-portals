@@ -37,12 +37,18 @@ export const ENEMY_AREAS: Record<AreaEnemyType, SpawnArea> = {
   living_armor: 2,
   headless_horseman: 3,
   medusa: 3,
+  golem_area4: 4,
+  ent_area4: 4,
+  mummy_area4: 4,
+  living_armor_area4: 4,
+  headless_horseman_area4: 4,
+  medusa_area4: 4,
 
   // Bosses
   minotaur: 1,
   witch: 2,
-  cerberus: 4,
-  sorcerer: 3,
+  cerberus: 3,
+  sorcerer: 4,
 };
 
 const minX = 1 * SQUARE_WIDTH;

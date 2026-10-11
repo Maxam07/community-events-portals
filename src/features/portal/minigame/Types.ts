@@ -274,7 +274,8 @@ export type WeaponType =
   | "orbiting"
   | "summoning"
   | "staticRange"
-  | "slash";
+  | "slash"
+  | "arena";
 export type CodexCategoryName = "Skills" | "Enemies" | "DropItems";
 export type PassiveAbilityType = "wings";
 export type EnemyType =
@@ -347,8 +348,14 @@ export type MiniBossType =
   | "living_armor"
   // Area 3
   | "headless_horseman"
-  | "medusa";
-// Area 4 - spawn the mini bosses from area 1 to 3
+  | "medusa"
+  // Area 4 - spawn the mini bosses from area 1 to 3
+  | "golem_area4"
+  | "ent_area4"
+  | "mummy_area4"
+  | "living_armor_area4"
+  | "headless_horseman_area4"
+  | "medusa_area4";
 
 export type BossTypes =
   // Area 1
@@ -415,20 +422,17 @@ export type WeaponStats = {
     SPEED: number;
     DURATION_MS: number;
   };
-
   orbiting?: {
     TEXTURE: string;
     RADIUS: number;
     SPEED_DEG_PER_SEC: number;
   };
-
   summoning?: {
     TEXTURE: string;
     DELAY_MS: number;
     WARNING_DURATION_MS: number;
     DURATION_MS: number;
   };
-
   staticRange?: {
     TEXTURE: string;
     FRAME_END: number;
@@ -437,12 +441,14 @@ export type WeaponStats = {
     COOLDOWN_MS: number;
     DURATION_MS: number;
   };
-
   slash?: {
     TEXTURE: string;
     RANGE: number;
     ARC_DEGREES: number;
     COOLDOWN_MS: number;
     DURATION_MS: number;
+  };
+  arena?: {
+    RADIUS: number;
   };
 };

@@ -5,12 +5,14 @@ import type {
   PhasingeWaveConfig,
 } from "../../Types";
 
+const TESTING = true;
+
 // Phasing
 export const PHASING_WAVE_THRESHOLDS: PhasingeWaveConfig[] = [
   // Area 1
   {
     mobType: "bat",
-    totalEnemy: 10,
+    totalEnemy: TESTING ? 5 : 20,
     batchSize: 5,
     delay: 4000,
     formation: "surround",
@@ -20,7 +22,7 @@ export const PHASING_WAVE_THRESHOLDS: PhasingeWaveConfig[] = [
   // Area 2
   {
     mobType: "crow",
-    totalEnemy: 10,
+    totalEnemy: TESTING ? 5 : 20,
     batchSize: 5,
     delay: 5000,
     formation: "horizontal line",
@@ -29,7 +31,7 @@ export const PHASING_WAVE_THRESHOLDS: PhasingeWaveConfig[] = [
   },
   {
     mobType: "ghost",
-    totalEnemy: 10,
+    totalEnemy: TESTING ? 5 : 20,
     batchSize: 5,
     delay: 2000,
     formation: "surround",
@@ -39,7 +41,7 @@ export const PHASING_WAVE_THRESHOLDS: PhasingeWaveConfig[] = [
   // Area 3
   {
     mobType: "gargoyle",
-    totalEnemy: 10,
+    totalEnemy: TESTING ? 5 : 20,
     batchSize: 5,
     delay: 6000,
     formation: "surround",
@@ -47,6 +49,15 @@ export const PHASING_WAVE_THRESHOLDS: PhasingeWaveConfig[] = [
     area: 3,
   },
   // Area 4
+  {
+    mobType: "shade",
+    totalEnemy: TESTING ? 5 : 20,
+    batchSize: 5,
+    delay: 6000,
+    formation: "surround",
+    flag: "wave4_1",
+    area: 4,
+  },
 ];
 
 // Melee
@@ -54,16 +65,16 @@ export const MELEE_WAVE_THRESHOLDS: MeleeWaveConfig[] = [
   // Area 1
   {
     mobType: "carnivore_plant",
-    totalEnemy: 10,
+    totalEnemy: TESTING ? 5 : 20,
     batchSize: 5,
-    delay: 5000,
+    delay: 7000,
     formation: "horizontal line",
     flag: "meleeWave1_1",
     area: 1,
   },
   {
     mobType: "rat",
-    totalEnemy: 10,
+    totalEnemy: TESTING ? 5 : 20,
     batchSize: 5,
     delay: 6000,
     formation: "surround",
@@ -72,7 +83,7 @@ export const MELEE_WAVE_THRESHOLDS: MeleeWaveConfig[] = [
   },
   {
     mobType: "zombie",
-    totalEnemy: 10,
+    totalEnemy: TESTING ? 5 : 20,
     batchSize: 5,
     delay: 8000,
     formation: "circle",
@@ -82,7 +93,7 @@ export const MELEE_WAVE_THRESHOLDS: MeleeWaveConfig[] = [
   // Area 2
   {
     mobType: "skeleton",
-    totalEnemy: 10,
+    totalEnemy: TESTING ? 5 : 20,
     batchSize: 5,
     delay: 3000,
     formation: "vertical line",
@@ -91,7 +102,7 @@ export const MELEE_WAVE_THRESHOLDS: MeleeWaveConfig[] = [
   },
   {
     mobType: "slime_red",
-    totalEnemy: 10,
+    totalEnemy: TESTING ? 5 : 20,
     batchSize: 5,
     delay: 3000,
     formation: "surround",
@@ -100,7 +111,7 @@ export const MELEE_WAVE_THRESHOLDS: MeleeWaveConfig[] = [
   },
   {
     mobType: "slime_green",
-    totalEnemy: 10,
+    totalEnemy: TESTING ? 5 : 20,
     batchSize: 5,
     delay: 8000,
     formation: "surround",
@@ -109,7 +120,7 @@ export const MELEE_WAVE_THRESHOLDS: MeleeWaveConfig[] = [
   },
   {
     mobType: "slime_blue",
-    totalEnemy: 10,
+    totalEnemy: TESTING ? 5 : 20,
     batchSize: 5,
     delay: 5000,
     formation: "surround",
@@ -119,7 +130,7 @@ export const MELEE_WAVE_THRESHOLDS: MeleeWaveConfig[] = [
   // Area 3
   {
     mobType: "vampire",
-    totalEnemy: 30,
+    totalEnemy: TESTING ? 5 : 20,
     batchSize: 3,
     delay: 4000,
     formation: "vertical line",
@@ -128,7 +139,7 @@ export const MELEE_WAVE_THRESHOLDS: MeleeWaveConfig[] = [
   },
   {
     mobType: "frankenstein",
-    totalEnemy: 30,
+    totalEnemy: TESTING ? 5 : 20,
     batchSize: 3,
     delay: 4000,
     formation: "horizontal line",
@@ -137,7 +148,7 @@ export const MELEE_WAVE_THRESHOLDS: MeleeWaveConfig[] = [
   },
   {
     mobType: "werewolf",
-    totalEnemy: 15,
+    totalEnemy: TESTING ? 5 : 20,
     batchSize: 3,
     delay: 4000,
     formation: "surround",
@@ -147,29 +158,29 @@ export const MELEE_WAVE_THRESHOLDS: MeleeWaveConfig[] = [
   // Area 4
   {
     mobType: "hellHound",
-    totalEnemy: 15,
+    totalEnemy: TESTING ? 5 : 20,
     batchSize: 3,
     delay: 2000,
     formation: "surround",
-    flag: "meleeWave2_1",
+    flag: "meleeWave4_1",
     area: 4,
   },
   {
     mobType: "demon1",
-    totalEnemy: 15,
+    totalEnemy: TESTING ? 5 : 20,
     batchSize: 3,
     delay: 4000,
     formation: "vertical line",
-    flag: "meleeWave2_2",
+    flag: "meleeWave4_2",
     area: 4,
   },
   {
     mobType: "demon2",
-    totalEnemy: 15,
+    totalEnemy: TESTING ? 5 : 20,
     batchSize: 3,
-    delay: 6000,
+    delay: 4000,
     formation: "horizontal line",
-    flag: "meleeWave2_3",
+    flag: "meleeWave4_3",
     area: 4,
   },
 ];
@@ -214,19 +225,68 @@ export const MINIBOSS_WAVE_THRESHOLDS: MiniBossWaveConfig[] = [
   {
     miniBossType: "headless_horseman",
     totalEnemy: 1,
-    weaponType: ["orbiting"],
+    weaponType: ["summoning"],
     formation: "vertical line",
     flag: "area3_1",
     area: 3,
   },
-  // {
-  //   miniBossType: "medusa",
-  //   totalEnemy: 1,
-  //   weaponType: ["orbiting"],
-  //   formation: "horizontal line",
-  //   flag: "area3_2",
-  //   area: 3,
-  // },
+  {
+    miniBossType: "medusa",
+    totalEnemy: 1,
+    weaponType: ["chasing"],
+    formation: "horizontal line",
+    flag: "area3_2",
+    area: 3,
+  },
+  // Area 4
+  {
+    miniBossType: "golem_area4",
+    totalEnemy: 1,
+    weaponType: ["orbiting"],
+    formation: "circle",
+    flag: "area4_1",
+    area: 4,
+  },
+  {
+    miniBossType: "ent_area4",
+    totalEnemy: 1,
+    weaponType: ["orbiting"],
+    formation: "horizontal line",
+    flag: "area4_2",
+    area: 4,
+  },
+  {
+    miniBossType: "mummy_area4",
+    totalEnemy: 1,
+    weaponType: ["orbiting"],
+    formation: "vertical line",
+    flag: "area4_3",
+    area: 4,
+  },
+  {
+    miniBossType: "living_armor_area4",
+    totalEnemy: 1,
+    weaponType: ["orbiting"],
+    formation: "surround",
+    flag: "area4_4",
+    area: 4,
+  },
+  {
+    miniBossType: "headless_horseman_area4",
+    totalEnemy: 1,
+    weaponType: ["orbiting"],
+    formation: "surround",
+    flag: "area4_5",
+    area: 4,
+  },
+  {
+    miniBossType: "medusa_area4",
+    totalEnemy: 1,
+    weaponType: ["orbiting"],
+    formation: "circle",
+    flag: "area4_6",
+    area: 4,
+  },
 ];
 
 export const BOSS_WAVE_THRESHOLDS: BossWaveConfig[] = [
@@ -247,19 +307,19 @@ export const BOSS_WAVE_THRESHOLDS: BossWaveConfig[] = [
     flag: "bossWave2",
   },
   // Area 3
-  // {
-  //   bossType: "cerberus",
-  //   totalEnemy: 1,
-  //   weaponType: ["summoning"],
-  //   formation: "vertical line",
-  //   flag: "bossWave3",
-  // },
-  // Area 4
   {
-    bossType: "sorcerer",
+    bossType: "cerberus",
     totalEnemy: 1,
     weaponType: ["summoning"],
     formation: "vertical line",
     flag: "bossWave3",
+  },
+  // Area 4
+  {
+    bossType: "sorcerer",
+    totalEnemy: 1,
+    weaponType: ["summoning", "arena"],
+    formation: "vertical line",
+    flag: "bossWave4",
   },
 ];
