@@ -7,6 +7,10 @@ interface Props {
   name: ObstacleName;
   x?: number;
   y?: number;
+  width?: number;
+  height?: number;
+  originX?: number;
+  originY?: number;
   scene: Scene;
   obstacleGroup: Phaser.Physics.Arcade.StaticGroup;
   waterGroup: Phaser.GameObjects.Group;
@@ -42,6 +46,15 @@ const obstacleConfig: Record<
     hp: Infinity,
     hasHitbox: true,
     setVisible: true,
+    setScale: 1,
+  },
+  empty: {
+    width: 1,
+    height: 1,
+    destructible: false,
+    hp: Infinity,
+    hasHitbox: true,
+    setVisible: false,
     setScale: 1,
   },
   tree: {
@@ -158,14 +171,20 @@ export function addStaticObstacle({
   name,
   x,
   y,
+  width: customWidth,
+  height: customHeight,
+  originX,
+  originY,
   scene,
   obstacleGroup,
   waterGroup,
   currentPlayer,
   obstacles,
 }: Props) {
-  const { width, height, destructible, hp, hasHitbox, setVisible, setScale } =
-    obstacleConfig[name];
+  const config = obstacleConfig[name];
+  const { destructible, hp, hasHitbox, setVisible, setScale } = config;
+  const width = customWidth ?? config.width;
+  const height = customHeight ?? config.height;
 
   const WATER_DEPTH = 5;
   const OBSTACLES_DEPTH = 60;
@@ -176,8 +195,10 @@ export function addStaticObstacle({
     y: y ?? 0,
   };
 
+  const hasCustomOrigin = originX !== undefined || originY !== undefined;
+
   // Adjust for even-sized objects
-  if (width === 2) {
+  if (width === 2 && !hasCustomOrigin) {
     coordinates.x += 1;
   }
 
@@ -185,19 +206,29 @@ export function addStaticObstacle({
   let worldY = coordinates.y * SQUARE_WIDTH;
 
   // Centering logic
-  if (width % 2 === 1) {
-    worldX += SQUARE_WIDTH / 2;
+  if (!hasCustomOrigin) {
+    if (width % 2 === 1) {
+      worldX += SQUARE_WIDTH / 2;
+    }
+
+    if (height % 2 === 1) {
+      worldY += SQUARE_WIDTH / 2;
+    }
+
+    worldX -= 8;
   }
 
-  if (height % 2 === 1) {
-    worldY += SQUARE_WIDTH / 2;
-  }
+  const textureKey = name === "empty" ? "__WHITE" : name;
+  const obstacle = scene.add.sprite(worldX, worldY, textureKey);
 
-  const obstacle = scene.add.sprite(worldX - 8, worldY, name);
-
+  obstacle.setOrigin(originX ?? 0.5, originY ?? 0.5);
   obstacle.setDepth(OBSTACLES_DEPTH);
   obstacle.setVisible(setVisible);
   obstacle.setScale(setScale);
+
+  if (name === "empty") {
+    obstacle.setDisplaySize(width * SQUARE_WIDTH, height * SQUARE_WIDTH);
+  }
 
   if (hasHitbox) {
     scene.physics.add.existing(obstacle, true);

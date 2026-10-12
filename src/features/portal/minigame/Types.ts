@@ -3,6 +3,7 @@ import type Phaser from "phaser";
 export type ObstacleName =
   | "rock"
   | "water"
+  | "empty"
   | "tree"
   | "cloud"
   | "cloud1"
@@ -16,7 +17,15 @@ export type ObstacleName =
   | "cultist"
   | "red_stone";
 
-export type Obstacle = { name: ObstacleName; x: number; y: number };
+export type Obstacle = {
+  name: ObstacleName;
+  x: number;
+  y: number;
+  width?: number;
+  height?: number;
+  originX?: number;
+  originY?: number;
+};
 
 export type WeaponId =
   | "banana"
@@ -111,12 +120,7 @@ export type LevelUpChoice = {
 export type ChestRarity = "rare" | "epic" | "legendary";
 
 export type DamageType =
-  | "physical"
-  | "water"
-  | "explosion"
-  | "light"
-  | "dot"
-  | "summon";
+  "physical" | "water" | "explosion" | "light" | "dot" | "summon";
 
 export type TargetingMode =
   | "nearest"
@@ -187,11 +191,7 @@ export type WeaponUpgrade = {
 };
 
 export type ProjectileBehavior =
-  | "linear"
-  | "exploding"
-  | "bouncing"
-  | "light"
-  | "rolling";
+  "linear" | "exploding" | "bouncing" | "light" | "rolling";
 
 export type ProjectileConfig = {
   texture: string;
@@ -207,11 +207,7 @@ export type ProjectileConfig = {
 };
 
 export type StatusEffectId =
-  | "rooted"
-  | "oilDot"
-  | "plaguePoison"
-  | "frostSlow"
-  | "curseStun";
+  "rooted" | "oilDot" | "plaguePoison" | "frostSlow" | "curseStun";
 
 export type StatusEffectConfig = {
   id: StatusEffectId;
@@ -263,18 +259,10 @@ export type CombatConfig = {
 };
 
 export type DropItemType =
-  | "blueOrb"
-  | "greenOrb"
-  | "grayOrb"
-  | "yellowOrb"
-  | "purpleOrb";
+  "blueOrb" | "greenOrb" | "grayOrb" | "yellowOrb" | "purpleOrb";
 
 export type WeaponType =
-  | "chasing"
-  | "orbiting"
-  | "summoning"
-  | "staticRange"
-  | "slash";
+  "chasing" | "orbiting" | "summoning" | "staticRange" | "slash";
 export type CodexCategoryName = "Skills" | "Enemies" | "DropItems";
 export type PassiveAbilityType = "wings";
 export type EnemyType =
@@ -285,10 +273,7 @@ export type EnemyType =
   | MiniBossType;
 export type WeaponEnemyType = BossTypes | MiniBossType | StaticRangeEnemyTypes;
 export type EnemyFormation =
-  | "vertical line"
-  | "horizontal line"
-  | "circle"
-  | "surround";
+  "vertical line" | "horizontal line" | "circle" | "surround";
 export type AreaEnemyType =
   | PhasingEnemyTypes
   | MeleeEnemyTypes

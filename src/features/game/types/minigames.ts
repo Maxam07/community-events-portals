@@ -11,6 +11,7 @@ export type MinigameName =
   | "festival-of-colors"
   | "festival-of-colors-2025"
   | "colors-2026"
+  | "halloween-2026-game-2"
   | "crops-and-chickens"
   | "farmer-football"
   | "fruit-dash"
@@ -36,6 +37,7 @@ export const SUPPORTED_MINIGAMES: MinigameName[] = [
   "festival-of-colors",
   "festival-of-colors-2025",
   "colors-2026",
+  "halloween-2026-game-2",
   "crops-and-chickens",
   "farmer-football",
   "fruit-dash",

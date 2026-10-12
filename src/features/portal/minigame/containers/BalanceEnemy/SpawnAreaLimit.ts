@@ -51,25 +51,25 @@ export const ENEMY_SPAWN_AREAS = {
   1: {
     minX: minX,
     maxX: maxX,
-    minY: 112 * SQUARE_WIDTH,
-    maxY: 145 * SQUARE_WIDTH,
+    minY: 151 * SQUARE_WIDTH,
+    maxY: 184 * SQUARE_WIDTH,
   },
   2: {
     minX: minX,
     maxX: maxX,
-    minY: 76 * SQUARE_WIDTH,
-    maxY: 106 * SQUARE_WIDTH,
+    minY: 115 * SQUARE_WIDTH,
+    maxY: 145 * SQUARE_WIDTH,
   },
   3: {
     minX: minX,
     maxX: maxX,
-    minY: 38 * SQUARE_WIDTH,
-    maxY: 70 * SQUARE_WIDTH,
+    minY: 77 * SQUARE_WIDTH,
+    maxY: 109 * SQUARE_WIDTH,
   },
   4: {
     minX: minX,
     maxX: maxX,
-    minY: 1 * SQUARE_WIDTH,
-    maxY: 34 * SQUARE_WIDTH,
+    minY: 40 * SQUARE_WIDTH,
+    maxY: 73 * SQUARE_WIDTH,
   },
 };

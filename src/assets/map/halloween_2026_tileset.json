@@ -1,0 +1,15 @@
+[
+  {
+    "columns": 165,
+    "firstgid": 1,
+    "image": "halloween_tileset.png",
+    "imageheight": 1248,
+    "imagewidth": 2640,
+    "margin": 0,
+    "name": "Sunnyside V3",
+    "spacing": 0,
+    "tilecount": 12870,
+    "tileheight": 16,
+    "tilewidth": 16
+  }
+]

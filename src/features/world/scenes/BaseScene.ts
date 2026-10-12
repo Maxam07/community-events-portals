@@ -105,10 +105,7 @@ export const FACTION_NAME_COLORS: Record<FactionName, string> = {
 
 type MicroInteractionAction = "wave" | "cheer";
 type MicroInteractionResponse =
-  | "wave_ack"
-  | "wave_cancel"
-  | "cheer_ack"
-  | "cheer_cancel";
+  "wave_ack" | "wave_cancel" | "cheer_ack" | "cheer_cancel";
 
 type MicroInteractionState = {
   senderId: number;
@@ -504,8 +501,7 @@ export abstract class BaseScene extends Phaser.Scene {
           const player = players[0];
           const target = clickedBumpkins[0];
           const existing = target.getByName("interactionMenu") as
-            | Phaser.GameObjects.Container
-            | undefined;
+            Phaser.GameObjects.Container | undefined;
 
           if (!existing) {
             this.showInteractionMenu(player, target);
@@ -694,8 +690,7 @@ export abstract class BaseScene extends Phaser.Scene {
       detailsBtn.setTexture("round_button");
       this.openPlayerProfile(player);
       const existing = target.getByName("interactionMenu") as
-        | Phaser.GameObjects.Container
-        | undefined;
+        Phaser.GameObjects.Container | undefined;
       existing?.destroy();
     });
 
@@ -706,8 +701,7 @@ export abstract class BaseScene extends Phaser.Scene {
     waveBtn.on("pointerup", () => {
       this.requestMicroInteraction(target, "wave");
       const existing = target.getByName("interactionMenu") as
-        | Phaser.GameObjects.Container
-        | undefined;
+        Phaser.GameObjects.Container | undefined;
       existing?.destroy();
     });
 
@@ -724,8 +718,7 @@ export abstract class BaseScene extends Phaser.Scene {
       cheerBtn.on("pointerup", () => {
         this.requestMicroInteraction(target, "cheer");
         const existing = target.getByName("interactionMenu") as
-          | Phaser.GameObjects.Container
-          | undefined;
+          Phaser.GameObjects.Container | undefined;
         existing?.destroy();
       });
     }
@@ -890,8 +883,7 @@ export abstract class BaseScene extends Phaser.Scene {
   ) {
     // Destroy any existing menu on this target
     const existingIndicator = target.getByName("microInteractionIndicator") as
-      | Phaser.GameObjects.Container
-      | undefined;
+      Phaser.GameObjects.Container | undefined;
     existingIndicator?.destroy();
 
     const icon = type === "wave" ? "hand_wave" : "cheer";
@@ -2074,16 +2066,14 @@ export abstract class BaseScene extends Phaser.Scene {
     server.state.players.forEach((player, sessionId) => {
       if (this.playerEntities[sessionId]) {
         const nameTag = this.playerEntities[sessionId].getByName("nameTag") as
-          | Phaser.GameObjects.Text
-          | undefined;
+          Phaser.GameObjects.Text | undefined;
 
         if (nameTag && player.username && nameTag.text !== player.username) {
           nameTag.setText(player.username);
         }
       } else if (sessionId === server.sessionId) {
         const nameTag = this.currentPlayer?.getByName("nameTag") as
-          | Phaser.GameObjects.Text
-          | undefined;
+          Phaser.GameObjects.Text | undefined;
 
         if (nameTag && player.username && nameTag.text !== player.username) {
           nameTag.setText(player.username);
@@ -2094,8 +2084,7 @@ export abstract class BaseScene extends Phaser.Scene {
 
   checkAndUpdateNameColor(entity: BumpkinContainer, color: string) {
     const nameTag = entity.getByName("nameTag") as
-      | Phaser.GameObjects.Text
-      | undefined;
+      Phaser.GameObjects.Text | undefined;
 
     if (nameTag && nameTag.style.color !== color) {
       nameTag.setColor(color);

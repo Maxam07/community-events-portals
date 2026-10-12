@@ -22,10 +22,16 @@ export const SPAWNS: () => SpawnLocation = () => ({
       y: 30 * SQUARE_WIDTH,
     },
   },
+  "halloween-2026-game-2": {
+    default: {
+      x: 20.5 * SQUARE_WIDTH,
+      y: 159 * SQUARE_WIDTH,
+    },
+  },
   "colors-2026": {
     default: {
       x: 20.5 * SQUARE_WIDTH,
-      y: 120 * SQUARE_WIDTH,
+      y: 159 * SQUARE_WIDTH,
     },
   },
   love_island: {

@@ -81,6 +81,8 @@ type BaseSceneOptions = {
     padding?: [number, number];
     imageKey?: string;
     defaultTilesetConfig?: any;
+    tilesetMargin?: number;
+    tilesetSpacing?: number;
   };
   mmo?: { enabled: boolean; url?: string; serverId?: string; sceneId?: string };
   controls?: {
@@ -509,8 +511,8 @@ export abstract class BaseScene extends Phaser.Scene {
       imageKey,
       16,
       16,
-      1,
-      2,
+      this.options.map?.tilesetMargin ?? 1,
+      this.options.map?.tilesetSpacing ?? 2,
     ) as Phaser.Tilemaps.Tileset;
 
     // Set up collider layers

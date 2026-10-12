@@ -551,7 +551,7 @@ export const INITIAL_FARM: GameState = {
       [PORTAL_NAME]: {
         coins: 0,
         items: {
-          [PORTAL_TOKEN]: 50,
+          [PORTAL_TOKEN as InventoryItemName]: 50,
         },
         wearables: {},
         score: 20,

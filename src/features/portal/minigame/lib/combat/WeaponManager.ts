@@ -72,6 +72,7 @@ type WeaponManagerProps = {
     body?: unknown;
   };
   enemyGroup: Phaser.Physics.Arcade.Group;
+  blockerGroups?: Phaser.GameObjects.Group[];
   portalService?: MachineInterpreter;
   loadout?: WeaponLoadoutItem[];
 };
@@ -271,6 +272,30 @@ export class WeaponManager {
           enemy as EnemyLike,
         ),
     );
+
+    const { physics } = this.props.scene;
+    (this.props.blockerGroups ?? []).forEach((blockerGroup) => {
+      physics.add.overlap(this.projectileGroup, blockerGroup, (a, b) =>
+        this.handleProjectileObstacleHit(a, b),
+      );
+      physics.add.overlap(this.rollingProjectileGroup, blockerGroup, (a, b) =>
+        this.handleProjectileObstacleHit(a, b),
+      );
+      physics.add.overlap(this.beeGroup, blockerGroup, (a, b) => {
+        const bee = [a, b].find((object) => object instanceof HomingBee);
+        if (bee?.active) bee.despawn();
+      });
+    });
+  }
+
+  private handleProjectileObstacleHit(a: unknown, b: unknown) {
+    const projectile = [a, b].find((object) => object instanceof Projectile);
+    if (!projectile?.active) return;
+
+    if (projectile.behavior === "exploding") {
+      this.spawnExplosion(projectile, this.props.scene.time.now);
+    }
+    projectile.despawn();
   }
 
   private fireWeapon(weapon: RuntimeWeapon, time: number) {
@@ -334,7 +359,10 @@ export class WeaponManager {
   }
 
   private fireWateringCan(weapon: RuntimeWeapon, time: number) {
-    const projectileCount = Math.max(1, Math.round(weapon.stats.projectileCount));
+    const projectileCount = Math.max(
+      1,
+      Math.round(weapon.stats.projectileCount),
+    );
     const selectedTargets = this.wateringCanSelectedTargets;
     selectedTargets.clear();
 
@@ -472,9 +500,7 @@ export class WeaponManager {
 
   private firePumpkin(weapon: RuntimeWeapon, time: number) {
     const direction =
-      PUMPKIN_DIRECTIONS[
-        Math.floor(Math.random() * PUMPKIN_DIRECTIONS.length)
-      ];
+      PUMPKIN_DIRECTIONS[Math.floor(Math.random() * PUMPKIN_DIRECTIONS.length)];
 
     this.fireProjectile({
       weapon,
@@ -722,7 +748,11 @@ export class WeaponManager {
         halfHeight,
       );
 
-      for (let enemyIndex = 0; enemyIndex < nearbyEnemies.length; enemyIndex++) {
+      for (
+        let enemyIndex = 0;
+        enemyIndex < nearbyEnemies.length;
+        enemyIndex++
+      ) {
         const enemy = nearbyEnemies[enemyIndex];
         if (!enemy.active || !hitbox.canHit(enemy, time)) continue;
 
@@ -793,9 +823,7 @@ export class WeaponManager {
     }
   }
 
-  private registerCollisionBody(
-    weaponObject: Phaser.GameObjects.GameObject,
-  ) {
+  private registerCollisionBody(weaponObject: Phaser.GameObjects.GameObject) {
     if (!this.weaponCollisionGroup.contains(weaponObject)) {
       this.weaponCollisionGroup.add(weaponObject);
     }

@@ -1,5 +1,5 @@
-import mapJson from "assets/map/empty_Map.json";
-// import tilesetconfig from "assets/map/tileset.json";
+import mapJson from "assets/map/halloween_2026.json";
+import tilesetConfig from "assets/map/halloween_2026_tileset.json";
 import type { SceneId } from "features/world/mmoMachine";
 import { BaseScene } from "./Core/BaseScene";
 import type { MachineInterpreter } from "./lib/Machine";
@@ -23,6 +23,7 @@ import type { BumpkinContainer } from "./Core/BumpkinContainer";
 import { OBSTACLES_LAYOUT, resolveSpecialPower } from "./constants";
 import { PhasingEnemy } from "./containers/PhasingEnemyContainer";
 import { SQUARE_WIDTH } from "features/game/lib/constants";
+import { translate } from "lib/i18n/translate";
 import { DropItem } from "./containers/DropItemsContainer";
 import { Chest } from "./containers/ChestContainer";
 import type {
@@ -69,6 +70,7 @@ import {
 //   },
 // ];
 export class Scene extends BaseScene {
+  private static readonly DISABLE_COLLIDERS = false;
   private static readonly WEAPON_BANANA_ANIMATION_KEY = "weapon_banana_active";
   private static readonly WEAPON_SCYTHE_ANIMATION_KEY = "weapon_scythe_active";
   private static readonly WEAPON_WATERING_CAN_PROJECTILE_ANIMATION_KEY =
@@ -122,6 +124,7 @@ export class Scene extends BaseScene {
   area1Blockade?: Phaser.GameObjects.Image;
   area2Blockade?: Phaser.GameObjects.Image;
   area3Blockade?: Phaser.GameObjects.Image;
+  private isEnteringUnderworld = false;
   defeatedMiniBosses = new Set<MiniBossType>();
   enteredAreas = new Set<number>();
   enemyKillsByArea: Record<SpawnArea, number> = {
@@ -137,6 +140,10 @@ export class Scene extends BaseScene {
       name: PORTAL_NAME,
       map: {
         json: mapJson,
+        imageKey: "halloween_2026_tileset",
+        defaultTilesetConfig: tilesetConfig,
+        tilesetMargin: 0,
+        tilesetSpacing: 0,
       },
       audio: { fx: { walk_key: "dirt_footstep" } },
     });
@@ -479,8 +486,11 @@ export class Scene extends BaseScene {
     this.load.image("rock", "world/portal/images/TematicRock.webp");
     this.load.image("tree", "world/portal/images/TematicTree.webp");
     this.load.image("tree_stump", SUNNYSIDE.decorations.spookyTree);
-    this.load.image("water1", SUNNYSIDE.decorations.ocean);
-    this.load.image("water", "world/portal/halloween/ocean1.webp");
+    this.load.image("bridge", "world/portal/halloween/bridge.png");
+    this.load.image("castle_door", "world/portal/halloween/castle_door.png");
+    this.load.image("castle_wall", "world/portal/halloween/castle_wall.png");
+    this.load.image("portal", "world/portal/halloween/portal.png");
+    // this.load.image("water", "world/portal/halloween/ocean1.webp");
     this.load.image("deco_1", "world/portal/images/deco_1.webp");
     this.load.image("deco_2", "world/portal/images/deco_2.webp");
     this.load.image("deco_3", "world/portal/images/deco_3.webp");
@@ -654,6 +664,8 @@ export class Scene extends BaseScene {
     });
     super.create();
 
+    this.cameras.main.setRoundPixels(true);
+
     // Reset listeners
     EventBus.removeAllListeners();
     this.createWeaponAnimations();
@@ -708,15 +720,15 @@ export class Scene extends BaseScene {
       }
     }
 
-    const centerX = 20.5 * SQUARE_WIDTH;
-    // Area 1
-    this.add.image(centerX, 131 * SQUARE_WIDTH, "galaxy_biome").setDepth(4);
-    // Area 2
-    this.add.image(centerX, 94 * SQUARE_WIDTH, "crystal_biome").setDepth(3);
-    // Area 3
-    this.add.image(centerX, 57 * SQUARE_WIDTH, "spooky_biome").setDepth(2);
-    // Area 4
-    this.add.image(centerX, 20 * SQUARE_WIDTH, "marble_biome").setDepth(1);
+    // const centerX = 20.5 * SQUARE_WIDTH;
+    // // Area 1
+    // this.add.image(centerX, 131 * SQUARE_WIDTH, "galaxy_biome").setDepth(4);
+    // // Area 2
+    // this.add.image(centerX, 94 * SQUARE_WIDTH, "crystal_biome").setDepth(3);
+    // // Area 3
+    // this.add.image(centerX, 57 * SQUARE_WIDTH, "spooky_biome").setDepth(2);
+    // // Area 4
+    // this.add.image(centerX, 20 * SQUARE_WIDTH, "marble_biome").setDepth(1);
 
     // Background music
     this.backgroundMusic = this.sound.add("backgroundMusic", {
@@ -952,8 +964,20 @@ export class Scene extends BaseScene {
     }
   }
 
+  private disableColliders() {
+    this.physics.world.colliders.getActive().forEach((collider) => {
+      if (!collider.overlapOnly) {
+        collider.active = false;
+      }
+    });
+  }
+
   update(time = this.time.now, delta = this.game.loop.delta) {
     this.syncPhysicsPause();
+
+    if (Scene.DISABLE_COLLIDERS) {
+      this.disableColliders();
+    }
 
     if (this.isGamePlaying && !this.isGameplayPaused) {
       // The game has started
@@ -1209,12 +1233,14 @@ export class Scene extends BaseScene {
     };
     portalService.onEvent(onStart);
 
-    this.events.once("shutdown", () => {
+    const removeListeners = () => {
       portalService.off(onRetry);
       portalService.off(onContinue);
       portalService.off(onContinueTraining);
       portalService.off(onStart);
-    });
+    };
+    this.events.once("shutdown", removeListeners);
+    this.events.once("destroy", removeListeners);
   }
 
   private initialiseFontFamily() {
@@ -1277,6 +1303,9 @@ export class Scene extends BaseScene {
       scene: this,
       player: this.currentPlayer,
       enemyGroup: this.enemyGroup,
+      blockerGroups: [this.obstacleGroup, this.colliders].filter(
+        (group): group is Phaser.GameObjects.Group => !!group,
+      ),
       portalService,
       loadout: weaponLoadout,
     });
@@ -1410,11 +1439,7 @@ export class Scene extends BaseScene {
         this.enemyGroup,
         (_player, enemyObj) => {
           const enemy = enemyObj as
-            | StaticRangeEnemy
-            | PhasingEnemy
-            | MeleeEnemy
-            | BossEnemy
-            | MiniBoss;
+            StaticRangeEnemy | PhasingEnemy | MeleeEnemy | BossEnemy | MiniBoss;
           enemy.handlePlayerContact();
         },
       );
@@ -1971,31 +1996,135 @@ export class Scene extends BaseScene {
   // Create blockade to restrict player movement until boss is defeated
   private createBlockade() {
     const area1Blockade = this.add
-      .image(21.5 * SQUARE_WIDTH, 109 * SQUARE_WIDTH, "water1")
-      .setDepth(5);
+      .image(this.map.widthInPixels / 2, 147 * SQUARE_WIDTH + 2, "bridge")
+      .setScale(1.5)
+      .setDepth(5)
+      .setVisible(false);
 
     const area2Blockade = this.add
-      .image(21.5 * SQUARE_WIDTH, 73 * SQUARE_WIDTH, "water1")
-      .setDepth(5);
+      .image(18 * SQUARE_WIDTH, 109 * SQUARE_WIDTH + 1, "castle_wall")
+      .setOrigin(0)
+      .setDepth(this.map.heightInPixels + 1);
 
     const area3Blockade = this.add
-      .image(21.5 * SQUARE_WIDTH, 36 * SQUARE_WIDTH, "water1")
-      .setDepth(5);
+      .image(this.map.widthInPixels / 2, 74 * SQUARE_WIDTH, "portal")
+      .setDepth(5)
+      .setVisible(false);
 
     for (const blockade of [area1Blockade, area2Blockade, area3Blockade]) {
       this.physics.add.existing(blockade, true);
 
       const body = blockade.body as Phaser.Physics.Arcade.StaticBody;
-      body.setSize(4 * SQUARE_WIDTH, 4 * SQUARE_WIDTH);
+      const offsetYArea =
+        blockade.texture.key === "portal"
+          ? -15
+          : blockade.texture.key === "castle_wall"
+            ? -10
+            : 0;
+      body.setSize(
+        blockade.width * blockade.scaleX,
+        blockade.height * blockade.scaleY + offsetYArea,
+      );
 
-      if (this.currentPlayer) {
+      if (this.currentPlayer && blockade.texture.key !== "portal") {
         this.physics.add.collider(this.currentPlayer, blockade);
       }
     }
 
+    this.isEnteringUnderworld = false;
+    (area3Blockade.body as Phaser.Physics.Arcade.StaticBody).enable = false;
+
     this.area1Blockade = area1Blockade;
     this.area2Blockade = area2Blockade;
     this.area3Blockade = area3Blockade;
+  }
+
+  private enterUnderworld() {
+    const player = this.currentPlayer;
+    const portalBody = this.area3Blockade?.body as
+      Phaser.Physics.Arcade.StaticBody | undefined;
+    if (this.isEnteringUnderworld || !player || !portalBody) return;
+
+    this.isEnteringUnderworld = true;
+    this.isCameraFading = true;
+    portalBody.enable = false;
+    (player.body as Phaser.Physics.Arcade.Body).setVelocity(0, 0);
+
+    const camera = this.cameras.main;
+    const baseZoom = camera.zoom;
+    const overlayDepth = 10000000000000;
+
+    const overlay = this.add
+      .rectangle(
+        camera.centerX,
+        camera.centerY,
+        camera.width * 4,
+        camera.height * 4,
+        0x000000,
+      )
+      .setScrollFactor(0)
+      .setDepth(overlayDepth)
+      .setAlpha(0);
+
+    const label = this.add
+      .text(camera.centerX, camera.centerY, translate("minigame.underworld"), {
+        fontSize: "16px",
+        fontFamily: "Basic",
+        resolution: 4,
+        color: "#ffffff",
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(overlayDepth + 1)
+      .setAlpha(0);
+
+    this.tweens.add({
+      targets: camera,
+      zoom: baseZoom * 1.15,
+      duration: 1200,
+      ease: "Sine.easeIn",
+    });
+    this.tweens.add({
+      targets: camera,
+      rotation: 0.05,
+      duration: 200,
+      yoyo: true,
+      repeat: 3,
+      ease: "Sine.easeInOut",
+    });
+    this.tweens.add({
+      targets: overlay,
+      alpha: 1,
+      duration: 1200,
+      ease: "Sine.easeIn",
+      onComplete: () => {
+        player.setPosition(319, 534);
+        (player.body as Phaser.Physics.Arcade.Body).reset(319, 534);
+        camera.setRotation(0);
+        camera.setZoom(baseZoom);
+        camera.centerOn(player.x, player.y);
+
+        this.tweens.add({
+          targets: label,
+          alpha: 1,
+          duration: 500,
+          hold: 800,
+          yoyo: true,
+          onComplete: () => {
+            this.tweens.add({
+              targets: overlay,
+              alpha: 0,
+              duration: 1200,
+              onComplete: () => {
+                overlay.destroy();
+                label.destroy();
+                this.isCameraFading = false;
+              },
+            });
+          },
+        });
+      },
+    });
   }
 
   // Handle enemy defeat
@@ -2086,11 +2215,29 @@ export class Scene extends BaseScene {
     });
 
     if (boss.bossType === "minotaur") {
-      this.area1Blockade?.destroy();
+      if (this.area1Blockade) {
+        (this.area1Blockade.body as Phaser.Physics.Arcade.StaticBody).enable =
+          false;
+        this.area1Blockade.setVisible(true);
+      }
     } else if (boss.bossType === "witch") {
-      this.area2Blockade?.destroy();
+      if (this.area2Blockade) {
+        this.area2Blockade.setTexture("castle_door");
+        (this.area2Blockade.body as Phaser.Physics.Arcade.StaticBody).enable =
+          false;
+      }
     } else if (boss.bossType === "cerberus") {
-      this.area3Blockade?.destroy();
+      if (this.area3Blockade) {
+        this.area3Blockade.setVisible(true);
+        (this.area3Blockade.body as Phaser.Physics.Arcade.StaticBody).enable =
+          true;
+
+        if (this.currentPlayer) {
+          this.physics.add.overlap(this.currentPlayer, this.area3Blockade, () =>
+            this.enterUnderworld(),
+          );
+        }
+      }
     }
 
     this.unregisterBossEnemy(boss);
