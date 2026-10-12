@@ -518,26 +518,18 @@ export class Scene extends BaseScene {
     this.load.image("golem_stone", "world/portal/halloween/stone.png");
 
     // Chests
-    this.load.spritesheet(
-      "chest_rare",
-      "world/portal/images/placeholder1.png",
-      {
-        frameWidth: 16,
-        frameHeight: 16,
-      },
-    );
-    this.load.spritesheet(
-      "chest_epic",
-      "world/portal/images/placeholder1.png",
-      {
-        frameWidth: 16,
-        frameHeight: 16,
-      },
-    );
+    this.load.spritesheet("chest_rare", "world/portal/images/rare_chest.png", {
+      frameWidth: 32,
+      frameHeight: 32,
+    });
+    this.load.spritesheet("chest_epic", "world/portal/images/epic_chest.png", {
+      frameWidth: 32,
+      frameHeight: 32,
+    });
     this.load.spritesheet(
       "chest_legendary",
-      "world/portal/images/placeholder1.png",
-      { frameWidth: 16, frameHeight: 16 },
+      "world/portal/images/legendary_chest.png",
+      { frameWidth: 32, frameHeight: 32 },
     );
 
     // Drop items
@@ -809,7 +801,7 @@ export class Scene extends BaseScene {
           // spritesheet is loaded.
           frames: this.anims.generateFrameNumbers(textureKey, {
             start: 0,
-            end: 1,
+            end: 7,
           }),
           frameRate: 6,
           repeat: -1,
@@ -823,8 +815,8 @@ export class Scene extends BaseScene {
           // it plays once - Chest.ts listens for "animationcomplete" on
           // this exact key to know when to offer the upgrades.
           frames: this.anims.generateFrameNumbers(textureKey, {
-            start: 2,
-            end: 9,
+            start: 8,
+            end: 14,
           }),
           frameRate: 6,
           repeat: 0,
