@@ -1,13 +1,14 @@
 import type { BumpkinContainer } from "../../Core/BumpkinContainer";
 import type { EnemyType } from "../../Types";
 import type { Scene } from "../../Scene";
+import { MiniBoss } from "../MiniBossContainer";
 
 interface ChasingWeaponProps {
   scene: Scene;
   /** The container this weapon spawns from, e.g. a MiniBoss instance. */
   target: Phaser.GameObjects.Container;
   /** Texture key for the weapon sprite. */
-  texture: string;
+  texture: string[];
   offsetX?: number;
   offsetY?: number;
   scale?: number;
@@ -55,6 +56,7 @@ export class ChasingWeapon extends Phaser.GameObjects.Sprite {
   private chaseDelayMs: number;
   private delayElapsedMs = 0;
   private isWaitingForNextChase = true;
+  private texturePool: string[];
 
   constructor({
     scene,
@@ -70,11 +72,14 @@ export class ChasingWeapon extends Phaser.GameObjects.Sprite {
     player,
     enemyType,
   }: ChasingWeaponProps) {
-    super(scene, target.x + offsetX, target.y + offsetY, texture);
+    const randomTexture = Phaser.Utils.Array.GetRandom(texture);
 
+    super(scene, target.x + offsetX, target.y + offsetY, randomTexture);
+
+    this.texturePool = texture;
     this.target = target;
-    this.offsetX = offsetX;
-    this.offsetY = offsetY;
+    this.offsetX = -offsetX / 2;
+    this.offsetY = -offsetY / 2;
     this.chaseDelayMs = chaseDelayMs;
     this.chaseSpeed = chaseSpeed;
     this.chaseDurationMs = chaseDurationMs;
@@ -90,23 +95,30 @@ export class ChasingWeapon extends Phaser.GameObjects.Sprite {
   }
 
   private createAnimation() {
-    const animationKey = `${this.texture.key}_chase`;
+    const key = this.texture.key;
+    const animationKey = `${key}_chase`;
 
     // Regular image: no animation needed
-    const texture = this.scene.textures.get(this.texture);
-    if (texture.frameTotal <= 1) return;
-
+    if (this.texture.frameTotal <= 1) return;
     if (this.scene.anims.exists(animationKey)) return;
 
     this.scene.anims.create({
       key: animationKey,
-      frames: this.scene.anims.generateFrameNumbers(this.texture.key, {
-        start: 0,
-        end: 7,
-      }),
-      frameRate: 12,
+      frames: this.scene.anims.generateFrameNumbers(key, {}), // all frames
+      frameRate: 10,
       repeat: -1,
     });
+  }
+
+  private randomizeTexture() {
+    if (this.texturePool.length < 2) return;
+
+    const options = this.texturePool.filter((t) => t !== this.texture.key);
+    const next = Phaser.Utils.Array.GetRandom(options);
+
+    this.anims.stop();
+    this.setTexture(next);
+    this.createAnimation();
   }
 
   public update(delta: number) {
@@ -121,11 +133,23 @@ export class ChasingWeapon extends Phaser.GameObjects.Sprite {
     if (this.isWaitingForNextChase) {
       this.delayElapsedMs += delta;
 
+      this.x = this.target.x + this.offsetX;
+      this.y = this.target.y + this.offsetY;
+
       if (this.delayElapsedMs >= this.chaseDelayMs) {
         this.isWaitingForNextChase = false;
         this.elapsedMs = 0;
         this.setVisible(true);
-        this.play(`${this.texture.key}_chase`);
+
+        if (this.target instanceof MiniBoss) {
+          this.target.playAttackAnimation();
+        }
+
+        const animationKey = `${this.texture.key}_chase`;
+
+        if (this.scene.anims.exists(animationKey)) {
+          this.play(animationKey);
+        }
       }
 
       return;
@@ -143,10 +167,13 @@ export class ChasingWeapon extends Phaser.GameObjects.Sprite {
     const dy = this.player.y - this.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
 
-    if (dx < 0) {
+    const flipAssets = ["skeleton"];
+    if (flipAssets.includes(this.texture.key)) {
       this.setFlipX(false);
-    } else if (dx > 0) {
+    } else if (dx < 0) {
       this.setFlipX(true);
+    } else if (dx > 0) {
+      this.setFlipX(false);
     }
 
     if (dist > 1) {
@@ -183,12 +210,17 @@ export class ChasingWeapon extends Phaser.GameObjects.Sprite {
       return;
     }
 
-    this.x = this.target.x;
-    this.y = this.target.y;
+    if (this.target instanceof MiniBoss) {
+      this.target.playMovementAnimation();
+    }
+
+    this.x = this.target.x + this.offsetX;
+    this.y = this.target.y + this.offsetY;
 
     this.elapsedMs = 0;
     this.delayElapsedMs = 0;
     this.setVisible(false);
+    this.randomizeTexture();
 
     this.isWaitingForNextChase = true;
 

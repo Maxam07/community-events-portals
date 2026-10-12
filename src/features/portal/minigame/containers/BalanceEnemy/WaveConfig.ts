@@ -199,7 +199,7 @@ export const MINIBOSS_WAVE_THRESHOLDS: MiniBossWaveConfig[] = [
   {
     miniBossType: "ent",
     totalEnemy: 1,
-    weaponType: ["orbiting"],
+    weaponType: ["summoning"],
     formation: "horizontal line",
     flag: "area1_2",
     area: 1,
@@ -302,7 +302,7 @@ export const BOSS_WAVE_THRESHOLDS: BossWaveConfig[] = [
   {
     bossType: "witch",
     totalEnemy: 1,
-    weaponType: ["orbiting"],
+    weaponType: ["orbiting", "chasing"],
     formation: "vertical line",
     flag: "bossWave2",
   },
@@ -310,7 +310,7 @@ export const BOSS_WAVE_THRESHOLDS: BossWaveConfig[] = [
   {
     bossType: "cerberus",
     totalEnemy: 1,
-    weaponType: ["summoning"],
+    weaponType: ["chasing"],
     formation: "vertical line",
     flag: "bossWave3",
   },

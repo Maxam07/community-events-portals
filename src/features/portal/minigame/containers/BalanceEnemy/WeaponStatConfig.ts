@@ -5,16 +5,18 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
   // Miniboss
   golem: {
     orbiting: {
-      TEXTURE: "Fire",
+      TEXTURE: "golem_stone",
       RADIUS: 50,
       SPEED_DEG_PER_SEC: 100,
     },
   },
   ent: {
-    orbiting: {
-      TEXTURE: "Fire",
-      RADIUS: 50,
-      SPEED_DEG_PER_SEC: 100,
+    summoning: {
+      TEXTURE: "ent_tree",
+      WARNING: "ent_stump",
+      DELAY_MS: 500,
+      WARNING_DURATION_MS: 500,
+      DURATION_MS: 800,
     },
   },
   mummy: {
@@ -39,6 +41,7 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
     },
     summoning: {
       TEXTURE: "headless-magmaPuddle",
+      WARNING: "headless-magmaPuddle",
       DELAY_MS: 500,
       WARNING_DURATION_MS: 500,
       DURATION_MS: 800,
@@ -51,7 +54,8 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
       SPEED_DEG_PER_SEC: 100,
     },
     chasing: {
-      TEXTURE: "medusa_head",
+      TEXTURE: ["medusa_head"],
+      NEXT_CHASE: 2000,
       SPEED: 50,
       DURATION_MS: 5000,
     },
@@ -156,18 +160,39 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
       RADIUS: 70,
       SPEED_DEG_PER_SEC: 120,
     },
+    chasing: {
+      TEXTURE: [
+        "skeleton",
+        "ghost",
+        "slime_red",
+        "crow",
+        "slime_blue",
+        "slime_green",
+      ],
+      NEXT_CHASE: 1000,
+      SPEED: 55,
+      DURATION_MS: 5000,
+    },
   },
   cerberus: {
     summoning: {
       TEXTURE: "Fire",
+      WARNING: "tree_stump",
       DELAY_MS: 500,
       WARNING_DURATION_MS: 300,
       DURATION_MS: 4000,
+    },
+    chasing: {
+      TEXTURE: ["fang-the-curse", "fang-the-frost", "fang-the-plague"],
+      NEXT_CHASE: 1000,
+      SPEED: 55,
+      DURATION_MS: 5000,
     },
   },
   sorcerer: {
     summoning: {
       TEXTURE: "Fire",
+      WARNING: "tree_stump",
       DELAY_MS: 500,
       WARNING_DURATION_MS: 300,
       DURATION_MS: 4000,

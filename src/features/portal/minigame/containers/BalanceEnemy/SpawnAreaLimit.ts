@@ -55,27 +55,31 @@ const minX = 1 * SQUARE_WIDTH;
 const maxX = 39 * SQUARE_WIDTH;
 export const ENEMY_SPAWN_AREAS = {
   1: {
-    minX: minX,
-    maxX: maxX,
+    world: "overworld",
+    minX,
+    maxX,
     minY: 151 * SQUARE_WIDTH,
     maxY: 184 * SQUARE_WIDTH,
   },
   2: {
-    minX: minX,
-    maxX: maxX,
+    world: "overworld",
+    minX,
+    maxX,
     minY: 115 * SQUARE_WIDTH,
-    maxY: 145 * SQUARE_WIDTH,
+    maxY: 143 * SQUARE_WIDTH,
   },
   3: {
-    minX: minX,
-    maxX: maxX,
+    world: "overworld",
+    minX,
+    maxX,
     minY: 77 * SQUARE_WIDTH,
     maxY: 109 * SQUARE_WIDTH,
   },
   4: {
-    minX: minX,
-    maxX: maxX,
-    minY: 40 * SQUARE_WIDTH,
-    maxY: 73 * SQUARE_WIDTH,
+    world: "underworld",
+    minX,
+    maxX,
+    minY: 1 * SQUARE_WIDTH,
+    maxY: 33 * SQUARE_WIDTH,
   },
-};
+} as const;

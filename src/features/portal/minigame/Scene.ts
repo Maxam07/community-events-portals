@@ -127,6 +127,7 @@ export class Scene extends BaseScene {
   private isEnteringUnderworld = false;
   defeatedMiniBosses = new Set<MiniBossType>();
   enteredAreas = new Set<number>();
+  private currentWorld: "overworld" | "underworld" = "overworld";
   enemyKillsByArea: Record<SpawnArea, number> = {
     1: 0,
     2: 0,
@@ -419,6 +420,14 @@ export class Scene extends BaseScene {
       },
     );
     this.load.spritesheet(
+      "cerberus-attack-top",
+      "world/portal/halloween/cerberus-attack-top.webp",
+      {
+        frameWidth: 80,
+        frameHeight: 48,
+      },
+    );
+    this.load.spritesheet(
       "sorcerer",
       "world/portal/halloween/sorcerer-Sheet.webp",
       {
@@ -472,7 +481,41 @@ export class Scene extends BaseScene {
         frameHeight: 32,
       },
     );
+    this.load.spritesheet(
+      "ent_tree",
+      "world/portal/halloween/spring_shake_sheet.webp",
+      {
+        frameWidth: 45,
+        frameHeight: 41,
+      },
+    );
+    this.load.spritesheet(
+      "fang-the-curse",
+      "world/portal/halloween/fang-the-curse.webp",
+      {
+        frameWidth: 48,
+        frameHeight: 64,
+      },
+    );
+    this.load.spritesheet(
+      "fang-the-frost",
+      "world/portal/halloween/fang-the-frost.png",
+      {
+        frameWidth: 48,
+        frameHeight: 64,
+      },
+    );
+    this.load.spritesheet(
+      "fang-the-plague",
+      "world/portal/halloween/fang-the-plague.webp",
+      {
+        frameWidth: 48,
+        frameHeight: 64,
+      },
+    );
     this.load.image("medusa_head", "world/portal/halloween/medusa_head.webp");
+    this.load.image("ent_stump", "world/portal/halloween/stump.webp");
+    this.load.image("golem_stone", "world/portal/halloween/stone.png");
 
     // Chests
     this.load.spritesheet(
@@ -744,16 +787,6 @@ export class Scene extends BaseScene {
         }
       }
     }
-
-    // const centerX = 20.5 * SQUARE_WIDTH;
-    // // Area 1
-    // this.add.image(centerX, 131 * SQUARE_WIDTH, "galaxy_biome").setDepth(4);
-    // // Area 2
-    // this.add.image(centerX, 94 * SQUARE_WIDTH, "crystal_biome").setDepth(3);
-    // // Area 3
-    // this.add.image(centerX, 57 * SQUARE_WIDTH, "spooky_biome").setDepth(2);
-    // // Area 4
-    // this.add.image(centerX, 20 * SQUARE_WIDTH, "marble_biome").setDepth(1);
 
     // Background music
     this.backgroundMusic = this.sound.add("backgroundMusic", {
@@ -1464,7 +1497,11 @@ export class Scene extends BaseScene {
         this.enemyGroup,
         (_player, enemyObj) => {
           const enemy = enemyObj as
-            StaticRangeEnemy | PhasingEnemy | MeleeEnemy | BossEnemy | MiniBoss;
+            | StaticRangeEnemy
+            | PhasingEnemy
+            | MeleeEnemy
+            | BossEnemy
+            | MiniBoss;
           enemy.handlePlayerContact();
         },
       );
@@ -1580,6 +1617,7 @@ export class Scene extends BaseScene {
     const spawnArea = ENEMY_SPAWN_AREAS[area as keyof typeof ENEMY_SPAWN_AREAS];
 
     if (!spawnArea) return false;
+    if (spawnArea.world !== this.currentWorld) return false;
 
     return (
       this.currentPlayer.x >= spawnArea.minX &&
@@ -2007,8 +2045,8 @@ export class Scene extends BaseScene {
 
   //   console.log("Defeated mini-bosses:", defeatedCount);
 
-  //   if (defeatedCount === 6) {
-  //     this.spawnBoss("sorcerer");
+  //   if (defeatedCount === 2) {
+  //     this.spawnBoss("cerberus");
   //   }
   // }
 
@@ -2079,7 +2117,8 @@ export class Scene extends BaseScene {
   private enterUnderworld() {
     const player = this.currentPlayer;
     const portalBody = this.area3Blockade?.body as
-      Phaser.Physics.Arcade.StaticBody | undefined;
+      | Phaser.Physics.Arcade.StaticBody
+      | undefined;
     if (this.isEnteringUnderworld || !player || !portalBody) return;
 
     this.isEnteringUnderworld = true;
@@ -2140,6 +2179,8 @@ export class Scene extends BaseScene {
         camera.setRotation(0);
         camera.setZoom(baseZoom);
         camera.centerOn(player.x, player.y);
+
+        this.currentWorld = "underworld";
 
         this.tweens.add({
           targets: label,

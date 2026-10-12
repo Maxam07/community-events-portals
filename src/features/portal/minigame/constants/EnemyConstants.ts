@@ -9,8 +9,8 @@ import type {
   StaticRangeEnemyTypes,
 } from "../Types";
 
-export const BOSS_DEPTH = 100;
-export const ORB_DEPTH = 70;
+export const BOSS_DEPTH = 200;
+export const ORB_DEPTH = 500;
 export const OBSTACLE_SPAWN_BUFFER = SQUARE_WIDTH * 1.5;
 
 // XP values for each drop item type
@@ -25,13 +25,13 @@ export const DROP_ITEM_XP_VALUES: Record<DropItemType, number> = {
 export const ENEMY_BALANCE_STATS = {
   // Area 1
   bat: { HP: 4, SPEED: 20, DAMAGE: 1 }, // phasing
-  scarecrow: { HP: 8, SPEED: 20, DAMAGE: 1 }, // static
-  carnivore_plant: { HP: 8, SPEED: 15, DAMAGE: 2 }, // melee
+  scarecrow: { HP: 4, SPEED: 20, DAMAGE: 1 }, // static
+  carnivore_plant: { HP: 4, SPEED: 15, DAMAGE: 2 }, // melee
   rat: { HP: 4, SPEED: 30, DAMAGE: 3 },
-  zombie: { HP: 10, SPEED: 10, DAMAGE: 3 },
-  golem: { HP: 10, SPEED: 15, DAMAGE: 10 }, // mini boss
-  ent: { HP: 10, SPEED: 25, DAMAGE: 10 },
-  minotaur: { HP: 200, SPEED: 25, DAMAGE: 10 }, // boss
+  zombie: { HP: 4, SPEED: 10, DAMAGE: 3 },
+  golem: { HP: 50, SPEED: 15, DAMAGE: 10 }, // mini boss
+  ent: { HP: 50, SPEED: 25, DAMAGE: 10 },
+  minotaur: { HP: 100, SPEED: 25, DAMAGE: 10 }, // boss
 
   // Area 2
   crow: { HP: 8, SPEED: 25, DAMAGE: 3 }, // phasing
@@ -43,17 +43,17 @@ export const ENEMY_BALANCE_STATS = {
   slime_blue: { HP: 3, SPEED: 15, DAMAGE: 4 },
   mummy: { HP: 100, SPEED: 15, DAMAGE: 15 }, // mini boss
   living_armor: { HP: 100, SPEED: 20, DAMAGE: 10 },
-  witch: { HP: 200, SPEED: 25, DAMAGE: 12 }, // boss
+  witch: { HP: 300, SPEED: 25, DAMAGE: 12 }, // boss
 
   // Area 3
   gargoyle: { HP: 2, SPEED: 35, DAMAGE: 10 }, // phasing
-  cultist: { HP: 100, SPEED: 30, DAMAGE: 5 }, // static
+  cultist: { HP: 5, SPEED: 30, DAMAGE: 5 }, // static
   vampire: { HP: 2, SPEED: 32, DAMAGE: 5 }, // melee
   frankenstein: { HP: 2, SPEED: 15, DAMAGE: 8 },
   werewolf: { HP: 2, SPEED: 38, DAMAGE: 6 },
-  headless_horseman: { HP: 500, SPEED: 25, DAMAGE: 10 }, // mini boss
-  medusa: { HP: 500, SPEED: 25, DAMAGE: 10 },
-  cerberus: { HP: 600, SPEED: 30, DAMAGE: 15 }, // boss
+  headless_horseman: { HP: 200, SPEED: 25, DAMAGE: 10 }, // mini boss
+  medusa: { HP: 200, SPEED: 25, DAMAGE: 10 },
+  cerberus: { HP: 300, SPEED: 30, DAMAGE: 15 }, // boss
 
   // Area 4
   shade: { HP: 4, SPEED: 30, DAMAGE: 5 }, // phasing
@@ -61,13 +61,13 @@ export const ENEMY_BALANCE_STATS = {
   hellHound: { HP: 4, SPEED: 25, DAMAGE: 2 }, // melee
   demon1: { HP: 4, SPEED: 20, DAMAGE: 5 },
   demon2: { HP: 4, SPEED: 15, DAMAGE: 5 },
-  golem_area4: { HP: 20, SPEED: 20, DAMAGE: 15 }, // mini bosses
-  ent_area4: { HP: 20, SPEED: 25, DAMAGE: 15 },
-  mummy_area4: { HP: 20, SPEED: 20, DAMAGE: 20 },
-  living_armor_area4: { HP: 20, SPEED: 20, DAMAGE: 15 },
-  headless_horseman_area4: { HP: 20, SPEED: 30, DAMAGE: 20 },
-  medusa_area4: { HP: 20, SPEED: 25, DAMAGE: 25 },
-  sorcerer: { HP: 1000, SPEED: 30, DAMAGE: 12 }, // boss
+  golem_area4: { HP: 500, SPEED: 20, DAMAGE: 15 }, // mini bosses
+  ent_area4: { HP: 500, SPEED: 25, DAMAGE: 15 },
+  mummy_area4: { HP: 500, SPEED: 20, DAMAGE: 20 },
+  living_armor_area4: { HP: 500, SPEED: 20, DAMAGE: 15 },
+  headless_horseman_area4: { HP: 500, SPEED: 30, DAMAGE: 20 },
+  medusa_area4: { HP: 500, SPEED: 20, DAMAGE: 25 },
+  sorcerer: { HP: 2000, SPEED: 30, DAMAGE: 12 }, // boss
 } as const;
 
 const STATIC_RANGE_DEPTH = 50;
@@ -111,10 +111,10 @@ export const STATIC_RANGE_CONFIG: Record<StaticRangeEnemyTypes, EnemyConfig> = {
     key: "cultist",
     attackKey: "cultist_attack",
     scale: STATIC_RANGE_SCALE,
-    bodyWidth: 16,
-    bodyHeight: 16,
-    offsetX: -8,
-    offsetY: -8,
+    bodyWidth: 32,
+    bodyHeight: 32,
+    offsetX: -16,
+    offsetY: -16,
     frameStart: 0,
     frameEnd: 7,
     frameRate: 10,
@@ -653,7 +653,7 @@ export const BOSS_CONFIGS: Record<BossTypes, EnemyConfig> = {
     frameStart: 0,
     frameEnd: 7,
     frameRate: 10,
-    depth: 100,
+    depth: BOSS_DEPTH,
     speed: ENEMY_BALANCE_STATS.minotaur.SPEED,
     hp: ENEMY_BALANCE_STATS.minotaur.HP,
     maxHp: ENEMY_BALANCE_STATS.minotaur.HP,
@@ -677,6 +677,7 @@ export const BOSS_CONFIGS: Record<BossTypes, EnemyConfig> = {
   },
   cerberus: {
     key: "cerberus",
+    attackKey: "cerberus-attack-top",
     scale: 1,
     bodyWidth: 80,
     bodyHeight: 48,

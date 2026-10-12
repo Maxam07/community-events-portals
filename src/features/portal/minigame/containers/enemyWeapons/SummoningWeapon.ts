@@ -82,17 +82,17 @@ export class SummoningWeapon extends Phaser.GameObjects.Sprite {
     this.setVisible(false);
   }
 
-  private createAnimation() {
-    const animationKey = `Fire_summon`;
+  private get animationKey() {
+    return `animKey_summon_${this.weapontexture}`;
+  }
 
-    // Regular image: no animation needed
+  private createAnimation() {
     const texture = this.scene.textures.get(this.weapontexture);
     if (texture.frameTotal <= 1) return;
-
-    if (this.scene.anims.exists(animationKey)) return;
+    if (this.scene.anims.exists(this.animationKey)) return;
 
     this.scene.anims.create({
-      key: animationKey,
+      key: this.animationKey,
       frames: this.scene.anims.generateFrameNumbers(this.weapontexture, {
         start: 0,
         end: 7,
@@ -168,7 +168,10 @@ export class SummoningWeapon extends Phaser.GameObjects.Sprite {
     this.phase = "summon";
 
     this.setTexture(this.weapontexture);
-    this.play("Fire_summon");
+
+    if (this.scene.anims.exists(this.animationKey)) {
+      this.play(this.animationKey);
+    }
 
     // if (this.target instanceof MiniBoss) {
     //   this.target.playMovementAnimation();

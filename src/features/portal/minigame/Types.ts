@@ -120,7 +120,12 @@ export type LevelUpChoice = {
 export type ChestRarity = "rare" | "epic" | "legendary";
 
 export type DamageType =
-  "physical" | "water" | "explosion" | "light" | "dot" | "summon";
+  | "physical"
+  | "water"
+  | "explosion"
+  | "light"
+  | "dot"
+  | "summon";
 
 export type TargetingMode =
   | "nearest"
@@ -191,7 +196,11 @@ export type WeaponUpgrade = {
 };
 
 export type ProjectileBehavior =
-  "linear" | "exploding" | "bouncing" | "light" | "rolling";
+  | "linear"
+  | "exploding"
+  | "bouncing"
+  | "light"
+  | "rolling";
 
 export type ProjectileConfig = {
   texture: string;
@@ -207,7 +216,11 @@ export type ProjectileConfig = {
 };
 
 export type StatusEffectId =
-  "rooted" | "oilDot" | "plaguePoison" | "frostSlow" | "curseStun";
+  | "rooted"
+  | "oilDot"
+  | "plaguePoison"
+  | "frostSlow"
+  | "curseStun";
 
 export type StatusEffectConfig = {
   id: StatusEffectId;
@@ -259,10 +272,19 @@ export type CombatConfig = {
 };
 
 export type DropItemType =
-  "blueOrb" | "greenOrb" | "grayOrb" | "yellowOrb" | "purpleOrb";
+  | "blueOrb"
+  | "greenOrb"
+  | "grayOrb"
+  | "yellowOrb"
+  | "purpleOrb";
 
 export type WeaponType =
-  "chasing" | "orbiting" | "summoning" | "staticRange" | "slash" | "arena";
+  | "chasing"
+  | "orbiting"
+  | "summoning"
+  | "staticRange"
+  | "slash"
+  | "arena";
 export type CodexCategoryName = "Skills" | "Enemies" | "DropItems";
 export type PassiveAbilityType = "wings";
 export type EnemyType =
@@ -273,7 +295,10 @@ export type EnemyType =
   | MiniBossType;
 export type WeaponEnemyType = BossTypes | MiniBossType | StaticRangeEnemyTypes;
 export type EnemyFormation =
-  "vertical line" | "horizontal line" | "circle" | "surround";
+  | "vertical line"
+  | "horizontal line"
+  | "circle"
+  | "surround";
 export type AreaEnemyType =
   | PhasingEnemyTypes
   | MeleeEnemyTypes
@@ -402,8 +427,9 @@ export type BossWaveConfig = {
 
 export type WeaponStats = {
   chasing?: {
-    TEXTURE: string;
+    TEXTURE: string[];
     SPEED: number;
+    NEXT_CHASE: number;
     DURATION_MS: number;
   };
   orbiting?: {
@@ -413,6 +439,7 @@ export type WeaponStats = {
   };
   summoning?: {
     TEXTURE: string;
+    WARNING: string;
     DELAY_MS: number;
     WARNING_DURATION_MS: number;
     DURATION_MS: number;

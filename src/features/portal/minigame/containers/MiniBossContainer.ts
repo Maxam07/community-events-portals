@@ -132,17 +132,17 @@ export class MiniBoss extends Phaser.GameObjects.Container {
     this.sprite.play(animKey);
   }
 
-  // public playAttackAnimation() {
-  //   if (this.isDead || !this.active) return;
+  public playAttackAnimation() {
+    if (this.isDead || !this.active) return;
 
-  //   this.sprite.play(`${this.config.attackKey}_anim`, true);
-  // }
+    this.sprite.play(`${this.config.attackKey}_anim`, true);
+  }
 
-  // public playMovementAnimation() {
-  //   if (this.isDead || !this.active) return;
+  public playMovementAnimation() {
+    if (this.isDead || !this.active) return;
 
-  //   this.sprite.play(`${this.config.key}_anim`, true);
-  // }
+    this.sprite.play(`${this.config.key}_anim`, true);
+  }
 
   private avoidObstacles(): { x: number; y: number } {
     const obstacles = (this.scene as any).obstacles as
