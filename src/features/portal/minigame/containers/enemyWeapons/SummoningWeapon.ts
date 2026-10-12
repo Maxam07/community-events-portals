@@ -85,6 +85,10 @@ export class SummoningWeapon extends Phaser.GameObjects.Sprite {
   private createAnimation() {
     const animationKey = `Fire_summon`;
 
+    // Regular image: no animation needed
+    const texture = this.scene.textures.get(this.weapontexture);
+    if (texture.frameTotal <= 1) return;
+
     if (this.scene.anims.exists(animationKey)) return;
 
     this.scene.anims.create({

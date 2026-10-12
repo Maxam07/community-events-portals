@@ -29,8 +29,8 @@ export const ENEMY_BALANCE_STATS = {
   carnivore_plant: { HP: 8, SPEED: 15, DAMAGE: 2 }, // melee
   rat: { HP: 4, SPEED: 30, DAMAGE: 3 },
   zombie: { HP: 10, SPEED: 10, DAMAGE: 3 },
-  golem: { HP: 100, SPEED: 15, DAMAGE: 10 }, // mini boss
-  ent: { HP: 100, SPEED: 25, DAMAGE: 10 },
+  golem: { HP: 10, SPEED: 15, DAMAGE: 10 }, // mini boss
+  ent: { HP: 10, SPEED: 25, DAMAGE: 10 },
   minotaur: { HP: 200, SPEED: 25, DAMAGE: 10 }, // boss
 
   // Area 2
@@ -48,23 +48,29 @@ export const ENEMY_BALANCE_STATS = {
   // Area 3
   gargoyle: { HP: 2, SPEED: 35, DAMAGE: 10 }, // phasing
   cultist: { HP: 100, SPEED: 30, DAMAGE: 5 }, // static
-  vampire: { HP: 18, SPEED: 32, DAMAGE: 5 }, // melee
-  frankenstein: { HP: 100, SPEED: 15, DAMAGE: 8 },
-  werewolf: { HP: 50, SPEED: 38, DAMAGE: 6 },
-  headless_horseman: { HP: 300, SPEED: 25, DAMAGE: 10 }, //. mini boss
-  medusa: { HP: 100, SPEED: 25, DAMAGE: 10 },
+  vampire: { HP: 2, SPEED: 32, DAMAGE: 5 }, // melee
+  frankenstein: { HP: 2, SPEED: 15, DAMAGE: 8 },
+  werewolf: { HP: 2, SPEED: 38, DAMAGE: 6 },
+  headless_horseman: { HP: 500, SPEED: 25, DAMAGE: 10 }, // mini boss
+  medusa: { HP: 500, SPEED: 25, DAMAGE: 10 },
   cerberus: { HP: 600, SPEED: 30, DAMAGE: 15 }, // boss
 
   // Area 4
-  shade: { HP: 15, SPEED: 30, DAMAGE: 5 }, // phasing
-  red_stone: { HP: 100, SPEED: 30, DAMAGE: 5 }, // static
+  shade: { HP: 4, SPEED: 30, DAMAGE: 5 }, // phasing
+  red_stone: { HP: 4, SPEED: 30, DAMAGE: 5 }, // static
   hellHound: { HP: 4, SPEED: 25, DAMAGE: 2 }, // melee
-  demon1: { HP: 6, SPEED: 20, DAMAGE: 5 },
-  demon2: { HP: 6, SPEED: 15, DAMAGE: 5 },
-  sorcerer: { HP: 350, SPEED: 30, DAMAGE: 12 }, // boss
+  demon1: { HP: 4, SPEED: 20, DAMAGE: 5 },
+  demon2: { HP: 4, SPEED: 15, DAMAGE: 5 },
+  golem_area4: { HP: 20, SPEED: 20, DAMAGE: 15 }, // mini bosses
+  ent_area4: { HP: 20, SPEED: 25, DAMAGE: 15 },
+  mummy_area4: { HP: 20, SPEED: 20, DAMAGE: 20 },
+  living_armor_area4: { HP: 20, SPEED: 20, DAMAGE: 15 },
+  headless_horseman_area4: { HP: 20, SPEED: 30, DAMAGE: 20 },
+  medusa_area4: { HP: 20, SPEED: 25, DAMAGE: 25 },
+  sorcerer: { HP: 1000, SPEED: 30, DAMAGE: 12 }, // boss
 } as const;
 
-const STATIC_RANGE_DEPTH = 1000;
+const STATIC_RANGE_DEPTH = 50;
 const STATIC_RANGE_SCALE = 0.8;
 export const STATIC_RANGE_CONFIG: Record<StaticRangeEnemyTypes, EnemyConfig> = {
   scarecrow: {
@@ -521,19 +527,116 @@ export const MINIBOSS_CONFIGS: Record<MiniBossType, EnemyConfig> = {
     dropItem: "blueOrb",
   },
   medusa: {
-    key: "MiniBoss2",
-    scale: MINI_BOSS_SCALE,
-    bodyWidth: 64,
-    bodyHeight: 64,
-    offsetX: -32,
-    offsetY: -32,
+    key: "medusa",
+    scale: 1,
+    bodyWidth: 32,
+    bodyHeight: 48,
+    offsetX: -16,
+    offsetY: -24,
     frameStart: 0,
-    frameEnd: 8,
-    frameRate: 10,
+    frameEnd: 7,
+    frameRate: 12,
     depth: MINI_BOSS_DEPTH,
     speed: ENEMY_BALANCE_STATS.medusa.SPEED,
     hp: ENEMY_BALANCE_STATS.medusa.HP,
     maxHp: ENEMY_BALANCE_STATS.medusa.HP,
+    dropItem: "blueOrb",
+  },
+  // area 4
+  golem_area4: {
+    key: "golem_walk",
+    scale: MINI_BOSS_SCALE,
+    bodyWidth: 50,
+    bodyHeight: 50,
+    offsetX: -25,
+    offsetY: -25,
+    frameStart: 0,
+    frameEnd: 8,
+    frameRate: 10,
+    depth: MINI_BOSS_DEPTH,
+    speed: ENEMY_BALANCE_STATS.golem_area4.SPEED,
+    hp: ENEMY_BALANCE_STATS.golem_area4.HP,
+    maxHp: ENEMY_BALANCE_STATS.golem_area4.HP,
+    dropItem: "blueOrb",
+  },
+  ent_area4: {
+    key: "ent",
+    scale: MINI_BOSS_SCALE,
+    bodyWidth: 48,
+    bodyHeight: 49,
+    offsetX: -24,
+    offsetY: -24.5,
+    frameStart: 0,
+    frameEnd: 9,
+    frameRate: 12,
+    depth: MINI_BOSS_DEPTH,
+    speed: ENEMY_BALANCE_STATS.ent_area4.SPEED,
+    hp: ENEMY_BALANCE_STATS.ent_area4.HP,
+    maxHp: ENEMY_BALANCE_STATS.ent_area4.HP,
+    dropItem: "blueOrb",
+  },
+  mummy_area4: {
+    key: "mummy_walk",
+    scale: MINI_BOSS_SCALE,
+    bodyWidth: 50,
+    bodyHeight: 50,
+    offsetX: -25,
+    offsetY: -25,
+    frameStart: 0,
+    frameEnd: 8,
+    frameRate: 10,
+    depth: MINI_BOSS_DEPTH,
+    speed: ENEMY_BALANCE_STATS.mummy_area4.SPEED,
+    hp: ENEMY_BALANCE_STATS.mummy_area4.HP,
+    maxHp: ENEMY_BALANCE_STATS.mummy_area4.HP,
+    dropItem: "blueOrb",
+  },
+  living_armor_area4: {
+    key: "living_armor",
+    scale: MINI_BOSS_SCALE,
+    bodyWidth: 48,
+    bodyHeight: 48,
+    offsetX: -24,
+    offsetY: -24,
+    frameStart: 0,
+    frameEnd: 7,
+    frameRate: 10,
+    depth: MINI_BOSS_DEPTH,
+    speed: ENEMY_BALANCE_STATS.living_armor_area4.SPEED,
+    hp: ENEMY_BALANCE_STATS.living_armor_area4.HP,
+    maxHp: ENEMY_BALANCE_STATS.living_armor_area4.HP,
+    dropItem: "blueOrb",
+  },
+  headless_horseman_area4: {
+    key: "headless_horseman",
+    scale: 1,
+    bodyWidth: 48,
+    bodyHeight: 48,
+    offsetX: -24,
+    offsetY: -24,
+    frameStart: 0,
+    frameEnd: 7,
+    frameRate: 10,
+    depth: MINI_BOSS_DEPTH,
+    speed: ENEMY_BALANCE_STATS.headless_horseman_area4.SPEED,
+    hp: ENEMY_BALANCE_STATS.headless_horseman_area4.HP,
+    maxHp: ENEMY_BALANCE_STATS.headless_horseman_area4.HP,
+    dropItem: "blueOrb",
+  },
+  medusa_area4: {
+    key: "medusa",
+    scale: 1,
+    bodyWidth: 32,
+    bodyHeight: 48,
+    offsetX: -16,
+    offsetY: -24,
+    frameStart: 0,
+    frameEnd: 7,
+    frameRate: 12,
+    depth: MINI_BOSS_DEPTH,
+    speed: ENEMY_BALANCE_STATS.medusa_area4.SPEED,
+    hp: ENEMY_BALANCE_STATS.medusa_area4.HP,
+    maxHp: ENEMY_BALANCE_STATS.medusa_area4.HP,
     dropItem: "blueOrb",
   },
 };
@@ -573,14 +676,14 @@ export const BOSS_CONFIGS: Record<BossTypes, EnemyConfig> = {
     dropItem: "purpleOrb",
   },
   cerberus: {
-    key: "Boss3",
+    key: "cerberus",
     scale: 1,
-    bodyWidth: 50,
-    bodyHeight: 55,
-    offsetX: -25,
-    offsetY: -27.5,
+    bodyWidth: 80,
+    bodyHeight: 48,
+    offsetX: -40,
+    offsetY: -24,
     frameStart: 0,
-    frameEnd: 8,
+    frameEnd: 5,
     frameRate: 10,
     depth: BOSS_DEPTH,
     speed: ENEMY_BALANCE_STATS.cerberus.SPEED,

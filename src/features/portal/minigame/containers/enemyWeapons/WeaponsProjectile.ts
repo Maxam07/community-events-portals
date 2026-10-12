@@ -11,6 +11,7 @@ import { StaticRangeWeapon } from "./StaticRangeWeapon";
 import type { StaticRangeEnemy } from "../StaticRangeEnemyContainer";
 import type { BossEnemy } from "../BossEnemyContainer";
 import { SlashWeapon } from "./SlashWeapon";
+import { ArenaWeapon } from "./ArenaWeapon";
 
 interface WeaponProps {
   scene: Scene;
@@ -131,6 +132,24 @@ export const createEnemyWeapon = ({
         arcDegrees: weaponStats.ARC_DEGREES,
         cooldownMs: weaponStats.COOLDOWN_MS,
         durationMs: weaponStats.DURATION_MS,
+        player,
+        enemyType,
+      });
+    }
+
+    case "arena": {
+      const weaponStats = stats.arena;
+
+      if (!weaponStats) {
+        throw new Error(
+          `${enemyType} does not have an arena weapon configured`,
+        );
+      }
+
+      return new ArenaWeapon({
+        scene,
+        target,
+        radius: weaponStats.RADIUS,
         player,
         enemyType,
       });

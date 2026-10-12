@@ -37,8 +37,62 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
       RADIUS: 50,
       SPEED_DEG_PER_SEC: 100,
     },
+    summoning: {
+      TEXTURE: "headless-magmaPuddle",
+      DELAY_MS: 500,
+      WARNING_DURATION_MS: 500,
+      DURATION_MS: 800,
+    },
   },
   medusa: {
+    orbiting: {
+      TEXTURE: "medusa_head",
+      RADIUS: 50,
+      SPEED_DEG_PER_SEC: 100,
+    },
+    chasing: {
+      TEXTURE: "medusa_head",
+      SPEED: 50,
+      DURATION_MS: 5000,
+    },
+  },
+  // area 4
+  golem_area4: {
+    orbiting: {
+      TEXTURE: "Fire",
+      RADIUS: 50,
+      SPEED_DEG_PER_SEC: 100,
+    },
+  },
+  ent_area4: {
+    orbiting: {
+      TEXTURE: "Fire",
+      RADIUS: 50,
+      SPEED_DEG_PER_SEC: 100,
+    },
+  },
+  mummy_area4: {
+    orbiting: {
+      TEXTURE: "Fire",
+      RADIUS: 50,
+      SPEED_DEG_PER_SEC: 100,
+    },
+  },
+  living_armor_area4: {
+    orbiting: {
+      TEXTURE: "Fire",
+      RADIUS: 50,
+      SPEED_DEG_PER_SEC: 100,
+    },
+  },
+  headless_horseman_area4: {
+    orbiting: {
+      TEXTURE: "Fire",
+      RADIUS: 50,
+      SPEED_DEG_PER_SEC: 100,
+    },
+  },
+  medusa_area4: {
     orbiting: {
       TEXTURE: "Fire",
       RADIUS: 50,
@@ -89,10 +143,10 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
   // Boss
   minotaur: {
     slash: {
-      TEXTURE: "weapon_scythe",
+      TEXTURE: "minotaur-hammer",
       RANGE: 80,
-      ARC_DEGREES: 90,
-      COOLDOWN_MS: 2000,
+      ARC_DEGREES: 120,
+      COOLDOWN_MS: 1000,
       DURATION_MS: 500,
     },
   },
@@ -117,6 +171,9 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
       DELAY_MS: 500,
       WARNING_DURATION_MS: 300,
       DURATION_MS: 4000,
+    },
+    arena: {
+      RADIUS: 120,
     },
   },
 };

@@ -34,7 +34,7 @@ const getVerticalFormation = (
   centerY: number,
 ) => {
   const positions = [];
-  const spacing = 3 * SQUARE_WIDTH;
+  const spacing = 10 * SQUARE_WIDTH;
 
   const startY = centerY - ((count - 1) * spacing) / 2;
 
@@ -62,7 +62,7 @@ const getHorizontalFormation = (
   centerY: number,
 ) => {
   const positions = [];
-  const spacing = 3 * SQUARE_WIDTH;
+  const spacing = 10 * SQUARE_WIDTH;
 
   const startX = centerX - ((count - 1) * spacing) / 2;
 

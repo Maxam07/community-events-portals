@@ -112,6 +112,14 @@ export class SlashWeapon extends Phaser.GameObjects.Sprite {
     this.setActive(true);
     this.setVisible(false);
 
+    scene.physics.add.existing(this);
+
+    const body = this.body as Phaser.Physics.Arcade.Body;
+    body.setCircle(1);
+    body.setOffset(0, 0);
+    body.setAllowGravity(false);
+    body.setImmovable(true);
+
     this.createAnimation();
   }
 

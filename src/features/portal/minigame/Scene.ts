@@ -388,10 +388,14 @@ export class Scene extends BaseScene {
         frameHeight: 48,
       },
     );
-    this.load.spritesheet("medusa", "world/portal/halloween/medusa.webp", {
-      frameWidth: 48,
-      frameHeight: 48,
-    });
+    this.load.spritesheet(
+      "medusa",
+      "world/portal/halloween/medusa-Sheet.webp",
+      {
+        frameWidth: 32,
+        frameHeight: 48,
+      },
+    );
 
     // Boss enemy
     this.load.spritesheet(
@@ -406,10 +410,14 @@ export class Scene extends BaseScene {
       frameWidth: 32,
       frameHeight: 36,
     });
-    this.load.spritesheet("cerberus", "world/portal/halloween/cerberus.webp", {
-      frameWidth: 48,
-      frameHeight: 48,
-    });
+    this.load.spritesheet(
+      "cerberus",
+      "world/portal/halloween/cerberus-walk.webp",
+      {
+        frameWidth: 80,
+        frameHeight: 48,
+      },
+    );
     this.load.spritesheet(
       "sorcerer",
       "world/portal/halloween/sorcerer-Sheet.webp",
@@ -448,6 +456,23 @@ export class Scene extends BaseScene {
         frameHeight: 16,
       },
     );
+    this.load.spritesheet(
+      "minotaur-hammer",
+      "world/portal/halloween/minotaur-hammer.webp",
+      {
+        frameWidth: 46,
+        frameHeight: 34,
+      },
+    );
+    this.load.spritesheet(
+      "headless-magmaPuddle",
+      "world/portal/halloween/MagmaPuddle.webp",
+      {
+        frameWidth: 32,
+        frameHeight: 32,
+      },
+    );
+    this.load.image("medusa_head", "world/portal/halloween/medusa_head.webp");
 
     // Chests
     this.load.spritesheet(
@@ -1971,10 +1996,22 @@ export class Scene extends BaseScene {
       this.spawnBoss("witch");
     } else if (defeatedCount === 6) {
       this.spawnBoss("cerberus");
-    } else if (defeatedCount === 8) {
+    } else if (defeatedCount === 12) {
       this.spawnBoss("sorcerer");
     }
   }
+
+  // For testing bosses only
+  // private checkMiniBossProgression() {
+  //   const defeatedCount = this.defeatedMiniBosses.size;
+
+  //   console.log("Defeated mini-bosses:", defeatedCount);
+
+  //   if (defeatedCount === 6) {
+  //     this.spawnBoss("sorcerer");
+  //   }
+  // }
+
   // Create drop items when enemies are defeated
   public createDropItems({
     x,
