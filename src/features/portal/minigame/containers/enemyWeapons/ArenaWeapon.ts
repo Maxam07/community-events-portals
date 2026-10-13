@@ -12,6 +12,7 @@ interface ArenaWeaponProps {
   playerRadius?: number;
   depth?: number;
   color?: number;
+  spawnGap?: number;
 }
 
 export class ArenaWeapon extends Phaser.GameObjects.Sprite {
@@ -26,6 +27,7 @@ export class ArenaWeapon extends Phaser.GameObjects.Sprite {
   private color: number;
   private ending = false;
   public isDead = false;
+  private spawnGap: number;
 
   constructor({
     scene,
@@ -36,9 +38,11 @@ export class ArenaWeapon extends Phaser.GameObjects.Sprite {
     playerRadius = 8,
     depth = 1000,
     color = 0xff4444,
+    spawnGap = 60,
   }: ArenaWeaponProps) {
     // "__WHITE" is a built-in Phaser texture; the sprite itself is never shown.
     super(scene, target.x, target.y, "__WHITE");
+    this.spawnGap = Math.min(spawnGap, radius - playerRadius);
 
     this.target = target;
     this.player = player;
@@ -55,11 +59,7 @@ export class ArenaWeapon extends Phaser.GameObjects.Sprite {
     this.ring = scene.add.graphics();
     this.ring.setDepth(depth);
     this.drawRing();
-
-    // Pull the player to the center as soon as the weapon is created.
-    this.player.setPosition(this.centerX, this.centerY);
-    const body = this.player.body as Phaser.Physics.Arcade.Body | undefined;
-    body?.reset(this.centerX, this.centerY);
+    this.placePlayerWithGap();
   }
 
   private drawRing() {
@@ -68,6 +68,27 @@ export class ArenaWeapon extends Phaser.GameObjects.Sprite {
     this.ring.fillCircle(this.centerX, this.centerY, this.radius);
     this.ring.lineStyle(3, this.color, 1);
     this.ring.strokeCircle(this.centerX, this.centerY, this.radius);
+  }
+
+  private placePlayerWithGap() {
+    let dx = this.player.x - this.centerX;
+    let dy = this.player.y - this.centerY;
+    let dist = Math.hypot(dx, dy);
+
+    // Player exactly on the boss: pick a random direction
+    if (dist === 0) {
+      const angle = Math.random() * Math.PI * 2;
+      dx = Math.cos(angle);
+      dy = Math.sin(angle);
+      dist = 1;
+    }
+
+    const px = this.centerX + (dx / dist) * this.spawnGap;
+    const py = this.centerY + (dy / dist) * this.spawnGap;
+
+    this.player.setPosition(px, py);
+    const body = this.player.body as Phaser.Physics.Arcade.Body | undefined;
+    body?.reset(px, py);
   }
 
   public update(_delta: number) {

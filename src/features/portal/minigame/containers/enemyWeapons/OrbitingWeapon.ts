@@ -93,24 +93,31 @@ export class OrbitingWeapon extends Phaser.GameObjects.Sprite {
   private createAnimation() {
     const animationKey = `${this.texture.key}_orbit`;
 
-    const weapontexture = this.scene.textures.get(this.texture);
-    if (weapontexture.frameTotal <= 1) return;
+    const weaponTexture = this.scene.textures.get(this.texture.key);
+    if (weaponTexture.frameTotal <= 1) return;
 
-    if (this.scene.anims.exists(animationKey)) return;
+    const frameEndByTexture: Partial<Record<string, number>> = {
+      default: 7,
+      eyeball_single: 48,
+    };
 
-    this.scene.anims.create({
-      key: animationKey,
-      frames: this.scene.anims.generateFrameNumbers(this.texture.key, {
-        start: 0,
-        end: 7,
-      }),
-      frameRate: 12,
-      repeat: -1,
-    });
+    const endFrame =
+      frameEndByTexture[this.texture.key] ?? frameEndByTexture.default!;
 
-    this.play(`${this.texture.key}_orbit`);
+    if (!this.scene.anims.exists(animationKey)) {
+      this.scene.anims.create({
+        key: animationKey,
+        frames: this.scene.anims.generateFrameNumbers(this.texture.key, {
+          start: 0,
+          end: endFrame,
+        }),
+        frameRate: 12,
+        repeat: -1,
+      });
+    }
+
+    this.play(animationKey);
   }
-
   /**
    * Call every frame (e.g. from the scene's update method) to keep the
    * weapon locked to the target, either at a fixed offset or, in orbit

@@ -13,8 +13,8 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
   ent: {
     summoning: {
       TEXTURE: "ent_tree",
-      WARNING: "ent_stump",
-      DELAY_MS: 500,
+      WARNING: "shadow_warning",
+      DELAY_MS: 1000,
       WARNING_DURATION_MS: 500,
       DURATION_MS: 800,
     },
@@ -41,7 +41,7 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
     },
     summoning: {
       TEXTURE: "headless-magmaPuddle",
-      WARNING: "headless-magmaPuddle",
+      WARNING: "shadow_warning",
       DELAY_MS: 500,
       WARNING_DURATION_MS: 500,
       DURATION_MS: 800,
@@ -63,16 +63,18 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
   // area 4
   golem_area4: {
     orbiting: {
-      TEXTURE: "Fire",
+      TEXTURE: "golem_stone",
       RADIUS: 50,
       SPEED_DEG_PER_SEC: 100,
     },
   },
   ent_area4: {
-    orbiting: {
-      TEXTURE: "Fire",
-      RADIUS: 50,
-      SPEED_DEG_PER_SEC: 100,
+    summoning: {
+      TEXTURE: "ent_tree",
+      WARNING: "shadow_warning",
+      DELAY_MS: 1000,
+      WARNING_DURATION_MS: 500,
+      DURATION_MS: 800,
     },
   },
   mummy_area4: {
@@ -90,17 +92,20 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
     },
   },
   headless_horseman_area4: {
-    orbiting: {
-      TEXTURE: "Fire",
-      RADIUS: 50,
-      SPEED_DEG_PER_SEC: 100,
+    summoning: {
+      TEXTURE: "headless-magmaPuddle",
+      WARNING: "shadow_warning",
+      DELAY_MS: 500,
+      WARNING_DURATION_MS: 500,
+      DURATION_MS: 800,
     },
   },
   medusa_area4: {
-    orbiting: {
-      TEXTURE: "Fire",
-      RADIUS: 50,
-      SPEED_DEG_PER_SEC: 100,
+    chasing: {
+      TEXTURE: ["medusa_head"],
+      NEXT_CHASE: 2000,
+      SPEED: 50,
+      DURATION_MS: 5000,
     },
   },
   // Static range
@@ -177,7 +182,7 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
   cerberus: {
     summoning: {
       TEXTURE: "Fire",
-      WARNING: "tree_stump",
+      WARNING: "shadow_warning",
       DELAY_MS: 500,
       WARNING_DURATION_MS: 300,
       DURATION_MS: 4000,
@@ -191,14 +196,25 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
   },
   sorcerer: {
     summoning: {
-      TEXTURE: "Fire",
-      WARNING: "tree_stump",
-      DELAY_MS: 500,
-      WARNING_DURATION_MS: 300,
-      DURATION_MS: 4000,
+      TEXTURE: "sorcerer_clone",
+      WARNING: "shadow_warning",
+      DELAY_MS: 6000,
+      WARNING_DURATION_MS: 1000,
+      DURATION_MS: 2000,
+    },
+    chasing: {
+      TEXTURE: ["eyeball"],
+      NEXT_CHASE: 3000,
+      SPEED: 45,
+      DURATION_MS: 5000,
+    },
+    orbiting: {
+      TEXTURE: "eyeball",
+      RADIUS: 120,
+      SPEED_DEG_PER_SEC: 60,
     },
     arena: {
-      RADIUS: 120,
+      RADIUS: 150,
     },
   },
 };

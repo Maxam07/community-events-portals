@@ -124,6 +124,8 @@ export class Scene extends BaseScene {
   area1Blockade?: Phaser.GameObjects.Image;
   area2Blockade?: Phaser.GameObjects.Image;
   area3Blockade?: Phaser.GameObjects.Image;
+  cloud1Blockade?: Phaser.GameObjects.Image;
+  cloud2Blockade?: Phaser.GameObjects.Image;
   private isEnteringUnderworld = false;
   defeatedMiniBosses = new Set<MiniBossType>();
   enteredAreas = new Set<number>();
@@ -429,7 +431,7 @@ export class Scene extends BaseScene {
     );
     this.load.spritesheet(
       "sorcerer",
-      "world/portal/halloween/sorcerer-Sheet.webp",
+      "world/portal/halloween/sorcerer-walking.webp",
       {
         frameWidth: 48,
         frameHeight: 48,
@@ -513,9 +515,34 @@ export class Scene extends BaseScene {
         frameHeight: 64,
       },
     );
+    this.load.spritesheet(
+      "eyeball",
+      "world/portal/halloween/eyeball_noShadow.webp",
+      {
+        frameWidth: 16,
+        frameHeight: 21,
+      },
+    );
+    this.load.spritesheet(
+      "eyeball_single",
+      "world/portal/halloween/eyeball_single.webp",
+      {
+        frameWidth: 16,
+        frameHeight: 48,
+      },
+    );
+    this.load.spritesheet(
+      "sorcerer_clone",
+      "world/portal/halloween/sorcerer-Sheet.webp",
+      {
+        frameWidth: 48,
+        frameHeight: 48,
+      },
+    );
     this.load.image("medusa_head", "world/portal/halloween/medusa_head.webp");
     this.load.image("ent_stump", "world/portal/halloween/stump.webp");
     this.load.image("golem_stone", "world/portal/halloween/stone.png");
+    this.load.image("shadow_warning", "world/portal/halloween/shadow1.webp");
 
     // Chests
     this.load.spritesheet("chest_rare", "world/portal/images/rare_chest.png", {
@@ -556,6 +583,7 @@ export class Scene extends BaseScene {
     this.load.image("deco_3", "world/portal/images/deco_3.webp");
     this.load.image("deco_4", "world/portal/images/deco_4.webp");
     this.load.image("blockade1", "world/goblin_exchange.png");
+    this.load.image("cloud_cover", "world/portal/halloween/cloud_cover.webp");
 
     // Boss icons
     this.load.image("icon_boss_1", "world/portal/images/icon_boss_1.webp");
@@ -1609,7 +1637,7 @@ export class Scene extends BaseScene {
     const spawnArea = ENEMY_SPAWN_AREAS[area as keyof typeof ENEMY_SPAWN_AREAS];
 
     if (!spawnArea) return false;
-    if (spawnArea.world !== this.currentWorld) return false;
+    // if (spawnArea.world !== this.currentWorld) return false;
 
     return (
       this.currentPlayer.x >= spawnArea.minX &&
@@ -2068,10 +2096,18 @@ export class Scene extends BaseScene {
       .setDepth(5)
       .setVisible(false);
 
+    this.cloud1Blockade = this.add
+      .image(20 * SQUARE_WIDTH, 130 * SQUARE_WIDTH, "cloud_cover")
+      .setDepth(10000);
+
     const area2Blockade = this.add
       .image(18 * SQUARE_WIDTH, 109 * SQUARE_WIDTH + 1, "castle_wall")
       .setOrigin(0)
       .setDepth(this.map.heightInPixels + 1);
+
+    this.cloud2Blockade = this.add
+      .image(20 * SQUARE_WIDTH, 95 * SQUARE_WIDTH, "cloud_cover")
+      .setDepth(10000);
 
     const area3Blockade = this.add
       .image(this.map.widthInPixels / 2, 74 * SQUARE_WIDTH, "portal")
@@ -2172,7 +2208,7 @@ export class Scene extends BaseScene {
         camera.setZoom(baseZoom);
         camera.centerOn(player.x, player.y);
 
-        this.currentWorld = "underworld";
+        // this.currentWorld = "underworld";
 
         this.tweens.add({
           targets: label,
@@ -2289,12 +2325,14 @@ export class Scene extends BaseScene {
         (this.area1Blockade.body as Phaser.Physics.Arcade.StaticBody).enable =
           false;
         this.area1Blockade.setVisible(true);
+        this.cloud1Blockade?.setVisible(false);
       }
     } else if (boss.bossType === "witch") {
       if (this.area2Blockade) {
         this.area2Blockade.setTexture("castle_door");
         (this.area2Blockade.body as Phaser.Physics.Arcade.StaticBody).enable =
           false;
+        this.cloud2Blockade?.setVisible(false);
       }
     } else if (boss.bossType === "cerberus") {
       if (this.area3Blockade) {

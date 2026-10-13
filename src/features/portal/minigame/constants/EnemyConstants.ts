@@ -9,8 +9,7 @@ import type {
   StaticRangeEnemyTypes,
 } from "../Types";
 
-export const BOSS_DEPTH = 200;
-export const ORB_DEPTH = 500;
+export const ORB_DEPTH = 50;
 export const OBSTACLE_SPAWN_BUFFER = SQUARE_WIDTH * 1.5;
 
 // XP values for each drop item type
@@ -25,7 +24,7 @@ export const DROP_ITEM_XP_VALUES: Record<DropItemType, number> = {
 export const ENEMY_BALANCE_STATS = {
   // Area 1
   bat: { HP: 4, SPEED: 20, DAMAGE: 1 }, // phasing
-  scarecrow: { HP: 4, SPEED: 20, DAMAGE: 1 }, // static
+  scarecrow: { HP: 20, SPEED: 20, DAMAGE: 1 }, // static
   carnivore_plant: { HP: 4, SPEED: 15, DAMAGE: 2 }, // melee
   rat: { HP: 4, SPEED: 30, DAMAGE: 3 },
   zombie: { HP: 4, SPEED: 10, DAMAGE: 3 },
@@ -35,39 +34,39 @@ export const ENEMY_BALANCE_STATS = {
 
   // Area 2
   crow: { HP: 8, SPEED: 25, DAMAGE: 3 }, // phasing
-  ghost: { HP: 8, SPEED: 15, DAMAGE: 7 },
+  ghost: { HP: 20, SPEED: 15, DAMAGE: 7 },
   imp: { HP: 100, SPEED: 25, DAMAGE: 5 }, // static
   skeleton: { HP: 3, SPEED: 20, DAMAGE: 3 }, // melee
   slime_red: { HP: 3, SPEED: 15, DAMAGE: 4 },
   slime_green: { HP: 3, SPEED: 15, DAMAGE: 4 },
   slime_blue: { HP: 3, SPEED: 15, DAMAGE: 4 },
-  mummy: { HP: 100, SPEED: 15, DAMAGE: 15 }, // mini boss
-  living_armor: { HP: 100, SPEED: 20, DAMAGE: 10 },
-  witch: { HP: 300, SPEED: 25, DAMAGE: 12 }, // boss
+  mummy: { HP: 300, SPEED: 15, DAMAGE: 15 }, // mini boss
+  living_armor: { HP: 300, SPEED: 20, DAMAGE: 10 },
+  witch: { HP: 1000, SPEED: 40, DAMAGE: 12 }, // boss
 
   // Area 3
   gargoyle: { HP: 2, SPEED: 35, DAMAGE: 10 }, // phasing
-  cultist: { HP: 5, SPEED: 30, DAMAGE: 5 }, // static
+  cultist: { HP: 20, SPEED: 30, DAMAGE: 5 }, // static
   vampire: { HP: 2, SPEED: 32, DAMAGE: 5 }, // melee
   frankenstein: { HP: 2, SPEED: 15, DAMAGE: 8 },
   werewolf: { HP: 2, SPEED: 38, DAMAGE: 6 },
-  headless_horseman: { HP: 200, SPEED: 25, DAMAGE: 10 }, // mini boss
-  medusa: { HP: 200, SPEED: 25, DAMAGE: 10 },
-  cerberus: { HP: 300, SPEED: 30, DAMAGE: 15 }, // boss
+  headless_horseman: { HP: 500, SPEED: 25, DAMAGE: 10 }, // mini boss
+  medusa: { HP: 500, SPEED: 25, DAMAGE: 10 },
+  cerberus: { HP: 800, SPEED: 30, DAMAGE: 15 }, // boss
 
   // Area 4
   shade: { HP: 4, SPEED: 30, DAMAGE: 5 }, // phasing
-  red_stone: { HP: 4, SPEED: 30, DAMAGE: 5 }, // static
+  red_stone: { HP: 20, SPEED: 30, DAMAGE: 5 }, // static
   hellHound: { HP: 4, SPEED: 25, DAMAGE: 2 }, // melee
   demon1: { HP: 4, SPEED: 20, DAMAGE: 5 },
   demon2: { HP: 4, SPEED: 15, DAMAGE: 5 },
-  golem_area4: { HP: 500, SPEED: 20, DAMAGE: 15 }, // mini bosses
-  ent_area4: { HP: 500, SPEED: 25, DAMAGE: 15 },
-  mummy_area4: { HP: 500, SPEED: 20, DAMAGE: 20 },
-  living_armor_area4: { HP: 500, SPEED: 20, DAMAGE: 15 },
-  headless_horseman_area4: { HP: 500, SPEED: 30, DAMAGE: 20 },
-  medusa_area4: { HP: 500, SPEED: 20, DAMAGE: 25 },
-  sorcerer: { HP: 2000, SPEED: 30, DAMAGE: 12 }, // boss
+  golem_area4: { HP: 500, SPEED: 20, DAMAGE: 5 }, // mini bosses
+  ent_area4: { HP: 500, SPEED: 25, DAMAGE: 5 },
+  mummy_area4: { HP: 500, SPEED: 20, DAMAGE: 5 },
+  living_armor_area4: { HP: 500, SPEED: 20, DAMAGE: 5 },
+  headless_horseman_area4: { HP: 500, SPEED: 30, DAMAGE: 5 },
+  medusa_area4: { HP: 500, SPEED: 20, DAMAGE: 5 },
+  sorcerer: { HP: 2000, SPEED: 15, DAMAGE: 5 }, // boss
 } as const;
 
 const STATIC_RANGE_DEPTH = 50;
@@ -642,6 +641,7 @@ export const MINIBOSS_CONFIGS: Record<MiniBossType, EnemyConfig> = {
 };
 
 // Boss enemy configurations
+export const BOSS_DEPTH = 1000;
 export const BOSS_CONFIGS: Record<BossTypes, EnemyConfig> = {
   minotaur: {
     key: "minotaur",
@@ -695,10 +695,10 @@ export const BOSS_CONFIGS: Record<BossTypes, EnemyConfig> = {
   sorcerer: {
     key: "sorcerer",
     scale: 1,
-    bodyWidth: 48,
-    bodyHeight: 48,
-    offsetX: -24,
-    offsetY: -24,
+    bodyWidth: 24,
+    bodyHeight: 24,
+    offsetX: -12,
+    offsetY: -12,
     frameStart: 0,
     frameEnd: 7,
     frameRate: 10,
