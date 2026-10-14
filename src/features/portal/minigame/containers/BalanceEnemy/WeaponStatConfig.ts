@@ -111,7 +111,7 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
   // Static range
   scarecrow: {
     staticRange: {
-      TEXTURE: "Fire",
+      TEXTURE: "scarecrow_pumpkin",
       FRAME_END: 4,
       RANGE: SQUARE_WIDTH * 5,
       SPEED: 100,

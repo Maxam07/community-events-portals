@@ -539,6 +539,14 @@ export class Scene extends BaseScene {
         frameHeight: 48,
       },
     );
+    this.load.spritesheet(
+      "scarecrow_pumpkin",
+      "world/portal/halloween/scarecrow_pumpkin.webp",
+      {
+        frameWidth: 16,
+        frameHeight: 16,
+      },
+    );
     this.load.image("medusa_head", "world/portal/halloween/medusa_head.webp");
     this.load.image("ent_stump", "world/portal/halloween/stump.webp");
     this.load.image("golem_stone", "world/portal/halloween/stone.png");
@@ -583,7 +591,10 @@ export class Scene extends BaseScene {
     this.load.image("deco_3", "world/portal/images/deco_3.webp");
     this.load.image("deco_4", "world/portal/images/deco_4.webp");
     this.load.image("blockade1", "world/goblin_exchange.png");
-    this.load.image("cloud_cover", "world/portal/halloween/cloud_cover.webp");
+    this.load.image(
+      "cloud_cover",
+      "world/portal/halloween/main_clouds_top.webp",
+    );
 
     // Boss icons
     this.load.image("icon_boss_1", "world/portal/images/icon_boss_1.webp");
@@ -1710,10 +1721,10 @@ export class Scene extends BaseScene {
   // Create Enemies
   private createStationaryEnemies(weaponTypes: WeaponType[]) {
     const enemies: StaticRangeEnemyTypes[] = [
-      // "scarecrow",
-      "red_stone", // temporary
+      "scarecrow",
       "imp",
       "cultist",
+      "red_stone",
     ];
 
     enemies.forEach((mobType, areaIndex) => {
@@ -2097,7 +2108,7 @@ export class Scene extends BaseScene {
       .setVisible(false);
 
     this.cloud1Blockade = this.add
-      .image(20 * SQUARE_WIDTH, 130 * SQUARE_WIDTH, "cloud_cover")
+      .image(20 * SQUARE_WIDTH, 140 * SQUARE_WIDTH, "cloud_cover")
       .setDepth(10000);
 
     const area2Blockade = this.add
@@ -2106,7 +2117,7 @@ export class Scene extends BaseScene {
       .setDepth(this.map.heightInPixels + 1);
 
     this.cloud2Blockade = this.add
-      .image(20 * SQUARE_WIDTH, 95 * SQUARE_WIDTH, "cloud_cover")
+      .image(20 * SQUARE_WIDTH, 107 * SQUARE_WIDTH, "cloud_cover")
       .setDepth(10000);
 
     const area3Blockade = this.add

@@ -25,6 +25,11 @@ export const STATIC_RANGE_POS = [
   { x: 35, y: 104 },
   { x: 25, y: 109 },
   { x: 3, y: 107 },
+  // area 4
+  { x: 20, y: 10 },
+  { x: 15, y: 15 },
+  { x: 3, y: 23 },
+  { x: 34, y: 30 },
 ];
 
 const enemy = STATIC_RANGE_POS;
@@ -58,13 +63,13 @@ export const OBSTACLES_LAYOUT = {
     { name: "tree_stump", x: 34, y: 174 },
     { name: "tree_stump", x: 26, y: 179 },
     // area 1 temporary red_stone
-    { name: "red_stone", x: enemy[0].x, y: enemy[0].y },
-    { name: "red_stone", x: enemy[1].x, y: enemy[1].y },
-    { name: "red_stone", x: enemy[2].x, y: enemy[2].y },
-    { name: "red_stone", x: enemy[3].x, y: enemy[3].y },
-    { name: "red_stone", x: enemy[4].x, y: enemy[4].y },
-    { name: "red_stone", x: enemy[5].x, y: enemy[5].y },
-    { name: "red_stone", x: enemy[6].x, y: enemy[6].y },
+    { name: "scarecrow", x: enemy[0].x, y: enemy[0].y },
+    { name: "scarecrow", x: enemy[1].x, y: enemy[1].y },
+    { name: "scarecrow", x: enemy[2].x, y: enemy[2].y },
+    { name: "scarecrow", x: enemy[3].x, y: enemy[3].y },
+    { name: "scarecrow", x: enemy[4].x, y: enemy[4].y },
+    { name: "scarecrow", x: enemy[5].x, y: enemy[5].y },
+    { name: "scarecrow", x: enemy[6].x, y: enemy[6].y },
     // area 2
     { name: "imp", x: enemy[7].x, y: enemy[7].y },
     { name: "imp", x: enemy[8].x, y: enemy[8].y },
@@ -74,14 +79,19 @@ export const OBSTACLES_LAYOUT = {
     { name: "imp", x: enemy[12].x, y: enemy[12].y },
     { name: "imp", x: enemy[13].x, y: enemy[13].y },
     // area 3
-    { name: "imp", x: enemy[14].x, y: enemy[14].y },
-    { name: "imp", x: enemy[15].x, y: enemy[15].y },
-    { name: "imp", x: enemy[16].x, y: enemy[16].y },
-    { name: "imp", x: enemy[17].x, y: enemy[17].y },
-    { name: "imp", x: enemy[18].x, y: enemy[18].y },
-    { name: "imp", x: enemy[19].x, y: enemy[19].y },
-    { name: "imp", x: enemy[20].x, y: enemy[20].y },
-    // area 1
+    { name: "cultist", x: enemy[14].x, y: enemy[14].y },
+    { name: "cultist", x: enemy[15].x, y: enemy[15].y },
+    { name: "cultist", x: enemy[16].x, y: enemy[16].y },
+    { name: "cultist", x: enemy[17].x, y: enemy[17].y },
+    { name: "cultist", x: enemy[18].x, y: enemy[18].y },
+    { name: "cultist", x: enemy[19].x, y: enemy[19].y },
+    { name: "cultist", x: enemy[20].x, y: enemy[20].y },
+    // area
+    { name: "red_stone", x: enemy[21].x, y: enemy[21].y },
+    { name: "red_stone", x: enemy[22].x, y: enemy[22].y },
+    { name: "red_stone", x: enemy[23].x, y: enemy[23].y },
+    { name: "red_stone", x: enemy[24].x, y: enemy[24].y },
+    // empty
     {
       name: "empty",
       x: 0,

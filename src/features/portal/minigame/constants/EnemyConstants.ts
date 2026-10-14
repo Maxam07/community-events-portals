@@ -24,7 +24,7 @@ export const DROP_ITEM_XP_VALUES: Record<DropItemType, number> = {
 export const ENEMY_BALANCE_STATS = {
   // Area 1
   bat: { HP: 4, SPEED: 20, DAMAGE: 1 }, // phasing
-  scarecrow: { HP: 20, SPEED: 20, DAMAGE: 1 }, // static
+  scarecrow: { HP: 50, SPEED: 20, DAMAGE: 1 }, // static
   carnivore_plant: { HP: 4, SPEED: 15, DAMAGE: 2 }, // melee
   rat: { HP: 4, SPEED: 30, DAMAGE: 3 },
   zombie: { HP: 4, SPEED: 10, DAMAGE: 3 },
@@ -34,7 +34,7 @@ export const ENEMY_BALANCE_STATS = {
 
   // Area 2
   crow: { HP: 8, SPEED: 25, DAMAGE: 3 }, // phasing
-  ghost: { HP: 20, SPEED: 15, DAMAGE: 7 },
+  ghost: { HP: 50, SPEED: 15, DAMAGE: 7 },
   imp: { HP: 100, SPEED: 25, DAMAGE: 5 }, // static
   skeleton: { HP: 3, SPEED: 20, DAMAGE: 3 }, // melee
   slime_red: { HP: 3, SPEED: 15, DAMAGE: 4 },
@@ -46,7 +46,7 @@ export const ENEMY_BALANCE_STATS = {
 
   // Area 3
   gargoyle: { HP: 2, SPEED: 35, DAMAGE: 10 }, // phasing
-  cultist: { HP: 20, SPEED: 30, DAMAGE: 5 }, // static
+  cultist: { HP: 50, SPEED: 30, DAMAGE: 5 }, // static
   vampire: { HP: 2, SPEED: 32, DAMAGE: 5 }, // melee
   frankenstein: { HP: 2, SPEED: 15, DAMAGE: 8 },
   werewolf: { HP: 2, SPEED: 38, DAMAGE: 6 },
@@ -56,7 +56,7 @@ export const ENEMY_BALANCE_STATS = {
 
   // Area 4
   shade: { HP: 4, SPEED: 30, DAMAGE: 5 }, // phasing
-  red_stone: { HP: 20, SPEED: 30, DAMAGE: 5 }, // static
+  red_stone: { HP: 50, SPEED: 30, DAMAGE: 5 }, // static
   hellHound: { HP: 4, SPEED: 25, DAMAGE: 2 }, // melee
   demon1: { HP: 4, SPEED: 20, DAMAGE: 5 },
   demon2: { HP: 4, SPEED: 15, DAMAGE: 5 },
@@ -74,14 +74,14 @@ const STATIC_RANGE_SCALE = 0.8;
 export const STATIC_RANGE_CONFIG: Record<StaticRangeEnemyTypes, EnemyConfig> = {
   scarecrow: {
     key: "scarecrow",
-    attackKey: "scarecrow_attack",
+    attackKey: "scarecrow",
     scale: STATIC_RANGE_SCALE,
     bodyWidth: 32,
     bodyHeight: 32,
     offsetX: -16,
     offsetY: -16,
     frameStart: 0,
-    frameEnd: 8,
+    frameEnd: 7,
     frameRate: 10,
     depth: STATIC_RANGE_DEPTH,
     speed: ENEMY_BALANCE_STATS.scarecrow.SPEED,
