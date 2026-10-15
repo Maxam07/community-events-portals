@@ -66,7 +66,115 @@ const obstacleConfig: Record<
     setVisible: true,
     setScale: 1,
   },
-  cloud: {
+  forest_deco1: {
+    width: 1,
+    height: 1.5,
+    destructible: true,
+    hp: Infinity,
+    hasHitbox: true,
+    setVisible: true,
+    setScale: 1,
+  },
+  forest_deco2: {
+    width: 1,
+    height: 1,
+    destructible: true,
+    hp: Infinity,
+    hasHitbox: true,
+    setVisible: true,
+    setScale: 1,
+  },
+  forest_deco3: {
+    width: 1,
+    height: 1,
+    destructible: true,
+    hp: Infinity,
+    hasHitbox: true,
+    setVisible: true,
+    setScale: 1,
+  },
+  swamp_deco1: {
+    width: 1,
+    height: 1,
+    destructible: true,
+    hp: Infinity,
+    hasHitbox: true,
+    setVisible: true,
+    setScale: 1,
+  },
+  swamp_deco2: {
+    width: 2,
+    height: 1,
+    destructible: true,
+    hp: Infinity,
+    hasHitbox: true,
+    setVisible: true,
+    setScale: 1,
+  },
+  swamp_deco3: {
+    width: 2,
+    height: 2,
+    destructible: true,
+    hp: Infinity,
+    hasHitbox: true,
+    setVisible: true,
+    setScale: 1,
+  },
+  castle_deco1: {
+    width: 2,
+    height: 1,
+    destructible: true,
+    hp: Infinity,
+    hasHitbox: true,
+    setVisible: true,
+    setScale: 1,
+  },
+  castle_deco2: {
+    width: 1,
+    height: 2,
+    destructible: true,
+    hp: Infinity,
+    hasHitbox: true,
+    setVisible: true,
+    setScale: 1,
+  },
+  castle_deco3: {
+    width: 1,
+    height: 1,
+    destructible: true,
+    hp: Infinity,
+    hasHitbox: true,
+    setVisible: true,
+    setScale: 1,
+  },
+  underworld_deco1: {
+    width: 2,
+    height: 2,
+    destructible: true,
+    hp: Infinity,
+    hasHitbox: true,
+    setVisible: true,
+    setScale: 1,
+  },
+  underworld_deco2: {
+    width: 2,
+    height: 1,
+    destructible: true,
+    hp: Infinity,
+    hasHitbox: true,
+    setVisible: true,
+    setScale: 1,
+  },
+  underworld_deco3: {
+    width: 1,
+    height: 1,
+    destructible: true,
+    hp: Infinity,
+    hasHitbox: true,
+    setVisible: true,
+    setScale: 1,
+  },
+  cloud1: {
     width: 4,
     height: 3,
     destructible: true,
@@ -75,7 +183,25 @@ const obstacleConfig: Record<
     setVisible: true,
     setScale: 1,
   },
-  cloud1: {
+  cloud2: {
+    width: 2,
+    height: 2,
+    destructible: true,
+    hp: Infinity,
+    hasHitbox: false,
+    setVisible: true,
+    setScale: 1,
+  },
+  cloud3: {
+    width: 4,
+    height: 3,
+    destructible: true,
+    hp: Infinity,
+    hasHitbox: false,
+    setVisible: true,
+    setScale: 1,
+  },
+  cloud4: {
     width: 2,
     height: 2,
     destructible: true,
@@ -87,42 +213,6 @@ const obstacleConfig: Record<
   tree_stump: {
     width: 1,
     height: 1,
-    destructible: true,
-    hp: Infinity,
-    hasHitbox: true,
-    setVisible: true,
-    setScale: 1,
-  },
-  deco_1: {
-    width: 5,
-    height: 3,
-    destructible: true,
-    hp: Infinity,
-    hasHitbox: true,
-    setVisible: true,
-    setScale: 1,
-  },
-  deco_2: {
-    width: 4,
-    height: 3,
-    destructible: true,
-    hp: Infinity,
-    hasHitbox: true,
-    setVisible: true,
-    setScale: 1,
-  },
-  deco_3: {
-    width: 7,
-    height: 3,
-    destructible: true,
-    hp: Infinity,
-    hasHitbox: true,
-    setVisible: true,
-    setScale: 1,
-  },
-  deco_4: {
-    width: 7,
-    height: 6,
     destructible: true,
     hp: Infinity,
     hasHitbox: true,
@@ -188,7 +278,7 @@ export function addStaticObstacle({
 
   const WATER_DEPTH = 5;
   const OBSTACLES_DEPTH = 60;
-  const CLOUDS_DEPTH = 1000;
+  const CLOUDS_DEPTH = 10000000000000;
 
   const coordinates = {
     x: x ?? 0,
@@ -238,11 +328,11 @@ export function addStaticObstacle({
     scene.physics.add.collider(currentPlayer, obstacle);
   }
 
-  const noHitbox: ObstacleName[] = ["cloud", "cloud1"];
+  const noHitbox: ObstacleName[] = ["cloud1", "cloud2", "cloud3", "cloud4"];
 
   if (noHitbox.includes(name)) {
     obstacle.setDepth(CLOUDS_DEPTH);
-    obstacle.alpha = 0.8;
+    // obstacle.alpha = 0.8;
   }
 
   // if (name === "water") {

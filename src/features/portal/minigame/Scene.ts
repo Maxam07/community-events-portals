@@ -585,12 +585,41 @@ export class Scene extends BaseScene {
     this.load.image("castle_door", "world/portal/halloween/castle_door.png");
     this.load.image("castle_wall", "world/portal/halloween/castle_wall.png");
     this.load.image("portal", "world/portal/halloween/portal.png");
-    // this.load.image("water", "world/portal/halloween/ocean1.webp");
-    this.load.image("deco_1", "world/portal/images/deco_1.webp");
-    this.load.image("deco_2", "world/portal/images/deco_2.webp");
-    this.load.image("deco_3", "world/portal/images/deco_3.webp");
-    this.load.image("deco_4", "world/portal/images/deco_4.webp");
     this.load.image("blockade1", "world/goblin_exchange.png");
+    this.load.image(
+      "forest_deco1",
+      "world/portal/halloween/forest_decor1.webp",
+    );
+    this.load.image(
+      "forest_deco2",
+      "world/portal/halloween/forest_decor2.webp",
+    );
+    this.load.image(
+      "forest_deco3",
+      "world/portal/halloween/forest_decor3.webp",
+    );
+    this.load.image("swamp_deco1", "world/portal/halloween/swamp_deco1.webp");
+    this.load.image("swamp_deco2", "world/portal/halloween/swamp_deco2.webp");
+    this.load.image("swamp_deco3", "world/portal/halloween/swamp_deco3.webp");
+    this.load.image("castle_deco1", "world/portal/halloween/castle_deco1.webp");
+    this.load.image("castle_deco2", "world/portal/halloween/castle_deco2.webp");
+    this.load.image("castle_deco3", "world/portal/halloween/castle_deco3.webp");
+    this.load.image(
+      "underworld_deco1",
+      "world/portal/halloween/underworld_deco1.webp",
+    );
+    this.load.image(
+      "underworld_deco2",
+      "world/portal/halloween/underworld_deco2.webp",
+    );
+    this.load.image(
+      "underworld_deco3",
+      "world/portal/halloween/underworld_deco3.webp",
+    );
+    this.load.image("cloud1", "world/portal/halloween/cloud_1.webp");
+    this.load.image("cloud2", "world/portal/halloween/cloud_2.webp");
+    this.load.image("cloud3", "world/portal/halloween/cloud_3.webp");
+    this.load.image("cloud4", "world/portal/halloween/cloud_4.webp");
     this.load.image(
       "cloud_cover",
       "world/portal/halloween/main_clouds_top.webp",
@@ -1521,6 +1550,7 @@ export class Scene extends BaseScene {
     this.physics.add.collider(this.bossGroup, this.bossGroup);
     this.physics.add.collider(this.miniBossGroup, this.miniBossGroup);
     this.physics.add.collider(this.meleeGroup, this.meleeGroup);
+    this.physics.add.collider(this.phasingGroup, this.phasingGroup);
 
     if (this.currentPlayer) {
       this.physics.add.overlap(
