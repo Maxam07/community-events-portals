@@ -473,3 +473,48 @@ export type WeaponStats = {
     RADIUS: number;
   };
 };
+
+export interface EnemyBalanceStats {
+  HP: number;
+  SPEED: number;
+  DAMAGE: number;
+  TOTAL?: number;
+  BATCH_SIZE?: number;
+  DELAY?: number;
+  FORMATION?: EnemyFormation;
+  DROP_ITEM: DropItemType;
+  WEAPON?: WeaponType[];
+
+  WEAPONS?: {
+    orbiting?: {
+      RADIUS?: number;
+      SPEED_DEG_PER_SEC?: number;
+    };
+    summoning?: {
+      DELAY_MS?: number;
+      WARNING_DURATION_MS?: number;
+      DURATION_MS?: number;
+    };
+    chasing?: {
+      NEXT_CHASE?: number;
+      SPEED?: number;
+      DURATION_MS?: number;
+    };
+    staticRange?: {
+      FRAME_END?: number;
+      RANGE?: number;
+      SPEED?: number;
+      COOLDOWN_MS?: number;
+      DURATION_MS?: number;
+    };
+    slash?: {
+      RANGE?: number;
+      ARC_DEGREES?: number;
+      COOLDOWN_MS?: number;
+      DURATION_MS?: number;
+    };
+    arena?: {
+      RADIUS?: number;
+    };
+  };
+}

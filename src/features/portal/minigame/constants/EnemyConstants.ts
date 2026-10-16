@@ -7,10 +7,12 @@ import type {
   MiniBossType,
   PhasingEnemyTypes,
   StaticRangeEnemyTypes,
+  EnemyBalanceStats,
 } from "../Types";
 
 export const ORB_DEPTH = 50;
 export const OBSTACLE_SPAWN_BUFFER = SQUARE_WIDTH * 1.5;
+export const TESTING = false;
 
 // XP values for each drop item type
 export const DROP_ITEM_XP_VALUES: Record<DropItemType, number> = {
@@ -23,51 +25,463 @@ export const DROP_ITEM_XP_VALUES: Record<DropItemType, number> = {
 
 export const ENEMY_BALANCE_STATS = {
   // Area 1
-  bat: { HP: 4, SPEED: 20, DAMAGE: 1 }, // phasing
-  scarecrow: { HP: 50, SPEED: 20, DAMAGE: 1 }, // static
-  carnivore_plant: { HP: 4, SPEED: 15, DAMAGE: 2 }, // melee
-  rat: { HP: 4, SPEED: 30, DAMAGE: 3 },
-  zombie: { HP: 4, SPEED: 10, DAMAGE: 3 },
-  golem: { HP: 50, SPEED: 15, DAMAGE: 10 }, // mini boss
-  ent: { HP: 50, SPEED: 25, DAMAGE: 10 },
-  minotaur: { HP: 100, SPEED: 25, DAMAGE: 10 }, // boss
-
+  bat: {
+    HP: 4,
+    SPEED: 20,
+    DAMAGE: 1,
+    TOTAL: 20,
+    BATCH_SIZE: 5,
+    DELAY: 4000,
+    FORMATION: "surround",
+    DROP_ITEM: "blueOrb",
+  },
+  scarecrow: { HP: 50, SPEED: 20, DAMAGE: 1, DROP_ITEM: "blueOrb" },
+  carnivore_plant: {
+    HP: 4,
+    SPEED: 15,
+    DAMAGE: 2,
+    TOTAL: 20,
+    BATCH_SIZE: 5,
+    DELAY: 7000,
+    FORMATION: "horizontal line",
+    DROP_ITEM: "blueOrb",
+  },
+  rat: {
+    HP: 4,
+    SPEED: 30,
+    DAMAGE: 3,
+    TOTAL: 20,
+    BATCH_SIZE: 5,
+    DELAY: 6000,
+    FORMATION: "surround",
+    DROP_ITEM: "blueOrb",
+  },
+  zombie: {
+    HP: 4,
+    SPEED: 10,
+    DAMAGE: 3,
+    TOTAL: 20,
+    BATCH_SIZE: 5,
+    DELAY: 8000,
+    FORMATION: "circle",
+    DROP_ITEM: "blueOrb",
+  },
+  golem: {
+    HP: 50,
+    SPEED: 15,
+    DAMAGE: 10,
+    TOTAL: 1,
+    WEAPON: ["orbiting"],
+    WEAPONS: {
+      orbiting: {
+        RADIUS: 50,
+        SPEED_DEG_PER_SEC: 100,
+      },
+    },
+    FORMATION: "vertical line",
+    DROP_ITEM: "blueOrb",
+  },
+  ent: {
+    HP: 50,
+    SPEED: 25,
+    DAMAGE: 10,
+    TOTAL: 1,
+    WEAPON: ["summoning"],
+    WEAPONS: {
+      summoning: {
+        DELAY_MS: 1000,
+        WARNING_DURATION_MS: 500,
+        DURATION_MS: 800,
+      },
+    },
+    FORMATION: "horizontal line",
+    DROP_ITEM: "blueOrb",
+  },
+  minotaur: {
+    HP: 100,
+    SPEED: 25,
+    DAMAGE: 10,
+    TOTAL: 1,
+    WEAPON: ["slash"],
+    WEAPONS: {
+      slash: {
+        RANGE: 80,
+        ARC_DEGREES: 120,
+        COOLDOWN_MS: 1000,
+        DURATION_MS: 500,
+      },
+    },
+    FORMATION: "vertical line",
+    DROP_ITEM: "yellowOrb",
+  },
   // Area 2
-  crow: { HP: 8, SPEED: 25, DAMAGE: 3 }, // phasing
-  ghost: { HP: 50, SPEED: 15, DAMAGE: 7 },
-  imp: { HP: 100, SPEED: 25, DAMAGE: 5 }, // static
-  skeleton: { HP: 3, SPEED: 20, DAMAGE: 3 }, // melee
-  slime_red: { HP: 3, SPEED: 15, DAMAGE: 4 },
-  slime_green: { HP: 3, SPEED: 15, DAMAGE: 4 },
-  slime_blue: { HP: 3, SPEED: 15, DAMAGE: 4 },
-  mummy: { HP: 300, SPEED: 15, DAMAGE: 15 }, // mini boss
-  living_armor: { HP: 300, SPEED: 20, DAMAGE: 10 },
-  witch: { HP: 1000, SPEED: 40, DAMAGE: 12 }, // boss
+  crow: {
+    HP: 8,
+    SPEED: 25,
+    DAMAGE: 3,
+    TOTAL: 20,
+    BATCH_SIZE: 5,
+    DELAY: 5000,
+    FORMATION: "horizontal line",
+    DROP_ITEM: "blueOrb",
+  },
+  ghost: {
+    HP: 50,
+    SPEED: 15,
+    DAMAGE: 7,
+    TOTAL: 20,
+    BATCH_SIZE: 5,
+    DELAY: 2000,
+    FORMATION: "surround",
+    DROP_ITEM: "greenOrb",
+  },
+  imp: { HP: 100, SPEED: 25, DAMAGE: 5, DROP_ITEM: "blueOrb" },
+  skeleton: {
+    HP: 3,
+    SPEED: 20,
+    DAMAGE: 3,
+    TOTAL: 20,
+    BATCH_SIZE: 5,
+    DELAY: 3000,
+    FORMATION: "vertical line",
+    DROP_ITEM: "blueOrb",
+  },
+  slime_red: {
+    HP: 3,
+    SPEED: 15,
+    DAMAGE: 4,
+    TOTAL: 20,
+    BATCH_SIZE: 5,
+    DELAY: 3000,
+    FORMATION: "surround",
+    DROP_ITEM: "blueOrb",
+  },
+  slime_green: {
+    HP: 3,
+    SPEED: 15,
+    DAMAGE: 4,
+    TOTAL: 20,
+    BATCH_SIZE: 5,
+    DELAY: 8000,
+    FORMATION: "surround",
+    DROP_ITEM: "blueOrb",
+  },
+  slime_blue: {
+    HP: 3,
+    SPEED: 15,
+    DAMAGE: 4,
+    TOTAL: 20,
+    BATCH_SIZE: 5,
+    DELAY: 5000,
+    FORMATION: "surround",
+    DROP_ITEM: "blueOrb",
+  },
+  mummy: {
+    HP: 300,
+    SPEED: 15,
+    DAMAGE: 15,
+    TOTAL: 1,
+    WEAPON: ["orbiting"],
+    WEAPONS: {
+      orbiting: {
+        RADIUS: 50,
+        SPEED_DEG_PER_SEC: 100,
+      },
+    },
+    FORMATION: "vertical line",
+    DROP_ITEM: "blueOrb",
+  },
+  living_armor: {
+    HP: 300,
+    SPEED: 20,
+    DAMAGE: 10,
+    TOTAL: 1,
+    WEAPON: ["orbiting"],
+    WEAPONS: {
+      orbiting: {
+        RADIUS: 50,
+        SPEED_DEG_PER_SEC: 100,
+      },
+    },
+    FORMATION: "horizontal line",
+    DROP_ITEM: "blueOrb",
+  },
+  witch: {
+    HP: 1000,
+    SPEED: 40,
+    DAMAGE: 12,
+    TOTAL: 1,
+    WEAPON: ["orbiting", "chasing"],
+    WEAPONS: {
+      orbiting: {
+        RADIUS: 70,
+        SPEED_DEG_PER_SEC: 120,
+      },
+      chasing: {
+        NEXT_CHASE: 1000,
+        SPEED: 55,
+        DURATION_MS: 5000,
+      },
+    },
+    FORMATION: "vertical line",
+    DROP_ITEM: "purpleOrb",
+  },
 
   // Area 3
-  gargoyle: { HP: 2, SPEED: 35, DAMAGE: 10 }, // phasing
-  cultist: { HP: 50, SPEED: 30, DAMAGE: 5 }, // static
-  vampire: { HP: 2, SPEED: 32, DAMAGE: 5 }, // melee
-  frankenstein: { HP: 2, SPEED: 15, DAMAGE: 8 },
-  werewolf: { HP: 2, SPEED: 38, DAMAGE: 6 },
-  headless_horseman: { HP: 500, SPEED: 25, DAMAGE: 10 }, // mini boss
-  medusa: { HP: 500, SPEED: 25, DAMAGE: 10 },
-  cerberus: { HP: 800, SPEED: 30, DAMAGE: 15 }, // boss
+  gargoyle: {
+    HP: 2,
+    SPEED: 35,
+    DAMAGE: 10,
+    TOTAL: 20,
+    BATCH_SIZE: 5,
+    DELAY: 6000,
+    FORMATION: "surround",
+    DROP_ITEM: "grayOrb",
+  },
+  cultist: { HP: 50, SPEED: 30, DAMAGE: 5, DROP_ITEM: "greenOrb" },
+  vampire: {
+    HP: 2,
+    SPEED: 32,
+    DAMAGE: 5,
+    TOTAL: 20,
+    BATCH_SIZE: 3,
+    DELAY: 4000,
+    FORMATION: "vertical line",
+    DROP_ITEM: "blueOrb",
+  },
+  frankenstein: {
+    HP: 2,
+    SPEED: 15,
+    DAMAGE: 8,
+    TOTAL: 20,
+    BATCH_SIZE: 3,
+    DELAY: 4000,
+    FORMATION: "horizontal line",
+    DROP_ITEM: "blueOrb",
+  },
+  werewolf: {
+    HP: 2,
+    SPEED: 38,
+    DAMAGE: 6,
+    TOTAL: 20,
+    BATCH_SIZE: 3,
+    DELAY: 4000,
+    FORMATION: "surround",
+    DROP_ITEM: "blueOrb",
+  },
+  headless_horseman: {
+    HP: 500,
+    SPEED: 25,
+    DAMAGE: 10,
+    TOTAL: 1,
+    WEAPON: ["summoning"],
+    WEAPONS: {
+      summoning: {
+        DELAY_MS: 500,
+        WARNING_DURATION_MS: 500,
+        DURATION_MS: 800,
+      },
+    },
+    FORMATION: "vertical line",
+    DROP_ITEM: "blueOrb",
+  },
+  medusa: {
+    HP: 500,
+    SPEED: 25,
+    DAMAGE: 10,
+    TOTAL: 1,
+    WEAPON: ["chasing"],
+    WEAPONS: {
+      chasing: {
+        NEXT_CHASE: 2000,
+        SPEED: 50,
+        DURATION_MS: 5000,
+      },
+    },
+    FORMATION: "horizontal line",
+    DROP_ITEM: "blueOrb",
+  },
+  cerberus: {
+    HP: 800,
+    SPEED: 30,
+    DAMAGE: 15,
+    TOTAL: 2,
+    WEAPON: ["chasing"],
+    WEAPONS: {
+      chasing: {
+        NEXT_CHASE: 1000,
+        SPEED: 55,
+        DURATION_MS: 5000,
+      },
+    },
+    FORMATION: "horizontal line",
+    DROP_ITEM: "purpleOrb",
+  },
 
   // Area 4
-  shade: { HP: 4, SPEED: 30, DAMAGE: 5 }, // phasing
-  red_stone: { HP: 50, SPEED: 30, DAMAGE: 5 }, // static
-  hellHound: { HP: 4, SPEED: 25, DAMAGE: 2 }, // melee
-  demon1: { HP: 4, SPEED: 20, DAMAGE: 5 },
-  demon2: { HP: 4, SPEED: 15, DAMAGE: 5 },
-  golem_area4: { HP: 500, SPEED: 20, DAMAGE: 5 }, // mini bosses
-  ent_area4: { HP: 500, SPEED: 25, DAMAGE: 5 },
-  mummy_area4: { HP: 500, SPEED: 20, DAMAGE: 5 },
-  living_armor_area4: { HP: 500, SPEED: 20, DAMAGE: 5 },
-  headless_horseman_area4: { HP: 500, SPEED: 30, DAMAGE: 5 },
-  medusa_area4: { HP: 500, SPEED: 20, DAMAGE: 5 },
-  sorcerer: { HP: 2000, SPEED: 15, DAMAGE: 5 }, // boss
-} as const;
+  shade: {
+    HP: 4,
+    SPEED: 30,
+    DAMAGE: 5,
+    TOTAL: 20,
+    BATCH_SIZE: 5,
+    DELAY: 6000,
+    FORMATION: "surround",
+    DROP_ITEM: "grayOrb",
+  },
+  red_stone: { HP: 50, SPEED: 30, DAMAGE: 5, DROP_ITEM: "greenOrb" },
+  hellHound: {
+    HP: 4,
+    SPEED: 25,
+    DAMAGE: 2,
+    TOTAL: 20,
+    BATCH_SIZE: 3,
+    DELAY: 2000,
+    FORMATION: "surround",
+    DROP_ITEM: "blueOrb",
+  },
+  demon1: {
+    HP: 4,
+    SPEED: 20,
+    DAMAGE: 5,
+    TOTAL: 20,
+    BATCH_SIZE: 3,
+    DELAY: 4000,
+    FORMATION: "vertical line",
+    DROP_ITEM: "blueOrb",
+  },
+  demon2: {
+    HP: 4,
+    SPEED: 15,
+    DAMAGE: 5,
+    TOTAL: 20,
+    BATCH_SIZE: 3,
+    DELAY: 4000,
+    FORMATION: "horizontal line",
+    DROP_ITEM: "blueOrb",
+  },
+  golem_area4: {
+    HP: 500,
+    SPEED: 20,
+    DAMAGE: 5,
+    TOTAL: 1,
+    WEAPON: ["orbiting"],
+    WEAPONS: {
+      orbiting: {
+        RADIUS: 50,
+        SPEED_DEG_PER_SEC: 100,
+      },
+    },
+    FORMATION: "vertical line",
+    DROP_ITEM: "blueOrb",
+  },
+  ent_area4: {
+    HP: 500,
+    SPEED: 25,
+    DAMAGE: 5,
+    TOTAL: 1,
+    WEAPON: ["summoning"],
+    WEAPONS: {
+      summoning: {
+        DELAY_MS: 1000,
+        WARNING_DURATION_MS: 500,
+        DURATION_MS: 800,
+      },
+    },
+    FORMATION: "horizontal line",
+    DROP_ITEM: "blueOrb",
+  },
+  mummy_area4: {
+    HP: 500,
+    SPEED: 20,
+    DAMAGE: 5,
+    TOTAL: 1,
+    WEAPON: ["orbiting"],
+    WEAPONS: {
+      orbiting: {
+        RADIUS: 50,
+        SPEED_DEG_PER_SEC: 100,
+      },
+    },
+    FORMATION: "vertical line",
+    DROP_ITEM: "blueOrb",
+  },
+  living_armor_area4: {
+    HP: 500,
+    SPEED: 20,
+    DAMAGE: 5,
+    TOTAL: 1,
+    WEAPON: ["orbiting"],
+    WEAPONS: {
+      orbiting: {
+        RADIUS: 50,
+        SPEED_DEG_PER_SEC: 100,
+      },
+    },
+    FORMATION: "horizontal line",
+    DROP_ITEM: "blueOrb",
+  },
+  headless_horseman_area4: {
+    HP: 500,
+    SPEED: 30,
+    DAMAGE: 5,
+    TOTAL: 1,
+    WEAPON: ["summoning"],
+    WEAPONS: {
+      summoning: {
+        DELAY_MS: 500,
+        WARNING_DURATION_MS: 500,
+        DURATION_MS: 800,
+      },
+    },
+    FORMATION: "vertical line",
+    DROP_ITEM: "blueOrb",
+  },
+  medusa_area4: {
+    HP: 500,
+    SPEED: 20,
+    DAMAGE: 5,
+    TOTAL: 1,
+    WEAPON: ["chasing"],
+    WEAPONS: {
+      chasing: {
+        NEXT_CHASE: 2000,
+        SPEED: 50,
+        DURATION_MS: 5000,
+      },
+    },
+    FORMATION: "horizontal line",
+    DROP_ITEM: "blueOrb",
+  },
+  sorcerer: {
+    HP: 2000,
+    SPEED: 15,
+    DAMAGE: 5,
+    TOTAL: 1,
+    WEAPON: ["arena", "summoning", "chasing", "orbiting"],
+    WEAPONS: {
+      arena: {
+        RADIUS: 150,
+      },
+      summoning: {
+        DELAY_MS: 6000,
+        WARNING_DURATION_MS: 1000,
+        DURATION_MS: 2000,
+      },
+      chasing: {
+        NEXT_CHASE: 3000,
+        SPEED: 45,
+        DURATION_MS: 5000,
+      },
+      orbiting: {
+        RADIUS: 120,
+        SPEED_DEG_PER_SEC: 60,
+      },
+    },
+    FORMATION: "vertical line",
+    DROP_ITEM: "purpleOrb",
+  },
+} satisfies Record<string, EnemyBalanceStats>;
 
 const STATIC_RANGE_DEPTH = 50;
 const STATIC_RANGE_SCALE = 0.8;
@@ -87,7 +501,7 @@ export const STATIC_RANGE_CONFIG: Record<StaticRangeEnemyTypes, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.scarecrow.SPEED,
     hp: ENEMY_BALANCE_STATS.scarecrow.HP,
     maxHp: ENEMY_BALANCE_STATS.scarecrow.HP,
-    dropItem: "blueOrb",
+    dropItem: ENEMY_BALANCE_STATS.scarecrow.DROP_ITEM,
   },
   imp: {
     key: "imp",
@@ -104,7 +518,7 @@ export const STATIC_RANGE_CONFIG: Record<StaticRangeEnemyTypes, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.imp.SPEED,
     hp: ENEMY_BALANCE_STATS.imp.HP,
     maxHp: ENEMY_BALANCE_STATS.imp.HP,
-    dropItem: "blueOrb",
+    dropItem: ENEMY_BALANCE_STATS.imp.DROP_ITEM,
   },
   cultist: {
     key: "cultist",
@@ -121,7 +535,7 @@ export const STATIC_RANGE_CONFIG: Record<StaticRangeEnemyTypes, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.cultist.SPEED,
     hp: ENEMY_BALANCE_STATS.cultist.HP,
     maxHp: ENEMY_BALANCE_STATS.cultist.HP,
-    dropItem: "greenOrb",
+    dropItem: ENEMY_BALANCE_STATS.cultist.DROP_ITEM,
   },
   red_stone: {
     key: "red_stone",
@@ -138,7 +552,7 @@ export const STATIC_RANGE_CONFIG: Record<StaticRangeEnemyTypes, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.red_stone.SPEED,
     hp: ENEMY_BALANCE_STATS.red_stone.HP,
     maxHp: ENEMY_BALANCE_STATS.red_stone.HP,
-    dropItem: "greenOrb",
+    dropItem: ENEMY_BALANCE_STATS.red_stone.DROP_ITEM,
   },
 };
 
@@ -160,7 +574,7 @@ export const PHASING_CONFIGS: Record<PhasingEnemyTypes, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.bat.SPEED,
     hp: ENEMY_BALANCE_STATS.bat.HP,
     maxHp: ENEMY_BALANCE_STATS.bat.HP,
-    dropItem: "blueOrb",
+    dropItem: ENEMY_BALANCE_STATS.bat.DROP_ITEM,
   },
   crow: {
     key: "crow",
@@ -176,7 +590,7 @@ export const PHASING_CONFIGS: Record<PhasingEnemyTypes, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.crow.SPEED,
     hp: ENEMY_BALANCE_STATS.crow.HP,
     maxHp: ENEMY_BALANCE_STATS.crow.HP,
-    dropItem: "blueOrb",
+    dropItem: ENEMY_BALANCE_STATS.crow.DROP_ITEM,
   },
   ghost: {
     key: "ghost",
@@ -192,7 +606,7 @@ export const PHASING_CONFIGS: Record<PhasingEnemyTypes, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.ghost.SPEED,
     hp: ENEMY_BALANCE_STATS.ghost.HP,
     maxHp: ENEMY_BALANCE_STATS.ghost.HP,
-    dropItem: "greenOrb",
+    dropItem: ENEMY_BALANCE_STATS.ghost.DROP_ITEM,
   },
   gargoyle: {
     key: "gargoyle",
@@ -208,7 +622,7 @@ export const PHASING_CONFIGS: Record<PhasingEnemyTypes, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.gargoyle.SPEED,
     hp: ENEMY_BALANCE_STATS.gargoyle.HP,
     maxHp: ENEMY_BALANCE_STATS.gargoyle.HP,
-    dropItem: "grayOrb",
+    dropItem: ENEMY_BALANCE_STATS.gargoyle.DROP_ITEM,
   },
   shade: {
     key: "shade",
@@ -224,7 +638,7 @@ export const PHASING_CONFIGS: Record<PhasingEnemyTypes, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.shade.SPEED,
     hp: ENEMY_BALANCE_STATS.shade.HP,
     maxHp: ENEMY_BALANCE_STATS.shade.HP,
-    dropItem: "grayOrb",
+    dropItem: ENEMY_BALANCE_STATS.shade.DROP_ITEM,
   },
 };
 
@@ -246,7 +660,7 @@ export const MELEE_CONFIGS: Record<MeleeEnemyTypes, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.carnivore_plant.SPEED,
     hp: ENEMY_BALANCE_STATS.carnivore_plant.HP,
     maxHp: ENEMY_BALANCE_STATS.carnivore_plant.HP,
-    dropItem: "blueOrb",
+    dropItem: ENEMY_BALANCE_STATS.carnivore_plant.DROP_ITEM,
   },
   rat: {
     key: "rat",
@@ -262,7 +676,7 @@ export const MELEE_CONFIGS: Record<MeleeEnemyTypes, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.rat.SPEED,
     hp: ENEMY_BALANCE_STATS.rat.HP,
     maxHp: ENEMY_BALANCE_STATS.rat.HP,
-    dropItem: "blueOrb",
+    dropItem: ENEMY_BALANCE_STATS.rat.DROP_ITEM,
   },
   zombie: {
     key: "zombie",
@@ -278,7 +692,7 @@ export const MELEE_CONFIGS: Record<MeleeEnemyTypes, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.zombie.SPEED,
     hp: ENEMY_BALANCE_STATS.zombie.HP,
     maxHp: ENEMY_BALANCE_STATS.zombie.HP,
-    dropItem: "blueOrb",
+    dropItem: ENEMY_BALANCE_STATS.zombie.DROP_ITEM,
   },
   skeleton: {
     key: "skeleton",
@@ -294,7 +708,7 @@ export const MELEE_CONFIGS: Record<MeleeEnemyTypes, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.skeleton.SPEED,
     hp: ENEMY_BALANCE_STATS.skeleton.HP,
     maxHp: ENEMY_BALANCE_STATS.skeleton.HP,
-    dropItem: "blueOrb",
+    dropItem: ENEMY_BALANCE_STATS.skeleton.DROP_ITEM,
   },
   slime_red: {
     key: "slime_red",
@@ -309,8 +723,8 @@ export const MELEE_CONFIGS: Record<MeleeEnemyTypes, EnemyConfig> = {
     depth: MELEE_DEPTH,
     speed: ENEMY_BALANCE_STATS.slime_red.SPEED,
     hp: ENEMY_BALANCE_STATS.slime_red.HP,
-    maxHp: ENEMY_BALANCE_STATS.slime_red.SPEED,
-    dropItem: "blueOrb",
+    maxHp: ENEMY_BALANCE_STATS.slime_red.HP,
+    dropItem: ENEMY_BALANCE_STATS.slime_red.DROP_ITEM,
   },
   slime_green: {
     key: "slime_green",
@@ -325,8 +739,8 @@ export const MELEE_CONFIGS: Record<MeleeEnemyTypes, EnemyConfig> = {
     depth: MELEE_DEPTH,
     speed: ENEMY_BALANCE_STATS.slime_green.SPEED,
     hp: ENEMY_BALANCE_STATS.slime_green.HP,
-    maxHp: ENEMY_BALANCE_STATS.slime_green.SPEED,
-    dropItem: "blueOrb",
+    maxHp: ENEMY_BALANCE_STATS.slime_green.HP,
+    dropItem: ENEMY_BALANCE_STATS.slime_green.DROP_ITEM,
   },
   slime_blue: {
     key: "slime_blue",
@@ -341,8 +755,8 @@ export const MELEE_CONFIGS: Record<MeleeEnemyTypes, EnemyConfig> = {
     depth: MELEE_DEPTH,
     speed: ENEMY_BALANCE_STATS.slime_blue.SPEED,
     hp: ENEMY_BALANCE_STATS.slime_blue.HP,
-    maxHp: ENEMY_BALANCE_STATS.slime_blue.SPEED,
-    dropItem: "blueOrb",
+    maxHp: ENEMY_BALANCE_STATS.slime_blue.HP,
+    dropItem: ENEMY_BALANCE_STATS.slime_blue.DROP_ITEM,
   },
   vampire: {
     key: "vampire",
@@ -357,8 +771,8 @@ export const MELEE_CONFIGS: Record<MeleeEnemyTypes, EnemyConfig> = {
     depth: MELEE_DEPTH,
     speed: ENEMY_BALANCE_STATS.vampire.SPEED,
     hp: ENEMY_BALANCE_STATS.vampire.HP,
-    maxHp: ENEMY_BALANCE_STATS.vampire.SPEED,
-    dropItem: "blueOrb",
+    maxHp: ENEMY_BALANCE_STATS.vampire.HP,
+    dropItem: ENEMY_BALANCE_STATS.vampire.DROP_ITEM,
   },
   frankenstein: {
     key: "frankenstein",
@@ -373,8 +787,8 @@ export const MELEE_CONFIGS: Record<MeleeEnemyTypes, EnemyConfig> = {
     depth: MELEE_DEPTH,
     speed: ENEMY_BALANCE_STATS.frankenstein.SPEED,
     hp: ENEMY_BALANCE_STATS.frankenstein.HP,
-    maxHp: ENEMY_BALANCE_STATS.frankenstein.SPEED,
-    dropItem: "blueOrb",
+    maxHp: ENEMY_BALANCE_STATS.frankenstein.HP,
+    dropItem: ENEMY_BALANCE_STATS.frankenstein.DROP_ITEM,
   },
   werewolf: {
     key: "werewolf",
@@ -389,8 +803,8 @@ export const MELEE_CONFIGS: Record<MeleeEnemyTypes, EnemyConfig> = {
     depth: MELEE_DEPTH,
     speed: ENEMY_BALANCE_STATS.werewolf.SPEED,
     hp: ENEMY_BALANCE_STATS.werewolf.HP,
-    maxHp: ENEMY_BALANCE_STATS.werewolf.SPEED,
-    dropItem: "blueOrb",
+    maxHp: ENEMY_BALANCE_STATS.werewolf.HP,
+    dropItem: ENEMY_BALANCE_STATS.werewolf.DROP_ITEM,
   },
   hellHound: {
     key: "hellHound",
@@ -406,7 +820,7 @@ export const MELEE_CONFIGS: Record<MeleeEnemyTypes, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.hellHound.SPEED,
     hp: ENEMY_BALANCE_STATS.hellHound.HP,
     maxHp: ENEMY_BALANCE_STATS.hellHound.HP,
-    dropItem: "blueOrb",
+    dropItem: ENEMY_BALANCE_STATS.hellHound.DROP_ITEM,
   },
   demon1: {
     key: "demon1",
@@ -422,7 +836,7 @@ export const MELEE_CONFIGS: Record<MeleeEnemyTypes, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.demon1.SPEED,
     hp: ENEMY_BALANCE_STATS.demon1.HP,
     maxHp: ENEMY_BALANCE_STATS.demon1.HP,
-    dropItem: "blueOrb",
+    dropItem: ENEMY_BALANCE_STATS.demon1.DROP_ITEM,
   },
   demon2: {
     key: "demon2",
@@ -438,7 +852,7 @@ export const MELEE_CONFIGS: Record<MeleeEnemyTypes, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.demon2.SPEED,
     hp: ENEMY_BALANCE_STATS.demon2.HP,
     maxHp: ENEMY_BALANCE_STATS.demon2.HP,
-    dropItem: "blueOrb",
+    dropItem: ENEMY_BALANCE_STATS.demon2.DROP_ITEM,
   },
 };
 
@@ -459,7 +873,7 @@ export const MINIBOSS_CONFIGS: Record<MiniBossType, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.golem.SPEED,
     hp: ENEMY_BALANCE_STATS.golem.HP,
     maxHp: ENEMY_BALANCE_STATS.golem.HP,
-    dropItem: "blueOrb",
+    dropItem: ENEMY_BALANCE_STATS.golem.DROP_ITEM,
   },
   ent: {
     key: "ent",
@@ -475,7 +889,7 @@ export const MINIBOSS_CONFIGS: Record<MiniBossType, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.ent.SPEED,
     hp: ENEMY_BALANCE_STATS.ent.HP,
     maxHp: ENEMY_BALANCE_STATS.ent.HP,
-    dropItem: "blueOrb",
+    dropItem: ENEMY_BALANCE_STATS.ent.DROP_ITEM,
   },
   mummy: {
     key: "mummy_walk",
@@ -491,7 +905,7 @@ export const MINIBOSS_CONFIGS: Record<MiniBossType, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.mummy.SPEED,
     hp: ENEMY_BALANCE_STATS.mummy.HP,
     maxHp: ENEMY_BALANCE_STATS.mummy.HP,
-    dropItem: "blueOrb",
+    dropItem: ENEMY_BALANCE_STATS.mummy.DROP_ITEM,
   },
   living_armor: {
     key: "living_armor",
@@ -507,7 +921,7 @@ export const MINIBOSS_CONFIGS: Record<MiniBossType, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.living_armor.SPEED,
     hp: ENEMY_BALANCE_STATS.living_armor.HP,
     maxHp: ENEMY_BALANCE_STATS.living_armor.HP,
-    dropItem: "blueOrb",
+    dropItem: ENEMY_BALANCE_STATS.living_armor.DROP_ITEM,
   },
   headless_horseman: {
     key: "headless_horseman",
@@ -523,7 +937,7 @@ export const MINIBOSS_CONFIGS: Record<MiniBossType, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.headless_horseman.SPEED,
     hp: ENEMY_BALANCE_STATS.headless_horseman.HP,
     maxHp: ENEMY_BALANCE_STATS.headless_horseman.HP,
-    dropItem: "blueOrb",
+    dropItem: ENEMY_BALANCE_STATS.headless_horseman.DROP_ITEM,
   },
   medusa: {
     key: "medusa",
@@ -539,9 +953,10 @@ export const MINIBOSS_CONFIGS: Record<MiniBossType, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.medusa.SPEED,
     hp: ENEMY_BALANCE_STATS.medusa.HP,
     maxHp: ENEMY_BALANCE_STATS.medusa.HP,
-    dropItem: "blueOrb",
+    dropItem: ENEMY_BALANCE_STATS.medusa.DROP_ITEM,
   },
-  // area 4
+
+  // Area 4
   golem_area4: {
     key: "golem_walk",
     scale: MINI_BOSS_SCALE,
@@ -556,7 +971,7 @@ export const MINIBOSS_CONFIGS: Record<MiniBossType, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.golem_area4.SPEED,
     hp: ENEMY_BALANCE_STATS.golem_area4.HP,
     maxHp: ENEMY_BALANCE_STATS.golem_area4.HP,
-    dropItem: "blueOrb",
+    dropItem: ENEMY_BALANCE_STATS.golem_area4.DROP_ITEM,
   },
   ent_area4: {
     key: "ent",
@@ -572,7 +987,7 @@ export const MINIBOSS_CONFIGS: Record<MiniBossType, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.ent_area4.SPEED,
     hp: ENEMY_BALANCE_STATS.ent_area4.HP,
     maxHp: ENEMY_BALANCE_STATS.ent_area4.HP,
-    dropItem: "blueOrb",
+    dropItem: ENEMY_BALANCE_STATS.ent_area4.DROP_ITEM,
   },
   mummy_area4: {
     key: "mummy_walk",
@@ -588,7 +1003,7 @@ export const MINIBOSS_CONFIGS: Record<MiniBossType, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.mummy_area4.SPEED,
     hp: ENEMY_BALANCE_STATS.mummy_area4.HP,
     maxHp: ENEMY_BALANCE_STATS.mummy_area4.HP,
-    dropItem: "blueOrb",
+    dropItem: ENEMY_BALANCE_STATS.mummy_area4.DROP_ITEM,
   },
   living_armor_area4: {
     key: "living_armor",
@@ -604,7 +1019,7 @@ export const MINIBOSS_CONFIGS: Record<MiniBossType, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.living_armor_area4.SPEED,
     hp: ENEMY_BALANCE_STATS.living_armor_area4.HP,
     maxHp: ENEMY_BALANCE_STATS.living_armor_area4.HP,
-    dropItem: "blueOrb",
+    dropItem: ENEMY_BALANCE_STATS.living_armor_area4.DROP_ITEM,
   },
   headless_horseman_area4: {
     key: "headless_horseman",
@@ -620,7 +1035,7 @@ export const MINIBOSS_CONFIGS: Record<MiniBossType, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.headless_horseman_area4.SPEED,
     hp: ENEMY_BALANCE_STATS.headless_horseman_area4.HP,
     maxHp: ENEMY_BALANCE_STATS.headless_horseman_area4.HP,
-    dropItem: "blueOrb",
+    dropItem: ENEMY_BALANCE_STATS.headless_horseman_area4.DROP_ITEM,
   },
   medusa_area4: {
     key: "medusa",
@@ -636,7 +1051,7 @@ export const MINIBOSS_CONFIGS: Record<MiniBossType, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.medusa_area4.SPEED,
     hp: ENEMY_BALANCE_STATS.medusa_area4.HP,
     maxHp: ENEMY_BALANCE_STATS.medusa_area4.HP,
-    dropItem: "blueOrb",
+    dropItem: ENEMY_BALANCE_STATS.medusa_area4.DROP_ITEM,
   },
 };
 
@@ -657,7 +1072,7 @@ export const BOSS_CONFIGS: Record<BossTypes, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.minotaur.SPEED,
     hp: ENEMY_BALANCE_STATS.minotaur.HP,
     maxHp: ENEMY_BALANCE_STATS.minotaur.HP,
-    dropItem: "yellowOrb",
+    dropItem: ENEMY_BALANCE_STATS.minotaur.DROP_ITEM,
   },
   witch: {
     key: "witch",
@@ -673,7 +1088,7 @@ export const BOSS_CONFIGS: Record<BossTypes, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.witch.SPEED,
     hp: ENEMY_BALANCE_STATS.witch.HP,
     maxHp: ENEMY_BALANCE_STATS.witch.HP,
-    dropItem: "purpleOrb",
+    dropItem: ENEMY_BALANCE_STATS.witch.DROP_ITEM,
   },
   cerberus: {
     key: "cerberus",
@@ -690,7 +1105,7 @@ export const BOSS_CONFIGS: Record<BossTypes, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.cerberus.SPEED,
     hp: ENEMY_BALANCE_STATS.cerberus.HP,
     maxHp: ENEMY_BALANCE_STATS.cerberus.HP,
-    dropItem: "purpleOrb",
+    dropItem: ENEMY_BALANCE_STATS.cerberus.DROP_ITEM,
   },
   sorcerer: {
     key: "sorcerer",
@@ -706,6 +1121,6 @@ export const BOSS_CONFIGS: Record<BossTypes, EnemyConfig> = {
     speed: ENEMY_BALANCE_STATS.sorcerer.SPEED,
     hp: ENEMY_BALANCE_STATS.sorcerer.HP,
     maxHp: ENEMY_BALANCE_STATS.sorcerer.HP,
-    dropItem: "purpleOrb",
+    dropItem: ENEMY_BALANCE_STATS.sorcerer.DROP_ITEM,
   },
 };

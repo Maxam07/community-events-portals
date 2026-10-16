@@ -1,36 +1,39 @@
 import { SQUARE_WIDTH } from "features/game/lib/constants";
 import type { WeaponEnemyType, WeaponStats } from "../../Types";
+import { ENEMY_BALANCE_STATS } from "../../constants";
+
+const stats = ENEMY_BALANCE_STATS;
 
 export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
   // Miniboss
   golem: {
     orbiting: {
       TEXTURE: "golem_stone",
-      RADIUS: 50,
-      SPEED_DEG_PER_SEC: 100,
+      RADIUS: stats.golem.WEAPONS.orbiting.RADIUS,
+      SPEED_DEG_PER_SEC: stats.golem.WEAPONS.orbiting.SPEED_DEG_PER_SEC,
     },
   },
   ent: {
     summoning: {
       TEXTURE: "ent_tree",
       WARNING: "shadow_warning",
-      DELAY_MS: 1000,
-      WARNING_DURATION_MS: 500,
-      DURATION_MS: 800,
+      DELAY_MS: stats.ent.WEAPONS.summoning.DELAY_MS,
+      WARNING_DURATION_MS: stats.ent.WEAPONS.summoning.WARNING_DURATION_MS,
+      DURATION_MS: stats.ent.WEAPONS.summoning.DURATION_MS,
     },
   },
   mummy: {
     orbiting: {
       TEXTURE: "Fire",
-      RADIUS: 50,
-      SPEED_DEG_PER_SEC: 100,
+      RADIUS: stats.mummy.WEAPONS.orbiting.RADIUS,
+      SPEED_DEG_PER_SEC: stats.mummy.WEAPONS.orbiting.SPEED_DEG_PER_SEC,
     },
   },
   living_armor: {
     orbiting: {
       TEXTURE: "Fire",
-      RADIUS: 50,
-      SPEED_DEG_PER_SEC: 100,
+      RADIUS: stats.living_armor.WEAPONS.orbiting.RADIUS,
+      SPEED_DEG_PER_SEC: stats.living_armor.WEAPONS.orbiting.SPEED_DEG_PER_SEC,
     },
   },
   headless_horseman: {
@@ -42,9 +45,10 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
     summoning: {
       TEXTURE: "headless-magmaPuddle",
       WARNING: "shadow_warning",
-      DELAY_MS: 500,
-      WARNING_DURATION_MS: 500,
-      DURATION_MS: 800,
+      DELAY_MS: stats.headless_horseman.WEAPONS.summoning.DELAY_MS,
+      WARNING_DURATION_MS:
+        stats.headless_horseman.WEAPONS.summoning.WARNING_DURATION_MS,
+      DURATION_MS: stats.headless_horseman.WEAPONS.summoning.DELAY_MS,
     },
   },
   medusa: {
@@ -55,57 +59,59 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
     },
     chasing: {
       TEXTURE: ["medusa_head"],
-      NEXT_CHASE: 2000,
-      SPEED: 50,
-      DURATION_MS: 5000,
+      NEXT_CHASE: stats.medusa.WEAPONS.chasing.NEXT_CHASE,
+      SPEED: stats.medusa.WEAPONS.chasing.SPEED,
+      DURATION_MS: stats.medusa.WEAPONS.chasing.DURATION_MS,
     },
   },
   // area 4
   golem_area4: {
     orbiting: {
       TEXTURE: "golem_stone",
-      RADIUS: 50,
-      SPEED_DEG_PER_SEC: 100,
+      RADIUS: stats.golem_area4.WEAPONS.orbiting.RADIUS,
+      SPEED_DEG_PER_SEC: stats.golem_area4.WEAPONS.orbiting.SPEED_DEG_PER_SEC,
     },
   },
   ent_area4: {
     summoning: {
       TEXTURE: "ent_tree",
       WARNING: "shadow_warning",
-      DELAY_MS: 1000,
-      WARNING_DURATION_MS: 500,
-      DURATION_MS: 800,
+      DELAY_MS: stats.ent_area4.WEAPONS.summoning.DELAY_MS,
+      WARNING_DURATION_MS:
+        stats.ent_area4.WEAPONS.summoning.WARNING_DURATION_MS,
+      DURATION_MS: stats.ent_area4.WEAPONS.summoning.DURATION_MS,
     },
   },
   mummy_area4: {
     orbiting: {
       TEXTURE: "Fire",
-      RADIUS: 50,
-      SPEED_DEG_PER_SEC: 100,
+      RADIUS: stats.mummy_area4.WEAPONS.orbiting.RADIUS,
+      SPEED_DEG_PER_SEC: stats.mummy_area4.WEAPONS.orbiting.SPEED_DEG_PER_SEC,
     },
   },
   living_armor_area4: {
     orbiting: {
       TEXTURE: "Fire",
-      RADIUS: 50,
-      SPEED_DEG_PER_SEC: 100,
+      RADIUS: stats.living_armor_area4.WEAPONS.orbiting.RADIUS,
+      SPEED_DEG_PER_SEC: stats.living_armor_area4.WEAPONS.orbiting.RADIUS,
     },
   },
   headless_horseman_area4: {
     summoning: {
       TEXTURE: "headless-magmaPuddle",
       WARNING: "shadow_warning",
-      DELAY_MS: 500,
-      WARNING_DURATION_MS: 500,
-      DURATION_MS: 800,
+      DELAY_MS: stats.headless_horseman_area4.WEAPONS.summoning.DELAY_MS,
+      WARNING_DURATION_MS:
+        stats.headless_horseman_area4.WEAPONS.summoning.WARNING_DURATION_MS,
+      DURATION_MS: stats.headless_horseman_area4.WEAPONS.summoning.DURATION_MS,
     },
   },
   medusa_area4: {
     chasing: {
       TEXTURE: ["medusa_head"],
-      NEXT_CHASE: 2000,
-      SPEED: 50,
-      DURATION_MS: 5000,
+      NEXT_CHASE: stats.medusa_area4.WEAPONS.chasing.NEXT_CHASE,
+      SPEED: stats.medusa_area4.WEAPONS.chasing.SPEED,
+      DURATION_MS: stats.medusa_area4.WEAPONS.chasing.DURATION_MS,
     },
   },
   // Static range
@@ -153,17 +159,17 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
   minotaur: {
     slash: {
       TEXTURE: "minotaur-hammer",
-      RANGE: 80,
-      ARC_DEGREES: 120,
-      COOLDOWN_MS: 1000,
-      DURATION_MS: 500,
+      RANGE: stats.minotaur.WEAPONS.slash.RANGE,
+      ARC_DEGREES: stats.minotaur.WEAPONS.slash.ARC_DEGREES,
+      COOLDOWN_MS: stats.minotaur.WEAPONS.slash.COOLDOWN_MS,
+      DURATION_MS: stats.minotaur.WEAPONS.slash.DURATION_MS,
     },
   },
   witch: {
     orbiting: {
       TEXTURE: "Fire",
-      RADIUS: 70,
-      SPEED_DEG_PER_SEC: 120,
+      RADIUS: stats.witch.WEAPONS.orbiting.RADIUS,
+      SPEED_DEG_PER_SEC: stats.witch.WEAPONS.orbiting.SPEED_DEG_PER_SEC,
     },
     chasing: {
       TEXTURE: [
@@ -174,9 +180,9 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
         "slime_blue",
         "slime_green",
       ],
-      NEXT_CHASE: 1000,
-      SPEED: 55,
-      DURATION_MS: 5000,
+      NEXT_CHASE: stats.witch.WEAPONS.chasing.NEXT_CHASE,
+      SPEED: stats.witch.WEAPONS.chasing.SPEED,
+      DURATION_MS: stats.witch.WEAPONS.chasing.DURATION_MS,
     },
   },
   cerberus: {
@@ -189,32 +195,32 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
     },
     chasing: {
       TEXTURE: ["fang-the-curse", "fang-the-frost", "fang-the-plague"],
-      NEXT_CHASE: 1000,
-      SPEED: 55,
-      DURATION_MS: 5000,
+      NEXT_CHASE: stats.cerberus.WEAPONS.chasing.NEXT_CHASE,
+      SPEED: stats.cerberus.WEAPONS.chasing.SPEED,
+      DURATION_MS: stats.cerberus.WEAPONS.chasing.DURATION_MS,
     },
   },
   sorcerer: {
     summoning: {
       TEXTURE: "sorcerer_clone",
       WARNING: "shadow_warning",
-      DELAY_MS: 6000,
-      WARNING_DURATION_MS: 1000,
-      DURATION_MS: 2000,
+      DELAY_MS: stats.sorcerer.WEAPONS.summoning.DELAY_MS,
+      WARNING_DURATION_MS: stats.sorcerer.WEAPONS.summoning.WARNING_DURATION_MS,
+      DURATION_MS: stats.sorcerer.WEAPONS.summoning.DELAY_MS,
     },
     chasing: {
       TEXTURE: ["eyeball"],
-      NEXT_CHASE: 3000,
-      SPEED: 45,
-      DURATION_MS: 5000,
+      NEXT_CHASE: stats.sorcerer.WEAPONS.chasing.NEXT_CHASE,
+      SPEED: stats.sorcerer.WEAPONS.chasing.SPEED,
+      DURATION_MS: stats.sorcerer.WEAPONS.chasing.DURATION_MS,
     },
     orbiting: {
       TEXTURE: "eyeball",
-      RADIUS: 120,
-      SPEED_DEG_PER_SEC: 60,
+      RADIUS: stats.sorcerer.WEAPONS.orbiting.RADIUS,
+      SPEED_DEG_PER_SEC: stats.sorcerer.WEAPONS.orbiting.SPEED_DEG_PER_SEC,
     },
     arena: {
-      RADIUS: 150,
+      RADIUS: stats.sorcerer.WEAPONS.arena.RADIUS,
     },
   },
 };
