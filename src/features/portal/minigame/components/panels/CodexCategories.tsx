@@ -47,10 +47,14 @@ const getPowerDescription = (category: WeaponCategoryId, t: Translate) => {
         duration: toSeconds(durationMs),
       });
     }
-    case "curse":
+    case "curse": {
+      const { damageMultiplier, durationMs } = CATEGORY_POWER_EFFECTS.curse;
+
       return t("minigame.categories.power.curse", {
-        duration: toSeconds(CATEGORY_POWER_EFFECTS.curse.durationMs),
+        percent: toPercent(1 - damageMultiplier),
+        duration: toSeconds(durationMs),
       });
+    }
     case "bloodyHarvest":
       return t("minigame.categories.power.bloodyHarvest", {
         amount: CATEGORY_POWER_EFFECTS.bloodyHarvest.healPerKill,

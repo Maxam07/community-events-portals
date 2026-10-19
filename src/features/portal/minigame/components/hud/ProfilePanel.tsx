@@ -9,7 +9,7 @@ import { WeaponsTab } from "./Weapons";
 import { WeaponsGuide } from "./WeaponsGuide";
 import { WearablesTab } from "./Wearables";
 
-import bananaIcon from "public/world/portal/images/banana_icon.webp";
+import frozenSkullIcon from "public/world/portal/halloween/weapons/the_frost/frozen_skull_icon.png";
 import guideIcon from "public/world/page.png";
 
 export type ProfilePanelTab = "weapons" | "wearables" | "guide";
@@ -43,7 +43,7 @@ export const ProfilePanel: React.FC<{
     },
     {
       id: "weapons" as const,
-      icon: bananaIcon,
+      icon: frozenSkullIcon,
       name: t("minigame.weapons"),
     },
     {

@@ -79,7 +79,7 @@ export class StatusEffectSystem {
     };
 
     this.effects.set(enemy, current);
-    this.syncMovementMultiplier(enemy, current);
+    this.syncMultipliers(enemy, current);
   }
 
   public hasEffect(enemy: EnemyLike, effectId: StatusEffectId) {
@@ -110,7 +110,7 @@ export class StatusEffectSystem {
           this.applyDamage?.(
             enemy,
             {
-              sourceWeaponId: effect.sourceWeaponId ?? "oil",
+              sourceWeaponId: effect.sourceWeaponId ?? "mossGround",
               amount: effect.damagePerTick,
               damageType: "dot",
             },
@@ -125,12 +125,13 @@ export class StatusEffectSystem {
 
       if (activeEffects.length === 0) {
         enemy.setMovementMultiplier?.(1);
+        enemy.setDamageMultiplier?.(1);
         this.effects.delete(enemy);
         return;
       }
 
       if (activeEffects.length !== effects.length) {
-        this.syncMovementMultiplier(enemy, activeEffects);
+        this.syncMultipliers(enemy, activeEffects);
       }
 
       this.effects.set(enemy, activeEffects);
@@ -140,6 +141,7 @@ export class StatusEffectSystem {
   public reset() {
     this.effects.forEach((effects, enemy) => {
       enemy.setMovementMultiplier?.(1);
+      enemy.setDamageMultiplier?.(1);
       effects.forEach((effect) => this.onExpire?.(enemy, effect.id));
     });
     this.effects.clear();
@@ -153,20 +155,23 @@ export class StatusEffectSystem {
     this.onExpire = undefined;
   }
 
-  // The strongest movement effect wins (e.g. a stun overrides a slow).
-  private syncMovementMultiplier(
-    enemy: EnemyLike,
-    effects: ActiveStatusEffect[],
-  ) {
+  // The strongest effect wins: lowest speed and lowest damage multiplier.
+  private syncMultipliers(enemy: EnemyLike, effects: ActiveStatusEffect[]) {
     let multiplier = 1;
+    let damageMultiplier = 1;
 
     for (let index = 0; index < effects.length; index++) {
-      const speedMultiplier = effects[index].speedMultiplier;
+      const { speedMultiplier, damageMultiplier: effectDamageMultiplier } =
+        effects[index];
+      if (effectDamageMultiplier !== undefined) {
+        damageMultiplier = Math.min(damageMultiplier, effectDamageMultiplier);
+      }
       if (speedMultiplier !== undefined) {
         multiplier = Math.min(multiplier, speedMultiplier);
       }
     }
 
     enemy.setMovementMultiplier?.(multiplier);
+    enemy.setDamageMultiplier?.(damageMultiplier);
   }
 }

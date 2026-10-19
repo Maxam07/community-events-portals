@@ -19,6 +19,7 @@ type AreaHitboxSpawnProps = {
   despawnOnAnimationComplete?: boolean;
   hitboxShape?: AreaHitboxShape;
   hitboxSize?: AreaHitboxSize;
+  depth?: number;
 };
 
 export class AreaHitbox extends Phaser.GameObjects.Sprite {
@@ -53,13 +54,14 @@ export class AreaHitbox extends Phaser.GameObjects.Sprite {
     despawnOnAnimationComplete = false,
     hitboxShape = "circle",
     hitboxSize,
+    depth,
   }: AreaHitboxSpawnProps) {
     this.setTexture(texture);
     this.setPosition(x, y);
     this.setDisplaySize(radius * 2, radius * 2);
     this.setActive(true);
     this.setVisible(true);
-    this.setDepth(getWeaponVisualDepth(y));
+    this.setDepth(depth ?? getWeaponVisualDepth(y));
     this.setAlpha(animationKey ? 1 : persistent ? 0.45 : 0.65);
     this.payload = payload;
     this.expiresAt = expiresAt;

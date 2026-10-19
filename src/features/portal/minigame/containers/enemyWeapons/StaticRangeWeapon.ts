@@ -2,6 +2,7 @@ import type { Scene } from "../../Scene";
 import type { BumpkinContainer } from "../../Core/BumpkinContainer";
 import type { EnemyType } from "../../Types";
 import { StaticRangeEnemy } from "../StaticRangeEnemyContainer";
+import { getOwnerDamageMultiplier } from "../../lib/combat/damageMultiplier";
 
 interface StaticRangeWeaponProps {
   scene: Scene;
@@ -159,7 +160,7 @@ export class StaticRangeWeapon extends Phaser.GameObjects.Sprite {
   public handlePlayerContact() {
     if (!this.active || this.isDead) return;
 
-    this.player.hurt(this.enemyType);
+    this.player.hurt(this.enemyType, getOwnerDamageMultiplier(this.target));
 
     this.resetToTarget();
   }

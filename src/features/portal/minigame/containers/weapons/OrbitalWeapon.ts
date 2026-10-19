@@ -1,6 +1,9 @@
 import Phaser from "phaser";
 import type { DamagePayload, EnemyLike, WeaponId } from "../../Types";
-import { getWeaponVisualDepth } from "../../constants/DepthConstants";
+import {
+  FROST_WEAPON_VISUAL_DEPTH,
+  getWeaponVisualDepth,
+} from "../../constants/DepthConstants";
 
 type OrbitalWeaponSpawnProps = {
   ownerWeaponId: WeaponId;
@@ -13,8 +16,8 @@ type OrbitalWeaponSpawnProps = {
   hitCooldownMs: number;
 };
 
-const WEAPON_BANANA_ANIMATION_KEY = "weapon_banana_active";
-const WEAPON_SUNFLOWER_ANIMATION_KEY = "weapon_sunflower_active";
+const WEAPON_FROZEN_SKULL_ANIMATION_KEY = "weapon_frozen_skull_active";
+const WEAPON_FROST_FLOWER_ANIMATION_KEY = "weapon_frost_flower_active";
 
 export class OrbitalWeapon extends Phaser.Physics.Arcade.Sprite {
   public ownerWeaponId!: WeaponId;
@@ -25,7 +28,12 @@ export class OrbitalWeapon extends Phaser.Physics.Arcade.Sprite {
   private baseAngle = 0;
   private readonly hitAt = new Map<EnemyLike, number>();
 
-  constructor(scene: Phaser.Scene, x = 0, y = 0, texture = "weapon_banana") {
+  constructor(
+    scene: Phaser.Scene,
+    x = 0,
+    y = 0,
+    texture = "weapon_frozen_skull",
+  ) {
     super(scene, x, y, texture);
 
     scene.add.existing(this);
@@ -46,7 +54,8 @@ export class OrbitalWeapon extends Phaser.Physics.Arcade.Sprite {
     this.setTexture(texture);
     this.setActive(true);
     this.setVisible(true);
-    this.setScale(ownerWeaponId === "sunflower" ? 0.85 : 1);
+    this.setScale(1);
+    this.setRotation(0);
     this.ownerWeaponId = ownerWeaponId;
     this.radius = radius;
     this.angularSpeed = angularSpeed;
@@ -61,18 +70,18 @@ export class OrbitalWeapon extends Phaser.Physics.Arcade.Sprite {
     body.setOffset(0, 0);
     body.setAllowGravity(false);
     body.setImmovable(true);
-    body.enable = ownerWeaponId !== "sunflower";
+    body.enable = ownerWeaponId !== "frostFlower";
 
     if (
-      ownerWeaponId === "banana" &&
-      this.scene.anims.exists(WEAPON_BANANA_ANIMATION_KEY)
+      ownerWeaponId === "frozenSkull" &&
+      this.scene.anims.exists(WEAPON_FROZEN_SKULL_ANIMATION_KEY)
     ) {
-      this.play(WEAPON_BANANA_ANIMATION_KEY, true);
+      this.play(WEAPON_FROZEN_SKULL_ANIMATION_KEY, true);
     } else if (
-      ownerWeaponId === "sunflower" &&
-      this.scene.anims.exists(WEAPON_SUNFLOWER_ANIMATION_KEY)
+      ownerWeaponId === "frostFlower" &&
+      this.scene.anims.exists(WEAPON_FROST_FLOWER_ANIMATION_KEY)
     ) {
-      this.play(WEAPON_SUNFLOWER_ANIMATION_KEY, true);
+      this.play(WEAPON_FROST_FLOWER_ANIMATION_KEY, true);
     } else {
       this.stop();
     }
@@ -87,8 +96,17 @@ export class OrbitalWeapon extends Phaser.Physics.Arcade.Sprite {
     const y = player.y + Math.sin(angle) * this.radius;
 
     this.setPosition(x, y);
-    // this.setRotation(angle);
-    this.setDepth(getWeaponVisualDepth(y));
+    if (this.ownerWeaponId !== "frostFlower") {
+      this.setRotation(0);
+    } else {
+      this.setRotation(this.angularSpeed >= 0 ? angle + Math.PI : angle);
+    }
+    this.setDepth(
+      this.ownerWeaponId === "frozenSkull" ||
+        this.ownerWeaponId === "frostFlower"
+        ? FROST_WEAPON_VISUAL_DEPTH
+        : getWeaponVisualDepth(y),
+    );
   }
 
   public canHit(enemy: EnemyLike, time: number) {

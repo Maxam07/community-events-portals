@@ -71,32 +71,40 @@ import {
 // ];
 export class Scene extends BaseScene {
   private static readonly DISABLE_COLLIDERS = false;
-  private static readonly WEAPON_BANANA_ANIMATION_KEY = "weapon_banana_active";
-  private static readonly WEAPON_SCYTHE_ANIMATION_KEY = "weapon_scythe_active";
-  private static readonly WEAPON_WATERING_CAN_PROJECTILE_ANIMATION_KEY =
-    "weapon_watering_can_projectile_active";
-  private static readonly WEAPON_CORN_PROJECTILE_ANIMATION_KEY =
-    "weapon_corn_projectile_active";
-  private static readonly WEAPON_CORN_EXPLOSION_ANIMATION_KEY =
-    "weapon_corn_explosion_active";
-  private static readonly WEAPON_TOMATO_PROJECTILE_ANIMATION_KEY =
-    "weapon_tomato_projectile_active";
-  private static readonly WEAPON_SUNFLOWER_ANIMATION_KEY =
-    "weapon_sunflower_active";
-  private static readonly WEAPON_SUNFLOWER_PROJECTILE_ANIMATION_KEY =
-    "weapon_sunflower_projectile_active";
-  private static readonly WEAPON_OIL_ANIMATION_KEY = "weapon_oil_active";
-  private static readonly WEAPON_HORIZONTAL_PUMPKIN_ANIMATION_KEY =
-    "weapon_horizontal_pumpkin_active";
-  private static readonly WEAPON_VERTICAL_PUMPKIN_ANIMATION_KEY =
-    "weapon_vertical_pumpkin_active";
-  private static readonly WEAPON_DIAGONAL_PUMPKIN_ANIMATION_KEY =
-    "weapon_diagonal_pumpkin_active";
-  private static readonly WEAPON_DIAGONAL_PUMPKIN_REVERSE_ANIMATION_KEY =
-    "weapon_diagonal_pumpkin_active_reverse";
-  private static readonly WEAPON_BEES_ANIMATION_KEY = "weapon_bees_active";
-  private static readonly WEAPON_BEES_SPAWN_ANIMATION_KEY =
-    "weapon_bees_spawn_active";
+  private static readonly WEAPON_FROZEN_SKULL_ANIMATION_KEY =
+    "weapon_frozen_skull_active";
+  private static readonly WEAPON_FROST_CHAIN_ANIMATION_KEY =
+    "weapon_frost_chain_active";
+  private static readonly FROST_HIT_EFFECT_ANIMATION_KEY =
+    "frost_hit_effect_active";
+  private static readonly POWER_FROST_GROUND_ANIMATION_KEY =
+    "power_frost_ground_active";
+  private static readonly WEAPON_SCYTHE_ANIMATION_KEY =
+    "weapon_blood_scythe_active";
+  private static readonly WEAPON_DARKNESS_BOOK_PROJECTILE_ANIMATION_KEY =
+    "weapon_darkness_book_projectile_active";
+  private static readonly WEAPON_POISON_VIAL_PROJECTILE_ANIMATION_KEY =
+    "weapon_poison_vial_projectile_active";
+  private static readonly WEAPON_POISON_VIAL_EXPLOSION_ANIMATION_KEY =
+    "weapon_poison_vial_explosion_active";
+  private static readonly WEAPON_BLOOD_KNIFE_ANIMATION_KEY =
+    "weapon_blood_knife_active";
+  private static readonly WEAPON_FROST_FLOWER_ANIMATION_KEY =
+    "weapon_frost_flower_active";
+  private static readonly WEAPON_MOSS_GROUND_ANIMATION_KEY =
+    "weapon_moss_ground_active";
+  private static readonly WEAPON_HORIZONTAL_JACK_O_LANTERN_ANIMATION_KEY =
+    "weapon_banished_jack_o_lantern_horizontal_active";
+  private static readonly WEAPON_VERTICAL_JACK_O_LANTERN_ANIMATION_KEY =
+    "weapon_banished_jack_o_lantern_vertical_active";
+  private static readonly WEAPON_DIAGONAL_JACK_O_LANTERN_ANIMATION_KEY =
+    "weapon_banished_jack_o_lantern_diagonal_active";
+  private static readonly WEAPON_DIAGONAL_JACK_O_LANTERN_REVERSE_ANIMATION_KEY =
+    "weapon_banished_jack_o_lantern_diagonal_active_reverse";
+  private static readonly WEAPON_FLY_STORM_ANIMATION_KEY =
+    "weapon_fly_storm_active";
+  private static readonly WEAPON_FLY_STORM_SPAWN_ANIMATION_KEY =
+    "weapon_fly_storm_spawn_active";
   private backgroundMusic!: Phaser.Sound.BaseSound;
   private obstacles: BoundingBox[] = [];
   private obstacleGroup!: Phaser.Physics.Arcade.StaticGroup;
@@ -121,6 +129,7 @@ export class Scene extends BaseScene {
   miniBossGroup!: Phaser.Physics.Arcade.Group;
   weaponGroup!: Phaser.Physics.Arcade.Group;
   enemyWeapons: EnemyWeapon[] = [];
+  smokeExplosion?: Phaser.GameObjects.Sprite;
   area1Blockade?: Phaser.GameObjects.Image;
   area2Blockade?: Phaser.GameObjects.Image;
   area3Blockade?: Phaser.GameObjects.Image;
@@ -581,6 +590,14 @@ export class Scene extends BaseScene {
     this.load.image("rock", "world/portal/images/TematicRock.webp");
     this.load.image("tree", "world/portal/images/TematicTree.webp");
     this.load.image("tree_stump", SUNNYSIDE.decorations.spookyTree);
+    this.load.spritesheet(
+      "smoke_explosion",
+      "world/portal/halloween/smoke_explosion_large.png",
+      {
+        frameWidth: 128,
+        frameHeight: 128,
+      },
+    );
     this.load.image("bridge", "world/portal/halloween/bridge.png");
     this.load.image("castle_door", "world/portal/halloween/castle_door.png");
     this.load.image("castle_wall", "world/portal/halloween/castle_wall.png");
@@ -631,127 +648,171 @@ export class Scene extends BaseScene {
     this.load.image("icon_boss_3", "world/portal/images/icon_boss_3.webp");
 
     // Weapons
-    this.load.spritesheet("weapon_banana", "world/portal/images/banana.png", {
-      frameWidth: 16,
-      frameHeight: 16,
-    });
-    this.load.spritesheet("weapon_scythe", "world/portal/images/scythe.png", {
-      frameWidth: 38,
-      frameHeight: 25,
-    });
+    this.load.spritesheet(
+      "weapon_frozen_skull",
+      "world/portal/halloween/weapons/the_frost/frozen_skull.png",
+      { frameWidth: 21, frameHeight: 23 },
+    );
+    this.load.spritesheet(
+      "weapon_frost_chain",
+      "world/portal/halloween/weapons/the_frost/frost_chain.png",
+      { frameWidth: 128, frameHeight: 44 },
+    );
+    this.load.spritesheet(
+      "frost_hit_effect",
+      "world/portal/halloween/weapons/the_frost/frost_hit_effect.png",
+      { frameWidth: 16, frameHeight: 16 },
+    );
+    this.load.spritesheet(
+      "power_frost_ground",
+      "world/portal/halloween/categories/the_frost/ground_frost.png",
+      { frameWidth: 32, frameHeight: 16 },
+    );
+    this.load.spritesheet(
+      "weapon_blood_scythe",
+      "world/portal/halloween/weapons/the_bloody_harvest/blood_scythe.png",
+      { frameWidth: 45, frameHeight: 44 },
+    );
+    this.load.spritesheet(
+      "weapon_crimson_vial",
+      "world/portal/halloween/weapons/the_bloody_harvest/crimson_vial.png",
+      { frameWidth: 139, frameHeight: 24 },
+    );
+    this.load.spritesheet(
+      "bloody_hit_effect",
+      "world/portal/halloween/weapons/the_bloody_harvest/bloody_haverst_hit_effect.png",
+      { frameWidth: 18, frameHeight: 13 },
+    );
+    this.load.spritesheet(
+      "bleed_effect",
+      "world/portal/halloween/categories/the_bloody_harvest/bleed_effect.png",
+      { frameWidth: 16, frameHeight: 16 },
+    );
+    this.load.spritesheet(
+      "crimson_vial_effect",
+      "world/portal/halloween/weapons/the_bloody_harvest/crimson_vial_effect.png",
+      { frameWidth: 16, frameHeight: 32 },
+    );
+    this.load.spritesheet(
+      "poison_effect",
+      "world/portal/halloween/categories/the_plague/poison_effect.png",
+      { frameWidth: 16, frameHeight: 16 },
+    );
     this.load.image(
-      "weapon_watering_can",
-      "world/portal/images/watering_can.png",
+      "weapon_darkness_book",
+      "world/portal/halloween/weapons/the_curse/darkness_book.png",
     );
     this.load.spritesheet(
-      "weapon_watering_can_projectile",
-      "world/portal/images/watering_can_projectile.png",
+      "weapon_darkness_book_projectile",
+      "world/portal/halloween/weapons/the_curse/darkness_book_projectile.png",
       {
-        frameWidth: 16,
-        frameHeight: 16,
+        frameWidth: 20,
+        frameHeight: 20,
       },
     );
     this.load.spritesheet(
-      "weapon_corn_projectile",
-      "world/portal/images/corn_projectile.png",
+      "weapon_cursed_coffin",
+      "world/portal/halloween/weapons/the_curse/cursed_coffin.png",
+      { frameWidth: 32, frameHeight: 32 },
+    );
+    this.load.image(
+      "weapon_cursed_coffin_shard",
+      "world/portal/halloween/weapons/the_curse/cursed_coffin_projectile.png",
+    );
+    this.load.spritesheet(
+      "weakness_effect",
+      "world/portal/halloween/categories/the_curse/weakness_effect.png",
+      { frameWidth: 16, frameHeight: 16 },
+    );
+    this.load.spritesheet(
+      "weapon_poison_vial_projectile",
+      "world/portal/halloween/weapons/the_plague/poison_vial_projectile.png",
       {
-        frameWidth: 16,
-        frameHeight: 48,
+        frameWidth: 14,
+        frameHeight: 38,
       },
     );
     this.load.spritesheet(
-      "weapon_corn_explosion",
-      "world/portal/images/corn_explosion.png",
+      "weapon_poison_vial_explosion",
+      "world/portal/halloween/weapons/the_plague/poison_vial_explosion.png",
       {
         frameWidth: 48,
         frameHeight: 48,
       },
     );
-    this.load.image(
-      "weapon_tomato_ricochet",
-      "world/portal/images/tomato_ricochet.png",
+    this.load.spritesheet(
+      "weapon_blood_knife",
+      "world/portal/halloween/weapons/the_bloody_harvest/blood_knife.png",
+      { frameWidth: 21, frameHeight: 24 },
     );
     this.load.spritesheet(
-      "weapon_tomato_projectile",
-      "world/portal/images/tomato_projectile.png",
+      "weapon_frost_flower",
+      "world/portal/halloween/weapons/the_frost/frost_flower.png",
+      { frameWidth: 16, frameHeight: 24 },
+    );
+    this.load.spritesheet(
+      "weapon_moss_ground",
+      "world/portal/halloween/weapons/the_plague/moss_ground.png",
       {
-        frameWidth: 17,
-        frameHeight: 17,
+        frameWidth: 32,
+        frameHeight: 32,
       },
     );
     this.load.spritesheet(
-      "weapon_sunflower",
-      "world/portal/images/sunflower.png",
-      {
-        frameWidth: 18,
-        frameHeight: 31,
-      },
-    );
-    this.load.spritesheet(
-      "weapon_sunflower_projectile",
-      "world/portal/images/sunflower_projectile.png",
-      {
-        frameWidth: 16,
-        frameHeight: 16,
-      },
-    );
-    this.load.spritesheet("weapon_oil", "world/portal/images/oil.png", {
-      frameWidth: 32,
-      frameHeight: 32,
-    });
-    this.load.spritesheet(
-      "weapon_horizontal_pumpkin",
-      "world/portal/images/horizontal_pumpkin.webp",
+      "weapon_banished_jack_o_lantern_horizontal",
+      "world/portal/halloween/weapons/the_curse/banished_jack_o_lantern_horizontal.png",
       {
         frameWidth: 32,
         frameHeight: 48,
       },
     );
     this.load.spritesheet(
-      "weapon_vertical_pumpkin",
-      "world/portal/images/vertical_pumpkin.webp",
+      "weapon_banished_jack_o_lantern_vertical",
+      "world/portal/halloween/weapons/the_curse/banished_jack_o_lantern_vertical.png",
       {
         frameWidth: 32,
         frameHeight: 48,
       },
     );
     this.load.spritesheet(
-      "weapon_diagonal_pumpkin",
-      "world/portal/images/diagonal_pumpkin.webp",
+      "weapon_banished_jack_o_lantern_diagonal",
+      "world/portal/halloween/weapons/the_curse/banished_jack_o_lantern_diagonal.png",
       {
         frameWidth: 32,
         frameHeight: 48,
       },
     );
     this.load.spritesheet(
-      "weapon_bees_spawn",
-      "world/portal/images/bees_spawn.png",
+      "weapon_fly_storm_spawn",
+      "world/portal/halloween/weapons/the_plague/fly_storm_spawn.png",
       {
         frameWidth: 16,
         frameHeight: 32,
       },
     );
-    this.load.spritesheet("weapon_bees", "world/portal/images/bees.png", {
-      frameWidth: 16,
-      frameHeight: 32,
-    });
+    this.load.spritesheet(
+      "weapon_fly_storm",
+      "world/portal/halloween/weapons/the_plague/fly_storm.png",
+      {
+        frameWidth: 16,
+        frameHeight: 32,
+      },
+    );
     // this.load.image("weapon_slash", "/world/portal/images/weapons/slash.png");
     // this.load.image(
     //   "weapon_water_drop",
     //   "/world/portal/images/weapons/water_drop.png",
     // );
-    // this.load.image("weapon_tomato", "/world/portal/images/weapons/tomato.png");
+    // this.load.image("weapon_tomato", "/world/portal/images/weapons/bloodKnife.png");
     // this.load.image("weapon_light", "/world/portal/images/weapons/light.png");
     // this.load.image(
-    //   "weapon_pumpkin",
+    //   "weapon_banished_jack_o_lantern",
     //   "/world/portal/images/weapons/pumpkin.png",
     // );
     // this.load.image(
     //   "weapon_sunflower",
     //   "/world/portal/images/weapons/sunflower.png",
     // );
-    // this.load.image("weapon_oil", "/world/portal/images/weapons/oil.png");
-    // this.load.image("weapon_bee", "/world/portal/images/weapons/bee.png");
 
     // Biomes
     this.load.image("galaxy_biome", SUNNYSIDE.seasons.winter.galaxyLevel42);
@@ -894,10 +955,130 @@ export class Scene extends BaseScene {
   }
 
   private createWeaponAnimations() {
-    if (!this.anims.exists(Scene.WEAPON_BANANA_ANIMATION_KEY)) {
+    if (!this.anims.exists(Scene.WEAPON_FROST_CHAIN_ANIMATION_KEY)) {
       this.anims.create({
-        key: Scene.WEAPON_BANANA_ANIMATION_KEY,
-        frames: this.anims.generateFrameNumbers("weapon_banana", {
+        key: Scene.WEAPON_FROST_CHAIN_ANIMATION_KEY,
+        frames: this.anims.generateFrameNumbers("weapon_frost_chain", {
+          start: 0,
+          end: 5,
+        }),
+        frameRate: 10,
+        repeat: 0,
+      });
+    }
+
+    if (!this.anims.exists(Scene.FROST_HIT_EFFECT_ANIMATION_KEY)) {
+      this.anims.create({
+        key: Scene.FROST_HIT_EFFECT_ANIMATION_KEY,
+        frames: this.anims.generateFrameNumbers("frost_hit_effect", {
+          start: 0,
+          end: 4,
+        }),
+        frameRate: 10,
+        repeat: 0,
+      });
+    }
+
+    if (!this.anims.exists(Scene.POWER_FROST_GROUND_ANIMATION_KEY)) {
+      this.anims.create({
+        key: Scene.POWER_FROST_GROUND_ANIMATION_KEY,
+        frames: this.anims.generateFrameNumbers("power_frost_ground", {
+          start: 0,
+          end: 2,
+        }),
+        frameRate: 5,
+        repeat: -1,
+      });
+    }
+
+    if (!this.anims.exists("weapon_crimson_vial_active")) {
+      this.anims.create({
+        key: "weapon_crimson_vial_active",
+        frames: this.anims.generateFrameNumbers("weapon_crimson_vial", {
+          start: 0,
+          end: 8,
+        }),
+        frameRate: 10,
+        repeat: 0,
+      });
+    }
+
+    if (!this.anims.exists("bloody_hit_effect_active")) {
+      this.anims.create({
+        key: "bloody_hit_effect_active",
+        frames: this.anims.generateFrameNumbers("bloody_hit_effect", {
+          start: 0,
+          end: 4,
+        }),
+        frameRate: 10,
+        repeat: 0,
+      });
+    }
+
+    if (!this.anims.exists("bleed_effect_active")) {
+      this.anims.create({
+        key: "bleed_effect_active",
+        frames: this.anims.generateFrameNumbers("bleed_effect", {
+          start: 0,
+          end: 6,
+        }),
+        frameRate: 10,
+        repeat: 0,
+      });
+    }
+
+    if (!this.anims.exists("crimson_vial_effect_active")) {
+      this.anims.create({
+        key: "crimson_vial_effect_active",
+        frames: this.anims.generateFrameNumbers("crimson_vial_effect", {
+          start: 0,
+          end: 12,
+        }),
+        frameRate: 10,
+        repeat: -1,
+      });
+    }
+
+    if (!this.anims.exists("poison_effect_active")) {
+      this.anims.create({
+        key: "poison_effect_active",
+        frames: this.anims.generateFrameNumbers("poison_effect", {
+          start: 0,
+          end: 5,
+        }),
+        frameRate: 9,
+        repeat: -1,
+      });
+    }
+
+    if (!this.anims.exists("weapon_cursed_coffin_active")) {
+      this.anims.create({
+        key: "weapon_cursed_coffin_active",
+        frames: this.anims.generateFrameNumbers("weapon_cursed_coffin", {
+          start: 0,
+          end: 11,
+        }),
+        frameRate: 12,
+        repeat: 0,
+      });
+    }
+
+    if (!this.anims.exists("weakness_effect_active")) {
+      this.anims.create({
+        key: "weakness_effect_active",
+        frames: this.anims.generateFrameNumbers("weakness_effect", {
+          start: 0,
+          end: 3,
+        }),
+        frameRate: 8,
+        repeat: -1,
+      });
+    }
+
+    if (!this.anims.exists(Scene.WEAPON_FROZEN_SKULL_ANIMATION_KEY)) {
+      this.anims.create({
+        key: Scene.WEAPON_FROZEN_SKULL_ANIMATION_KEY,
+        frames: this.anims.generateFrameNumbers("weapon_frozen_skull", {
           start: 0,
           end: 7,
         }),
@@ -909,25 +1090,40 @@ export class Scene extends BaseScene {
     if (!this.anims.exists(Scene.WEAPON_SCYTHE_ANIMATION_KEY)) {
       this.anims.create({
         key: Scene.WEAPON_SCYTHE_ANIMATION_KEY,
-        frames: this.anims.generateFrameNumbers("weapon_scythe", {
+        frames: this.anims.generateFrameNumbers("weapon_blood_scythe", {
           start: 0,
-          end: 9,
+          end: 3,
         }),
         frameRate: 36,
-        repeat: 0,
+        repeat: -1,
       });
     }
 
     if (
-      !this.anims.exists(Scene.WEAPON_WATERING_CAN_PROJECTILE_ANIMATION_KEY)
+      !this.anims.exists(Scene.WEAPON_DARKNESS_BOOK_PROJECTILE_ANIMATION_KEY)
     ) {
       this.anims.create({
-        key: Scene.WEAPON_WATERING_CAN_PROJECTILE_ANIMATION_KEY,
+        key: Scene.WEAPON_DARKNESS_BOOK_PROJECTILE_ANIMATION_KEY,
         frames: this.anims.generateFrameNumbers(
-          "weapon_watering_can_projectile",
+          "weapon_darkness_book_projectile",
           {
             start: 0,
             end: 4,
+          },
+        ),
+        frameRate: 7,
+        repeat: -1,
+      });
+    }
+
+    if (!this.anims.exists(Scene.WEAPON_POISON_VIAL_PROJECTILE_ANIMATION_KEY)) {
+      this.anims.create({
+        key: Scene.WEAPON_POISON_VIAL_PROJECTILE_ANIMATION_KEY,
+        frames: this.anims.generateFrameNumbers(
+          "weapon_poison_vial_projectile",
+          {
+            start: 0,
+            end: 9,
           },
         ),
         frameRate: 12,
@@ -935,58 +1131,25 @@ export class Scene extends BaseScene {
       });
     }
 
-    if (!this.anims.exists(Scene.WEAPON_CORN_PROJECTILE_ANIMATION_KEY)) {
+    if (!this.anims.exists(Scene.WEAPON_POISON_VIAL_EXPLOSION_ANIMATION_KEY)) {
       this.anims.create({
-        key: Scene.WEAPON_CORN_PROJECTILE_ANIMATION_KEY,
-        frames: this.anims.generateFrameNumbers("weapon_corn_projectile", {
-          start: 0,
-          end: 9,
-        }),
-        frameRate: 12,
-        repeat: -1,
-      });
-    }
-
-    if (!this.anims.exists(Scene.WEAPON_CORN_EXPLOSION_ANIMATION_KEY)) {
-      this.anims.create({
-        key: Scene.WEAPON_CORN_EXPLOSION_ANIMATION_KEY,
-        frames: this.anims.generateFrameNumbers("weapon_corn_explosion", {
-          start: 0,
-          end: 14,
-        }),
+        key: Scene.WEAPON_POISON_VIAL_EXPLOSION_ANIMATION_KEY,
+        frames: this.anims.generateFrameNumbers(
+          "weapon_poison_vial_explosion",
+          {
+            start: 0,
+            end: 14,
+          },
+        ),
         frameRate: 24,
         repeat: 0,
       });
     }
 
-    if (!this.anims.exists(Scene.WEAPON_TOMATO_PROJECTILE_ANIMATION_KEY)) {
+    if (!this.anims.exists(Scene.WEAPON_BLOOD_KNIFE_ANIMATION_KEY)) {
       this.anims.create({
-        key: Scene.WEAPON_TOMATO_PROJECTILE_ANIMATION_KEY,
-        frames: this.anims.generateFrameNumbers("weapon_tomato_projectile", {
-          start: 0,
-          end: 3,
-        }),
-        frameRate: 12,
-        repeat: -1,
-      });
-    }
-
-    if (!this.anims.exists(Scene.WEAPON_SUNFLOWER_ANIMATION_KEY)) {
-      this.anims.create({
-        key: Scene.WEAPON_SUNFLOWER_ANIMATION_KEY,
-        frames: this.anims.generateFrameNumbers("weapon_sunflower", {
-          start: 0,
-          end: 4,
-        }),
-        frameRate: 8,
-        repeat: -1,
-      });
-    }
-
-    if (!this.anims.exists(Scene.WEAPON_SUNFLOWER_PROJECTILE_ANIMATION_KEY)) {
-      this.anims.create({
-        key: Scene.WEAPON_SUNFLOWER_PROJECTILE_ANIMATION_KEY,
-        frames: this.anims.generateFrameNumbers("weapon_sunflower_projectile", {
+        key: Scene.WEAPON_BLOOD_KNIFE_ANIMATION_KEY,
+        frames: this.anims.generateFrameNumbers("weapon_blood_knife", {
           start: 0,
           end: 7,
         }),
@@ -995,10 +1158,22 @@ export class Scene extends BaseScene {
       });
     }
 
-    if (!this.anims.exists(Scene.WEAPON_OIL_ANIMATION_KEY)) {
+    if (!this.anims.exists(Scene.WEAPON_FROST_FLOWER_ANIMATION_KEY)) {
       this.anims.create({
-        key: Scene.WEAPON_OIL_ANIMATION_KEY,
-        frames: this.anims.generateFrameNumbers("weapon_oil", {
+        key: Scene.WEAPON_FROST_FLOWER_ANIMATION_KEY,
+        frames: this.anims.generateFrameNumbers("weapon_frost_flower", {
+          start: 0,
+          end: 3,
+        }),
+        frameRate: 8,
+        repeat: -1,
+      });
+    }
+
+    if (!this.anims.exists(Scene.WEAPON_MOSS_GROUND_ANIMATION_KEY)) {
+      this.anims.create({
+        key: Scene.WEAPON_MOSS_GROUND_ANIMATION_KEY,
+        frames: this.anims.generateFrameNumbers("weapon_moss_ground", {
           start: 0,
           end: 9,
         }),
@@ -1007,49 +1182,66 @@ export class Scene extends BaseScene {
       });
     }
 
-    if (!this.anims.exists(Scene.WEAPON_HORIZONTAL_PUMPKIN_ANIMATION_KEY)) {
+    if (
+      !this.anims.exists(Scene.WEAPON_HORIZONTAL_JACK_O_LANTERN_ANIMATION_KEY)
+    ) {
       this.anims.create({
-        key: Scene.WEAPON_HORIZONTAL_PUMPKIN_ANIMATION_KEY,
-        frames: this.anims.generateFrameNumbers("weapon_horizontal_pumpkin", {
-          start: 0,
-          end: 8,
-        }),
-        frameRate: 12,
-        repeat: -1,
-      });
-    }
-
-    if (!this.anims.exists(Scene.WEAPON_VERTICAL_PUMPKIN_ANIMATION_KEY)) {
-      this.anims.create({
-        key: Scene.WEAPON_VERTICAL_PUMPKIN_ANIMATION_KEY,
-        frames: this.anims.generateFrameNumbers("weapon_vertical_pumpkin", {
-          start: 0,
-          end: 8,
-        }),
-        frameRate: 12,
-        repeat: -1,
-      });
-    }
-
-    if (!this.anims.exists(Scene.WEAPON_DIAGONAL_PUMPKIN_ANIMATION_KEY)) {
-      this.anims.create({
-        key: Scene.WEAPON_DIAGONAL_PUMPKIN_ANIMATION_KEY,
-        frames: this.anims.generateFrameNumbers("weapon_diagonal_pumpkin", {
-          start: 0,
-          end: 8,
-        }),
+        key: Scene.WEAPON_HORIZONTAL_JACK_O_LANTERN_ANIMATION_KEY,
+        frames: this.anims.generateFrameNumbers(
+          "weapon_banished_jack_o_lantern_horizontal",
+          {
+            start: 0,
+            end: 8,
+          },
+        ),
         frameRate: 12,
         repeat: -1,
       });
     }
 
     if (
-      !this.anims.exists(Scene.WEAPON_DIAGONAL_PUMPKIN_REVERSE_ANIMATION_KEY)
+      !this.anims.exists(Scene.WEAPON_VERTICAL_JACK_O_LANTERN_ANIMATION_KEY)
     ) {
       this.anims.create({
-        key: Scene.WEAPON_DIAGONAL_PUMPKIN_REVERSE_ANIMATION_KEY,
+        key: Scene.WEAPON_VERTICAL_JACK_O_LANTERN_ANIMATION_KEY,
+        frames: this.anims.generateFrameNumbers(
+          "weapon_banished_jack_o_lantern_vertical",
+          {
+            start: 0,
+            end: 8,
+          },
+        ),
+        frameRate: 12,
+        repeat: -1,
+      });
+    }
+
+    if (
+      !this.anims.exists(Scene.WEAPON_DIAGONAL_JACK_O_LANTERN_ANIMATION_KEY)
+    ) {
+      this.anims.create({
+        key: Scene.WEAPON_DIAGONAL_JACK_O_LANTERN_ANIMATION_KEY,
+        frames: this.anims.generateFrameNumbers(
+          "weapon_banished_jack_o_lantern_diagonal",
+          {
+            start: 0,
+            end: 8,
+          },
+        ),
+        frameRate: 12,
+        repeat: -1,
+      });
+    }
+
+    if (
+      !this.anims.exists(
+        Scene.WEAPON_DIAGONAL_JACK_O_LANTERN_REVERSE_ANIMATION_KEY,
+      )
+    ) {
+      this.anims.create({
+        key: Scene.WEAPON_DIAGONAL_JACK_O_LANTERN_REVERSE_ANIMATION_KEY,
         frames: Array.from({ length: 9 }, (_, index) => ({
-          key: "weapon_diagonal_pumpkin",
+          key: "weapon_banished_jack_o_lantern_diagonal",
           frame: 8 - index,
         })),
         frameRate: 12,
@@ -1057,10 +1249,10 @@ export class Scene extends BaseScene {
       });
     }
 
-    if (!this.anims.exists(Scene.WEAPON_BEES_ANIMATION_KEY)) {
+    if (!this.anims.exists(Scene.WEAPON_FLY_STORM_ANIMATION_KEY)) {
       this.anims.create({
-        key: Scene.WEAPON_BEES_ANIMATION_KEY,
-        frames: this.anims.generateFrameNumbers("weapon_bees", {
+        key: Scene.WEAPON_FLY_STORM_ANIMATION_KEY,
+        frames: this.anims.generateFrameNumbers("weapon_fly_storm", {
           start: 0,
           end: 7,
         }),
@@ -1069,10 +1261,10 @@ export class Scene extends BaseScene {
       });
     }
 
-    if (!this.anims.exists(Scene.WEAPON_BEES_SPAWN_ANIMATION_KEY)) {
+    if (!this.anims.exists(Scene.WEAPON_FLY_STORM_SPAWN_ANIMATION_KEY)) {
       this.anims.create({
-        key: Scene.WEAPON_BEES_SPAWN_ANIMATION_KEY,
-        frames: this.anims.generateFrameNumbers("weapon_bees_spawn", {
+        key: Scene.WEAPON_FLY_STORM_SPAWN_ANIMATION_KEY,
+        frames: this.anims.generateFrameNumbers("weapon_fly_storm_spawn", {
           start: 0,
           end: 6,
         }),
@@ -1421,7 +1613,7 @@ export class Scene extends BaseScene {
       scene: this,
       player: this.currentPlayer,
       enemyGroup: this.enemyGroup,
-      blockerGroups: [this.obstacleGroup, this.colliders].filter(
+      blockerGroups: [this.colliders].filter(
         (group): group is Phaser.GameObjects.Group => !!group,
       ),
       portalService,
@@ -1531,7 +1723,7 @@ export class Scene extends BaseScene {
   }
 
   private getDisplayedWeapon(loadout: WeaponLoadoutItem[]) {
-    return loadout.find(({ id }) => id === "wateringCan")?.id;
+    return loadout.find(({ id }) => id === "darknessBook")?.id;
   }
 
   private groupPhysics() {
@@ -1558,11 +1750,7 @@ export class Scene extends BaseScene {
         this.enemyGroup,
         (_player, enemyObj) => {
           const enemy = enemyObj as
-            | StaticRangeEnemy
-            | PhasingEnemy
-            | MeleeEnemy
-            | BossEnemy
-            | MiniBoss;
+            StaticRangeEnemy | PhasingEnemy | MeleeEnemy | BossEnemy | MiniBoss;
           enemy.handlePlayerContact();
         },
       );
@@ -2131,9 +2319,26 @@ export class Scene extends BaseScene {
   }
   // Create blockade to restrict player movement until boss is defeated
   private createBlockade() {
+    this.smokeExplosion = this.add
+      .sprite(this.map.widthInPixels / 2, 147 * SQUARE_WIDTH, "smoke_explosion")
+      .setScale(1.4)
+      .setDepth(6)
+      .setVisible(false);
+
+    if (!this.anims.exists("smoke_explosion_anim")) {
+      this.anims.create({
+        key: "smoke_explosion_anim",
+        frames: this.anims.generateFrameNumbers("smoke_explosion", {
+          start: 0,
+          end: 6,
+        }),
+        frameRate: 12,
+        repeat: 0,
+      });
+    }
+
     const area1Blockade = this.add
-      .image(this.map.widthInPixels / 2, 147 * SQUARE_WIDTH + 2, "bridge")
-      .setScale(1.5)
+      .image(this.map.widthInPixels / 2, 147 * SQUARE_WIDTH, "bridge")
       .setDepth(5)
       .setVisible(false);
 
@@ -2183,11 +2388,27 @@ export class Scene extends BaseScene {
     this.area3Blockade = area3Blockade;
   }
 
+  private playSmokeExplosion(target?: Phaser.GameObjects.Image) {
+    if (!target || !this.smokeExplosion) return;
+
+    const { x, y } = target.getCenter();
+    const smoke = this.smokeExplosion;
+
+    smoke.off(Phaser.Animations.Events.ANIMATION_COMPLETE);
+    smoke
+      .setPosition(x, y)
+      .setDepth(target.depth + 1)
+      .setVisible(true)
+      .play("smoke_explosion_anim");
+    smoke.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+      smoke.setVisible(false);
+    });
+  }
+
   private enterUnderworld() {
     const player = this.currentPlayer;
     const portalBody = this.area3Blockade?.body as
-      | Phaser.Physics.Arcade.StaticBody
-      | undefined;
+      Phaser.Physics.Arcade.StaticBody | undefined;
     if (this.isEnteringUnderworld || !player || !portalBody) return;
 
     this.isEnteringUnderworld = true;
@@ -2367,6 +2588,7 @@ export class Scene extends BaseScene {
           false;
         this.area1Blockade.setVisible(true);
         this.cloud1Blockade?.setVisible(false);
+        this.playSmokeExplosion(this.area1Blockade);
       }
     } else if (boss.bossType === "witch") {
       if (this.area2Blockade) {
@@ -2374,6 +2596,7 @@ export class Scene extends BaseScene {
         (this.area2Blockade.body as Phaser.Physics.Arcade.StaticBody).enable =
           false;
         this.cloud2Blockade?.setVisible(false);
+        this.playSmokeExplosion(this.area2Blockade);
       }
     } else if (boss.bossType === "cerberus") {
       if (this.area3Blockade) {
@@ -2386,6 +2609,7 @@ export class Scene extends BaseScene {
             this.enterUnderworld(),
           );
         }
+        this.playSmokeExplosion(this.area3Blockade);
       }
     }
 

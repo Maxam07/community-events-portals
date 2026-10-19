@@ -6,7 +6,7 @@ import {
 
 describe("weaponStats", () => {
   it("returns only upgradeable stats for a weapon", () => {
-    expect(getUpgradeableWeaponStats("corn")).toEqual([
+    expect(getUpgradeableWeaponStats("poisonVial")).toEqual([
       "areaRadius",
       "damage",
       "durationMs",
@@ -17,8 +17,8 @@ describe("weaponStats", () => {
   });
 
   it("does not include base-only stats without active wearable buffs", () => {
-    expect(getWeaponDetailStats("corn")).not.toContain("chainRadius");
-    expect(getWeaponDetailStats("corn")).not.toContain("bounceCount");
+    expect(getWeaponDetailStats("poisonVial")).not.toContain("chainRadius");
+    expect(getWeaponDetailStats("poisonVial")).not.toContain("bounceCount");
   });
 
   it("includes active wearable buff stats for the matching weapon", () => {
@@ -26,10 +26,10 @@ describe("weaponStats", () => {
       tool: "Carrot Pitchfork",
     } as never;
 
-    expect(getBuffedWeaponStats("corn", activeWearables)).toEqual([
+    expect(getBuffedWeaponStats("poisonVial", activeWearables)).toEqual([
       "projectileSpeed",
     ]);
-    expect(getWeaponDetailStats("corn", activeWearables)).toContain(
+    expect(getWeaponDetailStats("poisonVial", activeWearables)).toContain(
       "projectileSpeed",
     );
   });
@@ -38,7 +38,7 @@ describe("weaponStats", () => {
     const activeWearables = {
       background: "Slime Wall Background",
     } as never;
-    const upgradeableStats = getUpgradeableWeaponStats("oil");
+    const upgradeableStats = getUpgradeableWeaponStats("mossGround");
 
     expect(upgradeableStats).toEqual([
       "areaRadius",
@@ -49,10 +49,10 @@ describe("weaponStats", () => {
       "statusDurationMs",
       "damage",
     ]);
-    expect(getBuffedWeaponStats("oil", activeWearables)).toEqual([
+    expect(getBuffedWeaponStats("mossGround", activeWearables)).toEqual([
       "durationMs",
     ]);
-    expect(getWeaponDetailStats("oil", activeWearables)).toEqual(
+    expect(getWeaponDetailStats("mossGround", activeWearables)).toEqual(
       upgradeableStats,
     );
   });

@@ -125,24 +125,5 @@ export const OBSTACLES_LAYOUT = {
     { name: "red_stone", x: enemy[22].x, y: enemy[22].y },
     { name: "red_stone", x: enemy[23].x, y: enemy[23].y },
     { name: "red_stone", x: enemy[24].x, y: enemy[24].y },
-    // empty
-    {
-      name: "empty",
-      x: 0,
-      y: 145,
-      width: 18.9,
-      height: 4.5,
-      originX: 0,
-      originY: 0,
-    },
-    {
-      name: "empty",
-      x: 21,
-      y: 145,
-      width: 19,
-      height: 4.5,
-      originX: 0,
-      originY: 0,
-    },
   ] as Obstacle[],
 };

@@ -5,7 +5,7 @@ import { Mission } from "./Mission";
 import { PANEL_NPC_WEARABLES } from "../../constants";
 import { Guide } from "./Guide";
 
-import misionIcon from "public/world/portal/images/banana_icon.webp";
+import misionIcon from "public/world/portal/halloween/weapons/the_frost/frozen_skull_icon.png";
 import guideIcon from "public/world/page.png";
 import leaderboardIcon from "assets/icons/trophy.png";
 import { Leaderboard } from "./Leaderboard";

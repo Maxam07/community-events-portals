@@ -4,11 +4,16 @@ import type {
   EnemyLike,
   SpecialPower,
   StatusEffectConfig,
+  WeaponCategoryId,
 } from "../../Types";
 import { EventBus } from "../EventBus";
 import { isEnemyAlive } from "./geometry";
 import type { StatusEffectSystem } from "./StatusEffectSystem";
-import { CATEGORY_POWER_EFFECTS, COMBAT_CONFIG } from "../../constants";
+import {
+  CATEGORY_POWER_EFFECTS,
+  COMBAT_CONFIG,
+  WEAPON_CATEGORIES,
+} from "../../constants";
 import { getPerkAmount } from "../../constants/PerkConstants";
 import { WeaponSfxLimiter } from "./WeaponSfxLimiter";
 import type { Scene } from "../../Scene";
@@ -27,6 +32,10 @@ export class DamageSystem {
   private specialPower: SpecialPower | null = null;
   private onLifesteal?: (enemy: EnemyLike) => void;
   private onHeal?: (amount: number) => void;
+  private onCategoryHit?: (
+    enemy: EnemyLike,
+    category: WeaponCategoryId,
+  ) => void;
   private pendingHeal = 0;
   private nextHealFlushAt = 0;
 
@@ -52,6 +61,13 @@ export class DamageSystem {
   // Fired with the batched HP amount sent to XState (player feedback).
   public setHealListener(onHeal?: (amount: number) => void) {
     this.onHeal = onHeal;
+  }
+
+  // Fired once per direct weapon hit with the category of the weapon.
+  public setCategoryHitListener(
+    onCategoryHit?: (enemy: EnemyLike, category: WeaponCategoryId) => void,
+  ) {
+    this.onCategoryHit = onCategoryHit;
   }
 
   public update(time: number) {
@@ -124,6 +140,18 @@ export class DamageSystem {
     } else if (enemy.hp !== undefined) {
       enemy.hp = Math.max(0, enemy.hp - resolvedPayload.amount);
       enemy.isDead = enemy.hp <= 0;
+    }
+
+    if (!options.skipStatusEffects) {
+      this.onCategoryHit?.(enemy, WEAPON_CATEGORIES[payload.sourceWeaponId]);
+    }
+
+    if (payload.knockback && payload.knockbackOrigin && !enemy.isDead) {
+      enemy.applyKnockback?.(
+        enemy.x - payload.knockbackOrigin.x,
+        enemy.y - payload.knockbackOrigin.y,
+        payload.knockback,
+      );
     }
 
     if (isCriticalHit) {

@@ -6,7 +6,10 @@ import {
   normalizeVector,
   type Vector,
 } from "../../lib/combat/geometry";
-import { getWeaponVisualDepth } from "../../constants/DepthConstants";
+import {
+  BLOODY_HARVEST_WEAPON_VISUAL_DEPTH,
+  getWeaponVisualDepth,
+} from "../../constants/DepthConstants";
 
 type SlashHitboxSpawnProps = {
   x: number;
@@ -20,11 +23,17 @@ type SlashHitboxSpawnProps = {
   followTarget?: { x: number; y: number };
 };
 
-const WEAPON_SCYTHE_TEXTURE_KEY = "weapon_scythe";
-const WEAPON_SCYTHE_ANIMATION_KEY = "weapon_scythe_active";
-const SCYTHE_SWING_START_RADIANS = -0.95;
-const SCYTHE_SWING_END_RADIANS = 0.65;
-const SCYTHE_VISUAL_ROTATION_OFFSET_RADIANS = Phaser.Math.DegToRad(90);
+const WEAPON_SCYTHE_TEXTURE_KEY = "weapon_blood_scythe";
+const WEAPON_SCYTHE_ANIMATION_KEY = "weapon_blood_scythe_active";
+const SCYTHE_BLADE_AXIS_TILT_DEGREES = 36;
+const SCYTHE_VISUAL_ROTATION_OFFSET_RADIANS = Phaser.Math.DegToRad(
+  90 + SCYTHE_BLADE_AXIS_TILT_DEGREES,
+);
+const SCYTHE_FRAME_WIDTH = 45;
+const SCYTHE_FRAME_HEIGHT = 44;
+const SCYTHE_PIXEL_SIZE_PER_RANGE = 1.25 / 38;
+const SCYTHE_ORIGIN_X = 0.25;
+const SCYTHE_ORIGIN_Y = 0.9;
 
 export class SlashHitbox extends Phaser.Physics.Arcade.Sprite {
   public payload!: DamagePayload;
@@ -127,7 +136,7 @@ export class SlashHitbox extends Phaser.Physics.Arcade.Sprite {
     this.setRotation(Math.atan2(this.direction.y, this.direction.x));
     this.setActive(true);
     this.setVisible(true);
-    this.setDepth(getWeaponVisualDepth(y));
+    this.setDepth(this.resolveDepth(y));
     this.setAlpha(0.7);
 
     this.scene.tweens.add({
@@ -151,18 +160,17 @@ export class SlashHitbox extends Phaser.Physics.Arcade.Sprite {
     expiresAt: number;
   }) {
     const baseRotation = Math.atan2(this.direction.y, this.direction.x);
+    const halfArcRadians = Phaser.Math.DegToRad(this.arcDegrees) / 2;
     const startRotation =
-      baseRotation +
-      SCYTHE_SWING_START_RADIANS +
-      SCYTHE_VISUAL_ROTATION_OFFSET_RADIANS;
+      baseRotation - halfArcRadians + SCYTHE_VISUAL_ROTATION_OFFSET_RADIANS;
     const endRotation =
-      baseRotation +
-      SCYTHE_SWING_END_RADIANS +
-      SCYTHE_VISUAL_ROTATION_OFFSET_RADIANS;
-    const visualWidth = range * 1.25;
-    const visualHeight = visualWidth * (25 / 38);
+      baseRotation + halfArcRadians + SCYTHE_VISUAL_ROTATION_OFFSET_RADIANS;
+    const visualWidth =
+      range * SCYTHE_PIXEL_SIZE_PER_RANGE * SCYTHE_FRAME_WIDTH;
+    const visualHeight =
+      range * SCYTHE_PIXEL_SIZE_PER_RANGE * SCYTHE_FRAME_HEIGHT;
 
-    this.setOrigin(0.14, 0.82);
+    this.setOrigin(SCYTHE_ORIGIN_X, SCYTHE_ORIGIN_Y);
     this.attackOrigin = this.followTarget
       ? { x: this.followTarget.x, y: this.followTarget.y }
       : { x, y };
@@ -171,7 +179,7 @@ export class SlashHitbox extends Phaser.Physics.Arcade.Sprite {
     this.setRotation(startRotation);
     this.setActive(true);
     this.setVisible(true);
-    this.setDepth(getWeaponVisualDepth(this.attackOrigin.y));
+    this.setDepth(this.resolveDepth(this.attackOrigin.y));
     this.setAlpha(1);
 
     this.scene.tweens.add({
@@ -215,6 +223,12 @@ export class SlashHitbox extends Phaser.Physics.Arcade.Sprite {
     return time >= this.expiresAt;
   }
 
+  private resolveDepth(y: number) {
+    return this.isScythe
+      ? BLOODY_HARVEST_WEAPON_VISUAL_DEPTH
+      : getWeaponVisualDepth(y);
+  }
+
   public despawn() {
     this.scene?.tweens.killTweensOf(this);
     this.setActive(false);
@@ -240,7 +254,7 @@ export class SlashHitbox extends Phaser.Physics.Arcade.Sprite {
       origin.x + this.direction.x * this.range * 0.12,
       origin.y + this.direction.y * this.range * 0.12,
     );
-    this.setDepth(getWeaponVisualDepth(origin.y));
+    this.setDepth(this.resolveDepth(origin.y));
   }
 
   private setScytheBroadphaseBody(

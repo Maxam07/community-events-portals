@@ -6,20 +6,23 @@ import type {
   WeaponId,
 } from "../../Types";
 import { enemyCenter } from "../../lib/combat/geometry";
-import { getWeaponVisualDepth } from "../../constants/DepthConstants";
+import {
+  ABOVE_ENEMIES_VISUAL_DEPTH,
+  getWeaponVisualDepth,
+} from "../../constants/DepthConstants";
 
-const WEAPON_WATERING_CAN_PROJECTILE_TEXTURE_KEY =
-  "weapon_watering_can_projectile";
-const WEAPON_WATERING_CAN_PROJECTILE_ANIMATION_KEY =
-  "weapon_watering_can_projectile_active";
-const WEAPON_CORN_PROJECTILE_TEXTURE_KEY = "weapon_corn_projectile";
-const WEAPON_CORN_PROJECTILE_ANIMATION_KEY = "weapon_corn_projectile_active";
-const WEAPON_TOMATO_PROJECTILE_TEXTURE_KEY = "weapon_tomato_projectile";
-const WEAPON_TOMATO_PROJECTILE_ANIMATION_KEY =
-  "weapon_tomato_projectile_active";
-const WEAPON_SUNFLOWER_PROJECTILE_TEXTURE_KEY = "weapon_sunflower_projectile";
-const WEAPON_SUNFLOWER_PROJECTILE_ANIMATION_KEY =
-  "weapon_sunflower_projectile_active";
+const WEAPON_DARKNESS_BOOK_PROJECTILE_TEXTURE_KEY =
+  "weapon_darkness_book_projectile";
+const WEAPON_DARKNESS_BOOK_PROJECTILE_ANIMATION_KEY =
+  "weapon_darkness_book_projectile_active";
+const WEAPON_POISON_VIAL_PROJECTILE_TEXTURE_KEY =
+  "weapon_poison_vial_projectile";
+const WEAPON_POISON_VIAL_PROJECTILE_ANIMATION_KEY =
+  "weapon_poison_vial_projectile_active";
+const WEAPON_BLOOD_KNIFE_TEXTURE_KEY = "weapon_blood_knife";
+const WEAPON_BLOOD_KNIFE_ANIMATION_KEY = "weapon_blood_knife_active";
+const WEAPON_FROST_FLOWER_TEXTURE_KEY = "weapon_frost_flower";
+const WEAPON_FROST_FLOWER_ANIMATION_KEY = "weapon_frost_flower_active";
 
 export type ProjectileSpawnProps = {
   x: number;
@@ -120,7 +123,13 @@ export class Projectile extends Phaser.Physics.Arcade.Sprite {
     }
     this.setActive(true);
     this.setVisible(true);
-    this.setDepth(getWeaponVisualDepth(y));
+    this.setDepth(
+      ownerWeaponId === "frostFlower" ||
+        ownerWeaponId === "bloodKnife" ||
+        ownerWeaponId === "cursedCoffin"
+        ? ABOVE_ENEMIES_VISUAL_DEPTH
+        : getWeaponVisualDepth(y),
+    );
     this.payload = payload;
     this.ownerWeaponId = ownerWeaponId;
     this.behavior = behavior;
@@ -147,20 +156,20 @@ export class Projectile extends Phaser.Physics.Arcade.Sprite {
   }
 
   private getAnimationKey(texture: string) {
-    if (texture === WEAPON_WATERING_CAN_PROJECTILE_TEXTURE_KEY) {
-      return WEAPON_WATERING_CAN_PROJECTILE_ANIMATION_KEY;
+    if (texture === WEAPON_DARKNESS_BOOK_PROJECTILE_TEXTURE_KEY) {
+      return WEAPON_DARKNESS_BOOK_PROJECTILE_ANIMATION_KEY;
     }
 
-    if (texture === WEAPON_CORN_PROJECTILE_TEXTURE_KEY) {
-      return WEAPON_CORN_PROJECTILE_ANIMATION_KEY;
+    if (texture === WEAPON_POISON_VIAL_PROJECTILE_TEXTURE_KEY) {
+      return WEAPON_POISON_VIAL_PROJECTILE_ANIMATION_KEY;
     }
 
-    if (texture === WEAPON_TOMATO_PROJECTILE_TEXTURE_KEY) {
-      return WEAPON_TOMATO_PROJECTILE_ANIMATION_KEY;
+    if (texture === WEAPON_BLOOD_KNIFE_TEXTURE_KEY) {
+      return WEAPON_BLOOD_KNIFE_ANIMATION_KEY;
     }
 
-    if (texture === WEAPON_SUNFLOWER_PROJECTILE_TEXTURE_KEY) {
-      return WEAPON_SUNFLOWER_PROJECTILE_ANIMATION_KEY;
+    if (texture === WEAPON_FROST_FLOWER_TEXTURE_KEY) {
+      return WEAPON_FROST_FLOWER_ANIMATION_KEY;
     }
 
     return undefined;

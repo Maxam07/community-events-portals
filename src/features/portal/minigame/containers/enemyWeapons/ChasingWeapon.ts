@@ -2,6 +2,7 @@ import type { BumpkinContainer } from "../../Core/BumpkinContainer";
 import type { EnemyType } from "../../Types";
 import type { Scene } from "../../Scene";
 import { MiniBoss } from "../MiniBossContainer";
+import { getOwnerDamageMultiplier } from "../../lib/combat/damageMultiplier";
 
 interface ChasingWeaponProps {
   scene: Scene;
@@ -195,7 +196,7 @@ export class ChasingWeapon extends Phaser.GameObjects.Sprite {
   public handlePlayerContact() {
     if (!this.active || this.isDead) return;
 
-    this.player?.hurt(this.enemyType);
+    this.player?.hurt(this.enemyType, getOwnerDamageMultiplier(this.target));
 
     this.resetToTarget();
   }

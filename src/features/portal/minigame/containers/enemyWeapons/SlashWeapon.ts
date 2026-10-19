@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import type { Scene } from "../../Scene";
 import type { BumpkinContainer } from "../../Core/BumpkinContainer";
 import type { EnemyType } from "../../Types";
+import { getOwnerDamageMultiplier } from "../../lib/combat/damageMultiplier";
 
 interface SlashWeaponProps {
   scene: Scene;
@@ -165,7 +166,7 @@ export class SlashWeapon extends Phaser.GameObjects.Sprite {
 
   public handlePlayerContact() {
     if (!this.active || this.isDead) return;
-    this.player?.hurt(this.enemyType);
+    this.player?.hurt(this.enemyType, getOwnerDamageMultiplier(this.target));
   }
 
   private startSequence() {

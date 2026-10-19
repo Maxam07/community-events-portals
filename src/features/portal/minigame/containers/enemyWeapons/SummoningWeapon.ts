@@ -2,6 +2,7 @@ import type { BumpkinContainer } from "../../Core/BumpkinContainer";
 import type { EnemyType } from "../../Types";
 import type { Scene } from "../../Scene";
 import { SQUARE_WIDTH } from "features/game/lib/constants";
+import { getOwnerDamageMultiplier } from "../../lib/combat/damageMultiplier";
 
 interface SummonigWeaponProps {
   scene: Scene;
@@ -189,7 +190,7 @@ export class SummoningWeapon extends Phaser.GameObjects.Sprite {
       return;
     }
 
-    this.player?.hurt(this.enemyType);
+    this.player?.hurt(this.enemyType, getOwnerDamageMultiplier(this.target));
   }
 
   /**

@@ -12,6 +12,7 @@ import moveControls2 from "public/world/minigame/base/move_controls_2.png";
 import joystick from "public/world/minigame/base/joystick.png";
 import spaceKey from "public/world/minigame/base/space_key.png";
 import vKey from "public/world/minigame/base/v_key.png";
+import eKey from "public/world/minigame/base/e_key.png";
 import bumpkinAvatar from "public/world/portal/images/bumpkin_avatar.png";
 import { Label } from "components/ui/Label";
 // import useToolButton from "public/world/use_tool_button.webp";
@@ -94,6 +95,14 @@ export const Controls: React.FC<Props> = ({ onBack }) => {
               )}
             </div>
           </OuterPanel>
+          {!isTouch && (
+            <OuterPanel className="w-full flex flex-col items-center gap-2">
+              <Label type="default">{t("minigame.controls.power")}</Label>
+              <div className="h-100 flex-1 flex flex-col items-center justify-center">
+                <img src={eKey} className="h-10" />
+              </div>
+            </OuterPanel>
+          )}
         </div>
       </div>
     </div>

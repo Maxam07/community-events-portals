@@ -472,7 +472,9 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
   }
 
   public setEquippedWeapon(weaponId?: WeaponId) {
-    if (weaponId !== "wateringCan") {
+    if (!this.scene) return;
+
+    if (weaponId !== "darknessBook") {
       if (this.equippedWeapon?.active) {
         this.equippedWeapon.destroy();
       }
@@ -480,11 +482,11 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
       return;
     }
 
-    if (!this.scene.textures.exists("weapon_watering_can")) return;
+    if (!this.scene.textures.exists("weapon_darkness_book")) return;
 
     if (!this.equippedWeapon?.active) {
       this.equippedWeapon = this.scene.add
-        .sprite(0, 4, "weapon_watering_can")
+        .sprite(3, 5, "weapon_darkness_book")
         .setOrigin(0.5);
       this.add(this.equippedWeapon);
     }
@@ -1195,15 +1197,18 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
     }
   }
 
-  public hurt(enemyType: EnemyType) {
+  public hurt(enemyType: EnemyType, damageMultiplier = 1) {
     if (this.portalService?.state.context.isGameplayPaused) return;
     if (this.isHurting) return;
 
-    const damage = ENEMY_BALANCE_STATS[enemyType].DAMAGE;
+    const damage = Math.floor(
+      ENEMY_BALANCE_STATS[enemyType].DAMAGE * damageMultiplier,
+    );
+    if (damage <= 0) return;
 
     this.isHurting = true;
     this.playHurtSound();
-    this.portalService?.send("LOSE_LIFE", { enemyType: enemyType });
+    this.portalService?.send("LOSE_LIFE", { enemyType, damage });
     this.playHeartFall(damage);
 
     if (this.isGameOver) return;

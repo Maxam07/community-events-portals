@@ -22,18 +22,19 @@ export const WEAPON_CATEGORY_IDS: WeaponCategoryId[] = [
   "bloodyHarvest",
 ];
 
-// Frost Coffin (frost), Cadena Amaldita (curse) and Vial Carmesi
-// (bloodyHarvest) are pending weapons; add them here once they exist.
 export const WEAPON_CATEGORIES: Record<WeaponId, WeaponCategoryId> = {
-  oil: "plague",
-  corn: "plague",
-  beehive: "plague",
-  wateringCan: "frost",
-  pumpkin: "frost",
-  banana: "curse",
-  sunflower: "curse",
-  tomato: "bloodyHarvest",
-  broomScythe: "bloodyHarvest",
+  mossGround: "plague",
+  poisonVial: "plague",
+  flyStorm: "plague",
+  darknessBook: "curse",
+  banishedJackOLantern: "curse",
+  frostChain: "frost",
+  frozenSkull: "frost",
+  frostFlower: "frost",
+  cursedCoffin: "curse",
+  bloodKnife: "bloodyHarvest",
+  bloodScythe: "bloodyHarvest",
+  crimsonVial: "bloodyHarvest",
 };
 
 type CategoryConfig = {
@@ -119,14 +120,14 @@ export const CATEGORY_POWER_EFFECTS = {
   } satisfies StatusEffectConfig,
   frost: {
     id: "frostSlow",
-    durationMs: 2000,
+    durationMs: 4000,
     speedMultiplier: 0.4,
     refreshMode: "refresh",
   } satisfies StatusEffectConfig,
   curse: {
-    id: "curseStun",
-    durationMs: 1200,
-    speedMultiplier: 0,
+    id: "curseWeakness",
+    durationMs: 4000,
+    damageMultiplier: 0.5,
     refreshMode: "refresh",
   } satisfies StatusEffectConfig,
   bloodyHarvest: {

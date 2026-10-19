@@ -34,6 +34,7 @@ export class StaticRangeEnemy extends Phaser.GameObjects.Container {
   public hp: number;
   public maxHp: number;
   public isDead = false;
+  public damageMultiplier = 1;
   public config: EnemyConfig;
   private isHurting = false;
   private hurtFlashRemainingMs = 0;
@@ -80,8 +81,7 @@ export class StaticRangeEnemy extends Phaser.GameObjects.Container {
 
   public get portalService() {
     return this.scene.registry.get("portalService") as
-      | MachineInterpreter
-      | undefined;
+      MachineInterpreter | undefined;
   }
 
   createEnemy() {
@@ -149,9 +149,13 @@ export class StaticRangeEnemy extends Phaser.GameObjects.Container {
     if (!value) this.enemyBody.setVelocity(0, 0);
   }
 
+  public setDamageMultiplier(multiplier: number) {
+    this.damageMultiplier = multiplier;
+  }
+
   public handlePlayerContact() {
     if (!this.active || this.isDead) return;
-    this.player?.hurt(this.mobType);
+    this.player?.hurt(this.mobType, this.damageMultiplier);
   }
 
   public updateMovement(delta: number) {

@@ -24,6 +24,12 @@ import { AreaHitbox } from "../../containers/weapons/AreaHitbox";
 import { OrbitalWeapon } from "../../containers/weapons/OrbitalWeapon";
 import { HomingBee } from "../../containers/weapons/HomingBee";
 import { EventBus } from "../EventBus";
+import {
+  MOSS_GROUND_VISUAL_DEPTH,
+  CURSE_WEAPON_VISUAL_DEPTH,
+  BLOODY_HARVEST_WEAPON_VISUAL_DEPTH,
+  FROST_WEAPON_VISUAL_DEPTH,
+} from "../../constants/DepthConstants";
 import { CooldownTracker } from "./CooldownTracker";
 import { DamageSystem } from "./DamageSystem";
 import { StatusEffectSystem } from "./StatusEffectSystem";
@@ -31,19 +37,22 @@ import { TargetingSystem } from "./TargetingSystem";
 import { SpecialPowerEffects } from "./SpecialPowerEffects";
 import {
   FALLBACK_AIM_VECTOR,
+  distanceBetween,
   enemyCenter,
+  isEnemyAlive,
   normalizeVector,
   rotateVector,
   vectorFromAngleDegrees,
   type Vector,
 } from "./geometry";
 
-const WEAPON_CORN_EXPLOSION_TEXTURE_KEY = "weapon_corn_explosion";
-const WEAPON_CORN_EXPLOSION_ANIMATION_KEY = "weapon_corn_explosion_active";
-const WEAPON_OIL_ANIMATION_KEY = "weapon_oil_active";
-const WEAPON_CORN_EXPLOSION_ANIMATION_MS = 625;
+const WEAPON_POISON_VIAL_EXPLOSION_TEXTURE_KEY = "weapon_poison_vial_explosion";
+const WEAPON_POISON_VIAL_EXPLOSION_ANIMATION_KEY =
+  "weapon_poison_vial_explosion_active";
+const WEAPON_MOSS_GROUND_ANIMATION_KEY = "weapon_moss_ground_active";
+const WEAPON_POISON_VIAL_EXPLOSION_ANIMATION_MS = 625;
 
-const PUMPKIN_DIRECTIONS: readonly Vector[] = [
+const JACK_O_LANTERN_DIRECTIONS: readonly Vector[] = [
   { x: 1, y: 0 },
   { x: -1, y: 0 },
   { x: 0, y: 1 },
@@ -53,6 +62,22 @@ const PUMPKIN_DIRECTIONS: readonly Vector[] = [
   { x: Math.SQRT1_2, y: -Math.SQRT1_2 },
   { x: -Math.SQRT1_2, y: -Math.SQRT1_2 },
 ];
+
+const FROST_CHAIN_FADE_MS = 220;
+const FROST_CHAIN_FRAME_WIDTH = 128;
+const FROST_CHAIN_THICKNESS_FACTOR = 1.1;
+const FROST_CHAIN_ANIMATION_KEY = "weapon_frost_chain_active";
+const CURSED_COFFIN_ANIMATION_KEY = "weapon_cursed_coffin_active";
+const CRIMSON_VIAL_FRAME_WIDTH = 139;
+const CRIMSON_VIAL_THICKNESS_FACTOR = 0.5;
+const CRIMSON_VIAL_ANIMATION_KEY = "weapon_crimson_vial_active";
+
+type BloodTether = {
+  enemy: EnemyLike;
+  link: Phaser.GameObjects.Sprite;
+  thicknessScale: number;
+  expiresAt: number;
+};
 
 type RuntimeWeapon = {
   id: WeaponId;
@@ -92,7 +117,9 @@ export class WeaponManager {
   private readonly targetingSystem: TargetingSystem;
   private readonly specialPowerEffects: SpecialPowerEffects;
   private readonly activeWeapons = new Map<WeaponId, RuntimeWeapon>();
-  private readonly wateringCanSelectedTargets = new Set<EnemyLike>();
+  private readonly darknessBookSelectedTargets = new Set<EnemyLike>();
+  private readonly claimedBeeTargets = new Set<EnemyLike>();
+  private readonly bloodTethers: BloodTether[] = [];
   private lastAimVector: Vector = { ...FALLBACK_AIM_VECTOR };
   private nextAreaCollisionCheckAt = 0;
   private isShutDown = false;
@@ -169,6 +196,9 @@ export class WeaponManager {
     this.damageSystem.setHealListener((amount) =>
       this.specialPowerEffects.playHeartGain(amount),
     );
+    this.damageSystem.setCategoryHitListener((enemy, category) =>
+      this.specialPowerEffects.playHitEffect(enemy, category),
+    );
 
     this.setupOverlaps(props.enemyGroup);
     this.reset(props.loadout ?? COMBAT_CONFIG.defaultWeaponLoadout);
@@ -183,6 +213,7 @@ export class WeaponManager {
     this.specialPowerEffects.update(time);
     this.updateAimVector();
     this.updatePooledObjects(time);
+    this.updateBloodTethers(time);
 
     this.activeWeapons.forEach((weapon) => {
       if (
@@ -190,6 +221,11 @@ export class WeaponManager {
         weapon.config.behavior === "orbitalShooter"
       ) {
         this.ensureOrbitals(weapon);
+      }
+
+      if (weapon.config.behavior === "homingSummon") {
+        this.ensureBees(weapon);
+        return;
       }
 
       if (weapon.config.behavior === "orbital") return;
@@ -238,6 +274,8 @@ export class WeaponManager {
     this.clearGroup(this.slashHitboxGroup);
     this.clearGroup(this.orbitalGroup);
     this.clearGroup(this.beeGroup);
+    this.claimedBeeTargets.clear();
+    this.clearBloodTethers();
 
     loadout.forEach(({ id, level }) => this.setWeaponLevel(id, level));
   }
@@ -252,6 +290,7 @@ export class WeaponManager {
     this.damageSystem.reset();
     this.damageSystem.setLifestealListener(undefined);
     this.damageSystem.setHealListener(undefined);
+    this.damageSystem.setCategoryHitListener(undefined);
     this.specialPowerEffects.shutdown();
     this.destroyGroup(this.weaponCollisionGroup, false);
     this.destroyGroup(this.projectileGroup);
@@ -281,10 +320,6 @@ export class WeaponManager {
       physics.add.overlap(this.rollingProjectileGroup, blockerGroup, (a, b) =>
         this.handleProjectileObstacleHit(a, b),
       );
-      physics.add.overlap(this.beeGroup, blockerGroup, (a, b) => {
-        const bee = [a, b].find((object) => object instanceof HomingBee);
-        if (bee?.active) bee.despawn();
-      });
     });
   }
 
@@ -303,29 +338,41 @@ export class WeaponManager {
       case "slash":
         return this.fireSlash(weapon, time);
       case "linearProjectile":
-        return this.fireWateringCan(weapon, time);
+        return this.fireDarknessBook(weapon, time);
       case "explodingProjectile":
-        return this.fireCorn(weapon, time);
+        return this.firePoisonVial(weapon, time);
       case "chainProjectile":
-        return this.fireTomato(weapon, time);
+        return this.fireBloodKnife(weapon, time);
       case "orbitalShooter":
-        return this.fireSunflower(weapon, time);
+        return this.fireFrostFlower(weapon, time);
       case "snareArea":
-        return this.fireOil(weapon, time);
+        return this.fireMossGround(weapon, time);
       case "rollingProjectile":
-        return this.firePumpkin(weapon, time);
-      case "homingSummon":
-        return this.fireBeehive(weapon, time);
+        return this.fireBanishedJackOLantern(weapon, time);
+      case "coffinBurst":
+        return this.fireCursedCoffin(weapon);
+      case "chainAnchor":
+        return this.fireFrostChain(weapon);
+      case "bloodTether":
+        return this.fireCrimsonVial(weapon, time);
       default:
         return false;
     }
   }
 
   private fireSlash(weapon: RuntimeWeapon, time: number) {
+    const target = this.nearestInRange();
+    if (!target) return false;
+
+    const targetCenter = enemyCenter(target);
+    const aimVector = normalizeVector({
+      x: targetCenter.x - this.props.player.x,
+      y: targetCenter.y - this.props.player.y,
+    });
     const directions =
       weapon.stats.projectileCount >= 2
-        ? [this.lastAimVector, rotateVector(this.lastAimVector, 180)]
-        : [this.lastAimVector];
+        ? [aimVector, rotateVector(aimVector, 180)]
+        : [aimVector];
 
     directions.forEach((direction) => {
       const hitbox = this.slashHitboxGroup.get(
@@ -358,22 +405,18 @@ export class WeaponManager {
     return directions.length > 0;
   }
 
-  private fireWateringCan(weapon: RuntimeWeapon, time: number) {
+  private fireDarknessBook(weapon: RuntimeWeapon, time: number) {
     const projectileCount = Math.max(
       1,
       Math.round(weapon.stats.projectileCount),
     );
-    const selectedTargets = this.wateringCanSelectedTargets;
+    const selectedTargets = this.darknessBookSelectedTargets;
     selectedTargets.clear();
 
     let fired = false;
 
     for (let index = 0; index < projectileCount; index++) {
-      const target = this.targetingSystem.nearest(
-        this.props.player,
-        undefined,
-        selectedTargets,
-      );
+      const target = this.nearestInRange(selectedTargets);
 
       const direction = target
         ? normalizeVector({
@@ -401,8 +444,8 @@ export class WeaponManager {
     return fired;
   }
 
-  private fireCorn(weapon: RuntimeWeapon, time: number) {
-    const target = this.targetingSystem.nearest(this.props.player);
+  private firePoisonVial(weapon: RuntimeWeapon, time: number) {
+    const target = this.nearestInRange();
     if (!target) return false;
 
     this.fireProjectile({
@@ -421,8 +464,13 @@ export class WeaponManager {
     return true;
   }
 
-  private fireTomato(weapon: RuntimeWeapon, time: number) {
-    const target = this.targetingSystem.random();
+  private fireBloodKnife(weapon: RuntimeWeapon, time: number) {
+    const target = this.targetingSystem.random(
+      this.targetingSystem.inRadius(
+        this.props.player,
+        COMBAT_CONFIG.maxWeaponRange,
+      ),
+    );
     if (!target) return false;
 
     this.fireProjectilesFromPlayer({
@@ -439,8 +487,8 @@ export class WeaponManager {
     return true;
   }
 
-  private fireSunflower(weapon: RuntimeWeapon, time: number) {
-    const target = this.targetingSystem.nearest(this.props.player);
+  private fireFrostFlower(weapon: RuntimeWeapon, time: number) {
+    const target = this.nearestInRange();
     if (!target) return false;
 
     const children = this.orbitalGroup.getChildren();
@@ -474,8 +522,8 @@ export class WeaponManager {
     return fired;
   }
 
-  private fireOil(weapon: RuntimeWeapon, time: number) {
-    const target = this.targetingSystem.nearest(this.props.player);
+  private fireMossGround(weapon: RuntimeWeapon, time: number) {
+    const target = this.nearestInRange();
     if (!target) return false;
 
     this.spawnArea({
@@ -487,20 +535,23 @@ export class WeaponManager {
       payload: this.createPayload(weapon),
       hitCooldownMs: weapon.stats.hitCooldownMs,
       persistent: true,
-      animationKey: WEAPON_OIL_ANIMATION_KEY,
+      animationKey: WEAPON_MOSS_GROUND_ANIMATION_KEY,
       hitboxShape: "spriteBounds",
       hitboxSize: {
         width: weapon.stats.areaRadius * 1,
         height: Math.round(weapon.stats.areaRadius * 0.5),
       },
+      depth: MOSS_GROUND_VISUAL_DEPTH,
     });
 
     return true;
   }
 
-  private firePumpkin(weapon: RuntimeWeapon, time: number) {
+  private fireBanishedJackOLantern(weapon: RuntimeWeapon, time: number) {
     const direction =
-      PUMPKIN_DIRECTIONS[Math.floor(Math.random() * PUMPKIN_DIRECTIONS.length)];
+      JACK_O_LANTERN_DIRECTIONS[
+        Math.floor(Math.random() * JACK_O_LANTERN_DIRECTIONS.length)
+      ];
 
     this.fireProjectile({
       weapon,
@@ -516,32 +567,274 @@ export class WeaponManager {
     return true;
   }
 
-  private fireBeehive(weapon: RuntimeWeapon, time: number) {
-    if (this.targetingSystem.getActiveEnemies().length === 0) return false;
+  private fireCursedCoffin(weapon: RuntimeWeapon) {
+    const target = this.nearestInRange();
+    if (!target) return false;
 
-    for (let index = 0; index < weapon.stats.projectileCount; index++) {
+    const origin = enemyCenter(target);
+    if (distanceBetween(this.props.player, origin) > weapon.stats.areaRadius) {
+      return false;
+    }
+
+    const shardCount = Math.max(1, Math.round(weapon.stats.projectileCount));
+    const startAngle = Math.random() * 360;
+
+    const releaseShards = () => {
+      if (this.isShutDown) return;
+
+      for (let index = 0; index < shardCount; index++) {
+        this.fireProjectile({
+          weapon,
+          time: this.props.scene.time.now,
+          projectile: weapon.config.projectile,
+          behavior: "linear",
+          x: origin.x,
+          y: origin.y,
+          direction: rotateVector(
+            { x: 1, y: 0 },
+            startAngle + (360 / shardCount) * index,
+          ),
+        });
+      }
+    };
+
+    const marker = this.props.scene.add
+      .sprite(origin.x, origin.y, weapon.config.texture)
+      .setDepth(CURSE_WEAPON_VISUAL_DEPTH);
+
+    if (this.props.scene.anims.exists(CURSED_COFFIN_ANIMATION_KEY)) {
+      marker.once("animationcomplete", () => {
+        marker.destroy();
+        releaseShards();
+      });
+      marker.play(CURSED_COFFIN_ANIMATION_KEY);
+    } else {
+      marker.destroy();
+      releaseShards();
+    }
+
+    return true;
+  }
+
+  private fireFrostChain(weapon: RuntimeWeapon) {
+    const { player } = this.props;
+    const target = this.nearestInRange();
+    if (!target) return false;
+
+    const targetCenter = enemyCenter(target);
+    if (
+      distanceBetween(player, targetCenter) > this.getEffectiveRange(weapon)
+    ) {
+      return false;
+    }
+
+    const strike = () => {
+      this.damageSystem.applyDamage(
+        target,
+        {
+          ...this.createPayload(weapon),
+          knockback: weapon.stats.knockback,
+          knockbackOrigin: { x: player.x, y: player.y },
+        },
+        this.props.scene.time.now,
+      );
+    };
+
+    const thicknessScale =
+      (weapon.stats.range / FROST_CHAIN_FRAME_WIDTH) *
+      FROST_CHAIN_THICKNESS_FACTOR;
+    const aim = (to: Vector) => {
+      link
+        .setPosition(player.x, player.y)
+        .setRotation(Math.atan2(to.y - player.y, to.x - player.x))
+        .setScale(
+          Math.max(1, distanceBetween(player, to)) / FROST_CHAIN_FRAME_WIDTH,
+          thicknessScale,
+        )
+        .setDepth(FROST_WEAPON_VISUAL_DEPTH);
+    };
+
+    const link = this.props.scene.add
+      .sprite(player.x, player.y, weapon.config.texture)
+      .setOrigin(0, 0.5);
+    aim(targetCenter);
+    if (this.props.scene.anims.exists(FROST_CHAIN_ANIMATION_KEY)) {
+      link.on("animationupdate", () => {
+        if (isEnemyAlive(target)) aim(enemyCenter(target));
+      });
+      link.once("animationcomplete", () => {
+        link.destroy();
+        strike();
+      });
+      link.play(FROST_CHAIN_ANIMATION_KEY);
+    } else {
+      strike();
+      this.props.scene.tweens.add({
+        targets: link,
+        alpha: 0,
+        duration: FROST_CHAIN_FADE_MS,
+        onComplete: () => link.destroy(),
+      });
+    }
+
+    EventBus.emit("weapon:fired", {
+      id: weapon.id,
+      x: targetCenter.x,
+      y: targetCenter.y,
+    });
+
+    return true;
+  }
+
+  private fireCrimsonVial(weapon: RuntimeWeapon, time: number) {
+    const { player } = this.props;
+    const freeSlots =
+      Math.max(1, Math.round(weapon.stats.projectileCount)) -
+      this.bloodTethers.length;
+    if (freeSlots <= 0) return false;
+
+    const tetheredEnemies = new Set<EnemyLike>(
+      this.bloodTethers.map((tether) => tether.enemy),
+    );
+    const statusEffects = this.createPayload(weapon).statusEffects;
+    let fired = false;
+
+    for (let slot = 0; slot < freeSlots; slot++) {
+      const target = this.nearestInRange(tetheredEnemies);
+      if (!target) break;
+
+      const targetCenter = enemyCenter(target);
+      if (
+        distanceBetween(player, targetCenter) > this.getEffectiveRange(weapon)
+      )
+        break;
+
+      tetheredEnemies.add(target);
+      if (statusEffects)
+        this.statusEffectSystem.apply(target, statusEffects, time);
+
+      const thicknessScale =
+        (weapon.stats.range / CRIMSON_VIAL_FRAME_WIDTH) *
+        CRIMSON_VIAL_THICKNESS_FACTOR;
+      const link = this.props.scene.add
+        .sprite(player.x, player.y, weapon.config.texture)
+        .setDepth(BLOODY_HARVEST_WEAPON_VISUAL_DEPTH);
+      this.placeLink(link, player, targetCenter, thicknessScale);
+      if (this.props.scene.anims.exists(CRIMSON_VIAL_ANIMATION_KEY)) {
+        link.play(CRIMSON_VIAL_ANIMATION_KEY);
+      }
+      this.bloodTethers.push({
+        enemy: target,
+        link,
+        thicknessScale,
+        expiresAt: time + weapon.stats.statusDurationMs,
+      });
+      fired = true;
+    }
+
+    if (fired) {
+      EventBus.emit("weapon:fired", {
+        id: weapon.id,
+        x: player.x,
+        y: player.y,
+      });
+    }
+
+    return fired;
+  }
+
+  private updateBloodTethers(time: number) {
+    const { player } = this.props;
+
+    for (let index = this.bloodTethers.length - 1; index >= 0; index--) {
+      const tether = this.bloodTethers[index];
+      const { enemy } = tether;
+
+      if (
+        time >= tether.expiresAt ||
+        !enemy.active ||
+        enemy.isDead ||
+        !enemy.scene
+      ) {
+        tether.link.destroy();
+        this.bloodTethers.splice(index, 1);
+        continue;
+      }
+
+      this.placeLink(
+        tether.link,
+        player,
+        enemyCenter(enemy),
+        tether.thicknessScale,
+      );
+    }
+  }
+
+  private clearBloodTethers() {
+    this.bloodTethers.forEach((tether) => tether.link.destroy());
+    this.bloodTethers.length = 0;
+  }
+
+  private placeLink(
+    link: Phaser.GameObjects.Sprite,
+    from: Vector,
+    to: Vector,
+    thicknessScale: number,
+  ) {
+    link
+      .setOrigin(0, 0.5)
+      .setPosition(from.x, from.y)
+      .setRotation(Math.atan2(to.y - from.y, to.x - from.x))
+      .setScale(
+        Math.max(1, distanceBetween(from, to)) / CRIMSON_VIAL_FRAME_WIDTH,
+        thicknessScale,
+      );
+  }
+
+  private ensureBees(weapon: RuntimeWeapon) {
+    const expectedCount = Math.max(1, Math.round(weapon.stats.projectileCount));
+    const children = this.beeGroup.getChildren();
+    const activeBees: HomingBee[] = [];
+
+    for (let index = 0; index < children.length; index++) {
+      const bee = children[index];
+      if (bee instanceof HomingBee && bee.active) activeBees.push(bee);
+    }
+
+    for (let index = expectedCount; index < activeBees.length; index++) {
+      activeBees[index].despawn();
+    }
+
+    let spawned = 0;
+    for (let index = activeBees.length; index < expectedCount; index++) {
       const bee = this.beeGroup.get(
         this.props.player.x,
         this.props.player.y,
         weapon.config.texture,
       ) as HomingBee | null;
 
-      if (!bee) continue;
+      if (!bee) break;
 
-      this.registerCollisionBody(bee);
       bee.spawn({
-        x: this.props.player.x + (index - weapon.stats.projectileCount / 2) * 4,
+        x: this.props.player.x + (index - expectedCount / 2) * 4,
         y: this.props.player.y,
         texture: weapon.config.texture,
         speed: weapon.stats.homingSpeed,
-        expiresAt: time + weapon.stats.durationMs,
         payload: this.createPayload(weapon),
         hitCooldownMs: weapon.stats.hitCooldownMs,
+        range: this.getEffectiveRange(weapon),
+        claimedTargets: this.claimedBeeTargets,
       });
-      EventBus.emit("weapon:fired", { id: weapon.id, x: bee.x, y: bee.y });
+      spawned++;
     }
 
-    return true;
+    if (spawned > 0) {
+      EventBus.emit("weapon:fired", {
+        id: weapon.id,
+        x: this.props.player.x,
+        y: this.props.player.y,
+      });
+    }
   }
 
   private fireProjectilesFromPlayer({
@@ -710,7 +1003,9 @@ export class WeaponManager {
     for (let index = 0; index < projectiles.length; index++) {
       const projectile = projectiles[index];
       if (!(projectile instanceof Projectile) || !projectile.active) continue;
-      if (!projectile.hasExpired(time)) continue;
+      if (!projectile.hasExpired(time) && !this.isBeyondMaxRange(projectile)) {
+        continue;
+      }
 
       if (projectile.behavior === "exploding") {
         this.spawnExplosion(projectile, time);
@@ -723,7 +1018,7 @@ export class WeaponManager {
       const projectile = rollingProjectiles[index];
       if (!(projectile instanceof Projectile) || !projectile.active) continue;
 
-      if (projectile.hasExpired(time)) {
+      if (projectile.hasExpired(time) || this.isBeyondMaxRange(projectile)) {
         projectile.despawn();
       }
     }
@@ -790,12 +1085,14 @@ export class WeaponManager {
       const bee = bees[index];
       if (!(bee instanceof HomingBee) || !bee.active) continue;
 
-      if (bee.hasExpired(time)) {
-        bee.despawn();
-        continue;
-      }
+      const stingTarget = bee.update(time, {
+        targeting: this.targetingSystem,
+        anchor: this.props.player,
+      });
 
-      bee.steer(time, this.targetingSystem);
+      if (stingTarget) {
+        this.damageSystem.applyDamage(stingTarget, bee.payload, time);
+      }
     }
   }
 
@@ -815,11 +1112,6 @@ export class WeaponManager {
 
     if (weaponObject instanceof OrbitalWeapon) {
       this.handleOrbitalHit(weaponObject, enemy);
-      return;
-    }
-
-    if (weaponObject instanceof HomingBee) {
-      this.handleBeeHit(weaponObject, enemy);
     }
   }
 
@@ -894,15 +1186,6 @@ export class WeaponManager {
     this.damageSystem.applyDamage(enemy, orbital.payload, time);
   }
 
-  private handleBeeHit(bee: HomingBee, enemy: EnemyLike) {
-    const time = this.props.scene.time.now;
-    if (!bee.active || !bee.canHit(enemy, time)) return;
-
-    bee.registerHit(enemy, time);
-    this.damageSystem.applyDamage(enemy, bee.payload, time);
-    bee.despawn();
-  }
-
   private spawnExplosion(projectile: Projectile, time: number) {
     const weapon = this.activeWeapons.get(projectile.ownerWeaponId);
     if (!weapon) return;
@@ -910,16 +1193,16 @@ export class WeaponManager {
     this.spawnArea({
       x: projectile.x,
       y: projectile.y,
-      texture: WEAPON_CORN_EXPLOSION_TEXTURE_KEY,
+      texture: WEAPON_POISON_VIAL_EXPLOSION_TEXTURE_KEY,
       radius: weapon.stats.areaRadius,
-      expiresAt: time + WEAPON_CORN_EXPLOSION_ANIMATION_MS,
+      expiresAt: time + WEAPON_POISON_VIAL_EXPLOSION_ANIMATION_MS,
       payload: {
         ...projectile.payload,
         damageType: "explosion",
       },
       hitCooldownMs: weapon.stats.hitCooldownMs,
       persistent: false,
-      animationKey: WEAPON_CORN_EXPLOSION_ANIMATION_KEY,
+      animationKey: WEAPON_POISON_VIAL_EXPLOSION_ANIMATION_KEY,
       despawnOnAnimationComplete: true,
       hitboxShape: "spriteBounds",
     });
@@ -938,6 +1221,7 @@ export class WeaponManager {
     despawnOnAnimationComplete,
     hitboxShape,
     hitboxSize,
+    depth,
   }: {
     x: number;
     y: number;
@@ -951,6 +1235,7 @@ export class WeaponManager {
     despawnOnAnimationComplete?: boolean;
     hitboxShape?: "circle" | "spriteBounds";
     hitboxSize?: { width: number; height: number };
+    depth?: number;
   }) {
     const hitbox = this.hitboxGroup.get(x, y, texture) as AreaHitbox | null;
 
@@ -969,6 +1254,7 @@ export class WeaponManager {
       despawnOnAnimationComplete,
       hitboxShape,
       hitboxSize,
+      depth,
     });
     EventBus.emit("weapon:aoe", {
       sourceWeaponId: payload.sourceWeaponId,
@@ -995,6 +1281,31 @@ export class WeaponManager {
       damageType: weapon.config.damageType,
       statusEffects,
     };
+  }
+
+  private getEffectiveRange(weapon: RuntimeWeapon) {
+    return Math.min(weapon.stats.range, COMBAT_CONFIG.maxWeaponRange);
+  }
+
+  private nearestInRange(excluded?: ReadonlySet<EnemyLike>) {
+    const { player } = this.props;
+    const target = this.targetingSystem.nearest(player, undefined, excluded);
+
+    if (
+      !target ||
+      distanceBetween(player, enemyCenter(target)) >
+        COMBAT_CONFIG.maxWeaponRange
+    ) {
+      return undefined;
+    }
+
+    return target;
+  }
+
+  private isBeyondMaxRange(object: { x: number; y: number }) {
+    return (
+      distanceBetween(this.props.player, object) > COMBAT_CONFIG.maxWeaponRange
+    );
   }
 
   private updateAimVector() {
@@ -1104,25 +1415,26 @@ export class WeaponManager {
     };
 
     circleTexture("weapon_projectile", 0xffffff, 8); // Basic projectile
-    circleTexture("weapon_watering_can_projectile", 0x5bbcff, 8); // Watering Can projectile
-    circleTexture("weapon_corn_projectile", 0xffd447, 10); // Corn projectile
-    circleTexture("weapon_tomato_projectile", 0xe14242, 10); // Tomato projectile
-    circleTexture("weapon_tomato_ricochet", 0xff6f61, 10); // Tomato ricochet
-    circleTexture("weapon_sunflower_projectile", 0xfff6a3, 8); // Sunflower projectile
-    circleTexture("weapon_pumpkin", 0xf28c28, 14); // Pumpkin
-    circleTexture("weapon_horizontal_pumpkin", 0xf28c28, 14);
-    circleTexture("weapon_vertical_pumpkin", 0xf28c28, 14);
-    circleTexture("weapon_diagonal_pumpkin", 0xf28c28, 14);
-    circleTexture("weapon_sunflower", 0xffd447, 14); // Sunflower
-    circleTexture("weapon_oil", 0xd8b35a, 20); // Oil
-    circleTexture("weapon_bee", 0xf4c430, 10);
-    circleTexture("weapon_bees", 0xf4c430, 10);
-    circleTexture("weapon_bees_spawn", 0xfff6a3, 12);
-    circleTexture("weapon_corn_explosion", 0xff8f3a, 48);
-    circleTexture("weapon_hitbox", 0xffffff, 32); // Oil area
-    rectTexture("weapon_banana", 0xcfd7e6, 18, 6); // Banana
+    circleTexture("weapon_darkness_book_projectile", 0x5bbcff, 8); // Darkness Book projectile
+    circleTexture("weapon_poison_vial_projectile", 0xffd447, 10); // Poison Vial projectile
+    circleTexture("weapon_blood_knife", 0xe14242, 10); // Blood Knife projectile
+    circleTexture("weapon_banished_jack_o_lantern", 0xf28c28, 14); // Pumpkin
+    circleTexture("weapon_banished_jack_o_lantern_horizontal", 0xf28c28, 14);
+    circleTexture("weapon_banished_jack_o_lantern_vertical", 0xf28c28, 14);
+    circleTexture("weapon_banished_jack_o_lantern_diagonal", 0xf28c28, 14);
+    circleTexture("weapon_frost_flower", 0xbfe9ff, 14); // Frost Flower
+    circleTexture("weapon_moss_ground", 0xd8b35a, 20); // Moss Ground
+    circleTexture("weapon_fly_storm", 0xf4c430, 10);
+    circleTexture("weapon_fly_storm_spawn", 0xfff6a3, 12);
+    circleTexture("weapon_poison_vial_explosion", 0xff8f3a, 48);
+    circleTexture("weapon_hitbox", 0xffffff, 32); // Moss Ground area
+    circleTexture("weapon_cursed_coffin", 0x290264, 20); // Cursed Coffin
+    circleTexture("weapon_cursed_coffin_shard", 0x7b4bd6, 8); // Coffin shard
+    rectTexture("weapon_frost_chain", 0x8bcef7, 16, 4); // Frost Chain
+    rectTexture("weapon_crimson_vial", 0xe43b44, 16, 4); // Crimson Vial tether
+    rectTexture("weapon_frozen_skull", 0xcfd7e6, 18, 6); // Frozen Skull
     rectTexture("weapon_slash", 0xe8f2ff, 42, 14); // Scythe slash
-    rectTexture("weapon_scythe", 0xe8f2ff, 38, 25); // Scythe
+    rectTexture("weapon_blood_scythe", 0xe8f2ff, 45, 44); // Blood Scythe
 
     graphics.destroy();
   }

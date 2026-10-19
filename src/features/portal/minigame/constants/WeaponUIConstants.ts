@@ -2,52 +2,64 @@ import type { TranslationKeys } from "lib/i18n/dictionaries/types";
 import type { WeaponId, WeaponRuntimeStats } from "../Types";
 import { WEAPON_CONFIGS } from "./WeaponConstants";
 
-import banana_icon from "public/world/portal/images/banana_icon.webp";
-import scythe_icon from "public/world/portal/images/scythe_icon.png";
-import tomato_icon from "public/world/portal/images/tomato_icon.png";
-import sunflower_icon from "public/world/portal/images/sunflower_icon.png";
-import oil_icon from "public/world/portal/images/oil_icon.png";
-import beehive_icon from "public/world/portal/images/beehive_icon.webp";
-import corn_bomb_icon from "public/world/portal/images/corn_bomb_icon.webp";
-import pumpkin_icon from "public/world/portal/images/pumpkin_icon.webp";
-import watering_can_icon from "public/world/portal/images/watering_can_icon.webp";
+import frozen_skull_icon from "public/world/portal/halloween/weapons/the_frost/frozen_skull_icon.png";
+import blood_scythe_icon from "public/world/portal/halloween/weapons/the_bloody_harvest/blood_scythe_icon.png";
+import blood_knife_icon from "public/world/portal/halloween/weapons/the_bloody_harvest/blood_knife_icon.png";
+import crimson_vial_icon from "public/world/portal/halloween/weapons/the_bloody_harvest/crimson_vial_icon.png";
+import frost_flower_icon from "public/world/portal/halloween/weapons/the_frost/frost_flower_icon.png";
+import moss_ground_icon from "public/world/portal/halloween/weapons/the_plague/moss_ground_icon.png";
+import fly_storm_icon from "public/world/portal/halloween/weapons/the_plague/fly_storm_icon.png";
+import poison_vial_icon from "public/world/portal/halloween/weapons/the_plague/poison_vial_icon.png";
+import banished_jack_o_lantern_icon from "public/world/portal/halloween/weapons/the_curse/banished_jack_o_lantern_icon.png";
+import darkness_book_icon from "public/world/portal/halloween/weapons/the_curse/darkness_book_icon.png";
+import cursed_coffin_icon from "public/world/portal/halloween/weapons/the_curse/cursed_coffin_icon.png";
+import frost_chain_icon from "public/world/portal/halloween/weapons/the_frost/frost_chain_icon.png";
 
 export const WEAPON_ICONS: Record<WeaponId, string> = {
-  banana: banana_icon,
-  broomScythe: scythe_icon,
-  wateringCan: watering_can_icon,
-  corn: corn_bomb_icon,
-  tomato: tomato_icon,
-  sunflower: sunflower_icon,
-  oil: oil_icon,
-  pumpkin: pumpkin_icon,
-  beehive: beehive_icon,
+  frozenSkull: frozen_skull_icon,
+  bloodScythe: blood_scythe_icon,
+  darknessBook: darkness_book_icon,
+  poisonVial: poison_vial_icon,
+  bloodKnife: blood_knife_icon,
+  frostFlower: frost_flower_icon,
+  mossGround: moss_ground_icon,
+  banishedJackOLantern: banished_jack_o_lantern_icon,
+  flyStorm: fly_storm_icon,
+  cursedCoffin: cursed_coffin_icon,
+  frostChain: frost_chain_icon,
+  crimsonVial: crimson_vial_icon,
 };
 
 export const WEAPON_IDS = Object.keys(WEAPON_CONFIGS) as WeaponId[];
 
 export const WEAPON_NAMES: Record<WeaponId, TranslationKeys> = {
-  banana: "minigame.weapon.banana",
-  broomScythe: "minigame.weapon.broomScythe",
-  wateringCan: "minigame.weapon.wateringCan",
-  corn: "minigame.weapon.corn",
-  tomato: "minigame.weapon.tomato",
-  sunflower: "minigame.weapon.sunflower",
-  oil: "minigame.weapon.oil",
-  pumpkin: "minigame.weapon.pumpkin",
-  beehive: "minigame.weapon.beehive",
+  frozenSkull: "minigame.weapon.frozenSkull",
+  bloodScythe: "minigame.weapon.bloodScythe",
+  darknessBook: "minigame.weapon.darknessBook",
+  poisonVial: "minigame.weapon.poisonVial",
+  bloodKnife: "minigame.weapon.bloodKnife",
+  frostFlower: "minigame.weapon.frostFlower",
+  mossGround: "minigame.weapon.mossGround",
+  banishedJackOLantern: "minigame.weapon.banishedJackOLantern",
+  flyStorm: "minigame.weapon.flyStorm",
+  cursedCoffin: "minigame.weapon.cursedCoffin",
+  frostChain: "minigame.weapon.frostChain",
+  crimsonVial: "minigame.weapon.crimsonVial",
 };
 
 export const WEAPON_DESCRIPTIONS: Record<WeaponId, TranslationKeys> = {
-  banana: "minigame.weapon.description.banana",
-  broomScythe: "minigame.weapon.description.broomScythe",
-  wateringCan: "minigame.weapon.description.wateringCan",
-  corn: "minigame.weapon.description.corn",
-  tomato: "minigame.weapon.description.tomato",
-  sunflower: "minigame.weapon.description.sunflower",
-  oil: "minigame.weapon.description.oil",
-  pumpkin: "minigame.weapon.description.pumpkin",
-  beehive: "minigame.weapon.description.beehive",
+  frozenSkull: "minigame.weapon.description.frozenSkull",
+  bloodScythe: "minigame.weapon.description.bloodScythe",
+  darknessBook: "minigame.weapon.description.darknessBook",
+  poisonVial: "minigame.weapon.description.poisonVial",
+  bloodKnife: "minigame.weapon.description.bloodKnife",
+  frostFlower: "minigame.weapon.description.frostFlower",
+  mossGround: "minigame.weapon.description.mossGround",
+  banishedJackOLantern: "minigame.weapon.description.banishedJackOLantern",
+  flyStorm: "minigame.weapon.description.flyStorm",
+  cursedCoffin: "minigame.weapon.description.cursedCoffin",
+  frostChain: "minigame.weapon.description.frostChain",
+  crimsonVial: "minigame.weapon.description.crimsonVial",
 };
 
 export const WEAPON_STAT_LABELS: Record<
@@ -75,6 +87,7 @@ export const WEAPON_STAT_LABELS: Record<
   homingSpeed: "minigame.weapon.stat.homingSpeed",
   hitCooldownMs: "minigame.weapon.stat.hitCooldownMs",
   angularSpeed: "minigame.weapon.stat.angularSpeed",
+  knockback: "minigame.weapon.stat.knockback",
 };
 
 export const WEAPON_STAT_DESCRIPTIONS: Record<
@@ -102,4 +115,5 @@ export const WEAPON_STAT_DESCRIPTIONS: Record<
   homingSpeed: "minigame.weapon.statDescription.homingSpeed",
   hitCooldownMs: "minigame.weapon.statDescription.hitCooldownMs",
   angularSpeed: "minigame.weapon.statDescription.angularSpeed",
+  knockback: "minigame.weapon.statDescription.knockback",
 };

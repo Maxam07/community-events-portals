@@ -14,7 +14,6 @@ import {
   isPlayerMaxLevel,
   LEVEL_UP_WEAPON_IDS,
   PLAYER_INITIAL_LEVEL,
-  ENEMY_BALANCE_STATS,
   getActiveWearableBuffs,
   NO_WEARABLE_BUFF_SCORE_MULTIPLIER,
   resolveSpecialPower,
@@ -324,6 +323,7 @@ type GainPointsEvent = {
 type LoseLifeEvent = {
   type: "LOSE_LIFE";
   enemyType: EnemyType;
+  damage: number;
 };
 
 type CollectItemEvent = {
@@ -910,8 +910,7 @@ export const portalMachine = createMachine<Context, PortalEvent, PortalState>({
         LOSE_LIFE: {
           actions: assign({
             lives: (context, event) => {
-              const damage = ENEMY_BALANCE_STATS[event.enemyType].DAMAGE;
-              return Math.max(0, context.lives - damage);
+              return Math.max(0, context.lives - event.damage);
             },
           }),
         },

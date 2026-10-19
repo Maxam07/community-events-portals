@@ -259,8 +259,7 @@ describe("portalMachine progression flow", () => {
     expect(service.state.context.pendingChestRemainingPicks).toBe(0);
     expect(service.state.context.isGameplayPaused).toBe(true);
 
-    const secondOption =
-      service.state.context.pendingLevelUpChoice?.options[0];
+    const secondOption = service.state.context.pendingLevelUpChoice?.options[0];
     service.send("SELECT_LEVEL_UP_OPTION", { option: secondOption! });
 
     // Queue exhausted - resumes like a normal level-up would.
@@ -316,9 +315,7 @@ describe("portalMachine progression flow", () => {
       option: { kind: "upgradePerk", perkId: "maxHealth", toLevel: 2 },
     });
 
-    expect(upgradePerkService.state.context.maxLives).toBe(
-      maxLivesBefore + 40,
-    );
+    expect(upgradePerkService.state.context.maxLives).toBe(maxLivesBefore + 40);
     expect(upgradePerkService.state.context.lives).toBe(livesBefore + 40);
     expect(upgradePerkService.state.context.perkLevels.maxHealth).toBe(2);
 
@@ -346,7 +343,7 @@ describe("portalMachine progression flow", () => {
     expect(service.state.context.maxLives).toBe(100);
     expect(service.state.context.lives).toBe(100);
 
-    service.send("LOSE_LIFE", { enemyType: "mob1" });
+    service.send("LOSE_LIFE", { enemyType: "mob1", damage: 1 });
     service.send("SET_ACTIVE_WEARABLES", { wearables: {} });
 
     expect(service.state.context.maxLives).toBe(100);
@@ -674,7 +671,7 @@ describe("portalMachine progression flow", () => {
 });
 
 describe("portalMachine special power", () => {
-  const PLAGUE_PAIR = { oil: 1, corn: 1 };
+  const PLAGUE_PAIR = { mossGround: 1, poisonVial: 1 };
 
   const startPlaying = (weaponLevels: Record<string, number>) =>
     interpret(
@@ -720,7 +717,7 @@ describe("portalMachine special power", () => {
   });
 
   it("ignores activation without a special power", () => {
-    const service = startPlaying({ oil: 1, banana: 1 });
+    const service = startPlaying({ mossGround: 1, frozenSkull: 1 });
 
     service.send("ACTIVATE_SPECIAL_POWER");
 

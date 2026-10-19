@@ -4,7 +4,11 @@ import type { MachineInterpreter } from "../lib/Machine";
 import type { DamagePayload, PhasingEnemyTypes } from "../Types";
 import type { EnemyConfig } from "../Types";
 import { PHASING_CONFIGS } from "../constants/EnemyConstants";
-import { WEAPON_SFX, WEAPON_SFX_VOL } from "../constants";
+import {
+  KNOCKBACK_DURATION_MS,
+  WEAPON_SFX,
+  WEAPON_SFX_VOL,
+} from "../constants";
 import { WeaponSfxLimiter } from "../lib/combat/WeaponSfxLimiter";
 import { SQUARE_WIDTH } from "features/game/lib/constants";
 
@@ -32,10 +36,12 @@ export class PhasingEnemy extends Phaser.GameObjects.Container {
   public hp: number;
   public maxHp: number;
   public isDead = false;
+  public damageMultiplier = 1;
   public config: EnemyConfig;
   private isHurting = false;
   // Status effects (slow/stun) scale movement speed; 1 = normal speed.
   private movementMultiplier = 1;
+  private knockbackRemainingMs = 0;
   private hurtFlashRemainingMs = 0;
   private isCritFlashing = false;
   private critFlashRemainingMs = 0;
@@ -69,8 +75,7 @@ export class PhasingEnemy extends Phaser.GameObjects.Container {
 
   public get portalService() {
     return this.scene.registry.get("portalService") as
-      | MachineInterpreter
-      | undefined;
+      MachineInterpreter | undefined;
   }
 
   createEnemy() {
@@ -111,6 +116,17 @@ export class PhasingEnemy extends Phaser.GameObjects.Container {
     this.updateCritVisual(delta);
 
     if (!this.player || !this.active || this.isDead) return;
+
+    if (this.knockbackRemainingMs > 0) {
+      this.knockbackRemainingMs -= delta;
+
+      if (this.knockbackRemainingMs <= 0) {
+        this.knockbackRemainingMs = 0;
+        this.enemyBody.setVelocity(0, 0);
+      }
+
+      return;
+    }
 
     if (this.deSpawnState) {
       const camera = this.scene.cameras.main;
@@ -199,9 +215,23 @@ export class PhasingEnemy extends Phaser.GameObjects.Container {
     }
   }
 
+  public applyKnockback(dx: number, dy: number, distance: number) {
+    if (!this.scene || this.isDead || !this.enemyBody) return;
+
+    const length = Math.hypot(dx, dy) || 1;
+    const speed = distance / (KNOCKBACK_DURATION_MS / 1000);
+
+    this.enemyBody.setVelocity((dx / length) * speed, (dy / length) * speed);
+    this.knockbackRemainingMs = KNOCKBACK_DURATION_MS;
+  }
+
+  public setDamageMultiplier(multiplier: number) {
+    this.damageMultiplier = multiplier;
+  }
+
   public handlePlayerContact() {
     if (!this.active || this.isDead) return;
-    this.player?.hurt(this.mobType);
+    this.player?.hurt(this.mobType, this.damageMultiplier);
   }
 
   private updateHurtVisual(delta: number) {

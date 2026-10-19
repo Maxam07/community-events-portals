@@ -38,15 +38,18 @@ export type Obstacle = {
 };
 
 export type WeaponId =
-  | "banana"
-  | "broomScythe"
-  | "wateringCan"
-  | "corn"
-  | "tomato"
-  | "sunflower"
-  | "oil"
-  | "pumpkin"
-  | "beehive";
+  | "frozenSkull"
+  | "bloodScythe"
+  | "darknessBook"
+  | "poisonVial"
+  | "bloodKnife"
+  | "frostFlower"
+  | "mossGround"
+  | "banishedJackOLantern"
+  | "flyStorm"
+  | "cursedCoffin"
+  | "frostChain"
+  | "crimsonVial";
 
 export type WeaponLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
@@ -130,21 +133,10 @@ export type LevelUpChoice = {
 export type ChestRarity = "rare" | "epic" | "legendary";
 
 export type DamageType =
-  | "physical"
-  | "water"
-  | "explosion"
-  | "light"
-  | "dot"
-  | "summon";
+  "physical" | "water" | "explosion" | "light" | "dot" | "summon";
 
 export type TargetingMode =
-  | "nearest"
-  | "random"
-  | "movementVector"
-  | "playerForward"
-  | "chainNext"
-  | "inCone"
-  | "inRadius";
+  "nearest" | "random" | "movementVector" | "chainNext" | "inCone" | "inRadius";
 
 export type WeaponBehavior =
   | "orbital"
@@ -155,7 +147,10 @@ export type WeaponBehavior =
   | "orbitalShooter"
   | "snareArea"
   | "rollingProjectile"
-  | "homingSummon";
+  | "homingSummon"
+  | "coffinBurst"
+  | "chainAnchor"
+  | "bloodTether";
 
 export type WeaponStatKey = keyof WeaponRuntimeStats;
 
@@ -183,6 +178,7 @@ export type WeaponRuntimeStats = {
   homingSpeed: number;
   hitCooldownMs: number;
   angularSpeed: number;
+  knockback: number;
 };
 
 export type WeaponConfig = {
@@ -206,11 +202,7 @@ export type WeaponUpgrade = {
 };
 
 export type ProjectileBehavior =
-  | "linear"
-  | "exploding"
-  | "bouncing"
-  | "light"
-  | "rolling";
+  "linear" | "exploding" | "bouncing" | "light" | "rolling";
 
 export type ProjectileConfig = {
   texture: string;
@@ -226,11 +218,7 @@ export type ProjectileConfig = {
 };
 
 export type StatusEffectId =
-  | "rooted"
-  | "oilDot"
-  | "plaguePoison"
-  | "frostSlow"
-  | "curseStun";
+  "oilDot" | "plaguePoison" | "frostSlow" | "curseWeakness" | "bleed";
 
 export type StatusEffectConfig = {
   id: StatusEffectId;
@@ -238,8 +226,9 @@ export type StatusEffectConfig = {
   tickMs?: number;
   damagePerTick?: number;
   speedMultiplier?: number;
+  damageMultiplier?: number;
   refreshMode: "refresh" | "stack";
-  // Weapon credited for damage-over-time ticks (defaults to "oil").
+  // Weapon credited for damage-over-time ticks (defaults to "mossGround").
   sourceWeaponId?: WeaponId;
 };
 
@@ -256,6 +245,8 @@ export type EnemyLike = Phaser.GameObjects.GameObject & {
   onDeath?: () => void;
   onCriticalHit?: () => void;
   setMovementMultiplier?: (multiplier: number) => void;
+  setDamageMultiplier?: (multiplier: number) => void;
+  applyKnockback?: (dx: number, dy: number, distance: number) => void;
 };
 
 export type DamagePayload = {
@@ -263,6 +254,7 @@ export type DamagePayload = {
   amount: number;
   damageType: DamageType;
   knockback?: number;
+  knockbackOrigin?: { x: number; y: number };
   statusEffects?: StatusEffectConfig[];
 };
 
@@ -277,24 +269,16 @@ export type CombatConfig = {
   orbitalPoolSize: number;
   beePoolSize: number;
   targetScanMs: number;
+  maxWeaponRange: number;
   defaultEnemyScore: number;
   defaultWeaponLoadout: WeaponLoadoutItem[];
 };
 
 export type DropItemType =
-  | "blueOrb"
-  | "greenOrb"
-  | "grayOrb"
-  | "yellowOrb"
-  | "purpleOrb";
+  "blueOrb" | "greenOrb" | "grayOrb" | "yellowOrb" | "purpleOrb";
 
 export type WeaponType =
-  | "chasing"
-  | "orbiting"
-  | "summoning"
-  | "staticRange"
-  | "slash"
-  | "arena";
+  "chasing" | "orbiting" | "summoning" | "staticRange" | "slash" | "arena";
 export type CodexCategoryName = "Skills" | "Enemies" | "DropItems";
 export type PassiveAbilityType = "wings";
 export type EnemyType =
@@ -305,10 +289,7 @@ export type EnemyType =
   | MiniBossType;
 export type WeaponEnemyType = BossTypes | MiniBossType | StaticRangeEnemyTypes;
 export type EnemyFormation =
-  | "vertical line"
-  | "horizontal line"
-  | "circle"
-  | "surround";
+  "vertical line" | "horizontal line" | "circle" | "surround";
 export type AreaEnemyType =
   | PhasingEnemyTypes
   | MeleeEnemyTypes

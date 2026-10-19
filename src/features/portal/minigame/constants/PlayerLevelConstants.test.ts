@@ -77,7 +77,7 @@ describe("PlayerLevelConstants", () => {
   });
 
   it("offers the same unified levelUp choice on every level - no hardcoded level 1 or 2 behavior", () => {
-    const weaponLevels = getWeaponLevels(["banana"]);
+    const weaponLevels = getWeaponLevels(["frozenSkull"]);
     const perkLevels = getPerkLevels();
 
     [1, 2, 3, 10].forEach((level) => {
@@ -108,7 +108,7 @@ describe("PlayerLevelConstants", () => {
   });
 
   it("goes back to the normal 3 weapon / 2 perk split as soon as a first weapon is owned", () => {
-    const weaponLevels = getWeaponLevels(["banana"]);
+    const weaponLevels = getWeaponLevels(["frozenSkull"]);
     const perkLevels = getPerkLevels();
 
     const options = pickLevelUpOptions({
@@ -121,7 +121,7 @@ describe("PlayerLevelConstants", () => {
   });
 
   it("always offers 3 center weapon slots and 2 corner perk slots when both are available", () => {
-    const weaponLevels = getWeaponLevels(["banana"]);
+    const weaponLevels = getWeaponLevels(["frozenSkull"]);
     const perkLevels = getPerkLevels();
 
     const options = pickLevelUpOptions({
@@ -144,7 +144,7 @@ describe("PlayerLevelConstants", () => {
   });
 
   it("backfills perk corners with weapons once every perk slot is full and maxed", () => {
-    const weaponLevels = getWeaponLevels(["banana"]);
+    const weaponLevels = getWeaponLevels(["frozenSkull"]);
     const perkLevels = Object.keys(DEFAULT_PERK_LEVELS)
       .slice(0, MAX_PLAYER_PERKS)
       .reduce(
@@ -207,12 +207,15 @@ describe("PlayerLevelConstants", () => {
   });
 
   it("excludes already unlocked weapons from future choices", () => {
-    const weaponLevels = getWeaponLevels(["banana", "corn"]);
+    const weaponLevels = getWeaponLevels(["frozenSkull", "poisonVial"]);
     const options = getAvailableWeaponChoices(weaponLevels);
 
-    expect(options).not.toContain("banana");
-    expect(options).not.toContain("corn");
-    expect(getUnlockedWeapons(weaponLevels)).toEqual(["banana", "corn"]);
+    expect(options).not.toContain("frozenSkull");
+    expect(options).not.toContain("poisonVial");
+    expect(getUnlockedWeapons(weaponLevels)).toEqual([
+      "frozenSkull",
+      "poisonVial",
+    ]);
   });
 
   it("stops offering new weapons/perks once slots are full but still offers upgrades", () => {
@@ -243,7 +246,7 @@ describe("PlayerLevelConstants", () => {
 
   describe("bonus levels (backlog 1.1 + Luck)", () => {
     it("grants exactly 1 level when neither bonus chance hits", () => {
-      const weaponLevels = getWeaponLevels(["banana"]);
+      const weaponLevels = getWeaponLevels(["frozenSkull"]);
       const perkLevels = getPerkLevels();
 
       const options = pickLevelUpOptions({
@@ -258,7 +261,7 @@ describe("PlayerLevelConstants", () => {
     });
 
     it("advances an upgrade by 3 levels at once when the 3-level roll hits", () => {
-      const weaponLevels = getWeaponLevels(["banana"]);
+      const weaponLevels = getWeaponLevels(["frozenSkull"]);
       const perkLevels = getPerkLevels();
 
       const options = pickLevelUpOptions({
@@ -267,16 +270,16 @@ describe("PlayerLevelConstants", () => {
         bonusLevelChances: ALWAYS_BONUS_3_CHANCES,
       });
 
-      const bananaUpgrade = options.find(
+      const frozenSkullUpgrade = options.find(
         (option) =>
-          option.kind === "upgradeWeapon" && option.weaponId === "banana",
+          option.kind === "upgradeWeapon" && option.weaponId === "frozenSkull",
       );
 
-      expect(bananaUpgrade?.bonusLevels).toBe(3);
-      // banana was at level 1, +3 should land it on level 4.
-      expect(bananaUpgrade?.kind).toBe("upgradeWeapon");
-      if (bananaUpgrade?.kind === "upgradeWeapon") {
-        expect(bananaUpgrade.toLevel).toBe(4);
+      expect(frozenSkullUpgrade?.bonusLevels).toBe(3);
+      // frozenSkull was at level 1, +3 should land it on level 4.
+      expect(frozenSkullUpgrade?.kind).toBe("upgradeWeapon");
+      if (frozenSkullUpgrade?.kind === "upgradeWeapon") {
+        expect(frozenSkullUpgrade.toLevel).toBe(4);
       }
     });
 
@@ -346,8 +349,8 @@ describe("PlayerLevelConstants", () => {
       });
     });
 
-    it("tags a chest choice with source \"chest\" and never touches player level bookkeeping fields", () => {
-      const weaponLevels = getWeaponLevels(["banana"]);
+    it('tags a chest choice with source "chest" and never touches player level bookkeeping fields', () => {
+      const weaponLevels = getWeaponLevels(["frozenSkull"]);
       const perkLevels = getPerkLevels();
 
       const choice = getChestLevelUpChoice({

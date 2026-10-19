@@ -35,9 +35,12 @@ const BASE_WEAPON_STATS = {
   homingSpeed: 90,
   hitCooldownMs: 450,
   angularSpeed: 0.003,
+  knockback: 0,
 };
 
 export const WEAPON_MAX_LEVEL: WeaponLevel = 8;
+
+export const KNOCKBACK_DURATION_MS = 160;
 
 export const getNextWeaponLevel = (
   level: WeaponLevel,
@@ -60,53 +63,48 @@ export const WEAPON_UPGRADE_XP_COSTS: Record<WeaponLevel, number | null> = {
 };
 
 export const PROJECTILE_CONFIGS: Record<string, ProjectileConfig> = {
-  waterDrop: {
-    texture: "weapon_watering_can_projectile",
+  darknessBook: {
+    texture: "weapon_darkness_book_projectile",
     behavior: "linear",
-    bodySize: 8,
-    rotateToVelocity: true,
+    bodySize: 10,
   },
-  corn: {
-    texture: "weapon_corn_projectile",
+  poisonVial: {
+    texture: "weapon_poison_vial_projectile",
     behavior: "exploding",
     bodySize: 10,
     rotateToVelocity: true,
     rotationOffsetDegrees: -90,
-    scale: 0.7,
+    scale: 0.8,
     orientedHitbox: true,
   },
-  tomato: {
-    texture: "weapon_tomato_projectile",
-    ricochetTexture: "weapon_tomato_ricochet",
+  bloodKnife: {
+    texture: "weapon_blood_knife",
     behavior: "bouncing",
     bodySize: 10,
-    rotateToVelocity: true,
-    rotationOffsetDegrees: -45,
-    orientedHitbox: true,
   },
   light: {
-    texture: "weapon_sunflower_projectile",
+    texture: "weapon_frost_flower",
     behavior: "light",
     bodySize: 6,
     rotateToVelocity: true,
     rotationOffsetDegrees: 90,
   },
-  pumpkin: {
-    texture: "weapon_horizontal_pumpkin",
+  banishedJackOLantern: {
+    texture: "weapon_banished_jack_o_lantern_horizontal",
     behavior: "rolling",
     bodySize: 14,
     bodySizeMode: "spriteBounds",
     bodySizeScale: { width: 1, height: 2 / 3 },
   },
+  coffinShard: {
+    texture: "weapon_cursed_coffin_shard",
+    behavior: "linear",
+    bodySize: 10,
+    rotateToVelocity: true,
+  },
 };
 
 export const STATUS_EFFECTS: Record<string, StatusEffectConfig> = {
-  rooted: {
-    id: "rooted",
-    durationMs: 1200,
-    speedMultiplier: 0,
-    refreshMode: "refresh",
-  },
   oilDot: {
     id: "oilDot",
     durationMs: 2400,
@@ -114,12 +112,20 @@ export const STATUS_EFFECTS: Record<string, StatusEffectConfig> = {
     damagePerTick: 1,
     refreshMode: "refresh",
   },
+  bleed: {
+    id: "bleed",
+    durationMs: 1500,
+    tickMs: 1000,
+    damagePerTick: 2,
+    refreshMode: "refresh",
+    sourceWeaponId: "crimsonVial",
+  },
 };
 
 export const WEAPON_CONFIGS: Record<WeaponId, WeaponConfig> = {
-  banana: {
-    id: "banana",
-    texture: "weapon_banana",
+  frozenSkull: {
+    id: "frozenSkull",
+    texture: "weapon_frozen_skull",
     behavior: "orbital",
     damageType: "physical",
     targeting: "inRadius",
@@ -132,28 +138,28 @@ export const WEAPON_CONFIGS: Record<WeaponId, WeaponConfig> = {
       angularSpeed: 0.004,
     },
   },
-  broomScythe: {
-    id: "broomScythe",
-    texture: "weapon_scythe",
+  bloodScythe: {
+    id: "bloodScythe",
+    texture: "weapon_blood_scythe",
     behavior: "slash",
     damageType: "physical",
-    targeting: "playerForward",
+    targeting: "nearest",
     baseStats: {
       ...BASE_WEAPON_STATS,
       damage: 6,
       cooldownMs: 1300,
       durationMs: 320,
-      arcDegrees: 60,
+      arcDegrees: 180,
       range: 40,
     },
   },
-  wateringCan: {
-    id: "wateringCan",
-    texture: "weapon_watering_can_projectile",
+  darknessBook: {
+    id: "darknessBook",
+    texture: "weapon_darkness_book_projectile",
     behavior: "linearProjectile",
     damageType: "water",
     targeting: "nearest",
-    projectile: PROJECTILE_CONFIGS.waterDrop,
+    projectile: PROJECTILE_CONFIGS.darknessBook,
     baseStats: {
       ...BASE_WEAPON_STATS,
       damage: 5,
@@ -162,13 +168,13 @@ export const WEAPON_CONFIGS: Record<WeaponId, WeaponConfig> = {
       durationMs: 900,
     },
   },
-  corn: {
-    id: "corn",
-    texture: "weapon_corn_projectile",
+  poisonVial: {
+    id: "poisonVial",
+    texture: "weapon_poison_vial_projectile",
     behavior: "explodingProjectile",
     damageType: "explosion",
     targeting: "nearest",
-    projectile: PROJECTILE_CONFIGS.corn,
+    projectile: PROJECTILE_CONFIGS.poisonVial,
     baseStats: {
       ...BASE_WEAPON_STATS,
       damage: 3,
@@ -178,13 +184,13 @@ export const WEAPON_CONFIGS: Record<WeaponId, WeaponConfig> = {
       durationMs: 1400,
     },
   },
-  tomato: {
-    id: "tomato",
-    texture: "weapon_tomato_projectile",
+  bloodKnife: {
+    id: "bloodKnife",
+    texture: "weapon_blood_knife",
     behavior: "chainProjectile",
     damageType: "physical",
     targeting: "random",
-    projectile: PROJECTILE_CONFIGS.tomato,
+    projectile: PROJECTILE_CONFIGS.bloodKnife,
     baseStats: {
       ...BASE_WEAPON_STATS,
       damage: 3,
@@ -196,9 +202,9 @@ export const WEAPON_CONFIGS: Record<WeaponId, WeaponConfig> = {
       durationMs: 2000,
     },
   },
-  sunflower: {
-    id: "sunflower",
-    texture: "weapon_sunflower",
+  frostFlower: {
+    id: "frostFlower",
+    texture: "weapon_frost_flower",
     behavior: "orbitalShooter",
     damageType: "light",
     targeting: "nearest",
@@ -214,13 +220,13 @@ export const WEAPON_CONFIGS: Record<WeaponId, WeaponConfig> = {
       angularSpeed: 0.003,
     },
   },
-  oil: {
-    id: "oil",
-    texture: "weapon_oil",
+  mossGround: {
+    id: "mossGround",
+    texture: "weapon_moss_ground",
     behavior: "snareArea",
     damageType: "dot",
     targeting: "nearest",
-    statusEffects: [STATUS_EFFECTS.rooted, STATUS_EFFECTS.oilDot],
+    statusEffects: [STATUS_EFFECTS.oilDot],
     baseStats: {
       ...BASE_WEAPON_STATS,
       damage: 1,
@@ -233,13 +239,13 @@ export const WEAPON_CONFIGS: Record<WeaponId, WeaponConfig> = {
       hitCooldownMs: 500,
     },
   },
-  pumpkin: {
-    id: "pumpkin",
-    texture: "weapon_horizontal_pumpkin",
+  banishedJackOLantern: {
+    id: "banishedJackOLantern",
+    texture: "weapon_banished_jack_o_lantern_horizontal",
     behavior: "rollingProjectile",
     damageType: "physical",
     targeting: "random",
-    projectile: PROJECTILE_CONFIGS.pumpkin,
+    projectile: PROJECTILE_CONFIGS.banishedJackOLantern,
     baseStats: {
       ...BASE_WEAPON_STATS,
       damage: 4,
@@ -250,26 +256,76 @@ export const WEAPON_CONFIGS: Record<WeaponId, WeaponConfig> = {
       size: 1.0,
     },
   },
-  beehive: {
-    id: "beehive",
-    texture: "weapon_bees",
+  flyStorm: {
+    id: "flyStorm",
+    texture: "weapon_fly_storm",
     behavior: "homingSummon",
     damageType: "summon",
     targeting: "nearest",
     baseStats: {
       ...BASE_WEAPON_STATS,
       damage: 2,
-      cooldownMs: 1100,
       projectileCount: 2,
       homingSpeed: 110,
-      durationMs: 2200,
-      hitCooldownMs: 300,
+      hitCooldownMs: 800,
+      range: 140,
+    },
+  },
+  cursedCoffin: {
+    id: "cursedCoffin",
+    texture: "weapon_cursed_coffin",
+    behavior: "coffinBurst",
+    damageType: "physical",
+    targeting: "nearest",
+    projectile: PROJECTILE_CONFIGS.coffinShard,
+    baseStats: {
+      ...BASE_WEAPON_STATS,
+      damage: 3,
+      cooldownMs: 2200,
+      projectileSpeed: 110,
+      projectileCount: 3,
+      areaRadius: 60,
+      durationMs: 700,
+      pierce: 1,
+    },
+  },
+  frostChain: {
+    id: "frostChain",
+    texture: "weapon_frost_chain",
+    behavior: "chainAnchor",
+    damageType: "physical",
+    targeting: "nearest",
+    baseStats: {
+      ...BASE_WEAPON_STATS,
+      damage: 4,
+      cooldownMs: 1600,
+      range: 55,
+      knockback: 30,
+      durationMs: 220,
+    },
+  },
+  crimsonVial: {
+    id: "crimsonVial",
+    texture: "weapon_crimson_vial",
+    behavior: "bloodTether",
+    damageType: "dot",
+    targeting: "nearest",
+    statusEffects: [STATUS_EFFECTS.bleed],
+    baseStats: {
+      ...BASE_WEAPON_STATS,
+      damage: 0,
+      cooldownMs: 2000,
+      projectileCount: 1,
+      range: 140,
+      dotDamage: 2,
+      dotTickMs: 1000,
+      statusDurationMs: 1500,
     },
   },
 };
 
 export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
-  banana: [
+  frozenSkull: [
     {
       level: 2,
       modifiers: [
@@ -321,17 +377,18 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
       ],
     },
   ],
-  broomScythe: [
+  bloodScythe: [
     {
       level: 2,
       modifiers: [
-        { stat: "arcDegrees", operation: "add", value: 30 },
+        { stat: "arcDegrees", operation: "add", value: 20 },
         { stat: "damage", operation: "add", value: 2 },
       ],
     },
     {
       level: 3,
       modifiers: [
+        { stat: "arcDegrees", operation: "add", value: 20 },
         { stat: "range", operation: "add", value: 5 },
         { stat: "cooldownMs", operation: "multiply", value: 0.9 },
       ],
@@ -339,13 +396,14 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
     {
       level: 4,
       modifiers: [
-        { stat: "arcDegrees", operation: "add", value: 40 },
+        { stat: "arcDegrees", operation: "add", value: 20 },
         { stat: "damage", operation: "add", value: 3 },
       ],
     },
     {
       level: 5,
       modifiers: [
+        { stat: "arcDegrees", operation: "add", value: 20 },
         { stat: "durationMs", operation: "add", value: 80 },
         { stat: "cooldownMs", operation: "multiply", value: 0.85 },
       ],
@@ -353,13 +411,14 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
     {
       level: 6,
       modifiers: [
-        { stat: "arcDegrees", operation: "set", value: 360 },
+        { stat: "arcDegrees", operation: "add", value: 20 },
         { stat: "damage", operation: "add", value: 4 },
       ],
     },
     {
       level: 7,
       modifiers: [
+        { stat: "arcDegrees", operation: "add", value: 20 },
         { stat: "range", operation: "add", value: 10 },
         { stat: "cooldownMs", operation: "multiply", value: 0.8 },
       ],
@@ -367,13 +426,14 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
     {
       level: 8,
       modifiers: [
+        { stat: "arcDegrees", operation: "add", value: 30 },
         { stat: "projectileCount", operation: "set", value: 2 },
         { stat: "damage", operation: "add", value: 10 },
         { stat: "range", operation: "add", value: 10 },
       ],
     },
   ],
-  wateringCan: [
+  darknessBook: [
     {
       level: 2,
       modifiers: [
@@ -425,7 +485,7 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
       ],
     },
   ],
-  corn: [
+  poisonVial: [
     {
       level: 2,
       modifiers: [
@@ -477,7 +537,7 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
       ],
     },
   ],
-  tomato: [
+  bloodKnife: [
     {
       level: 2,
       modifiers: [
@@ -529,7 +589,7 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
       ],
     },
   ],
-  sunflower: [
+  frostFlower: [
     {
       level: 2,
       modifiers: [
@@ -581,7 +641,7 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
       ],
     },
   ],
-  oil: [
+  mossGround: [
     {
       level: 2,
       modifiers: [
@@ -633,7 +693,7 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
       ],
     },
   ],
-  pumpkin: [
+  banishedJackOLantern: [
     {
       level: 2,
       modifiers: [
@@ -685,7 +745,7 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
       ],
     },
   ],
-  beehive: [
+  flyStorm: [
     {
       level: 2,
       modifiers: [
@@ -697,14 +757,14 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
       level: 3,
       modifiers: [
         { stat: "damage", operation: "add", value: 1 },
-        { stat: "durationMs", operation: "add", value: 250 },
+        { stat: "range", operation: "add", value: 20 },
       ],
     },
     {
       level: 4,
       modifiers: [
         { stat: "projectileCount", operation: "add", value: 1 },
-        { stat: "durationMs", operation: "add", value: 400 },
+        { stat: "hitCooldownMs", operation: "multiply", value: 0.85 },
       ],
     },
     {
@@ -718,14 +778,15 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
       level: 6,
       modifiers: [
         { stat: "projectileCount", operation: "add", value: 1 },
-        { stat: "cooldownMs", operation: "multiply", value: 0.9 },
+        { stat: "hitCooldownMs", operation: "multiply", value: 0.9 },
       ],
     },
     {
       level: 7,
       modifiers: [
         { stat: "damage", operation: "add", value: 2 },
-        { stat: "cooldownMs", operation: "multiply", value: 0.85 },
+        { stat: "hitCooldownMs", operation: "multiply", value: 0.85 },
+        { stat: "range", operation: "add", value: 30 },
       ],
     },
     {
@@ -734,6 +795,209 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
         { stat: "projectileCount", operation: "add", value: 2 },
         { stat: "homingSpeed", operation: "add", value: 40 },
         { stat: "damage", operation: "add", value: 3 },
+      ],
+    },
+  ],
+  cursedCoffin: [
+    {
+      level: 2,
+      modifiers: [
+        { stat: "projectileCount", operation: "set", value: 4 },
+        { stat: "damage", operation: "set", value: 4 },
+        { stat: "areaRadius", operation: "set", value: 68 },
+        { stat: "cooldownMs", operation: "set", value: 2000 },
+        { stat: "pierce", operation: "set", value: 1 },
+      ],
+    },
+    {
+      level: 3,
+      modifiers: [
+        { stat: "projectileCount", operation: "set", value: 4 },
+        { stat: "damage", operation: "set", value: 5 },
+        { stat: "areaRadius", operation: "set", value: 76 },
+        { stat: "cooldownMs", operation: "set", value: 1850 },
+        { stat: "pierce", operation: "set", value: 2 },
+      ],
+    },
+    {
+      level: 4,
+      modifiers: [
+        { stat: "projectileCount", operation: "set", value: 5 },
+        { stat: "damage", operation: "set", value: 5 },
+        { stat: "areaRadius", operation: "set", value: 84 },
+        { stat: "cooldownMs", operation: "set", value: 1700 },
+        { stat: "pierce", operation: "set", value: 2 },
+      ],
+    },
+    {
+      level: 5,
+      modifiers: [
+        { stat: "projectileCount", operation: "set", value: 5 },
+        { stat: "damage", operation: "set", value: 6 },
+        { stat: "areaRadius", operation: "set", value: 94 },
+        { stat: "cooldownMs", operation: "set", value: 1550 },
+        { stat: "pierce", operation: "set", value: 3 },
+      ],
+    },
+    {
+      level: 6,
+      modifiers: [
+        { stat: "projectileCount", operation: "set", value: 6 },
+        { stat: "damage", operation: "set", value: 7 },
+        { stat: "areaRadius", operation: "set", value: 102 },
+        { stat: "cooldownMs", operation: "set", value: 1400 },
+        { stat: "pierce", operation: "set", value: 3 },
+      ],
+    },
+    {
+      level: 7,
+      modifiers: [
+        { stat: "projectileCount", operation: "set", value: 7 },
+        { stat: "damage", operation: "set", value: 8 },
+        { stat: "areaRadius", operation: "set", value: 112 },
+        { stat: "cooldownMs", operation: "set", value: 1250 },
+        { stat: "pierce", operation: "set", value: 4 },
+      ],
+    },
+    {
+      level: 8,
+      modifiers: [
+        { stat: "projectileCount", operation: "set", value: 8 },
+        { stat: "damage", operation: "set", value: 9 },
+        { stat: "areaRadius", operation: "set", value: 120 },
+        { stat: "cooldownMs", operation: "set", value: 1100 },
+        { stat: "pierce", operation: "set", value: 4 },
+      ],
+    },
+  ],
+  frostChain: [
+    {
+      level: 2,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 5 },
+        { stat: "knockback", operation: "set", value: 45 },
+        { stat: "range", operation: "set", value: 60 },
+        { stat: "cooldownMs", operation: "set", value: 1500 },
+      ],
+    },
+    {
+      level: 3,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 6 },
+        { stat: "knockback", operation: "set", value: 50 },
+        { stat: "range", operation: "set", value: 65 },
+        { stat: "cooldownMs", operation: "set", value: 1400 },
+      ],
+    },
+    {
+      level: 4,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 7 },
+        { stat: "knockback", operation: "set", value: 55 },
+        { stat: "range", operation: "set", value: 70 },
+        { stat: "cooldownMs", operation: "set", value: 1300 },
+      ],
+    },
+    {
+      level: 5,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 9 },
+        { stat: "knockback", operation: "set", value: 60 },
+        { stat: "range", operation: "set", value: 75 },
+        { stat: "cooldownMs", operation: "set", value: 1150 },
+      ],
+    },
+    {
+      level: 6,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 10 },
+        { stat: "knockback", operation: "set", value: 67.5 },
+        { stat: "range", operation: "set", value: 80 },
+        { stat: "cooldownMs", operation: "set", value: 1000 },
+      ],
+    },
+    {
+      level: 7,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 11 },
+        { stat: "knockback", operation: "set", value: 75 },
+        { stat: "range", operation: "set", value: 85 },
+        { stat: "cooldownMs", operation: "set", value: 900 },
+      ],
+    },
+    {
+      level: 8,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 12 },
+        { stat: "knockback", operation: "set", value: 80 },
+        { stat: "range", operation: "set", value: 90 },
+        { stat: "cooldownMs", operation: "set", value: 800 },
+      ],
+    },
+  ],
+  // dotDamage is bleed damage per second (dotTickMs is 1000).
+  crimsonVial: [
+    {
+      level: 2,
+      modifiers: [
+        { stat: "dotDamage", operation: "set", value: 3 },
+        { stat: "statusDurationMs", operation: "set", value: 1700 },
+        { stat: "projectileCount", operation: "set", value: 1 },
+        { stat: "cooldownMs", operation: "set", value: 1850 },
+      ],
+    },
+    {
+      level: 3,
+      modifiers: [
+        { stat: "dotDamage", operation: "set", value: 3 },
+        { stat: "statusDurationMs", operation: "set", value: 1900 },
+        { stat: "projectileCount", operation: "set", value: 1 },
+        { stat: "cooldownMs", operation: "set", value: 1700 },
+      ],
+    },
+    {
+      level: 4,
+      modifiers: [
+        { stat: "dotDamage", operation: "set", value: 4 },
+        { stat: "statusDurationMs", operation: "set", value: 2100 },
+        { stat: "projectileCount", operation: "set", value: 1 },
+        { stat: "cooldownMs", operation: "set", value: 1550 },
+      ],
+    },
+    {
+      level: 5,
+      modifiers: [
+        { stat: "dotDamage", operation: "set", value: 5 },
+        { stat: "statusDurationMs", operation: "set", value: 2300 },
+        { stat: "projectileCount", operation: "set", value: 2 },
+        { stat: "cooldownMs", operation: "set", value: 1400 },
+      ],
+    },
+    {
+      level: 6,
+      modifiers: [
+        { stat: "dotDamage", operation: "set", value: 6 },
+        { stat: "statusDurationMs", operation: "set", value: 2500 },
+        { stat: "projectileCount", operation: "set", value: 2 },
+        { stat: "cooldownMs", operation: "set", value: 1250 },
+      ],
+    },
+    {
+      level: 7,
+      modifiers: [
+        { stat: "dotDamage", operation: "set", value: 6 },
+        { stat: "statusDurationMs", operation: "set", value: 2700 },
+        { stat: "projectileCount", operation: "set", value: 2 },
+        { stat: "cooldownMs", operation: "set", value: 1100 },
+      ],
+    },
+    {
+      level: 8,
+      modifiers: [
+        { stat: "dotDamage", operation: "set", value: 7 },
+        { stat: "statusDurationMs", operation: "set", value: 3000 },
+        { stat: "projectileCount", operation: "set", value: 2 },
+        { stat: "cooldownMs", operation: "set", value: 1000 },
       ],
     },
   ],
@@ -788,6 +1052,9 @@ export const resolveWeaponStats = (
   const attackSpeedBonus = getPerkAmount(perkLevels, "attackSpeed");
   if (attackSpeedBonus > 0) {
     stats.cooldownMs *= 1 - attackSpeedBonus;
+    if (id === "flyStorm") {
+      stats.hitCooldownMs *= 1 - attackSpeedBonus;
+    }
   }
 
   const cooldownReductionBonus = getPerkAmount(perkLevels, "cooldownReduction");
@@ -811,6 +1078,7 @@ export const COMBAT_CONFIG: CombatConfig = {
   orbitalPoolSize: 24,
   beePoolSize: 32,
   targetScanMs: 150,
+  maxWeaponRange: 200,
   defaultEnemyScore: 1,
-  defaultWeaponLoadout: [{ id: "banana", level: 1 }],
+  defaultWeaponLoadout: [{ id: "frozenSkull", level: 1 }],
 };

@@ -1,6 +1,7 @@
 import type { Scene } from "../../Scene";
 import type { BumpkinContainer } from "../../Core/BumpkinContainer";
 import type { EnemyType } from "../../Types";
+import { getOwnerDamageMultiplier } from "../../lib/combat/damageMultiplier";
 
 interface OrbitingWeaponProps {
   scene: Scene;
@@ -158,6 +159,6 @@ export class OrbitingWeapon extends Phaser.GameObjects.Sprite {
 
   public handlePlayerContact() {
     if (!this.active || this.isDead) return;
-    this.player?.hurt(this.enemyType);
+    this.player?.hurt(this.enemyType, getOwnerDamageMultiplier(this.target));
   }
 }

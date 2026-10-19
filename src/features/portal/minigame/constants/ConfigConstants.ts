@@ -7,15 +7,18 @@ import { translate as t } from "lib/i18n/translate";
 import { DROP_ITEM_XP_VALUES } from "./EnemyConstants";
 import { WEAPON_CONFIGS, WEAPON_UPGRADES } from "./WeaponConstants";
 
-import banana_icon from "public/world/portal/images/banana_icon.webp";
-import scythe_icon from "public/world/portal/images/scythe_icon.png";
-import tomato_icon from "public/world/portal/images/tomato_icon.png";
-import sunflower_icon from "public/world/portal/images/sunflower_icon.png";
-import oil_icon from "public/world/portal/images/oil_icon.png";
-import beehive_icon from "public/world/portal/images/beehive_icon.webp";
-import corn_bomb_icon from "public/world/portal/images/corn_bomb_icon.webp";
-import pumpkin_icon from "public/world/portal/images/pumpkin_icon.webp";
-import watering_can_icon from "public/world/portal/images/watering_can_icon.webp";
+import frozen_skull_icon from "public/world/portal/halloween/weapons/the_frost/frozen_skull_icon.png";
+import blood_scythe_icon from "public/world/portal/halloween/weapons/the_bloody_harvest/blood_scythe_icon.png";
+import blood_knife_icon from "public/world/portal/halloween/weapons/the_bloody_harvest/blood_knife_icon.png";
+import frost_flower_icon from "public/world/portal/halloween/weapons/the_frost/frost_flower_icon.png";
+import moss_ground_icon from "public/world/portal/halloween/weapons/the_plague/moss_ground_icon.png";
+import fly_storm_icon from "public/world/portal/halloween/weapons/the_plague/fly_storm_icon.png";
+import poison_vial_icon from "public/world/portal/halloween/weapons/the_plague/poison_vial_icon.png";
+import banished_jack_o_lantern_icon from "public/world/portal/halloween/weapons/the_curse/banished_jack_o_lantern_icon.png";
+import darkness_book_icon from "public/world/portal/halloween/weapons/the_curse/darkness_book_icon.png";
+import cursed_coffin_icon from "public/world/portal/halloween/weapons/the_curse/cursed_coffin_icon.png";
+import frost_chain_icon from "public/world/portal/halloween/weapons/the_frost/frost_chain_icon.png";
+import crimson_vial_icon from "public/world/portal/halloween/weapons/the_bloody_harvest/crimson_vial_icon.png";
 
 import blueOrb from "public/world/portal/images/dropItem1.webp";
 import greenOrb from "public/world/portal/images/dropItem2.webp";
@@ -30,6 +33,7 @@ import speedIcon from "public/world/portal/images/lightning.png";
 import type {
   // MobTypes,
   WeaponId,
+  WeaponStatKey,
   PassiveAbilityType,
 } from "../Types";
 import { SUNNYSIDE } from "assets/sunnyside";
@@ -109,7 +113,7 @@ export const INSTRUCTIONS: {
     description: t("minigame.instructions2"),
   },
   {
-    image: watering_can_icon,
+    image: darkness_book_icon,
     description: t("minigame.instructions3"),
   },
   // {
@@ -240,17 +244,20 @@ export const ENEMIES_TABLE: {
   // },
 ];
 
-function getWeaponMaxDamage(weaponId: WeaponId) {
-  const baseDamage = WEAPON_CONFIGS[weaponId].baseStats.damage;
-
-  const damageBonus = WEAPON_UPGRADES[weaponId]
+function getWeaponMaxStat(weaponId: WeaponId, stat: WeaponStatKey) {
+  return WEAPON_UPGRADES[weaponId]
     .flatMap((upgrade) => upgrade.modifiers)
-    .filter(
-      (modifier) => modifier.stat === "damage" && modifier.operation === "add",
-    )
-    .reduce((total, modifier) => total + modifier.value, 0);
+    .filter((modifier) => modifier.stat === stat)
+    .reduce((total, modifier) => {
+      if (modifier.operation === "add") return total + modifier.value;
+      if (modifier.operation === "set") return modifier.value;
 
-  return baseDamage + damageBonus;
+      return total;
+    }, WEAPON_CONFIGS[weaponId].baseStats[stat]);
+}
+
+function getWeaponMaxDamage(weaponId: WeaponId) {
+  return getWeaponMaxStat(weaponId, "damage");
 }
 
 export const SKILLS_TABLE: {
@@ -261,67 +268,88 @@ export const SKILLS_TABLE: {
   maxDamage: number;
 }[] = [
   {
-    image: banana_icon,
-    skillName: t("minigame.weapon.banana"),
+    image: frozen_skull_icon,
+    skillName: t("minigame.weapon.frozenSkull"),
     description: t("minigame.enemy2"),
-    minDamage: skill_config.banana.baseStats.damage,
-    maxDamage: getWeaponMaxDamage("banana"),
+    minDamage: skill_config.frozenSkull.baseStats.damage,
+    maxDamage: getWeaponMaxDamage("frozenSkull"),
   },
   {
-    image: scythe_icon,
-    skillName: t("minigame.weapon.broomScythe"),
+    image: blood_scythe_icon,
+    skillName: t("minigame.weapon.bloodScythe"),
     description: t("minigame.enemy3"),
-    minDamage: skill_config.broomScythe.baseStats.damage,
-    maxDamage: getWeaponMaxDamage("broomScythe"),
+    minDamage: skill_config.bloodScythe.baseStats.damage,
+    maxDamage: getWeaponMaxDamage("bloodScythe"),
   },
   {
-    image: watering_can_icon,
-    skillName: t("minigame.weapon.wateringCan"),
+    image: darkness_book_icon,
+    skillName: t("minigame.weapon.darknessBook"),
     description: t("minigame.enemy1"),
-    minDamage: skill_config.wateringCan.baseStats.damage,
-    maxDamage: getWeaponMaxDamage("wateringCan"),
+    minDamage: skill_config.darknessBook.baseStats.damage,
+    maxDamage: getWeaponMaxDamage("darknessBook"),
   },
   {
-    image: corn_bomb_icon,
-    skillName: t("minigame.weapon.corn"),
+    image: poison_vial_icon,
+    skillName: t("minigame.weapon.poisonVial"),
     description: t("minigame.enemy3"),
-    minDamage: skill_config.corn.baseStats.damage,
-    maxDamage: getWeaponMaxDamage("corn"),
+    minDamage: skill_config.poisonVial.baseStats.damage,
+    maxDamage: getWeaponMaxDamage("poisonVial"),
   },
   {
-    image: tomato_icon,
-    skillName: t("minigame.weapon.tomato"),
+    image: blood_knife_icon,
+    skillName: t("minigame.weapon.bloodKnife"),
     description: t("minigame.enemy3"),
-    minDamage: skill_config.tomato.baseStats.damage,
-    maxDamage: getWeaponMaxDamage("tomato"),
+    minDamage: skill_config.bloodKnife.baseStats.damage,
+    maxDamage: getWeaponMaxDamage("bloodKnife"),
   },
   {
-    image: sunflower_icon,
-    skillName: t("minigame.weapon.sunflower"),
+    image: frost_flower_icon,
+    skillName: t("minigame.weapon.frostFlower"),
     description: t("minigame.enemy3"),
-    minDamage: skill_config.sunflower.baseStats.damage,
-    maxDamage: getWeaponMaxDamage("sunflower"),
+    minDamage: skill_config.frostFlower.baseStats.damage,
+    maxDamage: getWeaponMaxDamage("frostFlower"),
   },
   {
-    image: oil_icon,
-    skillName: t("minigame.weapon.oil"),
+    image: moss_ground_icon,
+    skillName: t("minigame.weapon.mossGround"),
     description: t("minigame.enemy3"),
-    minDamage: skill_config.oil.baseStats.damage,
-    maxDamage: getWeaponMaxDamage("oil"),
+    minDamage: skill_config.mossGround.baseStats.damage,
+    maxDamage: getWeaponMaxDamage("mossGround"),
   },
   {
-    image: pumpkin_icon,
-    skillName: t("minigame.weapon.pumpkin"),
+    image: banished_jack_o_lantern_icon,
+    skillName: t("minigame.weapon.banishedJackOLantern"),
     description: t("minigame.enemy3"),
-    minDamage: skill_config.pumpkin.baseStats.damage,
-    maxDamage: getWeaponMaxDamage("pumpkin"),
+    minDamage: skill_config.banishedJackOLantern.baseStats.damage,
+    maxDamage: getWeaponMaxDamage("banishedJackOLantern"),
   },
   {
-    image: beehive_icon,
-    skillName: t("minigame.weapon.beehive"),
+    image: fly_storm_icon,
+    skillName: t("minigame.weapon.flyStorm"),
     description: t("minigame.enemy3"),
-    minDamage: skill_config.beehive.baseStats.damage,
-    maxDamage: getWeaponMaxDamage("beehive"),
+    minDamage: skill_config.flyStorm.baseStats.damage,
+    maxDamage: getWeaponMaxDamage("flyStorm"),
+  },
+  {
+    image: frost_chain_icon,
+    skillName: t("minigame.weapon.frostChain"),
+    description: t("minigame.enemy3"),
+    minDamage: skill_config.frostChain.baseStats.damage,
+    maxDamage: getWeaponMaxDamage("frostChain"),
+  },
+  {
+    image: crimson_vial_icon,
+    skillName: t("minigame.weapon.crimsonVial"),
+    description: t("minigame.enemy3"),
+    minDamage: skill_config.crimsonVial.baseStats.dotDamage,
+    maxDamage: getWeaponMaxStat("crimsonVial", "dotDamage"),
+  },
+  {
+    image: cursed_coffin_icon,
+    skillName: t("minigame.weapon.cursedCoffin"),
+    description: t("minigame.enemy3"),
+    minDamage: skill_config.cursedCoffin.baseStats.damage,
+    maxDamage: getWeaponMaxDamage("cursedCoffin"),
   },
 ];
 
@@ -373,13 +401,16 @@ export const PANEL_NPC_WEARABLES: Equipped = {
 // SFX
 export const WEAPON_SFX_VOL = 0.1;
 export const WEAPON_SFX: Record<WeaponId, { activate: string }> = {
-  banana: { activate: "sfx_banana_swing" },
-  broomScythe: { activate: "sfx_slash_broom" },
-  wateringCan: { activate: "sfx_water_shot" },
-  corn: { activate: "sfx_explosion_pop" },
-  tomato: { activate: "sfx_tomato_throw" },
-  sunflower: { activate: "sfx_light_shot" },
-  oil: { activate: "sfx_oil_cast" },
-  pumpkin: { activate: "sfx_pumpkin_roll" },
-  beehive: { activate: "sfx_bee_spawn" },
+  frozenSkull: { activate: "sfx_banana_swing" },
+  bloodScythe: { activate: "sfx_slash_broom" },
+  darknessBook: { activate: "sfx_water_shot" },
+  poisonVial: { activate: "sfx_explosion_pop" },
+  bloodKnife: { activate: "sfx_tomato_throw" },
+  frostFlower: { activate: "sfx_light_shot" },
+  mossGround: { activate: "sfx_oil_cast" },
+  banishedJackOLantern: { activate: "sfx_pumpkin_roll" },
+  flyStorm: { activate: "sfx_bee_spawn" },
+  cursedCoffin: { activate: "sfx_explosion_pop" },
+  frostChain: { activate: "sfx_slash_broom" },
+  crimsonVial: { activate: "sfx_oil_cast" },
 };

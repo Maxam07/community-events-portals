@@ -29,6 +29,7 @@ const _specialPowerState = (state: PortalMachineState) => ({
   weaponLevels: state.context.weaponLevels,
   cooldownUntil: state.context.specialPowerCooldownUntil,
   isPaused: state.context.isGameplayPaused,
+  pausedAt: state.context.gameplayPausedAt,
   isJoystickActive: state.context.isJoystickActive,
 });
 
@@ -75,8 +76,13 @@ const getCategoryCountsLabel = (
 const UI_REFRESH_MS = 100;
 
 export const SpecialPowerButton: React.FC = () => {
-  const [now, setNow] = useState(() => Date.now());
+  const [tick, setNow] = useState(() => Date.now());
 
+  const { portalService } = useContext(PortalContext);
+  const { t } = useAppTranslation();
+  const { weaponLevels, cooldownUntil, isPaused, pausedAt, isJoystickActive } =
+    useSelector(portalService, _specialPowerState);
+  const button = useSound("button");
   useEffect(() => {
     const interval = window.setInterval(
       () => setNow(Date.now()),
@@ -86,12 +92,9 @@ export const SpecialPowerButton: React.FC = () => {
     return () => window.clearInterval(interval);
   }, []);
 
-  const { portalService } = useContext(PortalContext);
-  const { t } = useAppTranslation();
-  const { weaponLevels, cooldownUntil, isPaused, isJoystickActive } =
-    useSelector(portalService, _specialPowerState);
-  const button = useSound("button");
-
+  // While the gameplay clock is paused (level-up cards) the countdown stays
+  // frozen at the pause instant; the machine shifts the timestamps on resume.
+  const now = pausedAt ?? tick;
   const power = useMemo(
     () => resolveSpecialPower(weaponLevels),
     [weaponLevels],
