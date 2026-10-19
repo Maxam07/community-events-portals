@@ -556,6 +556,22 @@ export class Scene extends BaseScene {
         frameHeight: 16,
       },
     );
+    this.load.spritesheet(
+      "armor_weapon",
+      "world/portal/halloween/livingArmor-Weapon.webp",
+      {
+        frameWidth: 11,
+        frameHeight: 15,
+      },
+    );
+    this.load.spritesheet(
+      "sand_vortex",
+      "world/portal/halloween/sand_vortex-Sheet.png",
+      {
+        frameWidth: 32,
+        frameHeight: 32,
+      },
+    );
     this.load.image("medusa_head", "world/portal/halloween/medusa_head.webp");
     this.load.image("ent_stump", "world/portal/halloween/stump.webp");
     this.load.image("golem_stone", "world/portal/halloween/stone.png");

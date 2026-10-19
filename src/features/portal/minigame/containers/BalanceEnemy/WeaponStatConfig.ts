@@ -24,14 +24,14 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
   },
   mummy: {
     orbiting: {
-      TEXTURE: "Fire",
+      TEXTURE: "sand_vortex",
       RADIUS: stats.mummy.WEAPONS.orbiting.RADIUS,
       SPEED_DEG_PER_SEC: stats.mummy.WEAPONS.orbiting.SPEED_DEG_PER_SEC,
     },
   },
   living_armor: {
     orbiting: {
-      TEXTURE: "Fire",
+      TEXTURE: "armor_weapon",
       RADIUS: stats.living_armor.WEAPONS.orbiting.RADIUS,
       SPEED_DEG_PER_SEC: stats.living_armor.WEAPONS.orbiting.SPEED_DEG_PER_SEC,
     },
@@ -84,14 +84,14 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
   },
   mummy_area4: {
     orbiting: {
-      TEXTURE: "Fire",
+      TEXTURE: "sand_vortex",
       RADIUS: stats.mummy_area4.WEAPONS.orbiting.RADIUS,
       SPEED_DEG_PER_SEC: stats.mummy_area4.WEAPONS.orbiting.SPEED_DEG_PER_SEC,
     },
   },
   living_armor_area4: {
     orbiting: {
-      TEXTURE: "Fire",
+      TEXTURE: "armor_weapon",
       RADIUS: stats.living_armor_area4.WEAPONS.orbiting.RADIUS,
       SPEED_DEG_PER_SEC: stats.living_armor_area4.WEAPONS.orbiting.RADIUS,
     },
