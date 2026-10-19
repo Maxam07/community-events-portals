@@ -29,7 +29,6 @@ import { Chest } from "./containers/ChestContainer";
 import type {
   WeaponId,
   WeaponLoadoutItem,
-  DropItemType,
   BossTypes,
   PhasingEnemyTypes,
   WeaponLevel,
@@ -42,6 +41,7 @@ import type {
   EnemyType,
   SpawnArea,
   MiniBossWaveConfig,
+  DropItemHalloweenType,
 } from "./Types";
 import { BossEnemy } from "./containers/BossEnemyContainer";
 import {
@@ -585,6 +585,16 @@ export class Scene extends BaseScene {
     this.load.image("boss_dropItem1", SUNNYSIDE.icons.lightning);
     this.load.image("boss_dropItem2", SUNNYSIDE.icons.happy);
     this.load.image("heart", SUNNYSIDE.icons.heart);
+    this.load.image("relicWrath", "world/portal/halloween/relics_wrath.webp");
+    this.load.image("relicSloth", "world/portal/halloween/relics_sloth.webp");
+    this.load.image("relicPride", "world/portal/halloween/relics_pride.webp");
+    this.load.image("relicLust", "world/portal/halloween/relics_lust.webp");
+    this.load.image("relicGreed", "world/portal/halloween/relics_greed.webp");
+    this.load.image(
+      "relicGluttony",
+      "world/portal/halloween/relics_gluttony.webp",
+    );
+    this.load.image("relicEnvy", "world/portal/halloween/relics_envy.webp");
 
     // Obstacles
     this.load.image("rock", "world/portal/images/TematicRock.webp");
@@ -1750,7 +1760,11 @@ export class Scene extends BaseScene {
         this.enemyGroup,
         (_player, enemyObj) => {
           const enemy = enemyObj as
-            StaticRangeEnemy | PhasingEnemy | MeleeEnemy | BossEnemy | MiniBoss;
+            | StaticRangeEnemy
+            | PhasingEnemy
+            | MeleeEnemy
+            | BossEnemy
+            | MiniBoss;
           enemy.handlePlayerContact();
         },
       );
@@ -2307,7 +2321,7 @@ export class Scene extends BaseScene {
   }: {
     x: number;
     y: number;
-    itemKey: DropItemType;
+    itemKey: DropItemHalloweenType;
   }) {
     new DropItem({
       x,
@@ -2408,7 +2422,8 @@ export class Scene extends BaseScene {
   private enterUnderworld() {
     const player = this.currentPlayer;
     const portalBody = this.area3Blockade?.body as
-      Phaser.Physics.Arcade.StaticBody | undefined;
+      | Phaser.Physics.Arcade.StaticBody
+      | undefined;
     if (this.isEnteringUnderworld || !player || !portalBody) return;
 
     this.isEnteringUnderworld = true;

@@ -225,10 +225,58 @@ export const Enemies: React.FC = () => {
     <div className="flex md:flex-row flex-col-reverse md:mr-1 items-start h-full">
       <InnerPanel className="p-2 w-full">
         <Label type="default">{t("minigame.enemy")}</Label>
+        <Label type="default" className="mt-2">
+          {t("minigame.area1")}
+        </Label>
         <div className="grid grid-cols-2 sm:grid-cols-3 w-full mt-1 gap-1">
-          {ENEMIES_TABLE.map((item, index) => (
+          {ENEMIES_TABLE.slice(0, 7).map((item) => (
             <EnemyCard
-              key={index}
+              key={item.type}
+              icon={item.image}
+              type={item.type}
+              hp={item.hp}
+              damage={item.damage}
+              itemIcon={item.itemIcon}
+            />
+          ))}
+        </div>
+        <Label type="default" className="mt-2">
+          {t("minigame.area2")}
+        </Label>
+        <div className="grid grid-cols-2 sm:grid-cols-3 w-full mt-1 gap-1">
+          {ENEMIES_TABLE.slice(8, 15).map((item) => (
+            <EnemyCard
+              key={item.type}
+              icon={item.image}
+              type={item.type}
+              hp={item.hp}
+              damage={item.damage}
+              itemIcon={item.itemIcon}
+            />
+          ))}
+        </div>
+        <Label type="default" className="mt-2">
+          {t("minigame.area3")}
+        </Label>
+        <div className="grid grid-cols-2 sm:grid-cols-3 w-full mt-1 gap-1">
+          {ENEMIES_TABLE.slice(15, 22).map((item) => (
+            <EnemyCard
+              key={item.type}
+              icon={item.image}
+              type={item.type}
+              hp={item.hp}
+              damage={item.damage}
+              itemIcon={item.itemIcon}
+            />
+          ))}
+        </div>
+        <Label type="default" className="mt-2">
+          {t("minigame.area4")}
+        </Label>
+        <div className="grid grid-cols-2 sm:grid-cols-3 w-full mt-1 gap-1">
+          {ENEMIES_TABLE.slice(22, 33).map((item) => (
+            <EnemyCard
+              key={item.type}
               icon={item.image}
               type={item.type}
               hp={item.hp}

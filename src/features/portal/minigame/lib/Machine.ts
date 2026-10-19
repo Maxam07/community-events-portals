@@ -36,7 +36,7 @@ import { getUrl, loadPortal } from "features/portal/actions/loadPortal";
 import { getAttemptsLeft, getUnlimitedAttemptsSfl } from "./Utils";
 import type {
   ChestRarity,
-  DropItemType,
+  DropItemHalloweenType,
   EnemyType,
   LevelUpChoice,
   LevelUpOption,
@@ -328,7 +328,7 @@ type LoseLifeEvent = {
 
 type CollectItemEvent = {
   type: "COLLECT_ITEM";
-  itemKey: DropItemType;
+  itemKey: DropItemHalloweenType;
 };
 
 type SetValidationsEvent = {

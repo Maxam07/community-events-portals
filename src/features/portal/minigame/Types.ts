@@ -133,10 +133,20 @@ export type LevelUpChoice = {
 export type ChestRarity = "rare" | "epic" | "legendary";
 
 export type DamageType =
-  "physical" | "water" | "explosion" | "light" | "dot" | "summon";
+  | "physical"
+  | "water"
+  | "explosion"
+  | "light"
+  | "dot"
+  | "summon";
 
 export type TargetingMode =
-  "nearest" | "random" | "movementVector" | "chainNext" | "inCone" | "inRadius";
+  | "nearest"
+  | "random"
+  | "movementVector"
+  | "chainNext"
+  | "inCone"
+  | "inRadius";
 
 export type WeaponBehavior =
   | "orbital"
@@ -202,7 +212,11 @@ export type WeaponUpgrade = {
 };
 
 export type ProjectileBehavior =
-  "linear" | "exploding" | "bouncing" | "light" | "rolling";
+  | "linear"
+  | "exploding"
+  | "bouncing"
+  | "light"
+  | "rolling";
 
 export type ProjectileConfig = {
   texture: string;
@@ -218,7 +232,11 @@ export type ProjectileConfig = {
 };
 
 export type StatusEffectId =
-  "oilDot" | "plaguePoison" | "frostSlow" | "curseWeakness" | "bleed";
+  | "oilDot"
+  | "plaguePoison"
+  | "frostSlow"
+  | "curseWeakness"
+  | "bleed";
 
 export type StatusEffectConfig = {
   id: StatusEffectId;
@@ -274,11 +292,22 @@ export type CombatConfig = {
   defaultWeaponLoadout: WeaponLoadoutItem[];
 };
 
-export type DropItemType =
-  "blueOrb" | "greenOrb" | "grayOrb" | "yellowOrb" | "purpleOrb";
+export type DropItemHalloweenType =
+  | "relicWrath"
+  | "relicSloth"
+  | "relicPride"
+  | "relicLust"
+  | "relicGreed"
+  | "relicGluttony"
+  | "relicEnvy";
 
 export type WeaponType =
-  "chasing" | "orbiting" | "summoning" | "staticRange" | "slash" | "arena";
+  | "chasing"
+  | "orbiting"
+  | "summoning"
+  | "staticRange"
+  | "slash"
+  | "arena";
 export type CodexCategoryName = "Skills" | "Enemies" | "DropItems";
 export type PassiveAbilityType = "wings";
 export type EnemyType =
@@ -289,7 +318,10 @@ export type EnemyType =
   | MiniBossType;
 export type WeaponEnemyType = BossTypes | MiniBossType | StaticRangeEnemyTypes;
 export type EnemyFormation =
-  "vertical line" | "horizontal line" | "circle" | "surround";
+  | "vertical line"
+  | "horizontal line"
+  | "circle"
+  | "surround";
 export type AreaEnemyType =
   | PhasingEnemyTypes
   | MeleeEnemyTypes
@@ -383,7 +415,7 @@ export type EnemyConfig = {
   speed: number;
   hp: number;
   maxHp: number;
-  dropItem: DropItemType;
+  dropItem: DropItemHalloweenType;
 };
 
 export type PhasingeWaveConfig = WaveConfig<PhasingEnemyTypes>;
@@ -463,7 +495,7 @@ export interface EnemyBalanceStats {
   BATCH_SIZE?: number;
   DELAY?: number;
   FORMATION?: EnemyFormation;
-  DROP_ITEM: DropItemType;
+  DROP_ITEM: DropItemHalloweenType;
   WEAPON?: WeaponType[];
 
   WEAPONS?: {

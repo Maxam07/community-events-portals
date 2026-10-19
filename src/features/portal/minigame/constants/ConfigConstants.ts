@@ -4,7 +4,7 @@ import type {
   Equipped,
 } from "features/game/types/bumpkin";
 import { translate as t } from "lib/i18n/translate";
-import { DROP_ITEM_XP_VALUES } from "./EnemyConstants";
+import { DROP_ITEM_XP_VALUES, ENEMY_BALANCE_STATS } from "./EnemyConstants";
 import { WEAPON_CONFIGS, WEAPON_UPGRADES } from "./WeaponConstants";
 
 import frozen_skull_icon from "public/world/portal/halloween/weapons/the_frost/frozen_skull_icon.png";
@@ -20,21 +20,55 @@ import cursed_coffin_icon from "public/world/portal/halloween/weapons/the_curse/
 import frost_chain_icon from "public/world/portal/halloween/weapons/the_frost/frost_chain_icon.png";
 import crimson_vial_icon from "public/world/portal/halloween/weapons/the_bloody_harvest/crimson_vial_icon.png";
 
-import blueOrb from "public/world/portal/images/dropItem1.webp";
-import greenOrb from "public/world/portal/images/dropItem2.webp";
-import grayOrb from "public/world/portal/images/dropItem3.webp";
-import yellowOrb from "public/world/portal/images/dropItem4.webp";
-import purpleOrb from "public/world/portal/images/dropItem5.webp";
+import bat from "public/world/portal/halloween/icons/bat_icon.png";
+import scarecrow from "public/world/portal/halloween/icons/scarecrow_icon.png";
+import rat from "public/world/portal/halloween/icons/rat_icon.png";
+import zombie from "public/world/portal/halloween/icons/zombie_icon.png";
+import golem from "public/world/portal/halloween/icons/golem_icon.png";
+import ent from "public/world/portal/halloween/icons/ent_icon.png";
+import minotaur from "public/world/portal/halloween/icons/minotaur_icon.png";
+import crow from "public/world/portal/halloween/icons/crow_icon.png";
+import ghost from "public/world/portal/halloween/icons/ghost_icon.png";
+import imp from "public/world/portal/halloween/icons/demon_icon.png";
+import skeleton from "public/world/portal/halloween/icons/skeleton_icon.png";
+import slime from "public/world/portal/halloween/icons/slimes_icon.png";
+import mummy from "public/world/portal/halloween/icons/mummy_icon.png";
+import living_armor from "public/world/portal/halloween/icons/armor_icon.png";
+import witch from "public/world/portal/halloween/icons/witch_icon.png";
+import gargoyle from "public/world/portal/halloween/icons/gargoyle_icon.png";
+import cultist from "public/world/portal/halloween/icons/cultist_icon.png";
+import frankenstein from "public/world/portal/halloween/icons/frankenstein_icon.png";
+import werewolf from "public/world/portal/halloween/icons/werewolf_icon.png";
+import headless_horseman from "public/world/portal/halloween/icons/horseman_icon.png";
+import medusa from "public/world/portal/halloween/icons/medusa_icon.png";
+import cerberus from "public/world/portal/halloween/icons/cerberus_icon.png";
+import shade from "public/world/portal/halloween/icons/shade_icon.png";
+import red_stone from "public/world/portal/halloween/icons/demon4_icon.png";
+import demon1 from "public/world/portal/halloween/icons/demon3_icon.png";
+import demon2 from "public/world/portal/halloween/icons/demon2_icon.png";
+import sorcerer from "public/world/portal/halloween/icons/sorcerer_icon.png";
+
+import relicWrath from "public/world/portal/halloween/relics_wrath.webp";
+import relicSloth from "public/world/portal/halloween/relics_sloth.webp";
+import relicPride from "public/world/portal/halloween/relics_pride.webp";
+import relicLust from "public/world/portal/halloween/relics_lust.webp";
+import relicGreed from "public/world/portal/halloween/relics_greed.webp";
+import relicGluttony from "public/world/portal/halloween/relics_gluttony.webp";
+import relicEnvy from "public/world/portal/halloween/relics_envy.webp";
 
 import icon_boss3 from "public/world/portal/images/icon_boss_3.webp";
 import tooltip_icon from "public/world/portal/images/ExpOrb_combined.webp";
 import swordIcon from "public/world/portal/images/sword_icon.png";
 import speedIcon from "public/world/portal/images/lightning.png";
 import type {
-  // MobTypes,
   WeaponId,
   WeaponStatKey,
   PassiveAbilityType,
+  PhasingEnemyTypes,
+  StaticRangeEnemyTypes,
+  MeleeEnemyTypes,
+  MiniBossType,
+  BossTypes,
 } from "../Types";
 import { SUNNYSIDE } from "assets/sunnyside";
 
@@ -109,7 +143,7 @@ export const INSTRUCTIONS: {
     description: t("minigame.instructions1"),
   },
   {
-    image: purpleOrb,
+    image: relicEnvy,
     description: t("minigame.instructions2"),
   },
   {
@@ -153,31 +187,71 @@ export const RESOURCES_TABLE: {
   // },
 ];
 
-// const mob_config = MOB_CONFIGS;
-// const boss_config = BOSS_CONFIGS;
+const stats = ENEMY_BALANCE_STATS;
 const skill_config = WEAPON_CONFIGS;
 
 export const DROP_ITEM_ASSETS: Record<string, string> = {
-  blueOrb,
-  greenOrb,
-  grayOrb,
-  yellowOrb,
-  purpleOrb,
+  relicWrath,
+  relicSloth,
+  relicPride,
+  relicLust,
+  relicGreed,
+  relicGluttony,
+  relicEnvy,
 };
 
-// const MOB_NAMES: Record<MobTypes, string> = {
-//   mob1: "Potted Slime",
-//   mob2: "Flappy",
-//   mob3: "Slime",
-//   mob4: "Blobert",
-//   mob5: "Balloon slime",
-// };
+const Phasing: Record<PhasingEnemyTypes, string> = {
+  bat: "Bat",
+  crow: "Crow",
+  ghost: "Ghost",
+  gargoyle: "Gargoyle",
+  shade: "Shade",
+};
 
-// const BOSS_NAMES: Record<BossTypes, string> = {
-//   boss1: "Daisy",
-//   boss2: "Pierrot",
-//   boss3: "Sharky",
-// };
+export const StaticRange: Record<StaticRangeEnemyTypes, string> = {
+  scarecrow: "Scarecrow",
+  imp: "Imp",
+  cultist: "Cultist",
+  red_stone: "Red stone",
+};
+
+export const Melee: Record<MeleeEnemyTypes, string> = {
+  carnivore_plant: "Carnivore_plant",
+  rat: "Rat",
+  zombie: "Zombie",
+  skeleton: "Skeleton",
+  slime_green: "Slime_green",
+  slime_blue: "Slime_blue",
+  slime_red: "Slimes",
+  vampire: "Vampire",
+  frankenstein: "Frankenstein",
+  werewolf: "Werewolf",
+  hellHound: "HellHound",
+  demon1: "Worm Demon",
+  demon2: "Demon",
+};
+
+export const MiniBoss: Record<MiniBossType, string> = {
+  golem: "Golem",
+  ent: "Ent",
+  mummy: "Mummy",
+  living_armor: "Living Armor",
+  headless_horseman: "Headless Horseman",
+  medusa: "Medusa",
+  golem_area4: "Golem",
+  ent_area4: "Ent",
+  mummy_area4: "Mummy",
+  living_armor_area4: "Living Armor",
+  headless_horseman_area4: "Headless Horseman",
+  medusa_area4: "Medusa",
+};
+
+export const Boss: Record<BossTypes, string> = {
+  minotaur: "Minotaur",
+  witch: "Witch",
+  cerberus: "Cerberus",
+  sorcerer: "Sorcerer",
+};
 
 export const ENEMIES_TABLE: {
   image: string;
@@ -186,62 +260,244 @@ export const ENEMIES_TABLE: {
   damage: number;
   itemIcon: string;
 }[] = [
-  // {
-  //   image: icon_boss1,
-  //   type: BOSS_NAMES.boss1,
-  //   hp: boss_config.boss1.hp,
-  //   damage: ENEMY_BALANCE_STATS.boss1.DAMAGE,
-  //   itemIcon: DROP_ITEM_ASSETS[boss_config.boss1.dropItem],
-  // },
-  // {
-  //   image: icon_boss2,
-  //   type: BOSS_NAMES.boss2,
-  //   hp: boss_config.boss2.hp,
-  //   damage: ENEMY_BALANCE_STATS.boss2.DAMAGE,
-  //   itemIcon: DROP_ITEM_ASSETS[boss_config.boss2.dropItem],
-  // },
-  // {
-  //   image: icon_boss3,
-  //   type: BOSS_NAMES.boss3,
-  //   hp: boss_config.boss3.hp,
-  //   damage: ENEMY_BALANCE_STATS.boss3.DAMAGE,
-  //   itemIcon: DROP_ITEM_ASSETS[boss_config.boss3.dropItem],
-  // },
-  // {
-  //   image: icon_mob1,
-  //   type: MOB_NAMES.mob1,
-  //   hp: mob_config.mob1.hp,
-  //   damage: ENEMY_BALANCE_STATS.mob1.DAMAGE,
-  //   itemIcon: DROP_ITEM_ASSETS[mob_config.mob1.dropItem],
-  // },
-  // {
-  //   image: icon_mob2,
-  //   type: MOB_NAMES.mob2,
-  //   hp: mob_config.mob2.hp,
-  //   damage: ENEMY_BALANCE_STATS.mob2.DAMAGE,
-  //   itemIcon: DROP_ITEM_ASSETS[mob_config.mob2.dropItem],
-  // },
-  // {
-  //   image: icon_mob3,
-  //   type: MOB_NAMES.mob3,
-  //   hp: mob_config.mob3.hp,
-  //   damage: ENEMY_BALANCE_STATS.mob3.DAMAGE,
-  //   itemIcon: DROP_ITEM_ASSETS[mob_config.mob3.dropItem],
-  // },
-  // {
-  //   image: icon_mob4,
-  //   type: MOB_NAMES.mob4,
-  //   hp: mob_config.mob4.hp,
-  //   damage: ENEMY_BALANCE_STATS.mob4.DAMAGE,
-  //   itemIcon: DROP_ITEM_ASSETS[mob_config.mob4.dropItem],
-  // },
-  // {
-  //   image: icon_mob5,
-  //   type: MOB_NAMES.mob5,
-  //   hp: mob_config.mob5.hp,
-  //   damage: ENEMY_BALANCE_STATS.mob5.DAMAGE,
-  //   itemIcon: DROP_ITEM_ASSETS[mob_config.mob5.dropItem],
-  // },
+  // Area 1
+  {
+    image: bat,
+    type: Phasing.bat,
+    hp: stats.bat.HP,
+    damage: stats.bat.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.bat.DROP_ITEM],
+  },
+  {
+    image: scarecrow,
+    type: StaticRange.scarecrow,
+    hp: stats.scarecrow.HP,
+    damage: stats.scarecrow.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.scarecrow.DROP_ITEM],
+  },
+  {
+    image: rat,
+    type: Melee.rat,
+    hp: stats.rat.HP,
+    damage: stats.rat.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.rat.DROP_ITEM],
+  },
+  {
+    image: zombie,
+    type: Melee.zombie,
+    hp: stats.zombie.HP,
+    damage: stats.zombie.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.zombie.DROP_ITEM],
+  },
+  {
+    image: golem,
+    type: MiniBoss.golem,
+    hp: stats.golem.HP,
+    damage: stats.golem.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.golem.DROP_ITEM],
+  },
+  {
+    image: ent,
+    type: MiniBoss.ent,
+    hp: stats.ent.HP,
+    damage: stats.ent.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.ent.DROP_ITEM],
+  },
+  {
+    image: minotaur,
+    type: Boss.minotaur,
+    hp: stats.minotaur.HP,
+    damage: stats.minotaur.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.minotaur.DROP_ITEM],
+  },
+
+  // Area 2
+  {
+    image: crow,
+    type: Phasing.crow,
+    hp: stats.crow.HP,
+    damage: stats.crow.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.crow.DROP_ITEM],
+  },
+  {
+    image: ghost,
+    type: Phasing.ghost,
+    hp: stats.ghost.HP,
+    damage: stats.ghost.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.ghost.DROP_ITEM],
+  },
+  {
+    image: imp,
+    type: StaticRange.imp,
+    hp: stats.imp.HP,
+    damage: stats.imp.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.imp.DROP_ITEM],
+  },
+  {
+    image: skeleton,
+    type: Melee.skeleton,
+    hp: stats.skeleton.HP,
+    damage: stats.skeleton.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.skeleton.DROP_ITEM],
+  },
+  {
+    image: slime,
+    type: Melee.slime_red,
+    hp: stats.slime_red.HP,
+    damage: stats.slime_red.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.slime_red.DROP_ITEM],
+  },
+  {
+    image: mummy,
+    type: MiniBoss.mummy,
+    hp: stats.mummy.HP,
+    damage: stats.mummy.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.mummy.DROP_ITEM],
+  },
+  {
+    image: living_armor,
+    type: MiniBoss.living_armor,
+    hp: stats.living_armor.HP,
+    damage: stats.living_armor.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.living_armor.DROP_ITEM],
+  },
+  {
+    image: witch,
+    type: Boss.witch,
+    hp: stats.witch.HP,
+    damage: stats.witch.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.witch.DROP_ITEM],
+  },
+
+  // Area 3
+  {
+    image: gargoyle,
+    type: Phasing.gargoyle,
+    hp: stats.gargoyle.HP,
+    damage: stats.gargoyle.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.gargoyle.DROP_ITEM],
+  },
+  {
+    image: cultist,
+    type: StaticRange.cultist,
+    hp: stats.cultist.HP,
+    damage: stats.cultist.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.cultist.DROP_ITEM],
+  },
+  {
+    image: frankenstein,
+    type: Melee.frankenstein,
+    hp: stats.frankenstein.HP,
+    damage: stats.frankenstein.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.frankenstein.DROP_ITEM],
+  },
+  {
+    image: werewolf,
+    type: Melee.werewolf,
+    hp: stats.werewolf.HP,
+    damage: stats.werewolf.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.werewolf.DROP_ITEM],
+  },
+  {
+    image: headless_horseman,
+    type: MiniBoss.headless_horseman,
+    hp: stats.headless_horseman.HP,
+    damage: stats.headless_horseman.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.headless_horseman.DROP_ITEM],
+  },
+  {
+    image: medusa,
+    type: MiniBoss.medusa,
+    hp: stats.medusa.HP,
+    damage: stats.medusa.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.medusa.DROP_ITEM],
+  },
+  {
+    image: cerberus,
+    type: Boss.cerberus,
+    hp: stats.cerberus.HP,
+    damage: stats.cerberus.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.cerberus.DROP_ITEM],
+  },
+
+  // Area 4
+  {
+    image: shade,
+    type: Phasing.shade,
+    hp: stats.shade.HP,
+    damage: stats.shade.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.shade.DROP_ITEM],
+  },
+  {
+    image: red_stone,
+    type: StaticRange.red_stone,
+    hp: stats.red_stone.HP,
+    damage: stats.red_stone.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.red_stone.DROP_ITEM],
+  },
+  {
+    image: demon1,
+    type: Melee.demon1,
+    hp: stats.demon1.HP,
+    damage: stats.demon1.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.demon1.DROP_ITEM],
+  },
+  {
+    image: demon2,
+    type: Melee.demon2,
+    hp: stats.demon2.HP,
+    damage: stats.demon2.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.demon2.DROP_ITEM],
+  },
+  {
+    image: golem,
+    type: MiniBoss.golem_area4,
+    hp: stats.golem_area4.HP,
+    damage: stats.golem_area4.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.golem_area4.DROP_ITEM],
+  },
+  {
+    image: ent,
+    type: MiniBoss.ent_area4,
+    hp: stats.ent_area4.HP,
+    damage: stats.ent_area4.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.ent_area4.DROP_ITEM],
+  },
+  {
+    image: mummy,
+    type: MiniBoss.mummy_area4,
+    hp: stats.mummy_area4.HP,
+    damage: stats.mummy_area4.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.mummy_area4.DROP_ITEM],
+  },
+  {
+    image: living_armor,
+    type: MiniBoss.living_armor_area4,
+    hp: stats.living_armor_area4.HP,
+    damage: stats.living_armor_area4.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.living_armor_area4.DROP_ITEM],
+  },
+  {
+    image: headless_horseman,
+    type: MiniBoss.headless_horseman_area4,
+    hp: stats.headless_horseman_area4.HP,
+    damage: stats.headless_horseman_area4.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.headless_horseman_area4.DROP_ITEM],
+  },
+  {
+    image: medusa,
+    type: MiniBoss.medusa_area4,
+    hp: stats.medusa_area4.HP,
+    damage: stats.medusa_area4.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.medusa_area4.DROP_ITEM],
+  },
+  {
+    image: sorcerer,
+    type: Boss.sorcerer,
+    hp: stats.sorcerer.HP,
+    damage: stats.sorcerer.DAMAGE,
+    itemIcon: DROP_ITEM_ASSETS[stats.sorcerer.DROP_ITEM],
+  },
 ];
 
 function getWeaponMaxStat(weaponId: WeaponId, stat: WeaponStatKey) {
@@ -359,29 +615,39 @@ export const DROP_ITEMS_XP_TABLE: {
   xp: number;
 }[] = [
   {
-    image: blueOrb,
+    image: relicWrath,
     description: t("minigame.enemy1"),
-    xp: DROP_ITEM_XP_VALUES.blueOrb,
+    xp: DROP_ITEM_XP_VALUES.relicWrath,
   },
   {
-    image: greenOrb,
+    image: relicSloth,
     description: t("minigame.enemy2"),
-    xp: DROP_ITEM_XP_VALUES.greenOrb,
+    xp: DROP_ITEM_XP_VALUES.relicSloth,
   },
   {
-    image: grayOrb,
+    image: relicPride,
     description: t("minigame.enemy2"),
-    xp: DROP_ITEM_XP_VALUES.grayOrb,
+    xp: DROP_ITEM_XP_VALUES.relicPride,
   },
   {
-    image: yellowOrb,
+    image: relicLust,
     description: t("minigame.enemy2"),
-    xp: DROP_ITEM_XP_VALUES.yellowOrb,
+    xp: DROP_ITEM_XP_VALUES.relicLust,
   },
   {
-    image: purpleOrb,
+    image: relicGreed,
     description: t("minigame.enemy2"),
-    xp: DROP_ITEM_XP_VALUES.purpleOrb,
+    xp: DROP_ITEM_XP_VALUES.relicGreed,
+  },
+  {
+    image: relicGluttony,
+    description: t("minigame.enemy2"),
+    xp: DROP_ITEM_XP_VALUES.relicGluttony,
+  },
+  {
+    image: relicEnvy,
+    description: t("minigame.enemy2"),
+    xp: DROP_ITEM_XP_VALUES.relicEnvy,
   },
 ];
 

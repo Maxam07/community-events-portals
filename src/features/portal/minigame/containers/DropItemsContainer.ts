@@ -1,6 +1,6 @@
 import type { Scene } from "../Scene";
 import type { BumpkinContainer } from "../Core/BumpkinContainer";
-import type { DropItemType } from "../Types";
+import type { DropItemHalloweenType } from "../Types";
 import { PASSIVE_ABILITY_ITEM, ORB_DEPTH, getPerkAmount } from "../constants";
 import { WeaponSfxLimiter } from "../lib/combat/WeaponSfxLimiter";
 
@@ -9,13 +9,13 @@ interface Props {
   y: number;
   scene: Scene;
   player?: BumpkinContainer;
-  itemKey: DropItemType;
+  itemKey: DropItemHalloweenType;
 }
 
 export class DropItem extends Phaser.GameObjects.Sprite {
   scene: Scene;
   private player?: BumpkinContainer;
-  dropItem?: DropItemType;
+  dropItem?: DropItemHalloweenType;
 
   private readonly magnetRangeWithWings = 60;
   private readonly defaultMagnetRange = 50;
@@ -39,6 +39,7 @@ export class DropItem extends Phaser.GameObjects.Sprite {
 
     scene.add.existing(this);
     this.setDepth(ORB_DEPTH);
+    this.setScale(0.5);
 
     const magnetRange = this.hasPassiveAbility()
       ? this.magnetRangeWithWings

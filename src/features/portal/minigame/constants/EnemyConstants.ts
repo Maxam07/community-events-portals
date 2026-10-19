@@ -1,26 +1,28 @@
 import { SQUARE_WIDTH } from "features/game/lib/constants";
 import type {
   BossTypes,
-  DropItemType,
   EnemyConfig,
   MeleeEnemyTypes,
   MiniBossType,
   PhasingEnemyTypes,
   StaticRangeEnemyTypes,
   EnemyBalanceStats,
+  DropItemHalloweenType,
 } from "../Types";
 
 export const ORB_DEPTH = 50;
 export const OBSTACLE_SPAWN_BUFFER = SQUARE_WIDTH * 1.5;
-export const TESTING = false;
+export const TESTING = true;
 
 // XP values for each drop item type
-export const DROP_ITEM_XP_VALUES: Record<DropItemType, number> = {
-  blueOrb: 5,
-  greenOrb: 12,
-  grayOrb: 26,
-  yellowOrb: 65,
-  purpleOrb: 125,
+export const DROP_ITEM_XP_VALUES: Record<DropItemHalloweenType, number> = {
+  relicWrath: 5,
+  relicSloth: 12,
+  relicPride: 26,
+  relicLust: 65,
+  relicGreed: 100,
+  relicGluttony: 100,
+  relicEnvy: 125,
 };
 
 export const ENEMY_BALANCE_STATS = {
@@ -33,9 +35,9 @@ export const ENEMY_BALANCE_STATS = {
     BATCH_SIZE: 5,
     DELAY: 4000,
     FORMATION: "surround",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicWrath",
   },
-  scarecrow: { HP: 50, SPEED: 20, DAMAGE: 1, DROP_ITEM: "blueOrb" },
+  scarecrow: { HP: 50, SPEED: 20, DAMAGE: 1, DROP_ITEM: "relicSloth" },
   carnivore_plant: {
     HP: 4,
     SPEED: 15,
@@ -44,7 +46,7 @@ export const ENEMY_BALANCE_STATS = {
     BATCH_SIZE: 5,
     DELAY: 7000,
     FORMATION: "horizontal line",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicWrath",
   },
   rat: {
     HP: 4,
@@ -54,7 +56,7 @@ export const ENEMY_BALANCE_STATS = {
     BATCH_SIZE: 5,
     DELAY: 6000,
     FORMATION: "surround",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicWrath",
   },
   zombie: {
     HP: 4,
@@ -64,7 +66,7 @@ export const ENEMY_BALANCE_STATS = {
     BATCH_SIZE: 5,
     DELAY: 8000,
     FORMATION: "circle",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicWrath",
   },
   golem: {
     HP: 50,
@@ -79,7 +81,7 @@ export const ENEMY_BALANCE_STATS = {
       },
     },
     FORMATION: "vertical line",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicPride",
   },
   ent: {
     HP: 50,
@@ -95,7 +97,7 @@ export const ENEMY_BALANCE_STATS = {
       },
     },
     FORMATION: "horizontal line",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicPride",
   },
   minotaur: {
     HP: 100,
@@ -112,7 +114,7 @@ export const ENEMY_BALANCE_STATS = {
       },
     },
     FORMATION: "vertical line",
-    DROP_ITEM: "yellowOrb",
+    DROP_ITEM: "relicLust",
   },
   // Area 2
   crow: {
@@ -123,7 +125,7 @@ export const ENEMY_BALANCE_STATS = {
     BATCH_SIZE: 5,
     DELAY: 5000,
     FORMATION: "horizontal line",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicSloth",
   },
   ghost: {
     HP: 50,
@@ -133,9 +135,9 @@ export const ENEMY_BALANCE_STATS = {
     BATCH_SIZE: 5,
     DELAY: 2000,
     FORMATION: "surround",
-    DROP_ITEM: "greenOrb",
+    DROP_ITEM: "relicSloth",
   },
-  imp: { HP: 100, SPEED: 25, DAMAGE: 5, DROP_ITEM: "blueOrb" },
+  imp: { HP: 100, SPEED: 25, DAMAGE: 5, DROP_ITEM: "relicPride" },
   skeleton: {
     HP: 3,
     SPEED: 20,
@@ -144,7 +146,7 @@ export const ENEMY_BALANCE_STATS = {
     BATCH_SIZE: 5,
     DELAY: 3000,
     FORMATION: "vertical line",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicSloth",
   },
   slime_red: {
     HP: 3,
@@ -154,7 +156,7 @@ export const ENEMY_BALANCE_STATS = {
     BATCH_SIZE: 5,
     DELAY: 3000,
     FORMATION: "surround",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicSloth",
   },
   slime_green: {
     HP: 3,
@@ -164,7 +166,7 @@ export const ENEMY_BALANCE_STATS = {
     BATCH_SIZE: 5,
     DELAY: 8000,
     FORMATION: "surround",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicSloth",
   },
   slime_blue: {
     HP: 3,
@@ -174,7 +176,7 @@ export const ENEMY_BALANCE_STATS = {
     BATCH_SIZE: 5,
     DELAY: 5000,
     FORMATION: "surround",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicSloth",
   },
   mummy: {
     HP: 300,
@@ -189,7 +191,7 @@ export const ENEMY_BALANCE_STATS = {
       },
     },
     FORMATION: "vertical line",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicLust",
   },
   living_armor: {
     HP: 300,
@@ -204,7 +206,7 @@ export const ENEMY_BALANCE_STATS = {
       },
     },
     FORMATION: "horizontal line",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicLust",
   },
   witch: {
     HP: 1000,
@@ -224,7 +226,7 @@ export const ENEMY_BALANCE_STATS = {
       },
     },
     FORMATION: "vertical line",
-    DROP_ITEM: "purpleOrb",
+    DROP_ITEM: "relicGreed",
   },
 
   // Area 3
@@ -236,9 +238,9 @@ export const ENEMY_BALANCE_STATS = {
     BATCH_SIZE: 5,
     DELAY: 6000,
     FORMATION: "surround",
-    DROP_ITEM: "grayOrb",
+    DROP_ITEM: "relicPride",
   },
-  cultist: { HP: 50, SPEED: 30, DAMAGE: 5, DROP_ITEM: "greenOrb" },
+  cultist: { HP: 50, SPEED: 30, DAMAGE: 5, DROP_ITEM: "relicLust" },
   vampire: {
     HP: 2,
     SPEED: 32,
@@ -247,7 +249,7 @@ export const ENEMY_BALANCE_STATS = {
     BATCH_SIZE: 3,
     DELAY: 4000,
     FORMATION: "vertical line",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicPride",
   },
   frankenstein: {
     HP: 2,
@@ -257,7 +259,7 @@ export const ENEMY_BALANCE_STATS = {
     BATCH_SIZE: 3,
     DELAY: 4000,
     FORMATION: "horizontal line",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicPride",
   },
   werewolf: {
     HP: 2,
@@ -267,7 +269,7 @@ export const ENEMY_BALANCE_STATS = {
     BATCH_SIZE: 3,
     DELAY: 4000,
     FORMATION: "surround",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicPride",
   },
   headless_horseman: {
     HP: 500,
@@ -283,7 +285,7 @@ export const ENEMY_BALANCE_STATS = {
       },
     },
     FORMATION: "vertical line",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicGreed",
   },
   medusa: {
     HP: 500,
@@ -299,7 +301,7 @@ export const ENEMY_BALANCE_STATS = {
       },
     },
     FORMATION: "horizontal line",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicGreed",
   },
   cerberus: {
     HP: 800,
@@ -315,7 +317,7 @@ export const ENEMY_BALANCE_STATS = {
       },
     },
     FORMATION: "horizontal line",
-    DROP_ITEM: "purpleOrb",
+    DROP_ITEM: "relicGluttony",
   },
 
   // Area 4
@@ -327,9 +329,9 @@ export const ENEMY_BALANCE_STATS = {
     BATCH_SIZE: 5,
     DELAY: 6000,
     FORMATION: "surround",
-    DROP_ITEM: "grayOrb",
+    DROP_ITEM: "relicLust",
   },
-  red_stone: { HP: 50, SPEED: 30, DAMAGE: 5, DROP_ITEM: "greenOrb" },
+  red_stone: { HP: 50, SPEED: 30, DAMAGE: 5, DROP_ITEM: "relicGreed" },
   hellHound: {
     HP: 4,
     SPEED: 25,
@@ -338,7 +340,7 @@ export const ENEMY_BALANCE_STATS = {
     BATCH_SIZE: 3,
     DELAY: 2000,
     FORMATION: "surround",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicLust",
   },
   demon1: {
     HP: 4,
@@ -348,7 +350,7 @@ export const ENEMY_BALANCE_STATS = {
     BATCH_SIZE: 3,
     DELAY: 4000,
     FORMATION: "vertical line",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicLust",
   },
   demon2: {
     HP: 4,
@@ -358,7 +360,7 @@ export const ENEMY_BALANCE_STATS = {
     BATCH_SIZE: 3,
     DELAY: 4000,
     FORMATION: "horizontal line",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicLust",
   },
   golem_area4: {
     HP: 500,
@@ -373,7 +375,7 @@ export const ENEMY_BALANCE_STATS = {
       },
     },
     FORMATION: "vertical line",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicGreed",
   },
   ent_area4: {
     HP: 500,
@@ -389,7 +391,7 @@ export const ENEMY_BALANCE_STATS = {
       },
     },
     FORMATION: "horizontal line",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicGreed",
   },
   mummy_area4: {
     HP: 500,
@@ -404,7 +406,7 @@ export const ENEMY_BALANCE_STATS = {
       },
     },
     FORMATION: "vertical line",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicGreed",
   },
   living_armor_area4: {
     HP: 500,
@@ -419,7 +421,7 @@ export const ENEMY_BALANCE_STATS = {
       },
     },
     FORMATION: "horizontal line",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicGreed",
   },
   headless_horseman_area4: {
     HP: 500,
@@ -435,7 +437,7 @@ export const ENEMY_BALANCE_STATS = {
       },
     },
     FORMATION: "vertical line",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicGreed",
   },
   medusa_area4: {
     HP: 500,
@@ -451,7 +453,7 @@ export const ENEMY_BALANCE_STATS = {
       },
     },
     FORMATION: "horizontal line",
-    DROP_ITEM: "blueOrb",
+    DROP_ITEM: "relicGreed",
   },
   sorcerer: {
     HP: 2000,
@@ -479,7 +481,7 @@ export const ENEMY_BALANCE_STATS = {
       },
     },
     FORMATION: "vertical line",
-    DROP_ITEM: "purpleOrb",
+    DROP_ITEM: "relicEnvy",
   },
 } satisfies Record<string, EnemyBalanceStats>;
 
