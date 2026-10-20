@@ -85,7 +85,8 @@ export class BossEnemy extends Phaser.GameObjects.Container {
 
   public get portalService() {
     return this.scene.registry.get("portalService") as
-      MachineInterpreter | undefined;
+      | MachineInterpreter
+      | undefined;
   }
 
   createEnemy() {
@@ -118,15 +119,17 @@ export class BossEnemy extends Phaser.GameObjects.Container {
       });
     }
 
-    if (this.config.attackKey) {
-      const attackAnimKey = `${this.config.attackKey}_anim`;
+    if (this.config.deathKey) {
+      const deathAnimKey = `${this.config.deathKey}_anim`;
 
-      if (!this.scene.anims.exists(attackAnimKey)) {
+      if (!this.scene.anims.exists(deathAnimKey)) {
+        const endFrame = this.config.deathKey === "dungeonboss_death" ? 12 : 7;
+
         this.scene.anims.create({
-          key: attackAnimKey,
-          frames: this.scene.anims.generateFrameNumbers(this.config.attackKey, {
+          key: deathAnimKey,
+          frames: this.scene.anims.generateFrameNumbers(this.config.deathKey, {
             start: 0,
-            end: 7,
+            end: endFrame,
           }),
           frameRate: 10,
           repeat: 0,
@@ -137,21 +140,31 @@ export class BossEnemy extends Phaser.GameObjects.Container {
     this.sprite.play(animKey);
   }
 
-  // public playAttackAnimation() {
-  //   if (this.isDead || !this.active) return;
+  public playDeathAnimation(onComplete?: () => void) {
+    if (!this.sprite?.anims) return;
 
-  //   this.sprite.play(`${this.config.attackKey}_anim`, true);
-  // }
+    const deathAnimKey = `${this.config.deathKey}_anim`;
 
-  // public playMovementAnimation() {
-  //   if (this.isDead || !this.active) return;
+    if (!this.config.deathKey || !this.scene.anims.exists(deathAnimKey)) {
+      onComplete?.();
+      return;
+    }
 
-  //   this.sprite.play(`${this.config.key}_anim`, true);
-  // }
+    this.enemyBody?.setVelocity(0, 0);
+    this.lifeBar.setVisible(false);
+    this.sprite.setAlpha(1);
+    this.sprite.anims.resume(); // in case slow/stun paused it
+
+    if (onComplete) {
+      this.sprite.once(Phaser.Animations.Events.ANIMATION_COMPLETE, onComplete);
+    }
+    this.sprite.play(deathAnimKey, true);
+  }
 
   private avoidObstacles(): { x: number; y: number } {
     const obstacles = (this.scene as any).obstacles as
-      BoundingBox[] | undefined;
+      | BoundingBox[]
+      | undefined;
     if (!obstacles || obstacles.length === 0) return { x: 0, y: 0 };
 
     let pushX = 0;
@@ -387,6 +400,6 @@ export class BossEnemy extends Phaser.GameObjects.Container {
     if (this.deathHandled) return;
 
     this.deathHandled = true;
-    this.scene.handleBossDefeat(this);
+    this.playDeathAnimation(() => this.scene.handleBossDefeat(this));
   }
 }

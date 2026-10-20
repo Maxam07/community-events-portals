@@ -56,7 +56,6 @@ import relicGreed from "public/world/portal/halloween/relics_greed.webp";
 import relicGluttony from "public/world/portal/halloween/relics_gluttony.webp";
 import relicEnvy from "public/world/portal/halloween/relics_envy.webp";
 
-import icon_boss3 from "public/world/portal/images/icon_boss_3.webp";
 import tooltip_icon from "public/world/portal/images/ExpOrb_combined.webp";
 import swordIcon from "public/world/portal/images/sword_icon.png";
 import speedIcon from "public/world/portal/images/lightning.png";
@@ -139,7 +138,7 @@ export const INSTRUCTIONS: {
   width?: number;
 }[] = [
   {
-    image: icon_boss3,
+    image: sorcerer,
     description: t("minigame.instructions1"),
   },
   {
@@ -251,6 +250,7 @@ export const Boss: Record<BossTypes, string> = {
   witch: "Witch",
   cerberus: "Cerberus",
   sorcerer: "Sorcerer",
+  dungeonboss: "Boss",
 };
 
 export const ENEMIES_TABLE: {

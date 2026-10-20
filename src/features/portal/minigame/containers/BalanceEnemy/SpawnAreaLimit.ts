@@ -49,6 +49,7 @@ export const ENEMY_AREAS: Record<AreaEnemyType, SpawnArea> = {
   witch: 2,
   cerberus: 3,
   sorcerer: 4,
+  dungeonboss: 4,
 };
 
 const minX = 1 * SQUARE_WIDTH;

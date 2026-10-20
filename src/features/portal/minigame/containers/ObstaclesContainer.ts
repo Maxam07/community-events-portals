@@ -278,7 +278,7 @@ export function addStaticObstacle({
 
   const WATER_DEPTH = 5;
   const OBSTACLES_DEPTH = 60;
-  const CLOUDS_DEPTH = 10000000000000;
+  const CLOUDS_DEPTH = 100000000;
 
   const coordinates = {
     x: x ?? 0,

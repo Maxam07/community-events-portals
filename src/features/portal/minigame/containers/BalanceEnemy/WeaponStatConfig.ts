@@ -187,14 +187,14 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
   },
   cerberus: {
     summoning: {
-      TEXTURE: "Fire",
+      TEXTURE: "fang-the-frost",
       WARNING: "shadow_warning",
-      DELAY_MS: 500,
-      WARNING_DURATION_MS: 300,
-      DURATION_MS: 4000,
+      DELAY_MS: stats.cerberus.WEAPONS.summoning.DELAY_MS,
+      WARNING_DURATION_MS: stats.cerberus.WEAPONS.summoning.WARNING_DURATION_MS,
+      DURATION_MS: stats.cerberus.WEAPONS.summoning.DURATION_MS,
     },
     chasing: {
-      TEXTURE: ["fang-the-curse", "fang-the-frost", "fang-the-plague"],
+      TEXTURE: ["fang-the-curse", "fang-the-plague"],
       NEXT_CHASE: stats.cerberus.WEAPONS.chasing.NEXT_CHASE,
       SPEED: stats.cerberus.WEAPONS.chasing.SPEED,
       DURATION_MS: stats.cerberus.WEAPONS.chasing.DURATION_MS,
@@ -221,6 +221,27 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
     },
     arena: {
       RADIUS: stats.sorcerer.WEAPONS.arena.RADIUS,
+    },
+  },
+  dungeonboss: {
+    summoning: {
+      TEXTURE: "sorcerer",
+      WARNING: "shadow_warning",
+      DELAY_MS: stats.dungeonboss.WEAPONS.summoning.DELAY_MS,
+      WARNING_DURATION_MS:
+        stats.dungeonboss.WEAPONS.summoning.WARNING_DURATION_MS,
+      DURATION_MS: stats.dungeonboss.WEAPONS.summoning.DURATION_MS,
+    },
+    chasing: {
+      TEXTURE: ["cerberus", "minotaur"],
+      NEXT_CHASE: stats.dungeonboss.WEAPONS.chasing.NEXT_CHASE,
+      SPEED: stats.dungeonboss.WEAPONS.chasing.SPEED,
+      DURATION_MS: stats.dungeonboss.WEAPONS.chasing.DURATION_MS,
+    },
+    orbiting: {
+      TEXTURE: "witch",
+      RADIUS: stats.dungeonboss.WEAPONS.orbiting.RADIUS,
+      SPEED_DEG_PER_SEC: stats.dungeonboss.WEAPONS.orbiting.SPEED_DEG_PER_SEC,
     },
   },
 };

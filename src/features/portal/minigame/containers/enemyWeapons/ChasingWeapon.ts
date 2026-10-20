@@ -88,11 +88,23 @@ export class ChasingWeapon extends Phaser.GameObjects.Sprite {
     this.enemyType = enemyType;
 
     scene.add.existing(this);
+    scene.physics.world.enable(this);
+
     this.setScale(scale);
     this.setDepth(depth);
     this.setOrigin(0.5);
     this.createAnimation();
     this.setVisible(false);
+    this.applyHitbox();
+  }
+
+  private applyHitbox(divisor = 2) {
+    const body = this.body as Phaser.Physics.Arcade.Body;
+    const w = this.width / divisor;
+    const h = this.height / divisor;
+
+    body.setSize(w, h);
+    body.setOffset((this.width - w) / 2, (this.height - h) / 2); // keeps it centred
   }
 
   private createAnimation() {
@@ -168,13 +180,14 @@ export class ChasingWeapon extends Phaser.GameObjects.Sprite {
     const dy = this.player.y - this.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
 
-    const flipAssets = ["skeleton"];
-    if (flipAssets.includes(this.texture.key)) {
-      this.setFlipX(false);
-    } else if (dx < 0) {
-      this.setFlipX(true);
+    // Textures drawn facing left, so their flip is inverted
+    const flipAssets = ["skeleton", "minotaur", "cerberus"];
+    const invert = flipAssets.includes(this.texture.key);
+
+    if (dx < 0) {
+      this.setFlipX(!invert);
     } else if (dx > 0) {
-      this.setFlipX(false);
+      this.setFlipX(invert);
     }
 
     if (dist > 1) {

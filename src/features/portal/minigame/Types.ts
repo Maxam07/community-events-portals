@@ -397,7 +397,8 @@ export type BossTypes =
   // Area 3
   | "cerberus"
   // Area 4
-  | "sorcerer";
+  | "sorcerer"
+  | "dungeonboss";
 
 export type EnemyConfig = {
   key: string;
@@ -445,6 +446,7 @@ export type BossWaveConfig = {
   totalEnemy: number;
   weaponType: WeaponType[];
   formation: EnemyFormation;
+  spawnPosition?: { x: number; y: number };
   flag: string;
 };
 

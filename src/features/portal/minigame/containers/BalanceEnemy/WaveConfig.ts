@@ -1,3 +1,4 @@
+import { SQUARE_WIDTH } from "features/game/lib/constants";
 import type {
   MiniBossWaveConfig,
   BossWaveConfig,
@@ -332,5 +333,13 @@ export const BOSS_WAVE_THRESHOLDS: BossWaveConfig[] = [
     weaponType: stats.sorcerer.WEAPON,
     formation: stats.sorcerer.FORMATION,
     flag: "bossWave4",
+  },
+  {
+    bossType: "dungeonboss",
+    totalEnemy: stats.dungeonboss.TOTAL,
+    weaponType: stats.dungeonboss.WEAPON,
+    formation: stats.dungeonboss.FORMATION,
+    spawnPosition: { x: 20 * SQUARE_WIDTH, y: 8 * SQUARE_WIDTH },
+    flag: "bossWave4_1",
   },
 ];
