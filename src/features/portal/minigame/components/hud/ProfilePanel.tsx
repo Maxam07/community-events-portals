@@ -11,8 +11,9 @@ import { WearablesTab } from "./Wearables";
 
 import frozenSkullIcon from "public/world/portal/halloween/weapons/the_frost/frozen_skull_icon.png";
 import guideIcon from "public/world/page.png";
-
-export type ProfilePanelTab = "weapons" | "wearables" | "guide";
+import enemyIcon from "public/world/portal/halloween/icons/scarecrow_icon.png";
+import { DropItemsXP, Enemies } from "../panels/CodexCategories";
+export type ProfilePanelTab = "weapons" | "wearables" | "guide" | "enemy";
 
 export const ProfilePanel: React.FC<{
   currentTab: ProfilePanelTab;
@@ -31,7 +32,7 @@ export const ProfilePanel: React.FC<{
   availableWearableCounts,
   onEquipWearable,
   onClose,
-  tabs = ["wearables", "weapons", "guide"],
+  tabs = ["wearables", "weapons", "guide", "enemy"],
 }) => {
   const { t } = useAppTranslation();
 
@@ -50,6 +51,11 @@ export const ProfilePanel: React.FC<{
       id: "guide" as const,
       icon: guideIcon,
       name: t("minigame.weaponGuide"),
+    },
+    {
+      id: "enemy" as const,
+      icon: enemyIcon,
+      name: t("minigame.enemyGuide"),
     },
   ].filter((tab) => tabs.includes(tab.id));
 
@@ -70,8 +76,13 @@ export const ProfilePanel: React.FC<{
         />
       ) : currentTab === "weapons" ? (
         <WeaponsTab />
-      ) : (
+      ) : currentTab === "guide" ? (
         <WeaponsGuide />
+      ) : (
+        <>
+          <Enemies />
+          <DropItemsXP />
+        </>
       )}
     </CloseButtonPanel>
   );

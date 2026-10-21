@@ -66,7 +66,7 @@ export class ChasingWeapon extends Phaser.GameObjects.Sprite {
     offsetX = 20,
     offsetY = 20,
     scale = 1,
-    depth = 1001,
+    depth = 100,
     chaseDelayMs = 2000,
     chaseSpeed = 400,
     chaseDurationMs = 5000,

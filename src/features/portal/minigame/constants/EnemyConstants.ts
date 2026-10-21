@@ -490,7 +490,7 @@ export const ENEMY_BALANCE_STATS = {
   },
   dungeonboss: {
     HP: 1000,
-    SPEED: 0,
+    SPEED: 5,
     DAMAGE: 5,
     TOTAL: 1,
     WEAPON: ["chasing", "summoning", "orbiting"],
@@ -1167,7 +1167,7 @@ export const BOSS_CONFIGS: Record<BossTypes, EnemyConfig> = {
     frameStart: 0,
     frameEnd: 7,
     frameRate: 10,
-    depth: BOSS_DEPTH + 10,
+    depth: BOSS_DEPTH,
     speed: ENEMY_BALANCE_STATS.dungeonboss.SPEED,
     hp: ENEMY_BALANCE_STATS.dungeonboss.HP,
     maxHp: ENEMY_BALANCE_STATS.dungeonboss.HP,
