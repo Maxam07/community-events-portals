@@ -467,8 +467,8 @@ export class Scene extends BaseScene {
       "dungeonboss_death",
       "world/portal/halloween/dungeonboss-defeat.webp",
       {
-        frameWidth: 158,
-        frameHeight: 158,
+        frameWidth: 160,
+        frameHeight: 160,
       },
     );
 

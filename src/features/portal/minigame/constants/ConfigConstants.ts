@@ -74,7 +74,7 @@ import { SUNNYSIDE } from "assets/sunnyside";
 export { PORTAL_NAME } from "./PortalConstants";
 
 // Game config
-export const GAME_SECONDS = 300;
+export const GAME_SECONDS = 900;
 export const GAME_LIVES = 100;
 export const WALKING_SPEED = 50;
 export const PLAYER_WATER_SPEED_MULTIPLIER = 0.6;
