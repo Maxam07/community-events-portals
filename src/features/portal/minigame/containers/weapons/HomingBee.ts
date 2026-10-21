@@ -23,6 +23,7 @@ type HomingBeeSpawnProps = {
   hitCooldownMs: number;
   range: number;
   claimedTargets: Set<EnemyLike>;
+  allActiveBees?: HomingBee[];
 };
 
 type HomingBeeUpdateProps = {
@@ -35,8 +36,10 @@ export class HomingBee extends Phaser.Physics.Arcade.Sprite {
   public speed = 0;
   public hitCooldownMs = 0;
   public range = 0;
+  private baseDamage = 0;
   private target?: EnemyLike;
   private claimedTargets?: Set<EnemyLike>;
+  private allActiveBees?: HomingBee[];
   private isAttached = false;
   private nextRetargetAt = 0;
   private nextSteerAt = 0;
@@ -74,6 +77,7 @@ export class HomingBee extends Phaser.Physics.Arcade.Sprite {
     hitCooldownMs,
     range,
     claimedTargets,
+    allActiveBees,
   }: HomingBeeSpawnProps) {
     this.setTexture(texture);
     this.setPosition(x, y);
@@ -87,11 +91,13 @@ export class HomingBee extends Phaser.Physics.Arcade.Sprite {
     } else {
       this.anims.stop();
     }
-    this.payload = payload;
+    this.payload = { ...payload };
+    this.baseDamage = payload.damage;
     this.speed = speed;
     this.hitCooldownMs = hitCooldownMs;
     this.range = range;
     this.claimedTargets = claimedTargets;
+    this.allActiveBees = allActiveBees;
     this.releaseTarget();
     const now = this.scene.time.now;
     this.nextRetargetAt = now + Phaser.Math.Between(0, RETARGET_INTERVAL_MS);
@@ -170,6 +176,22 @@ export class HomingBee extends Phaser.Physics.Arcade.Sprite {
       if (time < this.nextStingAt) return undefined;
 
       this.nextStingAt = time + this.hitCooldownMs;
+
+      // Aplica o dimensionamento de raiz quadrada: DTotal = D * sqrt(N)
+      // O dano individual de cada mosca é distribuído proporcionalmente: (D * sqrt(N)) / N
+      if (this.allActiveBees && this.target) {
+        const fliesOnTarget = this.allActiveBees.filter(
+          (bee) => bee.active && bee.target === this.target,
+        ).length;
+
+        if (fliesOnTarget > 1) {
+          this.payload.damage =
+            (this.baseDamage * Math.sqrt(fliesOnTarget)) / fliesOnTarget;
+        } else {
+          this.payload.damage = this.baseDamage;
+        }
+      }
+
       return this.target;
     }
 
@@ -203,6 +225,7 @@ export class HomingBee extends Phaser.Physics.Arcade.Sprite {
     this.setVisible(false);
     this.releaseTarget();
     this.claimedTargets = undefined;
+    this.allActiveBees = undefined;
     this.nextRetargetAt = 0;
     this.nextSteerAt = 0;
     this.nextStingAt = 0;
@@ -224,7 +247,15 @@ export class HomingBee extends Phaser.Physics.Arcade.Sprite {
     if (!this.claimedTargets) return;
 
     const candidates = targeting.inRadius(this, this.range);
-    const target = targeting.nearest(this, candidates, this.claimedTargets);
+
+    // 1. Tenta pegar primeiro um alvo que NÃO possui moscas
+    let target = targeting.nearest(this, candidates, this.claimedTargets);
+
+    // 2. Se não houver nenhum alvo livre, permite pegar um alvo que já possui moscas
+    if (!target && candidates.length > 0) {
+      target = targeting.nearest(this, candidates, new Set());
+    }
+
     if (!target) return;
 
     this.target = target;

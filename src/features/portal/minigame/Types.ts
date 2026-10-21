@@ -251,6 +251,7 @@ export type EnemyLike = Phaser.GameObjects.GameObject & {
 };
 
 export type DamagePayload = {
+  damage: number;
   sourceWeaponId: WeaponId;
   amount: number;
   damageType: DamageType;

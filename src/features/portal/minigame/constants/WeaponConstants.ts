@@ -1152,102 +1152,104 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
       level: 2,
       modifiers: [
         { stat: "damage", operation: "set", value: 3 },
-        { stat: "hitCooldownMs", operation: "set", value: 770 },
+        { stat: "hitCooldownMs", operation: "set", value: 850 },
       ],
     },
     {
       level: 3,
       modifiers: [
         { stat: "damage", operation: "set", value: 4 },
-        { stat: "hitCooldownMs", operation: "set", value: 750 },
+        { stat: "hitCooldownMs", operation: "set", value: 800 },
       ],
     },
     {
       level: 4,
       modifiers: [
         { stat: "damage", operation: "set", value: 5 },
-        { stat: "hitCooldownMs", operation: "set", value: 720 },
+        { stat: "hitCooldownMs", operation: "set", value: 750 },
       ],
     },
     {
       level: 5,
       modifiers: [
-        { stat: "damage", operation: "set", value: 8 },
+        { stat: "damage", operation: "set", value: 6 },
         { stat: "projectileCount", operation: "set", value: 4 },
         { stat: "range", operation: "set", value: 189 },
+        { stat: "hitCooldownMs", operation: "set", value: 700 },
       ],
     },
     {
       level: 6,
       modifiers: [
-        { stat: "damage", operation: "set", value: 10 },
-        { stat: "hitCooldownMs", operation: "set", value: 670 },
+        { stat: "damage", operation: "set", value: 7 },
+        { stat: "hitCooldownMs", operation: "set", value: 650 },
       ],
     },
     {
       level: 7,
       modifiers: [
-        { stat: "damage", operation: "set", value: 12 },
-        { stat: "hitCooldownMs", operation: "set", value: 640 },
+        { stat: "damage", operation: "set", value: 8 },
+        { stat: "hitCooldownMs", operation: "set", value: 600 },
       ],
     },
     {
       level: 8,
       modifiers: [
-        { stat: "damage", operation: "set", value: 14 },
-        { stat: "hitCooldownMs", operation: "set", value: 620 },
+        { stat: "damage", operation: "set", value: 9 },
+        { stat: "hitCooldownMs", operation: "set", value: 550 },
       ],
     },
     {
       level: 9,
       modifiers: [
-        { stat: "damage", operation: "set", value: 16 },
-        { stat: "hitCooldownMs", operation: "set", value: 590 },
+        { stat: "damage", operation: "set", value: 10 },
+        { stat: "hitCooldownMs", operation: "set", value: 500 },
       ],
     },
     {
       level: 10,
       modifiers: [
-        { stat: "damage", operation: "set", value: 22 },
+        { stat: "damage", operation: "set", value: 14 },
         { stat: "projectileCount", operation: "set", value: 8 },
         { stat: "range", operation: "set", value: 251 },
+        { stat: "hitCooldownMs", operation: "set", value: 430 },
       ],
     },
     {
       level: 11,
       modifiers: [
-        { stat: "damage", operation: "set", value: 25 },
-        { stat: "hitCooldownMs", operation: "set", value: 500 },
+        { stat: "damage", operation: "set", value: 16 },
+        { stat: "hitCooldownMs", operation: "set", value: 390 },
       ],
     },
     {
       level: 12,
       modifiers: [
-        { stat: "damage", operation: "set", value: 28 },
-        { stat: "hitCooldownMs", operation: "set", value: 450 },
+        { stat: "damage", operation: "set", value: 18 },
+        { stat: "hitCooldownMs", operation: "set", value: 350 },
       ],
     },
     {
       level: 13,
       modifiers: [
-        { stat: "damage", operation: "set", value: 33 },
-        { stat: "hitCooldownMs", operation: "set", value: 350 },
+        { stat: "damage", operation: "set", value: 21 },
+        { stat: "hitCooldownMs", operation: "set", value: 310 },
       ],
     },
     {
       level: 14,
       modifiers: [
-        { stat: "damage", operation: "set", value: 39 },
-        { stat: "hitCooldownMs", operation: "set", value: 250 },
+        { stat: "damage", operation: "set", value: 24 },
+        { stat: "hitCooldownMs", operation: "set", value: 280 },
       ],
     },
     {
       level: 15,
       modifiers: [
-        { stat: "damage", operation: "set", value: 46 },
+        { stat: "damage", operation: "set", value: 30 },
         { stat: "projectileCount", operation: "set", value: 12 },
         { stat: "range", operation: "set", value: 500 },
-        { stat: "hitCooldownMs", operation: "set", value: 100 },
+        { stat: "hitCooldownMs", operation: "set", value: 250 },
       ],
     },
   ],
