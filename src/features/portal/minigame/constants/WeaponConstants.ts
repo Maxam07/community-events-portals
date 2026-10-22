@@ -38,7 +38,7 @@ const BASE_WEAPON_STATS = {
   knockback: 0,
 };
 
-export const WEAPON_MAX_LEVEL: WeaponLevel = 8;
+export const WEAPON_MAX_LEVEL: WeaponLevel = 15;
 
 export const KNOCKBACK_DURATION_MS = 160;
 
@@ -48,18 +48,6 @@ export const getNextWeaponLevel = (
   if (level >= WEAPON_MAX_LEVEL) return undefined;
 
   return (level + 1) as WeaponLevel;
-};
-
-export const WEAPON_UPGRADE_XP_COSTS: Record<WeaponLevel, number | null> = {
-  0: null,
-  1: 20,
-  2: 20,
-  3: 50,
-  4: 90,
-  5: 140,
-  6: 200,
-  7: 270,
-  8: 350,
 };
 
 export const PROJECTILE_CONFIGS: Record<string, ProjectileConfig> = {
@@ -329,51 +317,84 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
     {
       level: 2,
       modifiers: [
-        { stat: "angularSpeed", operation: "multiply", value: 1.1 },
-        { stat: "damage", operation: "add", value: 1 },
+        { stat: "damage", operation: "set", value: 5 },
+        { stat: "cooldownMs", operation: "set", value: 390 },
       ],
     },
     {
       level: 3,
       modifiers: [
-        { stat: "orbitRadius", operation: "add", value: 5 },
-        { stat: "hitCooldownMs", operation: "multiply", value: 0.9 },
+        { stat: "damage", operation: "set", value: 6 },
+        { stat: "cooldownMs", operation: "set", value: 380 },
       ],
     },
-    {
-      level: 4,
-      modifiers: [
-        { stat: "orbitalCount", operation: "add", value: 1 },
-        { stat: "damage", operation: "add", value: 2 },
-      ],
-    },
+    { level: 4, modifiers: [{ stat: "damage", operation: "set", value: 7 }] },
     {
       level: 5,
       modifiers: [
-        { stat: "angularSpeed", operation: "multiply", value: 1.15 },
-        { stat: "damage", operation: "add", value: 2 },
+        { stat: "damage", operation: "set", value: 11 },
+        { stat: "orbitalCount", operation: "set", value: 2 },
+        { stat: "orbitRadius", operation: "set", value: 36 },
       ],
     },
     {
       level: 6,
       modifiers: [
-        { stat: "orbitRadius", operation: "add", value: 8 },
-        { stat: "damage", operation: "add", value: 2 },
+        { stat: "damage", operation: "set", value: 13 },
+        { stat: "cooldownMs", operation: "set", value: 360 },
       ],
     },
     {
       level: 7,
       modifiers: [
-        { stat: "orbitalCount", operation: "add", value: 1 },
-        { stat: "hitCooldownMs", operation: "multiply", value: 0.9 },
+        { stat: "damage", operation: "set", value: 15 },
+        { stat: "cooldownMs", operation: "set", value: 350 },
+      ],
+    },
+    { level: 8, modifiers: [{ stat: "damage", operation: "set", value: 17 }] },
+    {
+      level: 9,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 19 },
+        { stat: "cooldownMs", operation: "set", value: 340 },
       ],
     },
     {
-      level: 8,
+      level: 10,
       modifiers: [
-        { stat: "orbitalCount", operation: "add", value: 1 },
-        { stat: "angularSpeed", operation: "multiply", value: 1.1 },
-        { stat: "damage", operation: "add", value: 3 },
+        { stat: "damage", operation: "set", value: 25 },
+        { stat: "orbitalCount", operation: "set", value: 4 },
+        { stat: "orbitRadius", operation: "set", value: 44 },
+      ],
+    },
+    {
+      level: 11,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 28 },
+        { stat: "cooldownMs", operation: "set", value: 320 },
+      ],
+    },
+    { level: 12, modifiers: [{ stat: "damage", operation: "set", value: 31 }] },
+    {
+      level: 13,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 36 },
+        { stat: "cooldownMs", operation: "set", value: 310 },
+      ],
+    },
+    {
+      level: 14,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 42 },
+        { stat: "cooldownMs", operation: "set", value: 300 },
+      ],
+    },
+    {
+      level: 15,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 50 },
+        { stat: "orbitalCount", operation: "set", value: 7 },
+        { stat: "orbitRadius", operation: "set", value: 56 },
       ],
     },
   ],
@@ -381,55 +402,107 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
     {
       level: 2,
       modifiers: [
-        { stat: "arcDegrees", operation: "add", value: 20 },
-        { stat: "damage", operation: "add", value: 2 },
+        { stat: "damage", operation: "set", value: 8 },
+        { stat: "cooldownMs", operation: "set", value: 1250 },
       ],
     },
     {
       level: 3,
       modifiers: [
-        { stat: "arcDegrees", operation: "add", value: 20 },
-        { stat: "range", operation: "add", value: 5 },
-        { stat: "cooldownMs", operation: "multiply", value: 0.9 },
+        { stat: "damage", operation: "set", value: 10 },
+        { stat: "cooldownMs", operation: "set", value: 1210 },
       ],
     },
     {
       level: 4,
       modifiers: [
-        { stat: "arcDegrees", operation: "add", value: 20 },
-        { stat: "damage", operation: "add", value: 3 },
+        { stat: "damage", operation: "set", value: 12 },
+        { stat: "cooldownMs", operation: "set", value: 1160 },
       ],
     },
     {
       level: 5,
       modifiers: [
-        { stat: "arcDegrees", operation: "add", value: 20 },
-        { stat: "durationMs", operation: "add", value: 80 },
-        { stat: "cooldownMs", operation: "multiply", value: 0.85 },
+        { stat: "damage", operation: "set", value: 18 },
+        { stat: "cooldownMs", operation: "set", value: 1120 },
+        { stat: "arcDegrees", operation: "set", value: 202 },
+        { stat: "range", operation: "set", value: 45 },
       ],
     },
     {
       level: 6,
       modifiers: [
-        { stat: "arcDegrees", operation: "add", value: 20 },
-        { stat: "damage", operation: "add", value: 4 },
+        { stat: "damage", operation: "set", value: 21 },
+        { stat: "cooldownMs", operation: "set", value: 1070 },
       ],
     },
     {
       level: 7,
       modifiers: [
-        { stat: "arcDegrees", operation: "add", value: 20 },
-        { stat: "range", operation: "add", value: 10 },
-        { stat: "cooldownMs", operation: "multiply", value: 0.8 },
+        { stat: "damage", operation: "set", value: 24 },
+        { stat: "cooldownMs", operation: "set", value: 1020 },
       ],
     },
     {
       level: 8,
       modifiers: [
-        { stat: "arcDegrees", operation: "add", value: 30 },
+        { stat: "damage", operation: "set", value: 27 },
+        { stat: "cooldownMs", operation: "set", value: 980 },
+      ],
+    },
+    {
+      level: 9,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 30 },
+        { stat: "cooldownMs", operation: "set", value: 930 },
+      ],
+    },
+    {
+      level: 10,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 38 },
+        { stat: "cooldownMs", operation: "set", value: 880 },
         { stat: "projectileCount", operation: "set", value: 2 },
-        { stat: "damage", operation: "add", value: 10 },
-        { stat: "range", operation: "add", value: 10 },
+        { stat: "arcDegrees", operation: "set", value: 228 },
+        { stat: "range", operation: "set", value: 50 },
+      ],
+    },
+    {
+      level: 11,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 42 },
+        { stat: "cooldownMs", operation: "set", value: 840 },
+      ],
+    },
+    {
+      level: 12,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 46 },
+        { stat: "cooldownMs", operation: "set", value: 790 },
+      ],
+    },
+    {
+      level: 13,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 53 },
+        { stat: "cooldownMs", operation: "set", value: 750 },
+      ],
+    },
+    {
+      level: 14,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 61 },
+        { stat: "cooldownMs", operation: "set", value: 700 },
+      ],
+    },
+    {
+      level: 15,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 72 },
+        { stat: "cooldownMs", operation: "set", value: 600 },
+        { stat: "projectileCount", operation: "set", value: 3 },
+        { stat: "arcDegrees", operation: "set", value: 270 },
+        { stat: "range", operation: "set", value: 60 },
       ],
     },
   ],
@@ -437,51 +510,105 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
     {
       level: 2,
       modifiers: [
-        { stat: "cooldownMs", operation: "multiply", value: 0.85 },
-        { stat: "projectileSpeed", operation: "add", value: 10 },
+        { stat: "damage", operation: "set", value: 6 },
+        { stat: "cooldownMs", operation: "set", value: 630 },
       ],
     },
     {
       level: 3,
       modifiers: [
-        { stat: "damage", operation: "add", value: 3 },
-        { stat: "pierce", operation: "add", value: 1 },
+        { stat: "damage", operation: "set", value: 7 },
+        { stat: "cooldownMs", operation: "set", value: 620 },
       ],
     },
     {
       level: 4,
       modifiers: [
-        { stat: "projectileCount", operation: "add", value: 1 },
-        { stat: "cooldownMs", operation: "multiply", value: 0.8 },
+        { stat: "damage", operation: "set", value: 8 },
+        { stat: "cooldownMs", operation: "set", value: 600 },
       ],
     },
     {
       level: 5,
       modifiers: [
-        { stat: "damage", operation: "add", value: 3 },
-        { stat: "projectileSpeed", operation: "add", value: 20 },
+        { stat: "damage", operation: "set", value: 12 },
+        { stat: "cooldownMs", operation: "set", value: 590 },
+        { stat: "projectileCount", operation: "set", value: 2 },
+        { stat: "pierce", operation: "set", value: 4 },
       ],
     },
     {
       level: 6,
       modifiers: [
-        { stat: "projectileCount", operation: "add", value: 1 },
-        { stat: "damage", operation: "add", value: 4 },
+        { stat: "damage", operation: "set", value: 14 },
+        { stat: "cooldownMs", operation: "set", value: 570 },
       ],
     },
     {
       level: 7,
       modifiers: [
-        { stat: "pierce", operation: "add", value: 3 },
-        { stat: "cooldownMs", operation: "multiply", value: 0.9 },
+        { stat: "damage", operation: "set", value: 16 },
+        { stat: "cooldownMs", operation: "set", value: 560 },
       ],
     },
     {
       level: 8,
       modifiers: [
-        { stat: "projectileCount", operation: "add", value: 1 },
-        { stat: "damage", operation: "add", value: 5 },
-        { stat: "pierce", operation: "add", value: 5 },
+        { stat: "damage", operation: "set", value: 18 },
+        { stat: "cooldownMs", operation: "set", value: 540 },
+      ],
+    },
+    {
+      level: 9,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 20 },
+        { stat: "cooldownMs", operation: "set", value: 530 },
+      ],
+    },
+    {
+      level: 10,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 26 },
+        { stat: "cooldownMs", operation: "set", value: 510 },
+        { stat: "projectileCount", operation: "set", value: 4 },
+        { stat: "pierce", operation: "set", value: 8 },
+      ],
+    },
+    {
+      level: 11,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 29 },
+        { stat: "cooldownMs", operation: "set", value: 500 },
+      ],
+    },
+    {
+      level: 12,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 32 },
+        { stat: "cooldownMs", operation: "set", value: 480 },
+      ],
+    },
+    {
+      level: 13,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 37 },
+        { stat: "cooldownMs", operation: "set", value: 470 },
+      ],
+    },
+    {
+      level: 14,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 43 },
+        { stat: "cooldownMs", operation: "set", value: 450 },
+      ],
+    },
+    {
+      level: 15,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 52 },
+        { stat: "cooldownMs", operation: "set", value: 380 },
+        { stat: "projectileCount", operation: "set", value: 7 },
+        { stat: "pierce", operation: "set", value: 18 },
       ],
     },
   ],
@@ -489,51 +616,105 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
     {
       level: 2,
       modifiers: [
-        { stat: "areaRadius", operation: "add", value: 2 },
-        { stat: "damage", operation: "add", value: 1 },
+        { stat: "damage", operation: "set", value: 4 },
+        { stat: "cooldownMs", operation: "set", value: 1180 },
       ],
     },
     {
       level: 3,
       modifiers: [
-        { stat: "durationMs", operation: "add", value: 200 },
-        { stat: "cooldownMs", operation: "multiply", value: 0.9 },
+        { stat: "damage", operation: "set", value: 5 },
+        { stat: "cooldownMs", operation: "set", value: 1150 },
       ],
     },
     {
       level: 4,
       modifiers: [
-        { stat: "areaRadius", operation: "add", value: 3 },
-        { stat: "damage", operation: "add", value: 2 },
+        { stat: "damage", operation: "set", value: 6 },
+        { stat: "cooldownMs", operation: "set", value: 1130 },
       ],
     },
     {
       level: 5,
       modifiers: [
-        { stat: "damage", operation: "add", value: 3 },
-        { stat: "durationMs", operation: "add", value: 300 },
+        { stat: "damage", operation: "set", value: 10 },
+        { stat: "cooldownMs", operation: "set", value: 1110 },
+        { stat: "projectileCount", operation: "set", value: 2 },
+        { stat: "areaRadius", operation: "set", value: 34 },
       ],
     },
     {
       level: 6,
       modifiers: [
-        { stat: "areaRadius", operation: "add", value: 4 },
-        { stat: "damage", operation: "add", value: 5 },
+        { stat: "damage", operation: "set", value: 12 },
+        { stat: "cooldownMs", operation: "set", value: 1080 },
       ],
     },
     {
       level: 7,
       modifiers: [
-        { stat: "cooldownMs", operation: "multiply", value: 0.8 },
-        { stat: "projectileSpeed", operation: "add", value: 25 },
+        { stat: "damage", operation: "set", value: 14 },
+        { stat: "cooldownMs", operation: "set", value: 1060 },
       ],
     },
     {
       level: 8,
       modifiers: [
-        { stat: "projectileSpeed", operation: "add", value: 50 },
-        { stat: "areaRadius", operation: "add", value: 5 },
-        { stat: "damage", operation: "add", value: 10 },
+        { stat: "damage", operation: "set", value: 16 },
+        { stat: "cooldownMs", operation: "set", value: 1040 },
+      ],
+    },
+    {
+      level: 9,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 18 },
+        { stat: "cooldownMs", operation: "set", value: 1020 },
+      ],
+    },
+    {
+      level: 10,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 24 },
+        { stat: "cooldownMs", operation: "set", value: 990 },
+        { stat: "projectileCount", operation: "set", value: 3 },
+        { stat: "areaRadius", operation: "set", value: 46 },
+      ],
+    },
+    {
+      level: 11,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 27 },
+        { stat: "cooldownMs", operation: "set", value: 970 },
+      ],
+    },
+    {
+      level: 12,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 30 },
+        { stat: "cooldownMs", operation: "set", value: 950 },
+      ],
+    },
+    {
+      level: 13,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 35 },
+        { stat: "cooldownMs", operation: "set", value: 920 },
+      ],
+    },
+    {
+      level: 14,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 41 },
+        { stat: "cooldownMs", operation: "set", value: 900 },
+      ],
+    },
+    {
+      level: 15,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 48 },
+        { stat: "cooldownMs", operation: "set", value: 800 },
+        { stat: "projectileCount", operation: "set", value: 4 },
+        { stat: "areaRadius", operation: "set", value: 62 },
       ],
     },
   ],
@@ -541,51 +722,108 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
     {
       level: 2,
       modifiers: [
-        { stat: "bounceCount", operation: "add", value: 1 },
-        { stat: "damage", operation: "add", value: 2 },
+        { stat: "damage", operation: "set", value: 4 },
+        { stat: "cooldownMs", operation: "set", value: 1070 },
       ],
     },
     {
       level: 3,
       modifiers: [
-        { stat: "cooldownMs", operation: "multiply", value: 0.85 },
-        { stat: "projectileSpeed", operation: "add", value: 20 },
+        { stat: "damage", operation: "set", value: 5 },
+        { stat: "cooldownMs", operation: "set", value: 1050 },
       ],
     },
     {
       level: 4,
       modifiers: [
-        { stat: "projectileCount", operation: "add", value: 1 },
-        { stat: "damage", operation: "add", value: 2 },
+        { stat: "damage", operation: "set", value: 6 },
+        { stat: "cooldownMs", operation: "set", value: 1020 },
       ],
     },
     {
       level: 5,
       modifiers: [
-        { stat: "bounceCount", operation: "add", value: 2 },
-        { stat: "chainRadius", operation: "add", value: 30 },
+        { stat: "damage", operation: "set", value: 10 },
+        { stat: "cooldownMs", operation: "set", value: 990 },
+        { stat: "projectileCount", operation: "set", value: 2 },
+        { stat: "bounceCount", operation: "set", value: 9 },
+        { stat: "chainRadius", operation: "set", value: 142 },
       ],
     },
     {
       level: 6,
       modifiers: [
-        { stat: "projectileCount", operation: "add", value: 1 },
-        { stat: "damage", operation: "add", value: 3 },
+        { stat: "damage", operation: "set", value: 12 },
+        { stat: "cooldownMs", operation: "set", value: 970 },
       ],
     },
     {
       level: 7,
       modifiers: [
-        { stat: "damage", operation: "add", value: 4 },
-        { stat: "cooldownMs", operation: "multiply", value: 0.8 },
+        { stat: "damage", operation: "set", value: 14 },
+        { stat: "cooldownMs", operation: "set", value: 940 },
       ],
     },
     {
       level: 8,
       modifiers: [
-        { stat: "bounceCount", operation: "add", value: 2 },
-        { stat: "projectileCount", operation: "add", value: 1 },
-        { stat: "damage", operation: "add", value: 9 },
+        { stat: "damage", operation: "set", value: 16 },
+        { stat: "cooldownMs", operation: "set", value: 910 },
+      ],
+    },
+    {
+      level: 9,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 18 },
+        { stat: "cooldownMs", operation: "set", value: 880 },
+      ],
+    },
+    {
+      level: 10,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 24 },
+        { stat: "cooldownMs", operation: "set", value: 860 },
+        { stat: "projectileCount", operation: "set", value: 3 },
+        { stat: "bounceCount", operation: "set", value: 15 },
+        { stat: "chainRadius", operation: "set", value: 168 },
+      ],
+    },
+    {
+      level: 11,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 27 },
+        { stat: "cooldownMs", operation: "set", value: 830 },
+      ],
+    },
+    {
+      level: 12,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 30 },
+        { stat: "cooldownMs", operation: "set", value: 800 },
+      ],
+    },
+    {
+      level: 13,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 35 },
+        { stat: "cooldownMs", operation: "set", value: 780 },
+      ],
+    },
+    {
+      level: 14,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 41 },
+        { stat: "cooldownMs", operation: "set", value: 750 },
+      ],
+    },
+    {
+      level: 15,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 48 },
+        { stat: "cooldownMs", operation: "set", value: 660 },
+        { stat: "projectileCount", operation: "set", value: 5 },
+        { stat: "bounceCount", operation: "set", value: 26 },
+        { stat: "chainRadius", operation: "set", value: 210 },
       ],
     },
   ],
@@ -593,51 +831,105 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
     {
       level: 2,
       modifiers: [
-        { stat: "orbitRadius", operation: "add", value: 10 },
-        { stat: "damage", operation: "add", value: 2 },
+        { stat: "damage", operation: "set", value: 5 },
+        { stat: "cooldownMs", operation: "set", value: 730 },
       ],
     },
     {
       level: 3,
       modifiers: [
-        { stat: "cooldownMs", operation: "multiply", value: 0.85 },
-        { stat: "projectileSpeed", operation: "add", value: 25 },
+        { stat: "damage", operation: "set", value: 6 },
+        { stat: "cooldownMs", operation: "set", value: 710 },
       ],
     },
     {
       level: 4,
       modifiers: [
-        { stat: "orbitalCount", operation: "add", value: 1 },
-        { stat: "damage", operation: "add", value: 3 },
+        { stat: "damage", operation: "set", value: 7 },
+        { stat: "cooldownMs", operation: "set", value: 690 },
       ],
     },
     {
       level: 5,
       modifiers: [
-        { stat: "damage", operation: "add", value: 4 },
-        { stat: "cooldownMs", operation: "multiply", value: 0.9 },
+        { stat: "damage", operation: "set", value: 11 },
+        { stat: "cooldownMs", operation: "set", value: 670 },
+        { stat: "orbitalCount", operation: "set", value: 2 },
+        { stat: "orbitRadius", operation: "set", value: 49 },
       ],
     },
     {
       level: 6,
       modifiers: [
-        { stat: "orbitalCount", operation: "add", value: 1 },
-        { stat: "durationMs", operation: "add", value: 200 },
+        { stat: "damage", operation: "set", value: 13 },
+        { stat: "cooldownMs", operation: "set", value: 650 },
       ],
     },
     {
       level: 7,
       modifiers: [
-        { stat: "damage", operation: "add", value: 6 },
-        { stat: "orbitRadius", operation: "add", value: 15 },
+        { stat: "damage", operation: "set", value: 15 },
+        { stat: "cooldownMs", operation: "set", value: 630 },
       ],
     },
     {
       level: 8,
       modifiers: [
-        { stat: "orbitalCount", operation: "add", value: 1 },
-        { stat: "cooldownMs", operation: "multiply", value: 0.9 },
-        { stat: "damage", operation: "add", value: 9 },
+        { stat: "damage", operation: "set", value: 17 },
+        { stat: "cooldownMs", operation: "set", value: 600 },
+      ],
+    },
+    {
+      level: 9,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 19 },
+        { stat: "cooldownMs", operation: "set", value: 580 },
+      ],
+    },
+    {
+      level: 10,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 25 },
+        { stat: "cooldownMs", operation: "set", value: 560 },
+        { stat: "orbitalCount", operation: "set", value: 4 },
+        { stat: "orbitRadius", operation: "set", value: 61 },
+      ],
+    },
+    {
+      level: 11,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 28 },
+        { stat: "cooldownMs", operation: "set", value: 540 },
+      ],
+    },
+    {
+      level: 12,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 31 },
+        { stat: "cooldownMs", operation: "set", value: 520 },
+      ],
+    },
+    {
+      level: 13,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 36 },
+        { stat: "cooldownMs", operation: "set", value: 500 },
+      ],
+    },
+    {
+      level: 14,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 42 },
+        { stat: "cooldownMs", operation: "set", value: 480 },
+      ],
+    },
+    {
+      level: 15,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 50 },
+        { stat: "cooldownMs", operation: "set", value: 420 },
+        { stat: "orbitalCount", operation: "set", value: 7 },
+        { stat: "orbitRadius", operation: "set", value: 78 },
       ],
     },
   ],
@@ -645,51 +937,105 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
     {
       level: 2,
       modifiers: [
-        { stat: "areaRadius", operation: "add", value: 6 },
-        { stat: "dotDamage", operation: "add", value: 1 },
+        { stat: "damage", operation: "set", value: 2 },
+        { stat: "cooldownMs", operation: "set", value: 1560 },
       ],
     },
     {
       level: 3,
       modifiers: [
-        { stat: "durationMs", operation: "add", value: 400 },
-        { stat: "dotTickMs", operation: "multiply", value: 0.85 },
+        { stat: "damage", operation: "set", value: 3 },
+        { stat: "cooldownMs", operation: "set", value: 1520 },
       ],
     },
     {
       level: 4,
       modifiers: [
-        { stat: "areaRadius", operation: "add", value: 8 },
-        { stat: "dotDamage", operation: "add", value: 2 },
+        { stat: "damage", operation: "set", value: 4 },
+        { stat: "cooldownMs", operation: "set", value: 1480 },
       ],
     },
     {
       level: 5,
       modifiers: [
-        { stat: "cooldownMs", operation: "multiply", value: 0.85 },
-        { stat: "statusDurationMs", operation: "add", value: 400 },
+        { stat: "damage", operation: "set", value: 8 },
+        { stat: "cooldownMs", operation: "set", value: 1450 },
+        { stat: "areaRadius", operation: "set", value: 41 },
+        { stat: "dotDamage", operation: "set", value: 5 },
       ],
     },
     {
       level: 6,
       modifiers: [
-        { stat: "areaRadius", operation: "add", value: 10 },
-        { stat: "dotDamage", operation: "add", value: 3 },
+        { stat: "damage", operation: "set", value: 10 },
+        { stat: "cooldownMs", operation: "set", value: 1410 },
       ],
     },
     {
       level: 7,
       modifiers: [
-        { stat: "dotTickMs", operation: "multiply", value: 0.75 },
-        { stat: "damage", operation: "add", value: 2 },
+        { stat: "damage", operation: "set", value: 12 },
+        { stat: "cooldownMs", operation: "set", value: 1370 },
       ],
     },
     {
       level: 8,
       modifiers: [
-        { stat: "areaRadius", operation: "add", value: 15 },
-        { stat: "dotDamage", operation: "add", value: 5 },
-        { stat: "durationMs", operation: "add", value: 600 },
+        { stat: "damage", operation: "set", value: 14 },
+        { stat: "cooldownMs", operation: "set", value: 1330 },
+      ],
+    },
+    {
+      level: 9,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 16 },
+        { stat: "cooldownMs", operation: "set", value: 1290 },
+      ],
+    },
+    {
+      level: 10,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 22 },
+        { stat: "cooldownMs", operation: "set", value: 1250 },
+        { stat: "areaRadius", operation: "set", value: 54 },
+        { stat: "dotDamage", operation: "set", value: 14 },
+      ],
+    },
+    {
+      level: 11,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 25 },
+        { stat: "cooldownMs", operation: "set", value: 1220 },
+      ],
+    },
+    {
+      level: 12,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 28 },
+        { stat: "cooldownMs", operation: "set", value: 1180 },
+      ],
+    },
+    {
+      level: 13,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 33 },
+        { stat: "cooldownMs", operation: "set", value: 1140 },
+      ],
+    },
+    {
+      level: 14,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 39 },
+        { stat: "cooldownMs", operation: "set", value: 1100 },
+      ],
+    },
+    {
+      level: 15,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 48 },
+        { stat: "cooldownMs", operation: "set", value: 950 },
+        { stat: "areaRadius", operation: "set", value: 75 },
+        { stat: "dotDamage", operation: "set", value: 28 },
       ],
     },
   ],
@@ -697,51 +1043,107 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
     {
       level: 2,
       modifiers: [
-        { stat: "size", operation: "add", value: 0.2 },
-        { stat: "damage", operation: "add", value: 2 },
+        { stat: "damage", operation: "set", value: 6 },
+        { stat: "cooldownMs", operation: "set", value: 1460 },
       ],
     },
     {
       level: 3,
       modifiers: [
-        { stat: "pierce", operation: "add", value: 4 },
-        { stat: "cooldownMs", operation: "multiply", value: 0.9 },
+        { stat: "damage", operation: "set", value: 8 },
+        { stat: "cooldownMs", operation: "set", value: 1420 },
       ],
     },
     {
       level: 4,
       modifiers: [
-        { stat: "size", operation: "add", value: 0.25 },
-        { stat: "damage", operation: "add", value: 3 },
+        { stat: "damage", operation: "set", value: 10 },
+        { stat: "cooldownMs", operation: "set", value: 1380 },
       ],
     },
     {
       level: 5,
       modifiers: [
-        { stat: "projectileSpeed", operation: "add", value: 20 },
-        { stat: "durationMs", operation: "add", value: 200 },
+        { stat: "damage", operation: "set", value: 16 },
+        { stat: "cooldownMs", operation: "set", value: 1350 },
+        { stat: "pierce", operation: "set", value: 16 },
+        { stat: "size", operation: "set", value: 1.31 },
       ],
     },
     {
       level: 6,
       modifiers: [
-        { stat: "damage", operation: "add", value: 4 },
-        { stat: "pierce", operation: "add", value: 4 },
+        { stat: "damage", operation: "set", value: 19 },
+        { stat: "cooldownMs", operation: "set", value: 1310 },
       ],
     },
     {
       level: 7,
       modifiers: [
-        { stat: "cooldownMs", operation: "multiply", value: 0.8 },
-        { stat: "size", operation: "add", value: 0.3 },
+        { stat: "damage", operation: "set", value: 22 },
+        { stat: "cooldownMs", operation: "set", value: 1270 },
       ],
     },
     {
       level: 8,
       modifiers: [
-        { stat: "size", operation: "add", value: 0.5 },
-        { stat: "pierce", operation: "add", value: 8 },
-        { stat: "damage", operation: "add", value: 15 },
+        { stat: "damage", operation: "set", value: 25 },
+        { stat: "cooldownMs", operation: "set", value: 1230 },
+      ],
+    },
+    {
+      level: 9,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 28 },
+        { stat: "cooldownMs", operation: "set", value: 1190 },
+      ],
+    },
+    {
+      level: 10,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 36 },
+        { stat: "cooldownMs", operation: "set", value: 1150 },
+        { stat: "projectileCount", operation: "set", value: 2 },
+        { stat: "pierce", operation: "set", value: 29 },
+        { stat: "size", operation: "set", value: 1.69 },
+      ],
+    },
+    {
+      level: 11,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 40 },
+        { stat: "cooldownMs", operation: "set", value: 1120 },
+      ],
+    },
+    {
+      level: 12,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 45 },
+        { stat: "cooldownMs", operation: "set", value: 1080 },
+      ],
+    },
+    {
+      level: 13,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 52 },
+        { stat: "cooldownMs", operation: "set", value: 1040 },
+      ],
+    },
+    {
+      level: 14,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 60 },
+        { stat: "cooldownMs", operation: "set", value: 1000 },
+      ],
+    },
+    {
+      level: 15,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 70 },
+        { stat: "cooldownMs", operation: "set", value: 850 },
+        { stat: "projectileCount", operation: "set", value: 3 },
+        { stat: "pierce", operation: "set", value: 60 },
+        { stat: "size", operation: "set", value: 2.3 },
       ],
     },
   ],
@@ -749,52 +1151,105 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
     {
       level: 2,
       modifiers: [
-        { stat: "projectileCount", operation: "add", value: 1 },
-        { stat: "homingSpeed", operation: "add", value: 15 },
+        { stat: "damage", operation: "set", value: 3 },
+        { stat: "hitCooldownMs", operation: "set", value: 850 },
       ],
     },
     {
       level: 3,
       modifiers: [
-        { stat: "damage", operation: "add", value: 1 },
-        { stat: "range", operation: "add", value: 20 },
+        { stat: "damage", operation: "set", value: 4 },
+        { stat: "hitCooldownMs", operation: "set", value: 800 },
       ],
     },
     {
       level: 4,
       modifiers: [
-        { stat: "projectileCount", operation: "add", value: 1 },
-        { stat: "hitCooldownMs", operation: "multiply", value: 0.85 },
+        { stat: "damage", operation: "set", value: 5 },
+        { stat: "hitCooldownMs", operation: "set", value: 750 },
       ],
     },
     {
       level: 5,
       modifiers: [
-        { stat: "damage", operation: "add", value: 2 },
-        { stat: "homingSpeed", operation: "add", value: 25 },
+        { stat: "damage", operation: "set", value: 6 },
+        { stat: "projectileCount", operation: "set", value: 4 },
+        { stat: "range", operation: "set", value: 189 },
+        { stat: "hitCooldownMs", operation: "set", value: 700 },
       ],
     },
     {
       level: 6,
       modifiers: [
-        { stat: "projectileCount", operation: "add", value: 1 },
-        { stat: "hitCooldownMs", operation: "multiply", value: 0.9 },
+        { stat: "damage", operation: "set", value: 7 },
+        { stat: "hitCooldownMs", operation: "set", value: 650 },
       ],
     },
     {
       level: 7,
       modifiers: [
-        { stat: "damage", operation: "add", value: 2 },
-        { stat: "hitCooldownMs", operation: "multiply", value: 0.85 },
-        { stat: "range", operation: "add", value: 30 },
+        { stat: "damage", operation: "set", value: 8 },
+        { stat: "hitCooldownMs", operation: "set", value: 600 },
       ],
     },
     {
       level: 8,
       modifiers: [
-        { stat: "projectileCount", operation: "add", value: 2 },
-        { stat: "homingSpeed", operation: "add", value: 40 },
-        { stat: "damage", operation: "add", value: 3 },
+        { stat: "damage", operation: "set", value: 9 },
+        { stat: "hitCooldownMs", operation: "set", value: 550 },
+      ],
+    },
+    {
+      level: 9,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 10 },
+        { stat: "hitCooldownMs", operation: "set", value: 500 },
+      ],
+    },
+    {
+      level: 10,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 14 },
+        { stat: "projectileCount", operation: "set", value: 8 },
+        { stat: "range", operation: "set", value: 251 },
+        { stat: "hitCooldownMs", operation: "set", value: 430 },
+      ],
+    },
+    {
+      level: 11,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 16 },
+        { stat: "hitCooldownMs", operation: "set", value: 390 },
+      ],
+    },
+    {
+      level: 12,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 18 },
+        { stat: "hitCooldownMs", operation: "set", value: 350 },
+      ],
+    },
+    {
+      level: 13,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 21 },
+        { stat: "hitCooldownMs", operation: "set", value: 310 },
+      ],
+    },
+    {
+      level: 14,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 24 },
+        { stat: "hitCooldownMs", operation: "set", value: 280 },
+      ],
+    },
+    {
+      level: 15,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 30 },
+        { stat: "projectileCount", operation: "set", value: 12 },
+        { stat: "range", operation: "set", value: 500 },
+        { stat: "hitCooldownMs", operation: "set", value: 250 },
       ],
     },
   ],
@@ -802,71 +1257,108 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
     {
       level: 2,
       modifiers: [
-        { stat: "projectileCount", operation: "set", value: 4 },
         { stat: "damage", operation: "set", value: 4 },
-        { stat: "areaRadius", operation: "set", value: 68 },
-        { stat: "cooldownMs", operation: "set", value: 2000 },
-        { stat: "pierce", operation: "set", value: 1 },
+        { stat: "cooldownMs", operation: "set", value: 2120 },
       ],
     },
     {
       level: 3,
       modifiers: [
-        { stat: "projectileCount", operation: "set", value: 4 },
         { stat: "damage", operation: "set", value: 5 },
-        { stat: "areaRadius", operation: "set", value: 76 },
-        { stat: "cooldownMs", operation: "set", value: 1850 },
-        { stat: "pierce", operation: "set", value: 2 },
+        { stat: "cooldownMs", operation: "set", value: 2050 },
       ],
     },
     {
       level: 4,
       modifiers: [
-        { stat: "projectileCount", operation: "set", value: 5 },
-        { stat: "damage", operation: "set", value: 5 },
-        { stat: "areaRadius", operation: "set", value: 84 },
-        { stat: "cooldownMs", operation: "set", value: 1700 },
-        { stat: "pierce", operation: "set", value: 2 },
+        { stat: "damage", operation: "set", value: 6 },
+        { stat: "cooldownMs", operation: "set", value: 1970 },
       ],
     },
     {
       level: 5,
       modifiers: [
-        { stat: "projectileCount", operation: "set", value: 5 },
-        { stat: "damage", operation: "set", value: 6 },
-        { stat: "areaRadius", operation: "set", value: 94 },
-        { stat: "cooldownMs", operation: "set", value: 1550 },
+        { stat: "damage", operation: "set", value: 10 },
+        { stat: "cooldownMs", operation: "set", value: 1890 },
+        { stat: "projectileCount", operation: "set", value: 6 },
+        { stat: "areaRadius", operation: "set", value: 75 },
         { stat: "pierce", operation: "set", value: 3 },
       ],
     },
     {
       level: 6,
       modifiers: [
-        { stat: "projectileCount", operation: "set", value: 6 },
-        { stat: "damage", operation: "set", value: 7 },
-        { stat: "areaRadius", operation: "set", value: 102 },
-        { stat: "cooldownMs", operation: "set", value: 1400 },
-        { stat: "pierce", operation: "set", value: 3 },
+        { stat: "damage", operation: "set", value: 12 },
+        { stat: "cooldownMs", operation: "set", value: 1820 },
       ],
     },
     {
       level: 7,
       modifiers: [
-        { stat: "projectileCount", operation: "set", value: 7 },
-        { stat: "damage", operation: "set", value: 8 },
-        { stat: "areaRadius", operation: "set", value: 112 },
-        { stat: "cooldownMs", operation: "set", value: 1250 },
-        { stat: "pierce", operation: "set", value: 4 },
+        { stat: "damage", operation: "set", value: 14 },
+        { stat: "cooldownMs", operation: "set", value: 1740 },
       ],
     },
     {
       level: 8,
       modifiers: [
-        { stat: "projectileCount", operation: "set", value: 8 },
-        { stat: "damage", operation: "set", value: 9 },
-        { stat: "areaRadius", operation: "set", value: 120 },
-        { stat: "cooldownMs", operation: "set", value: 1100 },
+        { stat: "damage", operation: "set", value: 16 },
+        { stat: "cooldownMs", operation: "set", value: 1660 },
+      ],
+    },
+    {
+      level: 9,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 18 },
+        { stat: "cooldownMs", operation: "set", value: 1580 },
+      ],
+    },
+    {
+      level: 10,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 24 },
+        { stat: "cooldownMs", operation: "set", value: 1510 },
+        { stat: "projectileCount", operation: "set", value: 9 },
+        { stat: "areaRadius", operation: "set", value: 95 },
         { stat: "pierce", operation: "set", value: 4 },
+      ],
+    },
+    {
+      level: 11,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 27 },
+        { stat: "cooldownMs", operation: "set", value: 1430 },
+      ],
+    },
+    {
+      level: 12,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 30 },
+        { stat: "cooldownMs", operation: "set", value: 1350 },
+      ],
+    },
+    {
+      level: 13,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 35 },
+        { stat: "cooldownMs", operation: "set", value: 1280 },
+      ],
+    },
+    {
+      level: 14,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 41 },
+        { stat: "cooldownMs", operation: "set", value: 1200 },
+      ],
+    },
+    {
+      level: 15,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 48 },
+        { stat: "cooldownMs", operation: "set", value: 1000 },
+        { stat: "projectileCount", operation: "set", value: 15 },
+        { stat: "areaRadius", operation: "set", value: 125 },
+        { stat: "pierce", operation: "set", value: 8 },
       ],
     },
   ],
@@ -874,130 +1366,211 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
     {
       level: 2,
       modifiers: [
-        { stat: "damage", operation: "set", value: 5 },
-        { stat: "knockback", operation: "set", value: 45 },
-        { stat: "range", operation: "set", value: 60 },
-        { stat: "cooldownMs", operation: "set", value: 1500 },
+        { stat: "damage", operation: "set", value: 8 },
+        { stat: "cooldownMs", operation: "set", value: 1540 },
       ],
     },
     {
       level: 3,
       modifiers: [
-        { stat: "damage", operation: "set", value: 6 },
-        { stat: "knockback", operation: "set", value: 50 },
-        { stat: "range", operation: "set", value: 65 },
-        { stat: "cooldownMs", operation: "set", value: 1400 },
+        { stat: "damage", operation: "set", value: 12 },
+        { stat: "cooldownMs", operation: "set", value: 1480 },
       ],
     },
     {
       level: 4,
       modifiers: [
-        { stat: "damage", operation: "set", value: 7 },
-        { stat: "knockback", operation: "set", value: 55 },
-        { stat: "range", operation: "set", value: 70 },
-        { stat: "cooldownMs", operation: "set", value: 1300 },
+        { stat: "damage", operation: "set", value: 16 },
+        { stat: "cooldownMs", operation: "set", value: 1420 },
       ],
     },
     {
       level: 5,
       modifiers: [
-        { stat: "damage", operation: "set", value: 9 },
-        { stat: "knockback", operation: "set", value: 60 },
-        { stat: "range", operation: "set", value: 75 },
-        { stat: "cooldownMs", operation: "set", value: 1150 },
+        { stat: "damage", operation: "set", value: 26 },
+        { stat: "cooldownMs", operation: "set", value: 1350 },
+        { stat: "range", operation: "set", value: 67 },
+        { stat: "knockback", operation: "set", value: 38 },
       ],
     },
     {
       level: 6,
       modifiers: [
-        { stat: "damage", operation: "set", value: 10 },
-        { stat: "knockback", operation: "set", value: 67.5 },
-        { stat: "range", operation: "set", value: 80 },
-        { stat: "cooldownMs", operation: "set", value: 1000 },
+        { stat: "damage", operation: "set", value: 32 },
+        { stat: "cooldownMs", operation: "set", value: 1290 },
       ],
     },
     {
       level: 7,
       modifiers: [
-        { stat: "damage", operation: "set", value: 11 },
-        { stat: "knockback", operation: "set", value: 75 },
-        { stat: "range", operation: "set", value: 85 },
-        { stat: "cooldownMs", operation: "set", value: 900 },
+        { stat: "damage", operation: "set", value: 38 },
+        { stat: "cooldownMs", operation: "set", value: 1230 },
       ],
     },
     {
       level: 8,
       modifiers: [
-        { stat: "damage", operation: "set", value: 12 },
-        { stat: "knockback", operation: "set", value: 80 },
-        { stat: "range", operation: "set", value: 90 },
+        { stat: "damage", operation: "set", value: 44 },
+        { stat: "cooldownMs", operation: "set", value: 1170 },
+      ],
+    },
+    {
+      level: 9,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 50 },
+        { stat: "cooldownMs", operation: "set", value: 1110 },
+      ],
+    },
+    {
+      level: 10,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 68 },
+        { stat: "cooldownMs", operation: "set", value: 1050 },
+        { stat: "range", operation: "set", value: 83 },
+        { stat: "knockback", operation: "set", value: 48 },
+      ],
+    },
+    {
+      level: 11,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 78 },
+        { stat: "cooldownMs", operation: "set", value: 980 },
+      ],
+    },
+    {
+      level: 12,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 90 },
+        { stat: "cooldownMs", operation: "set", value: 920 },
+      ],
+    },
+    {
+      level: 13,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 110 },
+        { stat: "cooldownMs", operation: "set", value: 860 },
+      ],
+    },
+    {
+      level: 14,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 135 },
         { stat: "cooldownMs", operation: "set", value: 800 },
       ],
     },
+    {
+      level: 15,
+      modifiers: [
+        { stat: "damage", operation: "set", value: 170 },
+        { stat: "cooldownMs", operation: "set", value: 500 },
+        { stat: "range", operation: "set", value: 105 },
+        { stat: "knockback", operation: "set", value: 60 },
+      ],
+    },
   ],
-  // dotDamage is bleed damage per second (dotTickMs is 1000).
   crimsonVial: [
     {
       level: 2,
       modifiers: [
+        { stat: "cooldownMs", operation: "set", value: 1800 },
         { stat: "dotDamage", operation: "set", value: 3 },
-        { stat: "statusDurationMs", operation: "set", value: 1700 },
-        { stat: "projectileCount", operation: "set", value: 1 },
-        { stat: "cooldownMs", operation: "set", value: 1850 },
       ],
     },
     {
       level: 3,
       modifiers: [
-        { stat: "dotDamage", operation: "set", value: 3 },
-        { stat: "statusDurationMs", operation: "set", value: 1900 },
-        { stat: "projectileCount", operation: "set", value: 1 },
         { stat: "cooldownMs", operation: "set", value: 1700 },
+        { stat: "dotDamage", operation: "set", value: 4 },
       ],
     },
     {
       level: 4,
       modifiers: [
-        { stat: "dotDamage", operation: "set", value: 4 },
-        { stat: "statusDurationMs", operation: "set", value: 2100 },
-        { stat: "projectileCount", operation: "set", value: 1 },
-        { stat: "cooldownMs", operation: "set", value: 1550 },
+        { stat: "cooldownMs", operation: "set", value: 1600 },
+        { stat: "dotDamage", operation: "set", value: 5 },
       ],
     },
     {
       level: 5,
       modifiers: [
-        { stat: "dotDamage", operation: "set", value: 5 },
-        { stat: "statusDurationMs", operation: "set", value: 2300 },
+        { stat: "cooldownMs", operation: "set", value: 1500 },
         { stat: "projectileCount", operation: "set", value: 2 },
-        { stat: "cooldownMs", operation: "set", value: 1400 },
+        { stat: "dotDamage", operation: "set", value: 8 },
+        { stat: "statusDurationMs", operation: "set", value: 2420 },
       ],
     },
     {
       level: 6,
       modifiers: [
-        { stat: "dotDamage", operation: "set", value: 6 },
-        { stat: "statusDurationMs", operation: "set", value: 2500 },
-        { stat: "projectileCount", operation: "set", value: 2 },
-        { stat: "cooldownMs", operation: "set", value: 1250 },
+        { stat: "cooldownMs", operation: "set", value: 1400 },
+        { stat: "dotDamage", operation: "set", value: 10 },
       ],
     },
     {
       level: 7,
       modifiers: [
-        { stat: "dotDamage", operation: "set", value: 6 },
-        { stat: "statusDurationMs", operation: "set", value: 2700 },
-        { stat: "projectileCount", operation: "set", value: 2 },
-        { stat: "cooldownMs", operation: "set", value: 1100 },
+        { stat: "cooldownMs", operation: "set", value: 1350 },
+        { stat: "dotDamage", operation: "set", value: 12 },
       ],
     },
     {
       level: 8,
       modifiers: [
-        { stat: "dotDamage", operation: "set", value: 7 },
-        { stat: "statusDurationMs", operation: "set", value: 3000 },
-        { stat: "projectileCount", operation: "set", value: 2 },
+        { stat: "cooldownMs", operation: "set", value: 1300 },
+        { stat: "dotDamage", operation: "set", value: 14 },
+      ],
+    },
+    {
+      level: 9,
+      modifiers: [
+        { stat: "cooldownMs", operation: "set", value: 1250 },
+        { stat: "dotDamage", operation: "set", value: 16 },
+      ],
+    },
+    {
+      level: 10,
+      modifiers: [
+        { stat: "cooldownMs", operation: "set", value: 1200 },
+        { stat: "projectileCount", operation: "set", value: 4 },
+        { stat: "dotDamage", operation: "set", value: 22 },
+        { stat: "statusDurationMs", operation: "set", value: 3580 },
+      ],
+    },
+    {
+      level: 11,
+      modifiers: [
+        { stat: "cooldownMs", operation: "set", value: 1150 },
+        { stat: "dotDamage", operation: "set", value: 25 },
+      ],
+    },
+    {
+      level: 12,
+      modifiers: [
+        { stat: "cooldownMs", operation: "set", value: 1100 },
+        { stat: "dotDamage", operation: "set", value: 28 },
+      ],
+    },
+    {
+      level: 13,
+      modifiers: [
         { stat: "cooldownMs", operation: "set", value: 1000 },
+        { stat: "dotDamage", operation: "set", value: 33 },
+      ],
+    },
+    {
+      level: 14,
+      modifiers: [
+        { stat: "cooldownMs", operation: "set", value: 800 },
+        { stat: "dotDamage", operation: "set", value: 39 },
+      ],
+    },
+    {
+      level: 15,
+      modifiers: [
+        { stat: "cooldownMs", operation: "set", value: 500 },
+        { stat: "projectileCount", operation: "set", value: 10 },
+        { stat: "dotDamage", operation: "set", value: 46 },
+        { stat: "statusDurationMs", operation: "set", value: 5500 },
       ],
     },
   ],
@@ -1047,8 +1620,6 @@ export const resolveWeaponStats = (
     stats[buff.target.stat] += buff.value;
   });
 
-  // Passive perks (Halloween backlog 1.2) apply last, on top of upgrades
-  // and wearable buffs, as global multipliers.
   const attackSpeedBonus = getPerkAmount(perkLevels, "attackSpeed");
   if (attackSpeedBonus > 0) {
     stats.cooldownMs *= 1 - attackSpeedBonus;

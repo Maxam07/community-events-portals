@@ -30,7 +30,6 @@ import { Chest } from "./containers/ChestContainer";
 import type {
   WeaponId,
   WeaponLoadoutItem,
-  DropItemType,
   BossTypes,
   PhasingEnemyTypes,
   WeaponLevel,
@@ -43,6 +42,7 @@ import type {
   EnemyType,
   SpawnArea,
   MiniBossWaveConfig,
+  DropItemHalloweenType,
 } from "./Types";
 import { BossEnemy } from "./containers/BossEnemyContainer";
 import {
@@ -143,6 +143,7 @@ export class Scene extends BaseScene {
   private blockadeArrowFloat?: Phaser.Tweens.Tween;
   private isEnteringUnderworld = false;
   defeatedMiniBosses = new Set<MiniBossType>();
+  defeatedBosses = new Set<BossTypes>();
   enteredAreas = new Set<number>();
   private currentWorld: "overworld" | "underworld" = "overworld";
   enemyKillsByArea: Record<SpawnArea, number> = {
@@ -452,6 +453,30 @@ export class Scene extends BaseScene {
         frameHeight: 48,
       },
     );
+    this.load.spritesheet(
+      "sorcerer_death",
+      "world/portal/halloween/sorcerer-death.webp",
+      {
+        frameWidth: 48,
+        frameHeight: 48,
+      },
+    );
+    this.load.spritesheet(
+      "dungeonboss_walk",
+      "world/portal/halloween/dungeonboss-walk.webp",
+      {
+        frameWidth: 160,
+        frameHeight: 160,
+      },
+    );
+    this.load.spritesheet(
+      "dungeonboss_death",
+      "world/portal/halloween/dungeonboss-defeat.webp",
+      {
+        frameWidth: 160,
+        frameHeight: 160,
+      },
+    );
 
     // Enemy weapon
     this.load.spritesheet("Fire", "world/portal/halloween/fire.webp", {
@@ -562,6 +587,22 @@ export class Scene extends BaseScene {
         frameHeight: 16,
       },
     );
+    this.load.spritesheet(
+      "armor_weapon",
+      "world/portal/halloween/livingArmor-Weapon.webp",
+      {
+        frameWidth: 11,
+        frameHeight: 15,
+      },
+    );
+    this.load.spritesheet(
+      "sand_vortex",
+      "world/portal/halloween/sand_vortex-Sheet.png",
+      {
+        frameWidth: 32,
+        frameHeight: 32,
+      },
+    );
     this.load.image("medusa_head", "world/portal/halloween/medusa_head.webp");
     this.load.image("ent_stump", "world/portal/halloween/stump.webp");
     this.load.image("golem_stone", "world/portal/halloween/stone.png");
@@ -591,6 +632,16 @@ export class Scene extends BaseScene {
     this.load.image("boss_dropItem1", SUNNYSIDE.icons.lightning);
     this.load.image("boss_dropItem2", SUNNYSIDE.icons.happy);
     this.load.image("heart", SUNNYSIDE.icons.heart);
+    this.load.image("relicWrath", "world/portal/halloween/relics_wrath.webp");
+    this.load.image("relicSloth", "world/portal/halloween/relics_sloth.webp");
+    this.load.image("relicPride", "world/portal/halloween/relics_pride.webp");
+    this.load.image("relicLust", "world/portal/halloween/relics_lust.webp");
+    this.load.image("relicGreed", "world/portal/halloween/relics_greed.webp");
+    this.load.image(
+      "relicGluttony",
+      "world/portal/halloween/relics_gluttony.webp",
+    );
+    this.load.image("relicEnvy", "world/portal/halloween/relics_envy.webp");
 
     // Obstacles
     this.load.image("rock", "world/portal/images/TematicRock.webp");
@@ -1760,7 +1811,11 @@ export class Scene extends BaseScene {
         this.enemyGroup,
         (_player, enemyObj) => {
           const enemy = enemyObj as
-            StaticRangeEnemy | PhasingEnemy | MeleeEnemy | BossEnemy | MiniBoss;
+            | StaticRangeEnemy
+            | PhasingEnemy
+            | MeleeEnemy
+            | BossEnemy
+            | MiniBoss;
           enemy.handlePlayerContact();
         },
       );
@@ -2107,10 +2162,12 @@ export class Scene extends BaseScene {
     bossType: BossTypes,
     formation: EnemyFormation,
     weaponTypes: WeaponType[],
-    count = 1,
+    spawnPosition?: { x: number; y: number },
   ) {
     if (!this.currentPlayer) return 0;
-    const positions = this.getSpawnPositions(formation, count, bossType);
+    const positions = spawnPosition
+      ? [spawnPosition]
+      : this.getSpawnPositions(formation, 1, bossType);
 
     positions.forEach(({ x: spawnX, y: spawnY }) => {
       if (!this.currentPlayer) return;
@@ -2212,10 +2269,11 @@ export class Scene extends BaseScene {
     total: number,
     weaponType: WeaponType[],
     formation: EnemyFormation,
+    spawnPosition?: { x: number; y: number },
   ) {
     for (let i = 0; i < total; i++) {
       // this.bossWarning(bossType);
-      this.createBossEnemy(bossType, formation, weaponType);
+      this.createBossEnemy(bossType, formation, weaponType, spawnPosition);
     }
   }
 
@@ -2265,7 +2323,10 @@ export class Scene extends BaseScene {
     );
   }
 
-  private spawnBoss(bossType: BossTypes) {
+  private spawnBoss(
+    bossType: BossTypes,
+    spawnPosition?: { x: number; y: number },
+  ) {
     const bossWave = BOSS_WAVE_THRESHOLDS.find(
       (wave) => wave.bossType === bossType,
     );
@@ -2281,6 +2342,7 @@ export class Scene extends BaseScene {
       bossWave.totalEnemy,
       bossWave.weaponType,
       bossWave.formation,
+      spawnPosition ?? bossWave.spawnPosition,
     );
   }
 
@@ -2298,14 +2360,22 @@ export class Scene extends BaseScene {
     }
   }
 
+  private checkBossProgression() {
+    const defeatedCount = this.defeatedBosses.size;
+
+    if (defeatedCount === 4) {
+      this.spawnBoss("dungeonboss");
+    }
+  }
+
   // For testing bosses only
   // private checkMiniBossProgression() {
   //   const defeatedCount = this.defeatedMiniBosses.size;
 
   //   console.log("Defeated mini-bosses:", defeatedCount);
 
-  //   if (defeatedCount === 2) {
-  //     this.spawnBoss("cerberus");
+  //   if (defeatedCount === 6) {
+  //     this.spawnBoss("sorcerer");
   //   }
   // }
 
@@ -2317,7 +2387,7 @@ export class Scene extends BaseScene {
   }: {
     x: number;
     y: number;
-    itemKey: DropItemType;
+    itemKey: DropItemHalloweenType;
   }) {
     new DropItem({
       x,
@@ -2457,7 +2527,8 @@ export class Scene extends BaseScene {
   private enterUnderworld() {
     const player = this.currentPlayer;
     const portalBody = this.area3Blockade?.body as
-      Phaser.Physics.Arcade.StaticBody | undefined;
+      | Phaser.Physics.Arcade.StaticBody
+      | undefined;
     if (this.isEnteringUnderworld || !player || !portalBody) return;
 
     this.isEnteringUnderworld = true;
@@ -2664,6 +2735,8 @@ export class Scene extends BaseScene {
         this.playSmokeExplosion(this.area3Blockade);
       }
     }
+    this.defeatedBosses.add(boss.bossType);
+    this.checkBossProgression();
 
     this.unregisterBossEnemy(boss);
     boss.destroy();

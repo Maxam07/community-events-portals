@@ -10,6 +10,7 @@ import {
   ABOVE_ENEMIES_VISUAL_DEPTH,
   getWeaponVisualDepth,
 } from "../../constants/DepthConstants";
+import { getStackedHitMultiplier } from "./StackedHits";
 
 const WEAPON_DARKNESS_BOOK_PROJECTILE_TEXTURE_KEY =
   "weapon_darkness_book_projectile";
@@ -58,6 +59,10 @@ export class Projectile extends Phaser.Physics.Arcade.Sprite {
   public bounceRemaining = 0;
   public chainRadius = 0;
   public readonly hitEnemies = new Set<EnemyLike>();
+  // Last time (ms) each enemy was hit by this projectile, and the enemy hit most
+  // recently. Used by the knife to bounce back to enemies it already hit.
+  private readonly hitTimes = new Map<EnemyLike, number>();
+  public lastHitEnemy?: EnemyLike;
   private orientedHitbox = false;
   private orientedHitboxWidth = 0;
   private orientedHitboxHeight = 0;
@@ -146,7 +151,7 @@ export class Projectile extends Phaser.Physics.Arcade.Sprite {
     this.bodySizeMode = bodySizeMode;
     this.bodySizeScale = bodySizeScale;
     this.updateOrientedHitboxSize();
-    this.hitEnemies.clear();
+    this.clearHits();
 
     const body = this.body as Phaser.Physics.Arcade.Body;
     body.enable = true;
@@ -175,12 +180,89 @@ export class Projectile extends Phaser.Physics.Arcade.Sprite {
     return undefined;
   }
 
-  public registerHit(enemy: EnemyLike) {
+  public registerHit(enemy: EnemyLike, now = this.scene.time.now) {
     this.hitEnemies.add(enemy);
+    this.hitTimes.set(enemy, now);
+    this.lastHitEnemy = enemy;
   }
 
   public hasHit(enemy: EnemyLike) {
     return this.hitEnemies.has(enemy);
+  }
+
+  // Use this instead of `hasHit` in the overlap guard. A bouncing projectile
+  // (blood knife) may hit an enemy it already hit once it has bounced away from
+  // it, so only the enemy it just hit is ignored while it still has bounces left.
+  public shouldIgnoreOverlap(enemy: EnemyLike) {
+    if (this.behavior === "bouncing" && this.bounceRemaining > 0) {
+      return enemy === this.lastHitEnemy;
+    }
+
+    return this.hitEnemies.has(enemy);
+  }
+
+  // Payload to apply to `enemy` for the hit that is being resolved now. Hits of
+  // the same weapon on the same enemy within STACKED_HIT_WINDOW_MS are reduced
+  // progressively (see StackedHits.ts). Darkness book and poison vial are exempt.
+  public getHitPayload(enemy: EnemyLike, now = this.scene.time.now) {
+    const multiplier = getStackedHitMultiplier(enemy, this.ownerWeaponId, now);
+
+    if (multiplier === 1) return this.payload;
+
+    return { ...this.payload, amount: this.payload.amount * multiplier };
+  }
+
+  // Next target for a bounce. Enemies this projectile has not hit yet always come
+  // first (nearest one). If there is none inside `chainRadius`, it goes back to an
+  // enemy it already hit: the one hit longest ago, so with two enemies it keeps
+  // alternating between them. The enemy just hit is never picked, so a lone enemy
+  // gives no target.
+  public pickBounceTarget(candidates: Iterable<EnemyLike>) {
+    let fresh: EnemyLike | undefined;
+    let freshDistance = Infinity;
+    let stale: EnemyLike | undefined;
+    let staleTime = Infinity;
+    let staleDistance = Infinity;
+
+    for (const enemy of candidates) {
+      if (!enemy.active || enemy.isDead || enemy === this.lastHitEnemy)
+        continue;
+
+      const center = enemyCenter(enemy);
+      const distance = Phaser.Math.Distance.Between(
+        this.x,
+        this.y,
+        center.x,
+        center.y,
+      );
+      if (distance > this.chainRadius) continue;
+
+      if (!this.hitEnemies.has(enemy)) {
+        if (distance < freshDistance) {
+          fresh = enemy;
+          freshDistance = distance;
+        }
+        continue;
+      }
+
+      const hitAt = this.hitTimes.get(enemy) ?? 0;
+      if (
+        hitAt < staleTime ||
+        (hitAt === staleTime && distance < staleDistance)
+      ) {
+        stale = enemy;
+        staleTime = hitAt;
+        staleDistance = distance;
+      }
+    }
+
+    return fresh ?? stale;
+  }
+
+  private clearHits() {
+    this.hitEnemies.clear();
+    this.hitTimes.clear();
+    this.lastHitEnemy = undefined;
   }
 
   public canHit(enemy: EnemyLike) {
@@ -303,7 +385,7 @@ export class Projectile extends Phaser.Physics.Arcade.Sprite {
     this.bodySize = 0;
     this.bodySizeMode = "fixed";
     this.bodySizeScale = { width: 1, height: 1 };
-    this.hitEnemies.clear();
+    this.clearHits();
 
     const body = this.body as Phaser.Physics.Arcade.Body | undefined;
     if (!body) return;

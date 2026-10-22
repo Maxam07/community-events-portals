@@ -146,7 +146,12 @@ export class DamageSystem {
       this.onCategoryHit?.(enemy, WEAPON_CATEGORIES[payload.sourceWeaponId]);
     }
 
-    if (payload.knockback && payload.knockbackOrigin && !enemy.isDead) {
+    if (
+      payload.knockback &&
+      payload.knockbackOrigin &&
+      !enemy.isDead &&
+      (enemy.maxHp ?? 0) <= 10000
+    ) {
       enemy.applyKnockback?.(
         enemy.x - payload.knockbackOrigin.x,
         enemy.y - payload.knockbackOrigin.y,

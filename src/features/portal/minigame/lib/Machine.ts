@@ -39,7 +39,7 @@ import { getUrl, loadPortal } from "features/portal/actions/loadPortal";
 import { getAttemptsLeft, getUnlimitedAttemptsSfl } from "./Utils";
 import type {
   ChestRarity,
-  DropItemType,
+  DropItemHalloweenType,
   EnemyType,
   LevelUpChoice,
   LevelUpOption,
@@ -343,7 +343,7 @@ type LoseLifeEvent = {
 
 type CollectItemEvent = {
   type: "COLLECT_ITEM";
-  itemKey: DropItemType;
+  itemKey: DropItemHalloweenType;
 };
 
 type SetValidationsEvent = {
@@ -752,10 +752,18 @@ export const portalMachine = createMachine<Context, PortalEvent, PortalState>({
           actions: assign(
             (
               context: Context,
-              event: SelectLevelUpOptionEvent,
+              event: SelectLevelUpOptionEvent & { choiceId?: string | number }, // Garante o tipo do evento se necessário
             ): Partial<Context> => {
               const choice = context.pendingLevelUpChoice;
               if (choice?.type !== "levelUp") return {};
+
+              if (
+                event.choiceId !== undefined &&
+                choice.id !== undefined &&
+                event.choiceId !== choice.id
+              ) {
+                return {};
+              }
 
               const { option } = event;
               const isSameOption = (candidate: LevelUpOption) => {

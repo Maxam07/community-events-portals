@@ -295,7 +295,8 @@ export const BumpkinProfile: React.FC<BumpkinProfileProps> = ({
   } = useSelector(portalService, _profileState);
 
   const bumpkinEquipment = gameState?.bumpkin?.equipped as
-    BumpkinParts | undefined;
+    | BumpkinParts
+    | undefined;
   const bumpkinEquipmentKey = JSON.stringify(bumpkinEquipment);
 
   useEffect(() => {
@@ -431,7 +432,9 @@ export const BumpkinProfile: React.FC<BumpkinProfileProps> = ({
   const isModalOpen = showModal ?? internalShowModal;
   const isTouch = isTouchDevice();
   const profilePanelTabs: ProfilePanelTab[] =
-    mode === "preGame" ? ["wearables", "guide"] : ["weapons", "guide"];
+    mode === "preGame"
+      ? ["wearables", "guide", "enemy"]
+      : ["weapons", "guide", "enemy"];
 
   const closeModal = () => {
     if (isControlled) {

@@ -9,7 +9,6 @@ import { Settings } from "./Settings";
 import { Travel } from "./Travel";
 import { Timer } from "./Timer";
 import { ColletedItems } from "./CollectedItems";
-import { Codex } from "./Codex";
 import { BumpkinProfile } from "./BumpkinProfile";
 import { HudWeapons } from "./HudWeapons";
 import { HudPerks } from "./HudPerks";
@@ -79,7 +78,7 @@ export const Hud: React.FC = () => {
           {isPlaying && (
             <>
               <Timer />
-              <Codex />
+              {/* <Codex /> */}
               <div className="flex flex-row items-start gap-1">
                 <HudPerks />
                 <HudWeapons />

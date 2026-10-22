@@ -73,18 +73,29 @@ export class SummoningWeapon extends Phaser.GameObjects.Sprite {
     this.warningTexture = warningTexture;
 
     scene.add.existing(this);
+    scene.physics.world.enable(this);
 
     this.setScale(scale);
     this.setDepth(depth);
     this.setOrigin(0.5);
 
     this.createAnimation();
+    this.applyHitbox();
 
     this.setVisible(false);
   }
 
   private get animationKey() {
     return `animKey_summon_${this.weapontexture}`;
+  }
+
+  private applyHitbox(divisor = 2) {
+    const body = this.body as Phaser.Physics.Arcade.Body;
+    const w = this.width / divisor;
+    const h = this.height / divisor;
+
+    body.setSize(w, h);
+    body.setOffset((this.width - w) / 2, (this.height - h) / 2); // keeps it centred
   }
 
   private createAnimation() {
@@ -147,6 +158,8 @@ export class SummoningWeapon extends Phaser.GameObjects.Sprite {
     const gap = 2 * SQUARE_WIDTH;
     this.x = this.player.x;
     this.y = this.player.y + gap;
+
+    this.setFlipX(this.player.x < this.target.x);
 
     this.elapsedMs = 0;
     this.phase = "warning";

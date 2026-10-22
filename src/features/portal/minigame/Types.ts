@@ -51,7 +51,8 @@ export type WeaponId =
   | "frostChain"
   | "crimsonVial";
 
-export type WeaponLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+export type WeaponLevel =
+  0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15;
 
 // Weapon categories drive the Special Power: the category composition of
 // the equipped loadout decides which power (and at what duration) is ready.
@@ -84,7 +85,7 @@ export type PerkId =
   | "healing"
   | "maxHealth";
 
-export type PerkLevel = 0 | 1 | 2 | 3 | 4 | 5;
+export type PerkLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 
 export type PerkLevels = Record<PerkId, PerkLevel>;
 
@@ -125,6 +126,7 @@ export type LevelUpOption =
 
 export type LevelUpChoice = {
   type: "levelUp";
+  id: string;
   level: number;
   options: LevelUpOption[];
   source: "levelUp" | "chest";
@@ -250,6 +252,7 @@ export type EnemyLike = Phaser.GameObjects.GameObject & {
 };
 
 export type DamagePayload = {
+  damage: number;
   sourceWeaponId: WeaponId;
   amount: number;
   damageType: DamageType;
@@ -274,8 +277,14 @@ export type CombatConfig = {
   defaultWeaponLoadout: WeaponLoadoutItem[];
 };
 
-export type DropItemType =
-  "blueOrb" | "greenOrb" | "grayOrb" | "yellowOrb" | "purpleOrb";
+export type DropItemHalloweenType =
+  | "relicWrath"
+  | "relicSloth"
+  | "relicPride"
+  | "relicLust"
+  | "relicGreed"
+  | "relicGluttony"
+  | "relicEnvy";
 
 export type WeaponType =
   "chasing" | "orbiting" | "summoning" | "staticRange" | "slash" | "arena";
@@ -365,7 +374,8 @@ export type BossTypes =
   // Area 3
   | "cerberus"
   // Area 4
-  | "sorcerer";
+  | "sorcerer"
+  | "dungeonboss";
 
 export type EnemyConfig = {
   key: string;
@@ -383,7 +393,7 @@ export type EnemyConfig = {
   speed: number;
   hp: number;
   maxHp: number;
-  dropItem: DropItemType;
+  dropItem: DropItemHalloweenType;
 };
 
 export type PhasingeWaveConfig = WaveConfig<PhasingEnemyTypes>;
@@ -413,6 +423,7 @@ export type BossWaveConfig = {
   totalEnemy: number;
   weaponType: WeaponType[];
   formation: EnemyFormation;
+  spawnPosition?: { x: number; y: number };
   flag: string;
 };
 
@@ -463,7 +474,7 @@ export interface EnemyBalanceStats {
   BATCH_SIZE?: number;
   DELAY?: number;
   FORMATION?: EnemyFormation;
-  DROP_ITEM: DropItemType;
+  DROP_ITEM: DropItemHalloweenType;
   WEAPON?: WeaponType[];
 
   WEAPONS?: {

@@ -197,7 +197,7 @@ export abstract class BaseScene extends Phaser.Scene {
 
   private onZoomToggle = () => {
     this.isZoomedOut = !this.isZoomedOut;
-    const targetZoom = this.isZoomedOut ? this.baseZoom * 0.75 : this.baseZoom;
+    const targetZoom = this.isZoomedOut ? this.baseZoom * 0.6 : this.baseZoom;
     this.cameras.main.setZoom(targetZoom);
     this.repositionJoystick(targetZoom);
   };
@@ -1221,14 +1221,16 @@ export abstract class BaseScene extends Phaser.Scene {
     server.state.players.forEach((player, sessionId) => {
       if (this.playerEntities[sessionId]) {
         const nameTag = this.playerEntities[sessionId].getByName("nameTag") as
-          Phaser.GameObjects.Text | undefined;
+          | Phaser.GameObjects.Text
+          | undefined;
 
         if (nameTag && player.username && nameTag.text !== player.username) {
           nameTag.setText(player.username);
         }
       } else if (sessionId === server.sessionId) {
         const nameTag = this.currentPlayer?.getByName("nameTag") as
-          Phaser.GameObjects.Text | undefined;
+          | Phaser.GameObjects.Text
+          | undefined;
 
         if (nameTag && player.username && nameTag.text !== player.username) {
           nameTag.setText(player.username);
@@ -1239,7 +1241,8 @@ export abstract class BaseScene extends Phaser.Scene {
 
   checkAndUpdateNameColor(entity: BumpkinContainer, color: string) {
     const nameTag = entity.getByName("nameTag") as
-      Phaser.GameObjects.Text | undefined;
+      | Phaser.GameObjects.Text
+      | undefined;
 
     if (nameTag && nameTag.style.color !== color) {
       nameTag.setColor(color);
