@@ -243,5 +243,13 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
       RADIUS: stats.dungeonboss.WEAPONS.orbiting.RADIUS,
       SPEED_DEG_PER_SEC: stats.dungeonboss.WEAPONS.orbiting.SPEED_DEG_PER_SEC,
     },
+    staticRange: {
+      TEXTURE: "Fire",
+      FRAME_END: 7,
+      RANGE: SQUARE_WIDTH * 20,
+      SPEED: 150,
+      COOLDOWN_MS: 200,
+      DURATION_MS: 2000,
+    },
   },
 };

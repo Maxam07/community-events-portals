@@ -11,7 +11,7 @@ import { WearablesTab } from "./Wearables";
 
 import frozenSkullIcon from "public/world/portal/halloween/weapons/the_frost/frozen_skull_icon.png";
 import guideIcon from "public/world/page.png";
-import enemyIcon from "public/world/portal/halloween/icons/scarecrow_icon.png";
+import enemyIcon from "public/world/portal/halloween/icons/sorcerer_icon.png";
 import { DropItemsXP, Enemies } from "../panels/CodexCategories";
 export type ProfilePanelTab = "weapons" | "wearables" | "guide" | "enemy";
 

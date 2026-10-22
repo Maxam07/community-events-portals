@@ -62,6 +62,8 @@ export class StaticRangeWeapon extends Phaser.GameObjects.Sprite {
 
     this.setOrigin(0.5);
     this.setDepth(1001);
+    const scale = this.texture.key === "Fire" ? 1.3 : 1;
+    this.setScale(scale);
 
     this.createAnimation();
     this.setVisible(false);
