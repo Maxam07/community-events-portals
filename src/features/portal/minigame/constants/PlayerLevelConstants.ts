@@ -345,6 +345,7 @@ export const getLevelUpChoice = ({
 
   return {
     type: "levelUp",
+    id: `${Date.now()}-${Math.random()}`,
     level,
     options,
     source: "levelUp",
@@ -372,6 +373,7 @@ export const getChestLevelUpChoice = ({
 
   return {
     type: "levelUp",
+    id: `${Date.now()}-${Math.random()}`,
     level,
     options,
     source: "chest",

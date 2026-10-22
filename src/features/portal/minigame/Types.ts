@@ -126,6 +126,7 @@ export type LevelUpOption =
 
 export type LevelUpChoice = {
   type: "levelUp";
+  id: string;
   level: number;
   options: LevelUpOption[];
   source: "levelUp" | "chest";

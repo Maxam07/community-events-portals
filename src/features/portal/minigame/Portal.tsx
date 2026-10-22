@@ -226,6 +226,7 @@ export const Portal: React.FC = () => {
       )}
 
       <Modal
+        key={pendingLevelUpChoice?.id}
         show={!!pendingLevelUpChoice}
         backdrop="static"
         dialogClassName="max-w-[960px]"

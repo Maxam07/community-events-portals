@@ -697,10 +697,18 @@ export const portalMachine = createMachine<Context, PortalEvent, PortalState>({
           actions: assign(
             (
               context: Context,
-              event: SelectLevelUpOptionEvent,
+              event: SelectLevelUpOptionEvent & { choiceId?: string | number }, // Garante o tipo do evento se necessário
             ): Partial<Context> => {
               const choice = context.pendingLevelUpChoice;
               if (choice?.type !== "levelUp") return {};
+
+              if (
+                event.choiceId !== undefined &&
+                choice.id !== undefined &&
+                event.choiceId !== choice.id
+              ) {
+                return {};
+              }
 
               const { option } = event;
               const isSameOption = (candidate: LevelUpOption) => {

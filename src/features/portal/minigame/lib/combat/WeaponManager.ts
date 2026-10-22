@@ -1122,30 +1122,30 @@ export class WeaponManager {
   }
 
   private handleProjectileHit(projectile: Projectile, enemy: EnemyLike) {
-    if (!projectile.active || projectile.hasHit(enemy)) return;
+    if (!projectile.active || projectile.shouldIgnoreOverlap(enemy)) return;
     if (!projectile.canHit(enemy)) return;
 
-    projectile.registerHit(enemy);
+    const time = this.props.scene.time.now;
+
+    projectile.registerHit(enemy, time);
 
     if (projectile.behavior === "exploding") {
-      this.spawnExplosion(projectile, this.props.scene.time.now);
+      this.spawnExplosion(projectile, time);
       projectile.despawn();
       return;
     }
 
-    this.damageSystem.applyDamage(
-      enemy,
-      projectile.payload,
-      this.props.scene.time.now,
-    );
+    const payload = projectile.getHitPayload(enemy, time);
+    this.damageSystem.applyDamage(enemy, payload, time);
 
     if (projectile.behavior === "bouncing") {
       projectile.bounceRemaining -= 1;
-      const nextTarget = this.targetingSystem.chainNext({
-        origin: enemyCenter(enemy),
-        chainRadius: projectile.chainRadius,
-        excluded: projectile.hitEnemies,
-      });
+
+      const activeEnemies = this.targetingSystem.inRadius(
+        this.props.player,
+        COMBAT_CONFIG.maxWeaponRange,
+      );
+      const nextTarget = projectile.pickBounceTarget(activeEnemies);
 
       if (projectile.bounceRemaining >= 0 && nextTarget) {
         projectile.activateRicochet();
@@ -1280,6 +1280,7 @@ export class WeaponManager {
       amount: weapon.stats.damage,
       damageType: weapon.config.damageType,
       statusEffects,
+      damage: 0,
     };
   }
 

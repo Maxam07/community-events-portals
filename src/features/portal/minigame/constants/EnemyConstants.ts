@@ -368,7 +368,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicPride",
   },
   golem_area4: {
-    HP: 5600,
+    HP: 9000,
     SPEED: 20,
     DAMAGE: 42,
     TOTAL: 1,
@@ -383,7 +383,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGluttony",
   },
   ent_area4: {
-    HP: 5600,
+    HP: 9000,
     SPEED: 25,
     DAMAGE: 42,
     TOTAL: 1,
@@ -399,7 +399,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGluttony",
   },
   mummy_area4: {
-    HP: 5600,
+    HP: 9000,
     SPEED: 20,
     DAMAGE: 44,
     TOTAL: 1,
@@ -414,7 +414,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGluttony",
   },
   living_armor_area4: {
-    HP: 5600,
+    HP: 9000,
     SPEED: 20,
     DAMAGE: 44,
     TOTAL: 1,
@@ -429,7 +429,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGluttony",
   },
   headless_horseman_area4: {
-    HP: 5600,
+    HP: 9000,
     SPEED: 30,
     DAMAGE: 46,
     TOTAL: 1,
@@ -445,7 +445,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGluttony",
   },
   medusa_area4: {
-    HP: 5600,
+    HP: 9000,
     SPEED: 20,
     DAMAGE: 46,
     TOTAL: 1,
@@ -461,7 +461,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGluttony",
   },
   sorcerer: {
-    HP: 20000,
+    HP: 40000,
     SPEED: 15,
     DAMAGE: 50,
     TOTAL: 1,
@@ -489,7 +489,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGreed",
   },
   dungeonboss: {
-    HP: 25000,
+    HP: 50000,
     SPEED: 0,
     DAMAGE: 75,
     TOTAL: 1,
