@@ -82,6 +82,8 @@ export const REVIVE_FLOWER_COST = 4;
 export const REVIVE_SCORE_MULTIPLIER = 0.85;
 export const REVIVE_MAX_PER_RUN = 5;
 export const BLOCKADE_GUIDE_MIN_TILES = 12;
+export const FINAL_BOSS_TIME_BONUS_PER_SECOND = 10;
+export const HOLE_INTERACT_TILES = 3;
 
 // Attempts
 export const INITIAL_DATE = "2026-10-22"; // YYYY-MM-DD

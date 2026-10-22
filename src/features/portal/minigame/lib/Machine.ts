@@ -18,6 +18,7 @@ import {
   NO_WEARABLE_BUFF_SCORE_MULTIPLIER,
   resolveSpecialPower,
   SPECIAL_POWER_CONFIG,
+  FINAL_BOSS_TIME_BONUS_PER_SECOND,
   REVIVE_FLOWER_COST,
   REVIVE_MAX_PER_RUN,
   REVIVE_SCORE_MULTIPLIER,
@@ -389,6 +390,7 @@ export type PortalEvent =
   | { type: "END_GAME_EARLY" }
   | { type: "GAME_OVER" }
   | { type: "PLAYER_DIED" }
+  | { type: "HOLE_ENTERED" }
   | PurchaseReviveEvent
   | GainPointsEvent
   | LoseLifeEvent
@@ -452,6 +454,15 @@ const resetGameTransition = {
     }) as any,
   },
 };
+
+export const getTimeBonus = (
+  context: Pick<Context, "endAt">,
+  now = Date.now(),
+) =>
+  context.endAt > 0
+    ? Math.floor(Math.max(0, context.endAt - now) / 1000) *
+      FINAL_BOSS_TIME_BONUS_PER_SECOND
+    : 0;
 
 const canRevive = (context: Context) =>
   !context.isTraining &&
@@ -1054,6 +1065,15 @@ export const portalMachine = createMachine<Context, PortalEvent, PortalState>({
               revivesUsed: context.revivesUsed + 1,
             }),
           ) as any,
+        },
+        HOLE_ENTERED: {
+          target: "gameOver",
+          actions: [
+            assign((context: Context): Partial<Context> => ({
+              collected: context.collected + getTimeBonus(context),
+            })) as any,
+            gameOverActions,
+          ],
         },
         GAME_OVER: {
           target: "gameOver",

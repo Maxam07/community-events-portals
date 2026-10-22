@@ -496,8 +496,16 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
       this.add(this.equippedWeapon);
     }
 
-    this.equippedWeapon.setScale(this.direction === "left" ? -1 : 1, 1);
+    this.applyEquippedWeaponDirection();
     this.syncEquippedWeaponDepth();
+  }
+
+  private applyEquippedWeaponDirection() {
+    if (!this.equippedWeapon?.active) return;
+
+    const flip = this.direction === "left" ? -1 : 1;
+    this.equippedWeapon.setScale(flip, 1);
+    this.equippedWeapon.x = 3 * flip;
   }
 
   private syncEquippedWeaponDepth() {
@@ -943,7 +951,7 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
 
     this.direction = "right";
     this.sprite?.setScale(1, 1);
-    this.equippedWeapon?.setScale(1, 1);
+    this.applyEquippedWeaponDirection();
 
     if (this.speech) {
       this.speech.setScale(1, 1);
@@ -956,7 +964,7 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
 
     this.direction = "left";
     this.sprite?.setScale(-1, 1);
-    this.equippedWeapon?.setScale(-1, 1);
+    this.applyEquippedWeaponDirection();
 
     if (this.speech) {
       this.speech.changeDirection("left");
@@ -1437,10 +1445,10 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
 
   private createBlockadeArrow() {
     this.blockadeArrow = this.scene.add
-      .image(0, -15, "blockade_arrow")
+      .image(0, 0, "blockade_arrow")
       .setDepth(10001)
       .setOrigin(0.5)
-      .setVisible(true);
+      .setVisible(false);
 
     this.add(this.blockadeArrow);
   }
