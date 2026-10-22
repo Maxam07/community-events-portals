@@ -6,6 +6,7 @@ import type { MachineInterpreter } from "./lib/Machine";
 import type { EventObject } from "xstate";
 import { isTouchDevice } from "features/world/lib/device";
 import {
+  BLOCKADE_GUIDE_MIN_TILES,
   PLAYER_WATER_SPEED_MULTIPLIER,
   PORTAL_NAME,
   WALKING_SPEED,
@@ -115,6 +116,9 @@ export class Scene extends BaseScene {
   private seaBeastDefeated = false;
   private healingElapsedMs = 0;
   private static readonly HEALING_TICK_MS = 1000;
+  private static readonly BLOCKADE_ARROW_OFFSET_Y = 10;
+  private static readonly BLOCKADE_ARROW_FLOAT_PX = 3;
+  private static readonly BLOCKADE_ARROW_FLOAT_MS = 600;
   private waveState = new Map<string, boolean>();
   waterGroup!: Phaser.Physics.Arcade.StaticGroup;
   staticRangeEnemies: StaticRangeEnemy[] = [];
@@ -135,6 +139,8 @@ export class Scene extends BaseScene {
   area3Blockade?: Phaser.GameObjects.Image;
   cloud1Blockade?: Phaser.GameObjects.Image;
   cloud2Blockade?: Phaser.GameObjects.Image;
+  private unlockedBlockades: Phaser.GameObjects.Image[] = [];
+  private blockadeArrowFloat?: Phaser.Tweens.Tween;
   private isEnteringUnderworld = false;
   defeatedMiniBosses = new Set<MiniBossType>();
   enteredAreas = new Set<number>();
@@ -602,6 +608,7 @@ export class Scene extends BaseScene {
     this.load.image("castle_door", "world/portal/halloween/castle_door.png");
     this.load.image("castle_wall", "world/portal/halloween/castle_wall.png");
     this.load.image("portal", "world/portal/halloween/portal.png");
+    this.load.image("blockade_arrow", SUNNYSIDE.icons.arrow_up);
     this.load.image("blockade1", "world/goblin_exchange.png");
     this.load.image(
       "forest_deco1",
@@ -878,6 +885,7 @@ export class Scene extends BaseScene {
     this.initialiseWearables();
 
     this.createBlockade();
+    this.createBlockadeGuide();
     // DEBUG
     const texture = this.textures.get("skeleton");
 
@@ -1298,6 +1306,7 @@ export class Scene extends BaseScene {
       this.weaponManager?.update(time, delta);
       this.applyHealingTick(delta);
       this.updateEnteredArea();
+      this.updateBlockadeGuide();
       this.areaBaseSpawn();
       this.phasingEnemies.forEach((mob) => {
         mob.setPhasingMove(true);
@@ -1393,6 +1402,7 @@ export class Scene extends BaseScene {
     this.bossEnemies = [];
     this.miniBosses = [];
     this.seaBeastDefeated = false;
+    this.unlockedBlockades = [];
     this.healingElapsedMs = 0;
     this.waveState.clear();
 
@@ -2388,6 +2398,45 @@ export class Scene extends BaseScene {
     this.area3Blockade = area3Blockade;
   }
 
+  private createBlockadeGuide() {
+    this.blockadeArrowFloat = this.tweens.addCounter({
+      from: 0,
+      to: Scene.BLOCKADE_ARROW_FLOAT_PX,
+      duration: Scene.BLOCKADE_ARROW_FLOAT_MS,
+      ease: "Sine.easeInOut",
+      yoyo: true,
+      repeat: -1,
+    });
+
+    this.events.once("shutdown", () => {
+      this.blockadeArrowFloat?.remove();
+      this.blockadeArrowFloat = undefined;
+      this.currentPlayer?.destroyBlockadeArrow();
+    });
+  }
+
+  private updateBlockadeGuide() {
+    const arrow = this.currentPlayer?.blockadeArrow;
+    const player = this.currentPlayer;
+    if (!arrow || !player || !this.isGamePlaying) return;
+
+    const target = this.unlockedBlockades
+      .filter((blockade) => blockade.getCenter().y < player.y)
+      .sort((a, b) => b.getCenter().y - a.getCenter().y)[0];
+
+    const isFarBelow =
+      !!target &&
+      player.y - target.getCenter().y > BLOCKADE_GUIDE_MIN_TILES * SQUARE_WIDTH;
+
+    arrow.setVisible(isFarBelow);
+    if (!isFarBelow) return;
+
+    arrow.setY(
+      -Scene.BLOCKADE_ARROW_OFFSET_Y -
+        (this.blockadeArrowFloat?.getValue() ?? 0),
+    );
+  }
+
   private playSmokeExplosion(target?: Phaser.GameObjects.Image) {
     if (!target || !this.smokeExplosion) return;
 
@@ -2588,6 +2637,7 @@ export class Scene extends BaseScene {
           false;
         this.area1Blockade.setVisible(true);
         this.cloud1Blockade?.setVisible(false);
+        this.unlockedBlockades.push(this.area1Blockade);
         this.playSmokeExplosion(this.area1Blockade);
       }
     } else if (boss.bossType === "witch") {
@@ -2596,6 +2646,7 @@ export class Scene extends BaseScene {
         (this.area2Blockade.body as Phaser.Physics.Arcade.StaticBody).enable =
           false;
         this.cloud2Blockade?.setVisible(false);
+        this.unlockedBlockades.push(this.area2Blockade);
         this.playSmokeExplosion(this.area2Blockade);
       }
     } else if (boss.bossType === "cerberus") {
@@ -2609,6 +2660,7 @@ export class Scene extends BaseScene {
             this.enterUnderworld(),
           );
         }
+        this.unlockedBlockades.push(this.area3Blockade);
         this.playSmokeExplosion(this.area3Blockade);
       }
     }

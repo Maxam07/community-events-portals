@@ -10,18 +10,21 @@ import { secondsToString } from "lib/utils/time";
 import { GAME_SECONDS } from "../../constants";
 
 const _endAt = (state: PortalMachineState) => state.context.endAt;
+const _pendingRevive = (state: PortalMachineState) =>
+  state.context.pendingRevive;
 
 export const Timer: React.FC = () => {
   useUiRefresher({ delay: 100 });
 
   const { portalService } = useContext(PortalContext);
   const endAt = useSelector(portalService, _endAt);
+  const pendingRevive = useSelector(portalService, _pendingRevive);
 
   const secondsLeft = !endAt
     ? GAME_SECONDS
     : Math.max(endAt - Date.now(), 0) / 1000;
 
-  if (secondsLeft <= 0) {
+  if (secondsLeft <= 0 && !pendingRevive) {
     portalService.send("GAME_OVER");
     return <></>;
   }

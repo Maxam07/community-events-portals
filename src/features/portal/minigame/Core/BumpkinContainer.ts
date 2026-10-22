@@ -104,6 +104,9 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
   private hurtAnimationCompleteHandler:
     ((animation: Phaser.Animations.Animation) => void) | undefined;
 
+  // Halloween
+  blockadeArrow: Phaser.GameObjects.Image | undefined;
+
   constructor({
     scene,
     x,
@@ -187,6 +190,8 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
 
       this.label = label;
     }
+
+    this.createBlockadeArrow();
 
     // For Debugging Purpose - Check player position
     // Uncomment to see the coordinates
@@ -1211,8 +1216,6 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
     this.portalService?.send("LOSE_LIFE", { enemyType, damage });
     this.playHeartFall(damage);
 
-    if (this.isGameOver) return;
-
     this.hurtInvincibilityTimer?.remove(false);
     this.hurtInvincibilityTimer = this.scene.time.delayedCall(
       HURT_INVINCIBILITY_MS,
@@ -1220,6 +1223,9 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
         this.finishHurt();
       },
     );
+
+    if (this.isGameOver) return;
+
     this.playHurtAnimation();
   }
 
@@ -1425,7 +1431,22 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
   private get isGameOver() {
     const lives = this.portalService?.state.context.lives ?? 0;
     if (lives > 0) return false;
-    this.portalService?.send("GAME_OVER");
+    this.portalService?.send("PLAYER_DIED");
     return true;
+  }
+
+  private createBlockadeArrow() {
+    this.blockadeArrow = this.scene.add
+      .image(0, -15, "blockade_arrow")
+      .setDepth(10001)
+      .setOrigin(0.5)
+      .setVisible(true);
+
+    this.add(this.blockadeArrow);
+  }
+
+  destroyBlockadeArrow() {
+    this.blockadeArrow?.destroy();
+    this.blockadeArrow = undefined;
   }
 }

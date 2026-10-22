@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useInterpret } from "@xstate/react";
 import { portalMachine, type MachineInterpreter } from "./Machine";
-import { RESTOCK_ATTEMPTS } from "../constants";
+import { RESTOCK_ATTEMPTS, REVIVE_FLOWER_COST } from "../constants";
 import { isUnlimitedAttemptsSfl } from "./Utils";
 
 interface PortalContext {
@@ -27,7 +27,12 @@ export const PortalProvider: React.FC<React.PropsWithChildren> = ({
       const option = RESTOCK_ATTEMPTS.find(
         (option) => option.sfl === event.data.sfl,
       );
-      if (event.data.event === "purchased" && option) {
+      if (
+        event.data.event === "purchased" &&
+        event.data.sfl === REVIVE_FLOWER_COST
+      ) {
+        portalService.send("PURCHASED_REVIVE", { sfl: event.data.sfl });
+      } else if (event.data.event === "purchased" && option) {
         portalService.send("PURCHASED_RESTOCK", { sfl: option.sfl });
       } else if (
         event.data.event === "purchased" &&

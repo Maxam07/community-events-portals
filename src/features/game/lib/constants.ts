@@ -482,7 +482,7 @@ export const INITIAL_CHORE_BOARD: ChoreBoard = {
 export const INITIAL_FARM: GameState = {
   settings: {},
   coins: 0,
-  balance: new Decimal(0),
+  balance: new Decimal(1000),
   previousBalance: new Decimal(0),
   inventory: {
     "Town Center": new Decimal(1),
@@ -527,15 +527,15 @@ export const INITIAL_FARM: GameState = {
       [PORTAL_NAME]: {
         history: {
           // "2026-03-30": {
-          //   "attempts": 1,
-          //   "highscore": 9,
-          //   "prizeClaimedAt": 1774809958435
-          // },
-          // "2026-07-08": {
           //   attempts: 1,
-          //   highscore: 14,
-          //   prizeClaimedAt: new Date("2026-07-07T02:00:00").getTime(),
+          //   highscore: 9,
+          //   prizeClaimedAt: 1774809958435,
           // },
+          "2026-10-22": {
+            attempts: 1,
+            highscore: 14,
+            prizeClaimedAt: new Date("2026-10-22T02:00:00").getTime(),
+          },
         },
         highscore: 14,
         purchases: [
