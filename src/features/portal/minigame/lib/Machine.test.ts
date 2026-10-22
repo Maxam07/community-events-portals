@@ -53,6 +53,10 @@ jest.mock("../constants", () => {
     FREE_DAILY_ATTEMPTS: 1,
     GAME_LIVES: 100,
     GAME_SECONDS: 300,
+    REVIVE_FLOWER_COST: 4,
+    REVIVE_SCORE_MULTIPLIER: 0.85,
+    REVIVE_MAX_PER_RUN: 1,
+    FINAL_BOSS_TIME_BONUS_PER_SECOND: 10,
     INITIAL_DATE: "2026-01-01",
     ATTEMPTS_BETA_TESTERS: 0,
     BETA_TESTERS: [],
@@ -72,7 +76,7 @@ if (!global.structuredClone) {
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { interpret } = require("xstate");
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { portalMachine } = require("./Machine");
+const { portalMachine, getTimeBonus } = require("./Machine");
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { getNextLevelXP, PLAYER_MAX_LEVEL } = require("../constants");
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -421,6 +425,148 @@ describe("portalMachine progression flow", () => {
     expect(service.state.context.collected).toBe(initialCollected + 10);
 
     service.stop();
+  });
+
+  describe("final hole", () => {
+    const startPlaying = (overrides = {}) =>
+      interpret(
+        portalMachine.withContext({
+          ...portalMachine.initialState.context,
+          collected: 100,
+          isTraining: false,
+          isGameplayPaused: false,
+          pendingLevelUpChoice: undefined,
+          usedWearableBuff: true,
+          ...overrides,
+        }),
+      ).start("playing");
+
+    it("returns no time bonus when the timer has not started", () => {
+      expect(getTimeBonus({ endAt: 0 })).toBe(0);
+    });
+
+    it("gives 10 points per full second left and none once time is up", () => {
+      expect(getTimeBonus({ endAt: 100_000 + 5_500 }, 100_000)).toBe(50);
+      expect(getTimeBonus({ endAt: 100_000 }, 200_000)).toBe(0);
+    });
+
+    it("ends the game and adds the remaining time to the score", () => {
+      const service = startPlaying({ endAt: Date.now() + 60_500 });
+
+      service.send("HOLE_ENTERED");
+
+      expect(service.state.matches("loser")).toBe(true);
+      expect(service.state.context.lastScore).toBe(100 + 600);
+      expect(submitScore).toHaveBeenCalledWith({ score: 700 });
+
+      service.stop();
+    });
+
+    it("does not submit a score in training", () => {
+      submitScore.mockClear();
+      const service = startPlaying({
+        isTraining: true,
+        endAt: Date.now() + 60_500,
+      });
+
+      service.send("HOLE_ENTERED");
+
+      expect(service.state.matches("introduction")).toBe(true);
+      expect(submitScore).not.toHaveBeenCalled();
+
+      service.stop();
+    });
+  });
+
+  describe("revive", () => {
+    const startPlaying = (overrides = {}) =>
+      interpret(
+        portalMachine.withContext({
+          ...portalMachine.initialState.context,
+          collected: 100,
+          isTraining: false,
+          isGameplayPaused: false,
+          pendingLevelUpChoice: undefined,
+          usedWearableBuff: true,
+          ...overrides,
+        }),
+      ).start("playing");
+
+    it("pauses the run and asks for a revive on the first death", () => {
+      const service = startPlaying();
+
+      service.send("PLAYER_DIED");
+
+      expect(service.state.matches("playing")).toBe(true);
+      expect(service.state.context.pendingRevive).toBe(true);
+      expect(service.state.context.isGameplayPaused).toBe(true);
+
+      service.stop();
+    });
+
+    it("goes straight to game over in training", () => {
+      const service = startPlaying({ isTraining: true });
+
+      service.send("PLAYER_DIED");
+
+      expect(service.state.matches("introduction")).toBe(true);
+      expect(service.state.context.pendingRevive).toBe(false);
+
+      service.stop();
+    });
+
+    it("restores full health and resumes after the revive purchase", () => {
+      const service = startPlaying({ lives: 0, currentXP: 7, playerLevel: 3 });
+
+      service.send("PLAYER_DIED");
+      service.send("PURCHASED_REVIVE", { sfl: 4 });
+
+      expect(service.state.context.lives).toBe(service.state.context.maxLives);
+      expect(service.state.context.pendingRevive).toBe(false);
+      expect(service.state.context.revivesUsed).toBe(1);
+      expect(service.state.context.collected).toBe(85);
+      expect(service.state.context.currentXP).toBe(7);
+      expect(service.state.context.playerLevel).toBe(3);
+      expect(service.state.context.isGameplayPaused).toBe(false);
+
+      service.stop();
+    });
+
+    it("ignores a revive purchase when no revive is pending", () => {
+      const service = startPlaying();
+
+      service.send("PURCHASED_REVIVE", { sfl: 4 });
+
+      expect(service.state.context.revivesUsed).toBe(0);
+
+      service.stop();
+    });
+
+    it("ends the game on a second death and submits 85% of the score", () => {
+      const service = startPlaying();
+
+      service.send("PLAYER_DIED");
+      service.send("PURCHASED_REVIVE", { sfl: 4 });
+      service.send("PLAYER_DIED");
+
+      expect(service.state.matches("loser")).toBe(true);
+      expect(service.state.context.lastScore).toBe(85);
+      expect(service.state.context.revivesUsed).toBe(0);
+
+      service.stop();
+    });
+
+    it("keeps the full score when the player exits instead of retrying", () => {
+      const service = startPlaying();
+
+      service.send("PLAYER_DIED");
+      service.send("GAME_OVER");
+
+      expect(service.state.context.lastScore).toBe(100);
+      expect(service.state.context.pendingRevive).toBe(false);
+
+      service.stop();
+    });
   });
 
   it("uses collected as the submitted score and winner target score", () => {

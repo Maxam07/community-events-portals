@@ -3,7 +3,16 @@ import React from "react";
 import { useAppTranslation } from "lib/i18n/useAppTranslations";
 import { SquareIcon } from "components/ui/SquareIcon";
 import { Label } from "components/ui/Label";
-import { INSTRUCTIONS, RESOURCES_TABLE } from "../../constants";
+import { SUNNYSIDE } from "assets/sunnyside";
+import retryIcon from "public/world/portal/halloween/retry.png";
+import {
+  FINAL_BOSS_TIME_BONUS_PER_SECOND,
+  INSTRUCTIONS,
+  RESOURCES_TABLE,
+  REVIVE_FLOWER_COST,
+  REVIVE_MAX_PER_RUN,
+  REVIVE_SCORE_MULTIPLIER,
+} from "../../constants";
 import { Categories, Enemies, Skills } from "./CodexCategories";
 import { DropItemsXP } from "./CodexCategories";
 
@@ -63,6 +72,28 @@ export const Guide = () => {
             )}
           </tbody>
         </table>
+        {/* Final Boss */}
+        <Label type="default">{t("minigame.finalBoss")}</Label>
+        <div className="flex items-center mb-3 mx-2">
+          <SquareIcon icon={SUNNYSIDE.icons.stopwatch} width={10} />
+          <p className="text-xs ml-3 flex-1">
+            {t("minigame.finalBossDescription", {
+              points: FINAL_BOSS_TIME_BONUS_PER_SECOND,
+            })}
+          </p>
+        </div>
+        {/* Retries */}
+        <Label type="default">{t("minigame.retries")}</Label>
+        <div className="flex items-center mb-3 mx-2">
+          <SquareIcon icon={retryIcon} width={10} />
+          <p className="text-xs ml-3 flex-1">
+            {t("minigame.retriesDescription", {
+              cost: REVIVE_FLOWER_COST,
+              percent: Math.round(REVIVE_SCORE_MULTIPLIER * 100),
+              max: REVIVE_MAX_PER_RUN,
+            })}
+          </p>
+        </div>
         {/* Skills */}
         <Skills />
         {/* Weapon categories + Special Power */}

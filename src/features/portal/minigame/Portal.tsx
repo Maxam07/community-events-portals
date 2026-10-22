@@ -11,7 +11,7 @@ import { useAppTranslation } from "lib/i18n/useAppTranslations";
 import type { PortalMachineState } from "./lib/Machine";
 import { Loading } from "features/auth/components";
 import { CONFIG } from "lib/config";
-import { authorisePortal, claimPrize } from "../lib/portalUtil";
+import { authorisePortal, claimPrize, purchase } from "../lib/portalUtil";
 import { RulesPanel } from "./components/panels/RulesPanel";
 import { NoAttemptsPanel } from "./components/panels/NoAttemptsPanel";
 import { Hud } from "./components/hud/Hud";
@@ -25,10 +25,23 @@ import {
   WEAPON_DESCRIPTIONS,
   WEAPON_ICONS,
   WEAPON_NAMES,
+  REVIVE_FLOWER_COST,
+  REVIVE_MAX_PER_RUN,
+  REVIVE_SCORE_MULTIPLIER,
+  PANEL_NPC_WEARABLES,
 } from "./constants";
+import { getRevivedScore } from "./lib/Machine";
 import { PERK_ICONS, PERK_NAMES } from "./constants/PerkUIConstants";
 import type { LevelUpOption } from "./Types";
+import { ModalOverlay } from "components/ui/ModalOverlay";
+import flowerIcon from "assets/icons/flower_token.webp";
+import retryIcon from "public/world/portal/halloween/retry.png";
+import Decimal from "decimal.js-light";
 
+const _pendingRevive = (state: PortalMachineState) =>
+  state.context.pendingRevive;
+const _collected = (state: PortalMachineState) => state.context.collected;
+const _revivesUsed = (state: PortalMachineState) => state.context.revivesUsed;
 const _sflBalance = (state: PortalMachineState) => state.context.state?.balance;
 const _isError = (state: PortalMachineState) => state.matches("error");
 const _isUnauthorised = (state: PortalMachineState) =>
@@ -72,6 +85,7 @@ export const Portal: React.FC = () => {
   const { portalService } = useContext(PortalContext);
   const { t } = useAppTranslation();
   const [showPreGameProfile, setShowPreGameProfile] = useState(false);
+  const [showReviveConfirm, setShowReviveConfirm] = useState(false);
 
   const sflBalance = useSelector(portalService, _sflBalance);
   const isError = useSelector(portalService, _isError);
@@ -88,6 +102,14 @@ export const Portal: React.FC = () => {
     _pendingLevelUpChoice,
   );
   const weaponLevels = useSelector(portalService, _weaponLevels);
+  const pendingRevive = useSelector(portalService, _pendingRevive);
+  const collected = useSelector(portalService, _collected);
+  const revivesUsed = useSelector(portalService, _revivesUsed);
+  const isLastRevive = revivesUsed + 1 >= REVIVE_MAX_PER_RUN;
+
+  useEffect(() => {
+    if (!pendingRevive) setShowReviveConfirm(false);
+  }, [pendingRevive]);
 
   useEffect(() => {
     // If a player tries to quit while playing, mark it as an attempt
@@ -224,6 +246,84 @@ export const Portal: React.FC = () => {
           />
         </Modal>
       )}
+
+      <Modal show={pendingRevive} backdrop="static">
+        <Panel bumpkinParts={PANEL_NPC_WEARABLES}>
+          <div className="relative">
+            <div className="p-2 flex flex-col gap-2">
+              <div className="flex justify-between items-center gap-1">
+                <div className="flex items-center gap-3">
+                  <Label type="danger">{t("minigame.reviveTitle")}</Label>
+                  <Label
+                    type={
+                      revivesUsed >= REVIVE_MAX_PER_RUN ? "warning" : "default"
+                    }
+                    icon={retryIcon}
+                  >
+                    {`${revivesUsed}/${REVIVE_MAX_PER_RUN}`}
+                  </Label>
+                </div>
+                <Label type="default" icon={flowerIcon}>
+                  {(sflBalance ?? new Decimal(0))
+                    .toDecimalPlaces(4, Decimal.ROUND_DOWN)
+                    .toFixed()}
+                </Label>
+              </div>
+              <span className="text-sm">{t("minigame.reviveDescription")}</span>
+              <Label type="warning">
+                <span>
+                  {t("minigame.reviveScoreWarning", {
+                    percent: Math.round(REVIVE_SCORE_MULTIPLIER * 100),
+                  })}
+                  {" ("}
+                  <span className="line-through">{collected}</span>{" "}
+                  {getRevivedScore(collected)}
+                  {")"}
+                </span>
+              </Label>
+              {isLastRevive && (
+                <Label type="warning">{t("minigame.reviveLastRetry")}</Label>
+              )}
+            </div>
+            <div className="flex gap-1">
+              <Button onClick={() => portalService.send("GAME_OVER")}>
+                {`${t("exit")} ${t("minigame.reviveExitScore", { score: collected })}`}
+              </Button>
+              <Button
+                disabled={sflBalance?.lt(REVIVE_FLOWER_COST)}
+                onClick={() => setShowReviveConfirm(true)}
+              >
+                {t("minigame.reviveRetry", { cost: REVIVE_FLOWER_COST })}
+              </Button>
+            </div>
+            <ModalOverlay
+              show={showReviveConfirm}
+              onBackdropClick={() => setShowReviveConfirm(false)}
+            >
+              <Panel>
+                <p className="text-sm p-2">
+                  {t("minigame.reviveConfirmation", {
+                    cost: REVIVE_FLOWER_COST,
+                  })}
+                </p>
+                <div className="flex gap-1">
+                  <Button onClick={() => setShowReviveConfirm(false)}>
+                    {t("no")}
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setShowReviveConfirm(false);
+                      purchase({ sfl: REVIVE_FLOWER_COST, items: {} });
+                    }}
+                  >
+                    {t("yes")}
+                  </Button>
+                </div>
+              </Panel>
+            </ModalOverlay>
+          </div>
+        </Panel>
+      </Modal>
 
       <Modal
         key={pendingLevelUpChoice?.id}

@@ -78,11 +78,17 @@ export const GAME_SECONDS = 900;
 export const GAME_LIVES = 100;
 export const WALKING_SPEED = 50;
 export const PLAYER_WATER_SPEED_MULTIPLIER = 0.6;
+export const REVIVE_FLOWER_COST = 4;
+export const REVIVE_SCORE_MULTIPLIER = 0.85;
+export const REVIVE_MAX_PER_RUN = 5;
+export const BLOCKADE_GUIDE_MIN_TILES = 12;
+export const FINAL_BOSS_TIME_BONUS_PER_SECOND = 10;
+export const HOLE_INTERACT_TILES = 3;
 
 // Attempts
-export const INITIAL_DATE = "2026-07-13"; // YYYY-MM-DD
-export const INITIAL_DATE_LEADERBOARD = "2026-07-17"; // YYYY-MM-DD
-export const FINAL_DATE_LEADERBOARD = "2026-07-23"; // YYYY-MM-DD
+export const INITIAL_DATE = "2026-10-22"; // YYYY-MM-DD
+export const INITIAL_DATE_LEADERBOARD = "2026-10-26"; // YYYY-MM-DD
+export const FINAL_DATE_LEADERBOARD = "2026-11 -02"; // YYYY-MM-DD
 export const ATTEMPTS_BETA_TESTERS = 0;
 export const UNLIMITED_ATTEMPTS_SFL = 200; // If this value is less than 0, the option disappears
 export const UNLIMITED_ATTEMPTS_AURA_DISCOUNT_SFL = 150;

@@ -104,6 +104,9 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
   private hurtAnimationCompleteHandler:
     ((animation: Phaser.Animations.Animation) => void) | undefined;
 
+  // Halloween
+  blockadeArrow: Phaser.GameObjects.Image | undefined;
+
   constructor({
     scene,
     x,
@@ -187,6 +190,8 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
 
       this.label = label;
     }
+
+    this.createBlockadeArrow();
 
     // For Debugging Purpose - Check player position
     // Uncomment to see the coordinates
@@ -491,8 +496,16 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
       this.add(this.equippedWeapon);
     }
 
-    this.equippedWeapon.setScale(this.direction === "left" ? -1 : 1, 1);
+    this.applyEquippedWeaponDirection();
     this.syncEquippedWeaponDepth();
+  }
+
+  private applyEquippedWeaponDirection() {
+    if (!this.equippedWeapon?.active) return;
+
+    const flip = this.direction === "left" ? -1 : 1;
+    this.equippedWeapon.setScale(flip, 1);
+    this.equippedWeapon.x = 3 * flip;
   }
 
   private syncEquippedWeaponDepth() {
@@ -938,7 +951,7 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
 
     this.direction = "right";
     this.sprite?.setScale(1, 1);
-    this.equippedWeapon?.setScale(1, 1);
+    this.applyEquippedWeaponDirection();
 
     if (this.speech) {
       this.speech.setScale(1, 1);
@@ -951,7 +964,7 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
 
     this.direction = "left";
     this.sprite?.setScale(-1, 1);
-    this.equippedWeapon?.setScale(-1, 1);
+    this.applyEquippedWeaponDirection();
 
     if (this.speech) {
       this.speech.changeDirection("left");
@@ -1211,8 +1224,6 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
     this.portalService?.send("LOSE_LIFE", { enemyType, damage });
     this.playHeartFall(damage);
 
-    if (this.isGameOver) return;
-
     this.hurtInvincibilityTimer?.remove(false);
     this.hurtInvincibilityTimer = this.scene.time.delayedCall(
       HURT_INVINCIBILITY_MS,
@@ -1220,6 +1231,9 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
         this.finishHurt();
       },
     );
+
+    if (this.isGameOver) return;
+
     this.playHurtAnimation();
   }
 
@@ -1425,7 +1439,22 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
   private get isGameOver() {
     const lives = this.portalService?.state.context.lives ?? 0;
     if (lives > 0) return false;
-    this.portalService?.send("GAME_OVER");
+    this.portalService?.send("PLAYER_DIED");
     return true;
+  }
+
+  private createBlockadeArrow() {
+    this.blockadeArrow = this.scene.add
+      .image(0, 0, "blockade_arrow")
+      .setDepth(10001)
+      .setOrigin(0.5)
+      .setVisible(false);
+
+    this.add(this.blockadeArrow);
+  }
+
+  destroyBlockadeArrow() {
+    this.blockadeArrow?.destroy();
+    this.blockadeArrow = undefined;
   }
 }

@@ -18,6 +18,10 @@ import {
   NO_WEARABLE_BUFF_SCORE_MULTIPLIER,
   resolveSpecialPower,
   SPECIAL_POWER_CONFIG,
+  FINAL_BOSS_TIME_BONUS_PER_SECOND,
+  REVIVE_FLOWER_COST,
+  REVIVE_MAX_PER_RUN,
+  REVIVE_SCORE_MULTIPLIER,
 } from "../constants";
 import {
   CHEST_BONUS_LEVEL_CHANCES,
@@ -50,9 +54,12 @@ const getJWT = () => {
   return code;
 };
 
-const getRunScore = (context: Context) => context.collected;
-
 const roundToTwoDecimals = (value: number) => Math.round(value * 100) / 100;
+
+export const getRevivedScore = (score: number) =>
+  roundToTwoDecimals(score * REVIVE_SCORE_MULTIPLIER);
+
+const getRunScore = (context: Context) => context.collected;
 
 const getFinalRunScore = (context: Context) => {
   const baseScore = getRunScore(context);
@@ -111,6 +118,8 @@ export interface Context {
   pendingChoiceQueue: ("levelUp" | "chest")[];
   isGameplayPaused: boolean;
   gameplayPausedAt?: number;
+  pendingRevive: boolean;
+  revivesUsed: number;
   weaponLevels: Record<WeaponId, WeaponLevel>;
   hudWeapons: WeaponId[];
   perkLevels: PerkLevels;
@@ -153,6 +162,8 @@ const getInitialProgression = ({
     pendingChoiceQueue: [] as ("levelUp" | "chest")[],
     isGameplayPaused: !!pendingLevelUpChoice,
     gameplayPausedAt: undefined,
+    pendingRevive: false,
+    revivesUsed: 0,
     weaponLevels,
     hudWeapons: [] as WeaponId[],
     perkLevels,
@@ -315,6 +326,11 @@ type PurchaseUnlimitedEvent = {
   sfl: number;
 };
 
+type PurchaseReviveEvent = {
+  type: "PURCHASED_REVIVE";
+  sfl: number;
+};
+
 type GainPointsEvent = {
   type: "GAIN_POINTS";
   points: number;
@@ -373,6 +389,9 @@ export type PortalEvent =
   | { type: "CONTINUE_TRAINING" }
   | { type: "END_GAME_EARLY" }
   | { type: "GAME_OVER" }
+  | { type: "PLAYER_DIED" }
+  | { type: "HOLE_ENTERED" }
+  | PurchaseReviveEvent
   | GainPointsEvent
   | LoseLifeEvent
   | SetValidationsEvent
@@ -436,6 +455,52 @@ const resetGameTransition = {
   },
 };
 
+export const getTimeBonus = (
+  context: Pick<Context, "endAt">,
+  now = Date.now(),
+) =>
+  context.endAt > 0
+    ? Math.floor(Math.max(0, context.endAt - now) / 1000) *
+      FINAL_BOSS_TIME_BONUS_PER_SECOND
+    : 0;
+
+const canRevive = (context: Context) =>
+  !context.isTraining &&
+  context.revivesUsed < REVIVE_MAX_PER_RUN &&
+  !context.pendingRevive &&
+  REVIVE_FLOWER_COST > 0;
+
+const gameOverActions = assign((context: Context): Partial<Context> => {
+  const { baseScore, bonusApplied, score } = getFinalRunScore(context);
+  const progression = getInitialProgression();
+  const maxLives = getMaxLives(progression.perkLevels);
+
+  return {
+    endAt: 0,
+    lives: maxLives,
+    maxLives,
+    ...progression,
+    collected: score,
+    lastBaseScore: baseScore,
+    lastScoreBonusApplied: bonusApplied,
+    validations: structuredClone(VALIDATIONS),
+    lastScore: score,
+    state: (() => {
+      if (context.isTraining) return context.state;
+
+      submitScore({ score });
+      return submitMinigameScore({
+        state: context.state as GameState,
+        action: {
+          type: "minigame.scoreSubmitted",
+          score,
+          id: PORTAL_NAME,
+        },
+      });
+    })(),
+  };
+}) as any;
+
 export const portalMachine = createMachine<Context, PortalEvent, PortalState>({
   id: "portalMachine",
   initial: "initialising",
@@ -496,7 +561,8 @@ export const portalMachine = createMachine<Context, PortalEvent, PortalState>({
     SET_GAMEPLAY_PAUSED: {
       actions: assign(
         (context: Context, event: SetGameplayPausedEvent): Partial<Context> => {
-          if (context.pendingLevelUpChoice) return pauseGameplayClock(context);
+          if (context.pendingLevelUpChoice || context.pendingRevive)
+            return pauseGameplayClock(context);
           if (event.isPaused) return pauseGameplayClock(context);
 
           return resumeGameplayClock(context);
@@ -939,6 +1005,8 @@ export const portalMachine = createMachine<Context, PortalEvent, PortalState>({
 
             return {
               endAt: Date.now(),
+              pendingRevive: false,
+              revivesUsed: 0,
               collected: score,
               lastBaseScore: baseScore,
               lastScoreBonusApplied: bonusApplied,
@@ -960,39 +1028,56 @@ export const portalMachine = createMachine<Context, PortalEvent, PortalState>({
           }),
           target: "introduction",
         },
+        PLAYER_DIED: [
+          {
+            cond: canRevive,
+            actions: assign((context: Context): Partial<Context> => ({
+              ...pauseGameplayClock(context),
+              pendingRevive: true,
+            })) as any,
+          },
+          {
+            target: "gameOver",
+            actions: gameOverActions,
+          },
+        ],
+        PURCHASED_REVIVE: {
+          cond: (context: Context, event: PurchaseReviveEvent) =>
+            context.pendingRevive && event.sfl === REVIVE_FLOWER_COST,
+          actions: assign(
+            (
+              context: Context,
+              event: PurchaseReviveEvent,
+            ): Partial<Context> => ({
+              ...resumeGameplayClock(context),
+              state: purchaseMinigameItem({
+                state: context.state as GameState,
+                action: {
+                  id: PORTAL_NAME,
+                  sfl: event.sfl,
+                  type: "minigame.itemPurchased",
+                  items: {},
+                },
+              }),
+              lives: context.maxLives,
+              collected: getRevivedScore(context.collected),
+              pendingRevive: false,
+              revivesUsed: context.revivesUsed + 1,
+            }),
+          ) as any,
+        },
+        HOLE_ENTERED: {
+          target: "gameOver",
+          actions: [
+            assign((context: Context): Partial<Context> => ({
+              collected: context.collected + getTimeBonus(context),
+            })) as any,
+            gameOverActions,
+          ],
+        },
         GAME_OVER: {
           target: "gameOver",
-          actions: assign((context: Context): Partial<Context> => {
-            const { baseScore, bonusApplied, score } =
-              getFinalRunScore(context);
-            const progression = getInitialProgression();
-            const maxLives = getMaxLives(progression.perkLevels);
-
-            return {
-              endAt: 0,
-              lives: maxLives,
-              maxLives,
-              ...progression,
-              collected: score,
-              lastBaseScore: baseScore,
-              lastScoreBonusApplied: bonusApplied,
-              validations: structuredClone(VALIDATIONS),
-              lastScore: score,
-              state: (() => {
-                if (context.isTraining) return context.state;
-
-                submitScore({ score });
-                return submitMinigameScore({
-                  state: context.state as GameState,
-                  action: {
-                    type: "minigame.scoreSubmitted",
-                    score,
-                    id: PORTAL_NAME,
-                  },
-                });
-              })(),
-            };
-          }) as any,
+          actions: gameOverActions,
         },
       },
     },
