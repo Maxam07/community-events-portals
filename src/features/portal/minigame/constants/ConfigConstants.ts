@@ -58,7 +58,7 @@ import relicEnvy from "public/world/portal/halloween/relics_envy.webp";
 
 import tooltip_icon from "public/world/portal/images/ExpOrb_combined.webp";
 import swordIcon from "public/world/portal/images/sword_icon.png";
-import speedIcon from "public/world/portal/images/lightning.png";
+import areaIcon from "public/world/portal/halloween/icons/areaIcon.webp";
 import type {
   WeaponId,
   WeaponStatKey,
@@ -144,7 +144,7 @@ export const INSTRUCTIONS: {
   width?: number;
 }[] = [
   {
-    image: sorcerer,
+    image: areaIcon,
     description: t("minigame.instructions1"),
   },
   {
@@ -164,32 +164,67 @@ export const INSTRUCTIONS: {
     description: t("minigame.instructions7"),
   },
   {
-    image: SUNNYSIDE.icons.upgrade_disc,
+    image: sorcerer,
     description: t("minigame.instructions4"),
   },
 ];
 
-export const RESOURCES_TABLE: {
+export const PERKS_TABLE: {
   image: string;
+  perkName: string;
   description: string;
   width?: number;
 }[] = [
   {
-    image: SUNNYSIDE.icons.heart,
-    description: t("minigame.resource1"),
+    image: SUNNYSIDE.icons.lightning,
+    perkName: t("minigame.perk.moveSpeed"),
+    description: t("minigame.perk.description.moveSpeed"),
   },
   {
-    image: speedIcon,
-    description: t("minigame.resource2"),
+    image: SUNNYSIDE.icons.lightning,
+    perkName: t("minigame.perk.attackSpeed"),
+    description: t("minigame.perk.description.attackSpeed"),
   },
   {
     image: swordIcon,
-    description: t("minigame.resource3"),
+    perkName: t("minigame.perk.criticalChance"),
+    description: t("minigame.perk.description.criticalChance"),
   },
-  // {
-  //   image: getWearableImage(`${PASSIVE_ABILITY_ITEM}`),
-  //   description: t("minigame.AbilityDescription"),
-  // },
+  {
+    image: SUNNYSIDE.icons.arrow_right,
+    perkName: t("minigame.perk.projectileSpeed"),
+    description: t("minigame.perk.description.projectileSpeed"),
+  },
+  {
+    image: SUNNYSIDE.icons.xpIcon,
+    perkName: t("minigame.perk.xpGain"),
+    description: t("minigame.perk.description.xpGain"),
+  },
+  {
+    image: SUNNYSIDE.icons.happy,
+    perkName: t("minigame.perk.luck"),
+    description: t("minigame.perk.description.luck"),
+  },
+  {
+    image: SUNNYSIDE.icons.search,
+    perkName: t("minigame.perk.pickupRadius"),
+    description: t("minigame.perk.description.pickupRadius"),
+  },
+  {
+    image: SUNNYSIDE.icons.stopwatch,
+    perkName: t("minigame.perk.cooldownReduction"),
+    description: t("minigame.perk.description.cooldownReduction"),
+  },
+  {
+    image: SUNNYSIDE.icons.upgrade_disc,
+    perkName: t("minigame.perk.healing"),
+    description: t("minigame.perk.description.healing"),
+  },
+  {
+    image: SUNNYSIDE.icons.heart,
+    perkName: t("minigame.perk.maxHealth"),
+    description: t("minigame.perk.description.maxHealth"),
+  },
 ];
 
 const stats = ENEMY_BALANCE_STATS;
