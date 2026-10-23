@@ -291,7 +291,13 @@ export function getPriceHistory({
   const startDate = new Date(from);
   const today = new Date();
 
-  for (let date = startDate; date <= today; date.setDate(date.getDate() + 1)) {
+  // Step in UTC days: the keys are UTC dates, and local-time stepping drifts
+  // a day across a daylight-saving change.
+  for (
+    let date = startDate;
+    date <= today;
+    date.setUTCDate(date.getUTCDate() + 1)
+  ) {
     const dateKey = date.toISOString().split("T")[0];
 
     // Find matching history entry for this date
@@ -402,8 +408,8 @@ export function getMarketPrice({
 
 const ISLAND_RESOURCE_TAXES: Record<IslandType, number> = {
   basic: 1,
-  spring: 0.5,
-  desert: 0.2,
+  spring: 0.55,
+  desert: 0.25,
   volcano: 0.15,
   swamp: 0.15,
   // Ascension islands (spooky onward) reuse the swamp value for now.
@@ -426,7 +432,7 @@ export function getResourceTax({
     tax = tax.mul(0.5);
   }
 
-  if (isTemporaryCollectibleActive({ name: "Trading Shrine", game })) {
+  if (isTemporaryCollectibleActive({ name: "Trading Shrine", game, now })) {
     tax = tax.sub(0.025);
   }
 

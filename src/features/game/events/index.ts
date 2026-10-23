@@ -32,6 +32,10 @@ import {
 import type { GameState } from "../types/game";
 import { claimAirdrop, type ClaimAirdropAction } from "./claimAirdrop";
 import {
+  airdropFlower,
+  type AirdropFlowerAction,
+} from "./landExpansion/airdropFlower";
+import {
   placeBuilding,
   type PlaceBuildingAction,
 } from "./landExpansion/placeBuilding";
@@ -47,6 +51,31 @@ import {
   upgradeInterior,
   type UpgradeInteriorAction,
 } from "./landExpansion/upgradeInterior";
+import {
+  startCaveBatch,
+  type StartCaveBatchAction,
+} from "./landExpansion/startCaveBatch";
+import {
+  digCaveTile,
+  type DigCaveTileAction,
+} from "./landExpansion/digCaveTile";
+import {
+  drillCaveTiles,
+  type DrillCaveTilesAction,
+} from "./landExpansion/drillCaveTiles";
+import { expandCave, type ExpandCaveAction } from "./landExpansion/expandCave";
+import {
+  speedUpCaveExpansion,
+  type SpeedUpCaveExpansionAction,
+} from "./landExpansion/speedUpCaveExpansion";
+import {
+  completeCaveExpansion,
+  type CompleteCaveExpansionAction,
+} from "./landExpansion/completeCaveExpansion";
+import {
+  buyCaveMerchantOffer,
+  type BuyCaveMerchantOfferAction,
+} from "./landExpansion/buyCaveMerchantOffer";
 import { cook, type RecipeCookedAction } from "./landExpansion/cook";
 import {
   collectRecipe,
@@ -473,11 +502,19 @@ import {
 } from "./landExpansion/speedUpBuilding";
 import { buyAnimal, type BuyAnimalAction } from "./landExpansion/buyAnimal";
 import { feedAnimal, type FeedAnimalAction } from "./landExpansion/feedAnimal";
+import {
+  feedAllAnimals,
+  type FeedAllAnimalsAction,
+} from "./landExpansion/feedAllAnimals";
 import { loveAnimal, type LoveAnimalAction } from "./landExpansion/loveAnimal";
 import {
   feedMixed,
   type FeedMixedAction,
 } from "features/feederMachine/feedMixed";
+import {
+  bulkMixFeed,
+  type BulkMixFeedAction,
+} from "features/feederMachine/bulkMixFeed";
 import {
   upgradeBuilding,
   type UpgradeBuildingAction,
@@ -507,6 +544,12 @@ import {
   applyAnimalFeedBuff,
   type ApplyAnimalFeedBuffAction,
 } from "./landExpansion/applyAnimalFeedBuff";
+import { applyMud, type ApplyMudAction } from "./landExpansion/applyMud";
+import { tradeInPig, type TradeInPigAction } from "./landExpansion/tradeInPig";
+import {
+  bulkApplyMud,
+  type BulkApplyMudAction,
+} from "./landExpansion/bulkApplyMud";
 import { sellBounty, type SellBountyAction } from "./landExpansion/sellBounty";
 import {
   bulkSellBounty,
@@ -533,6 +576,10 @@ import {
   acknowledgeCalendarEvent,
   type AcknowledgeCalendarEventAction,
 } from "./landExpansion/acknowledgeCalendarEvent";
+import {
+  acknowledgeTcs,
+  type AcknowledgeTcsAction,
+} from "./landExpansion/acknowledgeTcs";
 
 import {
   collectLavaPit,
@@ -611,6 +658,14 @@ import {
   type InteriorsEnabledAction,
 } from "./updateInteriorsEnabled";
 import {
+  updateExperiment,
+  type ExperimentToggledAction,
+} from "./updateExperiment";
+import {
+  updateToolShopSettings,
+  type UpdateToolShopSettingsAction,
+} from "./updateToolShopSettings";
+import {
   acknowledgeRewardBox,
   type AcknowledgeRewardBoxAction,
 } from "./landExpansion/acknowledgeRewardBox";
@@ -626,6 +681,10 @@ import {
   claimPetalPrize,
   type ClaimPetalPrizeAction,
 } from "./landExpansion/claimPetalPrize";
+import {
+  claimFloatingIslandPrize,
+  type ClaimFloatingIslandPrizeAction,
+} from "./landExpansion/claimFloatingIslandPrize";
 import {
   buyOptionPurchaseItem,
   type BuyOptionPurchaseItemAction,
@@ -681,19 +740,6 @@ import {
   type RemoveBeehiveAction,
 } from "./landExpansion/removeBeehive";
 import { removeAll, type RemoveAllAction } from "./landExpansion/removeAll";
-import { saveLayout, type SaveLayoutAction } from "./landExpansion/saveLayout";
-import {
-  applyLayout,
-  type ApplyLayoutAction,
-} from "./landExpansion/applyLayout";
-import {
-  renameLayout,
-  type RenameLayoutAction,
-} from "./landExpansion/renameLayout";
-import {
-  deleteLayout,
-  type DeleteLayoutAction,
-} from "./landExpansion/deleteLayout";
 import {
   wakeAnimal,
   type WakeUpAnimalAction,
@@ -736,6 +782,10 @@ import {
   type StartProjectAction,
 } from "./landExpansion/startProject";
 import {
+  collectProject,
+  type CollectProjectAction,
+} from "./landExpansion/collectProject";
+import {
   instaGrowFlower,
   type InstaGrowFlowerAction,
 } from "./landExpansion/instaGrowFlower";
@@ -777,6 +827,10 @@ import {
   renewCollectible,
   type RenewCollectibleAction,
 } from "./landExpansion/renewCollectible";
+import {
+  extendCollectible,
+  type ExtendCollectibleAction,
+} from "./landExpansion/extendCollectible";
 import {
   renewWeatherCollectible,
   type RenewWeatherCollectibleAction,
@@ -842,6 +896,7 @@ export type PlayingEvent =
   | BulkSellBountyAction
   | ClaimBountyBonusAction
   | FeedMixedAction
+  | BulkMixFeedAction
   | InstantExpand
   | InstantCookRecipe
   | ShipmentRestockAction
@@ -863,6 +918,7 @@ export type PlayingEvent =
   | MineSunstoneAction
   | MineAscensionCrystalAction
   | ClaimAirdropAction
+  | AirdropFlowerAction
   | RecipeCookedAction
   | CollectRecipeAction
   | CancelProcessedResourceAction
@@ -961,6 +1017,7 @@ export type PlayingEvent =
   | BuyMoreDigsAction
   | BuyAnimalAction
   | FeedAnimalAction
+  | FeedAllAnimalsAction
   | LoveAnimalAction
   | UpgradeBuildingAction
   | StartCraftingAction
@@ -969,11 +1026,15 @@ export type PlayingEvent =
   | CompleteNPCChoreAction
   | ClaimProduceAction
   | ApplyAnimalFeedBuffAction
+  | ApplyMudAction
+  | BulkApplyMudAction
+  | TradeInPigAction
   | BuyChapterItemAction
   | ClaimPurchaseAction
   | RedeemTradeRewardsAction
   | DailyResetAction
   | AcknowledgeCalendarEventAction
+  | AcknowledgeTcsAction
   | CollectLavaPitAction
   | StartLavaPitAction
   | HarvestSaltAction
@@ -986,10 +1047,13 @@ export type PlayingEvent =
   | UpdateNetworkAction
   | EconomiesEnabledAction
   | InteriorsEnabledAction
+  | ExperimentToggledAction
+  | UpdateToolShopSettingsAction
   | BuyMinigameItemAction
   | AcknowledgeRewardBoxAction
   | OpenRewardBoxAction
   | ClaimPetalPrizeAction
+  | ClaimFloatingIslandPrizeAction
   | BuyOptionPurchaseItemAction
   | InstantCraftAction
   | BuyBiomeAction
@@ -999,6 +1063,7 @@ export type PlayingEvent =
   | BurnClutterAction
   | InstantGrowProjectAction
   | StartProjectAction
+  | CollectProjectAction
   | InstaGrowFlowerAction
   | UpgradeRockAction
   | UpgradeTreeAction
@@ -1008,6 +1073,7 @@ export type PlayingEvent =
   | BulkFertilisePlotAction
   | RenewPetShrineAction
   | RenewCollectibleAction
+  | ExtendCollectibleAction
   | RenewWeatherCollectibleAction
   | CollectWaterTrapAction
   | PlaceWaterTrapAction
@@ -1022,7 +1088,14 @@ export type PlayingEvent =
   | ClaimTrackMilestoneAction
   | StartTrialAction
   | UpgradeSaltSculptureAction
-  | UpgradeInteriorAction;
+  | UpgradeInteriorAction
+  | StartCaveBatchAction
+  | DigCaveTileAction
+  | DrillCaveTilesAction
+  | ExpandCaveAction
+  | SpeedUpCaveExpansionAction
+  | CompleteCaveExpansionAction
+  | BuyCaveMerchantOfferAction;
 
 export type LocalVisitingEvent =
   | CollectGarbageAction
@@ -1086,10 +1159,6 @@ export type PlacementEvent =
   | RemoveFlowerBedAction
   | RemoveBeehiveAction
   | RemoveAllAction
-  | SaveLayoutAction
-  | ApplyLayoutAction
-  | RenameLayoutAction
-  | DeleteLayoutAction
   | FlipCollectibleAction
   | FlipFarmHandAction
   | FlipBumpkinAction
@@ -1153,6 +1222,7 @@ export const PLAYING_EVENTS: Handlers<PlayingEvent> = {
   "minigame.attemptStarted": startMinigameAttempt,
   "minigame.scoreSubmitted": submitMinigameScore,
   "airdrop.claimed": claimAirdrop,
+  "flower.airdropped": airdropFlower,
   "bot.detected": detectBot,
   "seed.planted": landExpansionPlant,
   "seeds.bulkPlanted": bulkPlant,
@@ -1223,6 +1293,7 @@ export const PLAYING_EVENTS: Handlers<PlayingEvent> = {
   "land.revealed": revealLand,
   "collectible.burned": burnCollectible,
   "collectible.renewed": renewCollectible,
+  "collectible.extended": extendCollectible,
   "weatherCollectible.renewed": renewWeatherCollectible,
   "bonus.claimed": claimBonus,
   "dailyReward.claimed": claimDailyReward,
@@ -1261,8 +1332,10 @@ export const PLAYING_EVENTS: Handlers<PlayingEvent> = {
   "shipment.restocked": shipmentRestock,
   "animal.bought": buyAnimal,
   "animal.fed": feedAnimal,
+  "animals.fedAll": feedAllAnimals,
   "animal.loved": loveAnimal,
   "feed.mixed": feedMixed,
+  "feeds.bulkMixed": bulkMixFeed,
   "skill.used": skillUse,
   "building.upgraded": upgradeBuilding,
   "crafting.started": startCrafting,
@@ -1271,11 +1344,15 @@ export const PLAYING_EVENTS: Handlers<PlayingEvent> = {
   "chore.fulfilled": completeNPCChore,
   "produce.claimed": claimProduce,
   "animal.feedBuffApplied": applyAnimalFeedBuff,
+  "animal.mudApplied": applyMud,
+  "pigs.bulkMudApplied": bulkApplyMud,
+  "pig.tradedIn": tradeInPig,
   "chapterItem.bought": buyChapterItem,
   "purchase.claimed": claimPurchase,
   "reward.redeemed": redeemTradeReward,
   "daily.reset": dailyReset,
   "calendarEvent.acknowledged": acknowledgeCalendarEvent,
+  "tcs.acknowledged": acknowledgeTcs,
   "lavaPit.collected": collectLavaPit,
   "lavaPit.started": startLavaPit,
   "salt.harvested": harvestSalt,
@@ -1289,11 +1366,14 @@ export const PLAYING_EVENTS: Handlers<PlayingEvent> = {
   "network.updated": updateNetwork,
   "economies.enabled": updateEconomiesEnabled,
   "interiors.enabled": updateInteriorsEnabled,
+  "experiment.toggled": updateExperiment,
+  "toolShop.settingsUpdated": updateToolShopSettings,
   "minigameItem.bought": buyEventShopItem,
   "rewardBox.acknowledged": acknowledgeRewardBox,
   "rewardBox.opened": openRewardBox,
   "claim.bountyBoardBonus": claimBountyBonus,
   "petalPuzzle.solved": claimPetalPrize,
+  "floatingIslandPrize.claimed": claimFloatingIslandPrize,
   "optionPurchaseItem.bought": buyOptionPurchaseItem,
   "crafting.spedUp": speedUpCrafting,
   "biome.bought": buyBiome,
@@ -1303,6 +1383,7 @@ export const PLAYING_EVENTS: Handlers<PlayingEvent> = {
   "clutter.burned": burnClutter,
   "project.instantGrow": instantGrowProject,
   "project.started": startProject,
+  "project.collected": collectProject,
   "trial.started": startTrial,
   "rock.upgraded": upgradeRock,
   "tree.upgraded": upgradeTree,
@@ -1321,6 +1402,13 @@ export const PLAYING_EVENTS: Handlers<PlayingEvent> = {
   "farmhand.promoted": promoteFarmhand,
   "saltSculpture.upgraded": upgradeSaltSculpture,
   "interior.upgrade": upgradeInterior,
+  "cave.batchStarted": startCaveBatch,
+  "cave.dug": digCaveTile,
+  "cave.drilled": drillCaveTiles,
+  "cave.expanded": expandCave,
+  "cave.expansionSpedUp": speedUpCaveExpansion,
+  "cave.expansionCompleted": completeCaveExpansion,
+  "cave.merchantOfferBought": buyCaveMerchantOffer,
 };
 
 export const LOCAL_VISITING_EVENTS: Handlers<LocalVisitingEvent> = {
@@ -1395,10 +1483,6 @@ export const PLACEMENT_EVENTS: Handlers<PlacementEvent> = {
   "flowerBed.removed": removeFlowerBed,
   "beehive.removed": removeBeehive,
   "items.removed": removeAll,
-  "layout.saved": saveLayout,
-  "layout.applied": applyLayout,
-  "layout.renamed": renameLayout,
-  "layout.deleted": deleteLayout,
   "collectible.flipped": flipCollectible,
   "farmHand.flipped": flipFarmHand,
   "bumpkin.flipped": flipBumpkin,

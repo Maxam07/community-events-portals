@@ -1,4 +1,10 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, {
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 import levelIcon from "assets/icons/level_up.png";
 
@@ -7,9 +13,7 @@ import {
   getAscensionDisplayText,
   getAscensionLevel,
   getExperienceToNextLevel,
-  getMaxBumpkinLevel,
   isMaxLevel,
-  type BumpkinLevel as BumpkinLevelValue,
 } from "features/game/lib/level";
 
 import { AchievementsModal } from "./Achievements";
@@ -63,17 +67,14 @@ const _experience = (state: MachineState) =>
 export const BumpkinLevel: React.FC<{
   experience?: number;
   ascensionLevel?: number;
-  maxLevel?: BumpkinLevelValue;
-}> = ({ experience = 0, ascensionLevel = 0, maxLevel }) => {
+}> = ({ experience = 0, ascensionLevel = 0 }) => {
   const ascension =
     ascensionLevel >= 1
       ? getAscensionLevel({ experience, ascensionLevel })
       : undefined;
-  const atMax = ascension
-    ? ascension.isReadyToAscend
-    : isMaxLevel(experience, maxLevel);
+  const atMax = ascension ? ascension.isReadyToAscend : isMaxLevel(experience);
   const { currentExperienceProgress, experienceToNextLevel } =
-    ascension ?? getExperienceToNextLevel(experience, maxLevel);
+    ascension ?? getExperienceToNextLevel(experience);
 
   const getProgressPercentage = () => {
     let progressRatio = 1;
@@ -133,18 +134,18 @@ export const BumpkinModal: React.FC<Props> = ({
   const { openModal } = useContext(ModalContext);
   const experience = useSelector(gameService, _experience);
   const ascensionLevel = gameState.island.ascensionLevel ?? 0;
-  const maxBumpkinLevel = getMaxBumpkinLevel(gameState);
+  // Mount snapshot, as before — drives the power-skill cooldown readiness check.
+  const now = useNow();
   const isAscended = ascensionLevel >= 1;
   const ascension = getAscensionLevel({
     experience,
     ascensionLevel,
-    maxLevel: maxBumpkinLevel,
   });
   // Displayed level: within-ascension (0..50) when ascended, else the capped Bumpkin level.
   const level = ascension.level;
   const maxLevel = isAscended
     ? ascension.isReadyToAscend
-    : isMaxLevel(experience, maxBumpkinLevel);
+    : isMaxLevel(experience);
   // Fires the level-up modal once per level; the within-ascension (or legacy) level
   // increments per level-up and resets on ascend (no spurious modal on prestige).
   const currentBumpkinLevel = ascension.level;
@@ -156,7 +157,6 @@ export const BumpkinModal: React.FC<Props> = ({
     return stored && valid.includes(stored) ? stored : initialTab;
   });
   const { t } = useAppTranslation();
-  const now = useNow();
 
   useEffect(() => {
     if (!readonly) {
@@ -198,6 +198,27 @@ export const BumpkinModal: React.FC<Props> = ({
     useState(currentBumpkinLevel);
   const hasLeveledUp = currentBumpkinLevel > acknowledgedLevel;
   const acknowledgeLevelUp = () => setAcknowledgedLevel(currentBumpkinLevel);
+
+  // The LevelUp screen fully unmounts Feed and replaces it, so Feed's own
+  // scrollable content panel (the one inside its SplitScreenView, not this
+  // component's outer wrapper) gets torn down and remounted at scrollTop 0
+  // once the player acknowledges the level up. Track the last scroll
+  // position from here (which doesn't unmount) via a ref threaded down into
+  // Feed's content panel, and restore it as soon as Feed remounts.
+  const feedContentRef = useRef<HTMLDivElement>(null);
+  const lastFeedScrollTop = useRef(0);
+  useLayoutEffect(() => {
+    const el = feedContentRef.current;
+    if (!el) return;
+
+    el.scrollTop = lastFeedScrollTop.current;
+
+    const onScroll = () => {
+      lastFeedScrollTop.current = el.scrollTop;
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [hasLeveledUp, tab]);
 
   const [selectedFoodName, setSelectedFoodName] = useState<
     ConsumableName | undefined
@@ -296,7 +317,6 @@ export const BumpkinModal: React.FC<Props> = ({
             <BumpkinLevel
               experience={bumpkin.experience}
               ascensionLevel={ascensionLevel}
-              maxLevel={maxBumpkinLevel}
             />
           </div>
           {availableSkillPoints > 0 && (
@@ -361,6 +381,7 @@ export const BumpkinModal: React.FC<Props> = ({
                 food={availableFood}
                 selectedName={selectedFoodName}
                 setSelectedName={setSelectedFoodName}
+                contentRef={feedContentRef}
               />
             )}
           </>

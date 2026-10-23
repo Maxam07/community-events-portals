@@ -114,7 +114,9 @@ export const ReputationSystem: React.FC<{
 
 export const ReputationTiers: React.FC = () => {
   const { t } = useAppTranslation();
-  const [showInfo, setShowInfo] = useState<"seedling" | "grower" | null>(null);
+  const [showInfo, setShowInfo] = useState<
+    "seedling" | "grandHarvester" | null
+  >(null);
 
   return (
     <>
@@ -196,37 +198,6 @@ export const ReputationTiers: React.FC = () => {
               icon: tradeIcon,
             },
             {
-              text: (
-                <span
-                  onClick={() => {
-                    if (showInfo === "grower") {
-                      setShowInfo(null);
-                    } else {
-                      setShowInfo("grower");
-                    }
-                  }}
-                  className="flex items-center cursor-pointer"
-                >
-                  {t("reputation.grower.description")}
-                  <div className="relative">
-                    <img src={infoIcon} className="w-5 ml-2" />
-                    <AnimatedPanel
-                      show={showInfo === "grower"}
-                      className="top-0 left-8 w-20"
-                      onClick={() => setShowInfo(null)}
-                      onBackdropClick={() => setShowInfo(null)}
-                    >
-                      <div className="text-xxs p-0.5">
-                        {t("proof.of.humanity.required")}
-                      </div>
-                    </AnimatedPanel>
-                  </div>
-                </span>
-              ),
-              icon: walletIcon,
-            },
-
-            {
               text: t("reputation.grower.auctions"),
               icon: hammerinHarry,
             },
@@ -277,6 +248,40 @@ export const ReputationTiers: React.FC = () => {
             })}
           </Label>
         </div>
+        <NoticeboardItems
+          items={[
+            {
+              text: (
+                <span
+                  onClick={() => {
+                    if (showInfo === "grandHarvester") {
+                      setShowInfo(null);
+                    } else {
+                      setShowInfo("grandHarvester");
+                    }
+                  }}
+                  className="flex items-center cursor-pointer"
+                >
+                  {t("reputation.grandHarvester.withdraw")}
+                  <div className="relative">
+                    <img src={infoIcon} className="w-5 ml-2" />
+                    <AnimatedPanel
+                      show={showInfo === "grandHarvester"}
+                      className="top-0 left-8 w-20"
+                      onClick={() => setShowInfo(null)}
+                      onBackdropClick={() => setShowInfo(null)}
+                    >
+                      <div className="text-xxs p-0.5">
+                        {t("proof.of.humanity.required")}
+                      </div>
+                    </AnimatedPanel>
+                  </div>
+                </span>
+              ),
+              icon: walletIcon,
+            },
+          ]}
+        />
       </div>
     </>
   );

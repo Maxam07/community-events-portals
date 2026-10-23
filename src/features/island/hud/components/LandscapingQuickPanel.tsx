@@ -35,9 +35,17 @@ import {
   BUILDINGS_DIMENSIONS,
   type BuildingName,
 } from "features/game/types/buildings";
-import { isPetNFTRevealed } from "features/game/types/pets";
+import { isPetNFTRevealed, PET_TYPES } from "features/game/types/pets";
 import { Box, type BoxProps } from "components/ui/Box";
-import { ITEM_DETAILS } from "features/game/types/images";
+import {
+  getTranslatedItemName,
+  ITEM_DETAILS,
+} from "features/game/types/images";
+import {
+  getCollectiblesAcrossLocations,
+  getPlacementGroup,
+  isTemporaryCollectible,
+} from "features/game/lib/collectibleBuilt";
 import { SUNNYSIDE } from "assets/sunnyside";
 import { isMobile } from "mobile-device-detect";
 import { ITEM_ICONS } from "./inventory/Chest";
@@ -92,7 +100,14 @@ const ALL_DIMENSIONS: Record<string, { width: number; height: number }> = {
   Bud: { width: 1, height: 1 },
   Pet: { width: 2, height: 2 },
   FarmHand: { width: 1, height: 1 },
+  Bumpkin: { width: 1, height: 1 },
 };
+
+/**
+ * `LandscapingPlaceableType` requires an id alongside the name for the
+ * Bumpkin, but there is only ever one — matches `PlacedBumpkin`'s moveable id.
+ */
+const BUMPKIN_PLACEABLE_ID = "main";
 
 const getItemDims = (name: string) =>
   ALL_DIMENSIONS[name] ?? { width: 1, height: 1 };
@@ -138,17 +153,27 @@ export const LandscapingQuickPanel: React.FC<Props> = ({
   // ── Quick drag-and-drop state ──────────────────────────────────────────
   const dragRef = useRef<DragOrigin | null>(null);
   const wasDragRef = useRef(false);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
-  // Restore horizontal scroll position after item placement remounts the panel
-  useEffect(() => {
-    if (_savedScrollLeft > 0 && scrollContainerRef.current) {
-      const el = scrollContainerRef.current;
-      requestAnimationFrame(() => {
-        el.scrollLeft = _savedScrollLeft;
-      });
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // The panel's DOM is torn down while an item is being placed (the whole grid
+  // is hidden unless the machine is idle), so restore on every remount of the
+  // scroll container - not just the first mount of this component.
+  const setScrollContainer = useCallback((el: HTMLDivElement | null) => {
+    scrollContainerRef.current = el;
+    if (!el || _savedScrollLeft <= 0) return;
+
+    el.scrollLeft = _savedScrollLeft;
+    // Item images can finish loading after mount and change the scroll width,
+    // so re-apply once layout has settled.
+    requestAnimationFrame(() => {
+      el.scrollLeft = _savedScrollLeft;
+    });
+  }, []);
+
+  // Keep the saved position in sync with wherever the player last scrolled to.
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    _savedScrollLeft = e.currentTarget.scrollLeft;
+  }, []);
 
   const computeGridPos = useCallback((clientX: number, clientY: number) => {
     // Use the actual land center (GenesisBlock element) as the coordinate origin,
@@ -193,6 +218,13 @@ export const LandscapingQuickPanel: React.FC<Props> = ({
           requirements: { coins: 0, ingredients: {} },
           collisionDetected: false,
         } as any);
+      } else if (item.name === "Bumpkin") {
+        freshChild.send("SELECT", {
+          placeable: { name: "Bumpkin", id: BUMPKIN_PLACEABLE_ID },
+          action: "bumpkin.placed",
+          requirements: { coins: 0, ingredients: {} },
+          collisionDetected: false,
+        } as any);
       } else {
         freshChild.send("SELECT", {
           action: placeEvent(item.name as LandscapingPlaceable, loc),
@@ -224,7 +256,6 @@ export const LandscapingQuickPanel: React.FC<Props> = ({
 
         drag.activated = true;
         wasDragRef.current = true;
-        _savedScrollLeft = scrollContainerRef.current?.scrollLeft ?? 0;
         sendSelect(drag.item, location, freshChild);
         freshChild.send("DRAG");
         onQuickDragChange(true);
@@ -337,16 +368,31 @@ export const LandscapingQuickPanel: React.FC<Props> = ({
   );
 
   // ── Chest inventory ────────────────────────────────────────────────────
-  const buds = getChestBuds(state);
+  // The Pet House only accepts pets - mirror Chest.tsx's petHouse gating so
+  // this panel doesn't offer decorations/boosts/buildings/etc that can't
+  // actually be placed there.
+  const buds = location === "petHouse" ? {} : getChestBuds(state);
   const petsNFTs = getChestPets(state.pets?.nfts ?? {});
-  const farmHands = getChestFarmHands(state.farmHands);
+  const farmHands =
+    location === "petHouse" ? {} : getChestFarmHands(state.farmHands);
+
+  // The interior floors have no floating farm hand row (see LandscapingHud), so
+  // this tab is where the player's own Bumpkin is placed there. Like the farm
+  // hands above, it only appears while it isn't standing somewhere already.
+  const canPlaceBumpkin =
+    (location === "interior" || location === "level_one") &&
+    !!state.bumpkin &&
+    !state.bumpkin.coordinates;
   const chestMap = getChestItems(state);
   const biome = useMemo(() => getCurrentBiome(state.island), [state.island]);
 
   const collectibleNames = useMemo(
-    () => getKeys(chestMap).filter((item) => chestMap[item]?.gt(0)),
+    () =>
+      getKeys(chestMap)
+        .filter((item) => chestMap[item]?.gt(0))
+        .filter((item) => (location === "petHouse" ? item in PET_TYPES : true)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [chestMap],
+    [chestMap, location],
   );
 
   // ── Group items (shared with the chest) ────────────────────────────────
@@ -355,7 +401,7 @@ export const LandscapingQuickPanel: React.FC<Props> = ({
   const specialCounts: Record<ChestSpecialCategoryId, number> = {
     buds: getKeys(buds).length,
     petNFTs: getKeys(petsNFTs).length,
-    farmHands: Object.keys(farmHands).length,
+    farmHands: Object.keys(farmHands).length + (canPlaceBumpkin ? 1 : 0),
   };
 
   // ── Tab definitions (mirror the chest categories) ──────────────────────
@@ -408,6 +454,12 @@ export const LandscapingQuickPanel: React.FC<Props> = ({
         action: "farmHand.placed",
         requirements: { coins: 0, ingredients: {} },
       });
+    } else if (item.name === "Bumpkin") {
+      child.send("SELECT", {
+        placeable: { name: "Bumpkin", id: BUMPKIN_PLACEABLE_ID },
+        action: "bumpkin.placed",
+        requirements: { coins: 0, ingredients: {} },
+      });
     } else {
       child.send("SELECT", {
         action: placeEvent(item.name as LandscapingPlaceable, location),
@@ -422,7 +474,6 @@ export const LandscapingQuickPanel: React.FC<Props> = ({
       wasDragRef.current = false;
       return;
     }
-    _savedScrollLeft = scrollContainerRef.current?.scrollLeft ?? 0;
     _savedPage = currentPage;
     doPlace(item);
   };
@@ -444,12 +495,16 @@ export const LandscapingQuickPanel: React.FC<Props> = ({
       key: string,
       item: LandscapingPlaceableType,
       boxNode: React.ReactElement<BoxProps>,
+      // Disabled boxes must not start a drag either, or the item could still be
+      // dragged onto the map and have the placement rejected on drop.
+      disabled = false,
     ) =>
       React.cloneElement(boxNode, {
         key,
         style: { touchAction: "none" },
-        onPointerDown: (e: React.PointerEvent<HTMLDivElement>) =>
-          handleDragStart(e, item),
+        onPointerDown: disabled
+          ? undefined
+          : (e: React.PointerEvent<HTMLDivElement>) => handleDragStart(e, item),
       });
 
     if (effectiveTab === "buds") {
@@ -498,7 +553,7 @@ export const LandscapingQuickPanel: React.FC<Props> = ({
     }
 
     if (effectiveTab === "farmHands") {
-      return Object.keys(farmHands).map((id) => {
+      const boxes = Object.keys(farmHands).map((id) => {
         const image = SUNNYSIDE.achievement.farmHand;
         const item: LandscapingPlaceableType = { name: "FarmHand", id };
         return wrapBox(
@@ -512,6 +567,31 @@ export const LandscapingQuickPanel: React.FC<Props> = ({
           </Box>,
         );
       });
+
+      if (canPlaceBumpkin && state.bumpkin) {
+        const item: LandscapingPlaceableType = {
+          name: "Bumpkin",
+          id: BUMPKIN_PLACEABLE_ID,
+        };
+        // The player comes first, ahead of their farm hands.
+        boxes.unshift(
+          wrapBox(
+            "bumpkin",
+            item,
+            <Box
+              image={SUNNYSIDE.icons.player}
+              onClick={() => handleClick(item)}
+            >
+              <NPCPlaceable
+                parts={state.bumpkin.equipped}
+                width={PIXEL_SCALE * 12}
+              />
+            </Box>,
+          ),
+        );
+      }
+
+      return boxes;
     }
 
     const category = categories.find((c) => c.id === effectiveTab);
@@ -522,18 +602,44 @@ export const LandscapingQuickPanel: React.FC<Props> = ({
       const item: LandscapingPlaceableType = {
         name: name as CollectibleName | BuildingName | ResourceName,
       };
+      // Only one temporary collectible of a name may be on the map at a time
+      // (see placeCollectible), so grey out any that already has a placement
+      // rather than letting the player drag out a copy that gets rejected.
+      const alreadyPlaced =
+        isTemporaryCollectible(name) &&
+        getPlacementGroup(name).some((groupName) =>
+          getCollectiblesAcrossLocations(state, groupName).some(
+            (placed) => !!placed.coordinates,
+          ),
+        );
+
       return wrapBox(
         name,
         item,
         <Box
           count={chestMap[name]}
           image={image}
+          tooltip={getTranslatedItemName(name)}
+          disabled={alreadyPlaced}
+          // Bottom-right cross, so a greyed tile reads as "can't place this"
+          // rather than as a loading or locked state.
+          secondaryImage={alreadyPlaced ? SUNNYSIDE.icons.cancel : undefined}
           onClick={() => handleClick(item)}
         />,
+        alreadyPlaced,
       );
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [effectiveTab, chestMap, buds, petsNFTs, farmHands, now]);
+  }, [
+    effectiveTab,
+    chestMap,
+    buds,
+    petsNFTs,
+    farmHands,
+    canPlaceBumpkin,
+    state.bumpkin,
+    now,
+  ]);
 
   const totalPages = Math.ceil(items.length / MOBILE_ITEMS_PER_PAGE);
   const pagedItems = isMobile
@@ -610,7 +716,8 @@ export const LandscapingQuickPanel: React.FC<Props> = ({
               {/* Item grid */}
               <InnerPanel>
                 <div
-                  ref={scrollContainerRef}
+                  ref={setScrollContainer}
+                  onScroll={handleScroll}
                   className={classNames("flex items-center", {
                     "overflow-x-auto scrollable overflow-y-hidden pb-1":
                       !isMobile,

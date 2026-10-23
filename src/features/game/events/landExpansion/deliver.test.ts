@@ -29,9 +29,9 @@ jest.mock("lib/flags", () => {
   };
 });
 
-// esbuild-runner/jest does not hoist `jest.mock` above imports. Load the
-// flags module and the SUT via require *after* the mock is registered so
-// the SUT binds the jest.fn wrapper rather than the real function.
+// Load the flags module and the SUT via require *after* the mock is
+// registered so the SUT binds the jest.fn wrapper rather than the real
+// function.
 const flags = require("lib/flags") as typeof FlagsModule & {
   hasTimeBasedFeatureAccess: jest.Mock;
 };
@@ -1585,6 +1585,56 @@ describe("deliver", () => {
 
     expect(state.coins).toEqual(160);
   });
+
+  // Victoria's Secretary — +50%/+75%/+100% Coins on Victoria deliveries
+  // (rank 1 == current +50%).
+  it.each([
+    [1, 150],
+    [2, 175],
+    [3, 200],
+  ])(
+    "scales Victoria's Secretary coin bonus at rank %i",
+    (rank, expectedCoins) => {
+      const state = deliverOrder({
+        state: {
+          ...TEST_FARM,
+          bumpkin: {
+            ...INITIAL_BUMPKIN,
+            skills: {
+              "Victoria's Secretary": rank,
+            },
+          },
+          inventory: {
+            Sunflower: new Decimal(60),
+          },
+          delivery: {
+            ...TEST_FARM.delivery,
+            fulfilledCount: 3,
+            orders: [
+              {
+                id: "123",
+                createdAt: 0,
+                readyAt: new Date("2023-10-31T15:00:00Z").getTime(),
+                from: "victoria",
+                items: {
+                  Sunflower: 50,
+                },
+                reward: { coins: 100 },
+              },
+            ],
+          },
+        },
+        action: {
+          id: "123",
+          type: "order.delivered",
+        },
+        createdAt: new Date("2024-05-10T16:00:00Z").getTime(),
+      });
+
+      expect(state.coins).toEqual(expectedCoins);
+    },
+  );
+
   it("add 20% coins bonus if has Forge-Ward Profits skill on Blacksmith's orders with Coins reward", () => {
     const state = deliverOrder({
       state: {
@@ -2697,7 +2747,9 @@ describe("deliver", () => {
     });
 
     expect(state.wardrobe["Basic Hair"]).toEqual(0);
-    expect(state.inventory[getChapterTicket(mockDate)]).toEqual(new Decimal(4));
+    expect(state.inventory[getChapterTicket(mockDate)]).toEqual(
+      new Decimal(TICKET_REWARDS.cornwell),
+    );
   });
 
   it("tracks the bumpkin activity", () => {

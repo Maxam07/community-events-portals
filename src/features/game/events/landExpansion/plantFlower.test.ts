@@ -298,6 +298,65 @@ describe("plantFlower", () => {
     );
   });
 
+  it("records the back-date offset as boostedTime so the progress bar starts empty", () => {
+    const bedIndex = "1";
+
+    const state = plantFlower({
+      state: {
+        ...GAME_STATE,
+        bumpkin: {
+          ...TEST_BUMPKIN,
+          equipped: { ...TEST_BUMPKIN.equipped, hat: "Flower Crown" },
+        },
+        inventory: {
+          "Sunpetal Seed": new Decimal(5),
+          Sunflower: new Decimal(100),
+        },
+      },
+      createdAt: dateNow,
+      action: {
+        type: "flower.planted",
+        id: bedIndex,
+        seed: "Sunpetal Seed",
+        crossbreed: "Sunflower",
+      },
+    });
+
+    const flower = state.flowers.flowerBeds[bedIndex].flower!;
+    const offset = (FLOWER_SEEDS["Sunpetal Seed"].plantSeconds * 1000) / 2;
+
+    // The offset is the DISCOUNT, not growth already done: un-back-dating with
+    // it recovers the real plant time and the real (boosted) grow duration.
+    expect(flower.boostedTime).toEqual(offset);
+    expect(flower.plantedAt + flower.boostedTime!).toEqual(dateNow);
+  });
+
+  it("omits boostedTime when nothing boosts the grow time", () => {
+    const bedIndex = "1";
+
+    const state = plantFlower({
+      state: {
+        ...GAME_STATE,
+        inventory: {
+          "Sunpetal Seed": new Decimal(5),
+          Sunflower: new Decimal(100),
+        },
+      },
+      createdAt: dateNow,
+      action: {
+        type: "flower.planted",
+        id: bedIndex,
+        seed: "Sunpetal Seed",
+        crossbreed: "Sunflower",
+      },
+    });
+
+    const flower = state.flowers.flowerBeds[bedIndex].flower!;
+
+    expect(flower.plantedAt).toEqual(dateNow);
+    expect(flower.boostedTime).toBeUndefined();
+  });
+
   it("reduces flower harvest time in 10% if Flower Fox is built ", () => {
     const seedAmount = new Decimal(5);
 
@@ -420,19 +479,23 @@ describe("getFlowerTime", () => {
     const seed = "Bloom Seed";
     const growSeconds = FLOWER_SEEDS[seed].plantSeconds;
 
-    const { seconds: time } = getFlowerTime(seed, {
-      ...GAME_STATE,
-      collectibles: {
-        "Blossom Hourglass": [
-          {
-            id: "1",
-            createdAt: now,
-            readyAt: now + 4 * 60 * 60 * 1000,
-            coordinates: { x: 0, y: 0 },
-          },
-        ],
+    const { seconds: time } = getFlowerTime(
+      seed,
+      {
+        ...GAME_STATE,
+        collectibles: {
+          "Blossom Hourglass": [
+            {
+              id: "1",
+              createdAt: now,
+              readyAt: now + 4 * 60 * 60 * 1000,
+              coordinates: { x: 0, y: 0 },
+            },
+          ],
+        },
       },
-    });
+      Date.now(),
+    );
 
     expect(time).toEqual(growSeconds * 0.75);
   });
@@ -443,19 +506,23 @@ describe("getFlowerTime", () => {
     const seed = "Bloom Seed";
     const growSeconds = FLOWER_SEEDS[seed].plantSeconds;
 
-    const { seconds: time } = getFlowerTime(seed, {
-      ...GAME_STATE,
-      collectibles: {
-        "Blossom Hourglass": [
-          {
-            id: "1",
-            createdAt: fiveHoursAgo,
-            readyAt: fiveHoursAgo,
-            coordinates: { x: 0, y: 0 },
-          },
-        ],
+    const { seconds: time } = getFlowerTime(
+      seed,
+      {
+        ...GAME_STATE,
+        collectibles: {
+          "Blossom Hourglass": [
+            {
+              id: "1",
+              createdAt: fiveHoursAgo,
+              readyAt: fiveHoursAgo,
+              coordinates: { x: 0, y: 0 },
+            },
+          ],
+        },
       },
-    });
+      Date.now(),
+    );
 
     expect(time).toEqual(growSeconds);
   });
@@ -464,13 +531,17 @@ describe("getFlowerTime", () => {
     const seed = "Bloom Seed";
     const growSeconds = FLOWER_SEEDS[seed].plantSeconds;
 
-    const { seconds: time } = getFlowerTime(seed, {
-      ...GAME_STATE,
-      bumpkin: {
-        ...TEST_BUMPKIN,
-        skills: { "Blooming Boost": 1 },
+    const { seconds: time } = getFlowerTime(
+      seed,
+      {
+        ...GAME_STATE,
+        bumpkin: {
+          ...TEST_BUMPKIN,
+          skills: { "Blooming Boost": 1 },
+        },
       },
-    });
+      Date.now(),
+    );
 
     expect(time).toEqual(growSeconds * 0.9);
   });
@@ -479,15 +550,66 @@ describe("getFlowerTime", () => {
     const seed = "Bloom Seed";
     const growSeconds = FLOWER_SEEDS[seed].plantSeconds;
 
-    const { seconds: time } = getFlowerTime(seed, {
-      ...GAME_STATE,
-      bumpkin: {
-        ...TEST_BUMPKIN,
-        skills: { "Flower Power": 1 },
+    const { seconds: time } = getFlowerTime(
+      seed,
+      {
+        ...GAME_STATE,
+        bumpkin: {
+          ...TEST_BUMPKIN,
+          skills: { "Flower Power": 1 },
+        },
       },
-    });
+      Date.now(),
+    );
 
     expect(time).toEqual(growSeconds * 0.8);
+  });
+
+  describe("upgradeable skill ranks", () => {
+    const seed = "Bloom Seed";
+    const growSeconds = FLOWER_SEEDS[seed].plantSeconds;
+
+    const timeWithSkills = (skills: Record<string, number>) =>
+      getFlowerTime(
+        seed,
+        {
+          ...GAME_STATE,
+          bumpkin: { ...TEST_BUMPKIN, skills },
+        },
+        Date.now(),
+      ).seconds;
+
+    it("applies a 12.5% speed boost with Blooming Boost at rank 2", () => {
+      expect(timeWithSkills({ "Blooming Boost": 2 })).toEqual(
+        growSeconds * 0.875,
+      );
+    });
+
+    it("applies a 15% speed boost with Blooming Boost at rank 3", () => {
+      expect(timeWithSkills({ "Blooming Boost": 3 })).toEqual(
+        growSeconds * 0.85,
+      );
+    });
+
+    it("applies a 30% speed boost with Flower Power at rank 2", () => {
+      expect(timeWithSkills({ "Flower Power": 2 })).toEqual(growSeconds * 0.7);
+    });
+
+    it("applies a 40% speed boost with Flower Power at rank 3", () => {
+      expect(timeWithSkills({ "Flower Power": 3 })).toEqual(growSeconds * 0.6);
+    });
+
+    it("applies a 50% growth debuff with Flowery Abode at rank 1", () => {
+      expect(timeWithSkills({ "Flowery Abode": 1 })).toEqual(growSeconds * 1.5);
+    });
+
+    it("applies a 60% growth debuff with Flowery Abode at rank 2", () => {
+      expect(timeWithSkills({ "Flowery Abode": 2 })).toEqual(growSeconds * 1.6);
+    });
+
+    it("applies a 70% growth debuff with Flowery Abode at rank 3", () => {
+      expect(timeWithSkills({ "Flowery Abode": 3 })).toEqual(growSeconds * 1.7);
+    });
   });
 });
 
@@ -505,19 +627,23 @@ describe("getFlowerTime — SPEED_BOOSTS", () => {
     const seed = "Bloom Seed";
     const growSeconds = FLOWER_SEEDS[seed].plantSeconds;
 
-    const { seconds: time, boostsUsed } = getFlowerTime(seed, {
-      ...GAME_STATE,
-      collectibles: {
-        "Blossom Hourglass": [
-          {
-            id: "1",
-            createdAt: now,
-            readyAt: now + 4 * 60 * 60 * 1000,
-            coordinates: { x: 0, y: 0 },
-          },
-        ],
+    const { seconds: time, boostsUsed } = getFlowerTime(
+      seed,
+      {
+        ...GAME_STATE,
+        collectibles: {
+          "Blossom Hourglass": [
+            {
+              id: "1",
+              createdAt: now,
+              readyAt: now + 4 * 60 * 60 * 1000,
+              coordinates: { x: 0, y: 0 },
+            },
+          ],
+        },
       },
-    });
+      Date.now(),
+    );
 
     expect(time).toEqual(growSeconds);
     expect(boostsUsed.map((b) => b.name)).not.toContain("Blossom Hourglass");
@@ -527,19 +653,23 @@ describe("getFlowerTime — SPEED_BOOSTS", () => {
     const seed = "Bloom Seed";
     const growSeconds = FLOWER_SEEDS[seed].plantSeconds;
 
-    const { seconds: time, boostsUsed } = getFlowerTime(seed, {
-      ...GAME_STATE,
-      collectibles: {
-        "Moth Shrine": [
-          {
-            id: "1",
-            createdAt: now,
-            readyAt: now + 7 * 24 * 60 * 60 * 1000,
-            coordinates: { x: 0, y: 0 },
-          },
-        ],
+    const { seconds: time, boostsUsed } = getFlowerTime(
+      seed,
+      {
+        ...GAME_STATE,
+        collectibles: {
+          "Moth Shrine": [
+            {
+              id: "1",
+              createdAt: now,
+              readyAt: now + 7 * 24 * 60 * 60 * 1000,
+              coordinates: { x: 0, y: 0 },
+            },
+          ],
+        },
       },
-    });
+      Date.now(),
+    );
 
     expect(time).toEqual(growSeconds);
     expect(boostsUsed.map((b) => b.name)).not.toContain("Moth Shrine");
@@ -549,14 +679,23 @@ describe("getFlowerTime — SPEED_BOOSTS", () => {
     const seed = "Bloom Seed";
     const growSeconds = FLOWER_SEEDS[seed].plantSeconds;
 
-    const { seconds: time } = getFlowerTime(seed, {
-      ...GAME_STATE,
-      collectibles: {
-        "Flower Fox": [
-          { id: "1", createdAt: now, readyAt: 0, coordinates: { x: 0, y: 0 } },
-        ],
+    const { seconds: time } = getFlowerTime(
+      seed,
+      {
+        ...GAME_STATE,
+        collectibles: {
+          "Flower Fox": [
+            {
+              id: "1",
+              createdAt: now,
+              readyAt: 0,
+              coordinates: { x: 0, y: 0 },
+            },
+          ],
+        },
       },
-    });
+      Date.now(),
+    );
 
     expect(time).toEqual(growSeconds * 0.9);
   });

@@ -1,9 +1,13 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { isBeetle } from "features/game/types/beetles";
+import { hasFeatureAccess } from "lib/flags";
 import { SUNNYSIDE } from "assets/sunnyside";
 import { GRID_WIDTH_PX, PIXEL_SCALE } from "features/game/lib/constants";
 import type { MachineState } from "features/game/lib/gameMachine";
 import { Context } from "features/game/GameProvider";
 import { useInterpret, useSelector } from "@xstate/react";
+import { useNow } from "lib/utils/hooks/useNow";
+import { PRE_ACTION_TICK_MS } from "features/game/lib/timerDisplay";
 import { capitalize } from "lib/utils/capitalize";
 import {
   animalMachine,
@@ -15,7 +19,10 @@ import {
   getAnimalFavoriteFood,
   getAnimalLevel,
   getBoostedFoodQuantity,
-  isAnimalFood,
+  getFeedItem,
+  isFoodForAnimal,
+  getFeedQuantity,
+  resolveAnimal,
 } from "features/game/lib/animals";
 import classNames from "classnames";
 import { LevelProgress } from "features/game/expansion/components/animals/LevelProgress";
@@ -39,19 +46,20 @@ import Decimal from "decimal.js-light";
 import {
   getBarnDelightCost,
   handleFoodXP,
+  getFeedBatchSize,
   REQUIRED_FOOD_QTY,
 } from "features/game/events/landExpansion/feedAnimal";
 import { getAnimalXP } from "features/game/events/landExpansion/loveAnimal";
 import { isAnimalFeedable } from "features/game/events/landExpansion/buyAnimal";
-import { isCollectibleBuilt } from "features/game/lib/collectibleBuilt";
+import { isAnimalCoveredByGoldenAsset } from "features/game/events/landExpansion/feedAllAnimals";
 import { MutantAnimalModal } from "features/farming/animals/components/MutantAnimalModal";
+import { MutantSparkles } from "features/farming/animals/components/MutantSparkles";
 import { isWearableActive } from "features/game/lib/wearables";
 import { Modal } from "components/ui/Modal";
 import { CloseButtonPanel } from "features/game/components/CloseablePanel";
 import { OuterPanel } from "components/ui/Panel";
 import { SleepingAnimalModal } from "features/barn/components/SleepingAnimalModal";
 import { LockedAnimalModal } from "features/barn/components/LockedAnimalModal";
-import glow from "public/world/glow.png";
 
 export const CHICKEN_EMOTION_ICONS: Record<
   Exclude<TState["value"], "idle" | "needsLove" | "initial" | "sick">,
@@ -114,10 +122,22 @@ export const Chicken: React.FC<{ id: string; disabled: boolean }> = ({
   id,
   disabled,
 }) => {
+  // The Bantam Shrine's -5% feed cost only applies while the shrine is active,
+  // so the required-food display needs a LIVE clock — a mount snapshot would
+  // keep showing the discount after the shrine expired. One tick a minute is
+  // enough for a boost that flips at most a few times a day.
+  const now = useNow({ live: true, intervalMs: PRE_ACTION_TICK_MS });
   const { gameService, selectedItem, shortcutItem } = useContext(Context);
   const { t } = useAppTranslation();
-  const chicken = useSelector(gameService, _chicken(id));
+  const storedChicken = useSelector(gameService, _chicken(id));
   const game = useSelector(gameService, _game);
+  // The animal machine has no access to game state, so every consumer below —
+  // the machine included — is handed the animal with its live windowed wake time
+  // substituted in. Read-only: nothing here writes an animal back.
+  const chicken = useMemo(
+    () => resolveAnimal(storedChicken, game),
+    [storedChicken, game],
+  );
   const inventory = useSelector(gameService, _inventory);
   const chickenService = useInterpret(animalMachine, {
     context: { animal: chicken },
@@ -152,6 +172,8 @@ export const Chicken: React.FC<{ id: string; disabled: boolean }> = ({
   const [showNoMedicine, setShowNoMedicine] = useState(false);
   const [showLockedDetails, setShowLockedDetails] = useState(false);
   const [showFeedXP, setShowFeedXP] = useState(false);
+  // Captured when feeding: a level-up changes what the same feed is worth.
+  const [feedXPAmount, setFeedXPAmount] = useState(0);
   const [showNoFoodSelected, setShowNoFoodSelected] = useState(false);
   const [showLoveItem, setShowLoveItem] = useState<LoveAnimalItem>();
   const [showMutantAnimalModal, setShowMutantAnimalModal] = useState(false);
@@ -174,16 +196,87 @@ export const Chicken: React.FC<{ id: string; disabled: boolean }> = ({
   const { play: playLevelUp } = useSound("level_up");
   const { play: playCureAnimal } = useSound("cure_animal");
 
-  const { foodQuantity: requiredFoodQty } = getBoostedFoodQuantity({
+  const lastSynced = useRef({
+    state: chicken.state,
+    experience: chicken.experience,
+  });
+
+  // Sync the local machine when game state changes underneath it,
+  // e.g. via the Feed All button (bulk feed/cure/claim without a click).
+  useEffect(() => {
+    const prev = lastSynced.current;
+    lastSynced.current = {
+      state: chicken.state,
+      experience: chicken.experience,
+    };
+
+    if (
+      prev.state === chicken.state &&
+      prev.experience === chicken.experience
+    ) {
+      return;
+    }
+
+    const machineState = () => chickenService.getSnapshot().value;
+
+    if (machineState() === "sick" && chicken.state !== "sick") {
+      chickenService.send({ type: "CURE", animal: chicken });
+    }
+
+    // A bulk claim happens without a click — play the same drop animation
+    // and sounds as a manual claim before the sprite transitions.
+    const animateBulkClaim = async (
+      event: "CLAIM_PRODUCE" | "INSTANT_WAKE_UP",
+    ) => {
+      setShowDrops(true);
+      playProduceDrop();
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      playChickenCollect();
+      await new Promise((resolve) => setTimeout(resolve, 900));
+      playLevelUp();
+      chickenService.send({ type: event, animal: chicken });
+      setShowDrops(false);
+    };
+
+    if (machineState() === "ready" && chicken.state === "idle") {
+      animateBulkClaim("CLAIM_PRODUCE");
+    }
+
+    if (
+      ["idle", "happy", "sad"].includes(machineState() as string) &&
+      chicken.state === "idle" &&
+      Date.now() < chicken.awakeAt
+    ) {
+      // Bulk feeding can level an animal to ready and claim its produce in
+      // the same event; INSTANT_WAKE_UP re-derives the machine state from
+      // the animal, which maps an asleep animal to "sleeping".
+      animateBulkClaim("INSTANT_WAKE_UP");
+    }
+
+    if (
+      ["idle", "happy", "sad"].includes(machineState() as string) &&
+      ["happy", "sad", "ready"].includes(chicken.state) &&
+      machineState() !== chicken.state
+    ) {
+      chickenService.send({ type: "FEED", animal: chicken });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chicken.state, chicken.experience]);
+
+  // One click feeds the whole batch that gets the Chicken ready.
+  const feedBatchSize = getFeedBatchSize({ state: game, animal: chicken });
+  const { foodQuantity: quantityPerFeed } = getBoostedFoodQuantity({
     animalType: "Chicken",
     foodQuantity: REQUIRED_FOOD_QTY.Chicken,
     game,
     animal: chicken,
+    now,
   });
+  const requiredFoodQty = quantityPerFeed.mul(feedBatchSize);
 
-  const hasGoldEgg = isCollectibleBuilt({
-    name: "Gold Egg",
-    game,
+  const hasGoldEgg = isAnimalCoveredByGoldenAsset({
+    state: game,
+    animalType: "Chicken",
   });
 
   const hasOracleSyringeEquipped = isWearableActive({
@@ -194,7 +287,11 @@ export const Chicken: React.FC<{ id: string; disabled: boolean }> = ({
   // Check if the chicken has a mutant
   const { name: mutantName } = chicken.reward?.items?.[0] ?? {};
 
+  const hasBeetleFeedingAccess = hasFeatureAccess(game, "BEETLE_FEEDING");
+
   const feedChicken = (item?: InventoryItemName) => {
+    setFeedXPAmount(getAnimalXPEarned(item));
+
     const updatedState = gameService.send({
       type: "animal.fed",
       animal: "Chicken",
@@ -205,7 +302,13 @@ export const Chicken: React.FC<{ id: string; disabled: boolean }> = ({
     setShowFeedXP(true);
     setTimeout(() => setShowFeedXP(false), 700);
 
-    const updatedChicken = updatedState.context.state.henHouse.animals[id];
+    // Resolve before handing it to the machine: the raw record carries the
+    // stale cached `awakeAt`, and the machine's sleep guard has no game state
+    // of its own to re-derive from.
+    const updatedChicken = resolveAnimal(
+      updatedState.context.state.henHouse.animals[id],
+      updatedState.context.state,
+    );
 
     chickenService.send({
       type: "FEED",
@@ -236,7 +339,13 @@ export const Chicken: React.FC<{ id: string; disabled: boolean }> = ({
     setShowLoveItem(item as LoveAnimalItem);
     setTimeout(() => setShowLoveItem(undefined), 700);
 
-    const updatedChicken = updatedState.context.state.henHouse.animals[id];
+    // Resolve before handing it to the machine: the raw record carries the
+    // stale cached `awakeAt`, and the machine's sleep guard has no game state
+    // of its own to re-derive from.
+    const updatedChicken = resolveAnimal(
+      updatedState.context.state.henHouse.animals[id],
+      updatedState.context.state,
+    );
 
     chickenService.send({
       type: "LOVE",
@@ -253,7 +362,13 @@ export const Chicken: React.FC<{ id: string; disabled: boolean }> = ({
       id: chicken.id,
     });
 
-    const updatedChicken = updatedState.context.state.henHouse.animals[id];
+    // Resolve before handing it to the machine: the raw record carries the
+    // stale cached `awakeAt`, and the machine's sleep guard has no game state
+    // of its own to re-derive from.
+    const updatedChicken = resolveAnimal(
+      updatedState.context.state.henHouse.animals[id],
+      updatedState.context.state,
+    );
 
     chickenService.send({
       type: "CLAIM_PRODUCE",
@@ -268,7 +383,13 @@ export const Chicken: React.FC<{ id: string; disabled: boolean }> = ({
       id: chicken.id,
     });
 
-    const updatedChicken = updatedState.context.state.henHouse.animals[id];
+    // Resolve before handing it to the machine: the raw record carries the
+    // stale cached `awakeAt`, and the machine's sleep guard has no game state
+    // of its own to re-derive from.
+    const updatedChicken = resolveAnimal(
+      updatedState.context.state.henHouse.animals[id],
+      updatedState.context.state,
+    );
 
     chickenService.send({
       type: "CURE",
@@ -334,6 +455,10 @@ export const Chicken: React.FC<{ id: string; disabled: boolean }> = ({
 
   const handleClick = async () => {
     if (disabled) return;
+    // A bulk-claim animation is in flight: the sprite still looks awake but
+    // the game-state animal is already asleep, so any feed/claim event would
+    // throw. Ignore clicks until the animation resolves.
+    if (showDrops) return;
 
     const showNoFoodPrompt = async () => {
       setShowNoFoodSelected(true);
@@ -343,7 +468,12 @@ export const Chicken: React.FC<{ id: string; disabled: boolean }> = ({
 
     if (sick) return onSickClick();
 
-    if (needsLove) return onLoveClick();
+    if (needsLove) {
+      if (!hasGoldEgg) return onLoveClick();
+
+      handleShowDetails();
+      return;
+    }
 
     const hasBuffSelected = selectedItem && isAnimalFeedBuffItem(selectedItem);
 
@@ -384,24 +514,42 @@ export const Chicken: React.FC<{ id: string; disabled: boolean }> = ({
       return;
     }
 
-    const hasFoodSelected = selectedItem && isAnimalFood(selectedItem);
-
     if (hasGoldEgg) {
       feedChicken();
       return;
     }
 
+    // Auto-select the favourite food when it is held so a stale selection
+    // (e.g. Hay left over from the barn) never feeds the wrong item.
+    const feedItem = getFeedItem({
+      animal: "Chicken",
+      selectedItem,
+      favouriteFood: favFood,
+      inventory,
+      requiredQty: requiredFoodQty,
+      hasBeetleFeedingAccess,
+    });
+    if (feedItem && feedItem !== selectedItem) {
+      shortcutItem(feedItem);
+    }
+
+    // Without access a Beetle is not food here, so the click falls through to
+    // the no-food prompt instead of an event the reducer would reject.
+    const hasFoodSelected =
+      feedItem &&
+      (isFoodForAnimal("Chicken", feedItem) ||
+        (hasBeetleFeedingAccess && isBeetle(feedItem)));
+
     if (hasFoodSelected) {
-      const foodCount =
-        inventory[selectedItem as AnimalFoodName] ?? new Decimal(0);
-      if (foodCount.lt(requiredFoodQty)) {
+      const foodCount = inventory[feedItem as AnimalFoodName] ?? new Decimal(0);
+      if (foodCount.lt(getFeedQuantity(feedItem, requiredFoodQty))) {
         setShowNotEnoughFood(true);
         await new Promise((resolve) => setTimeout(resolve, 1000));
         setShowNotEnoughFood(false);
         return;
       }
 
-      feedChicken(selectedItem);
+      feedChicken(feedItem);
       return;
     }
 
@@ -412,18 +560,21 @@ export const Chicken: React.FC<{ id: string; disabled: boolean }> = ({
     if (showNoFoodSelected) return t("animal.noFoodMessage");
     if (showNoMedicine) return t("animal.noMedicine");
     if (showNotEnoughFood)
-      return t("animal.notEnoughFood", { amount: requiredFoodQty });
+      return t("animal.notEnoughFood", {
+        amount: getFeedQuantity(selectedItem, requiredFoodQty),
+      });
   };
 
-  const getAnimalXPEarned = () => {
+  const getAnimalXPEarned = (item?: InventoryItemName) => {
     const { foodXp } = handleFoodXP({
       state: game,
       animal: "Chicken",
       level,
-      food: hasGoldEgg ? favFood : (selectedItem as AnimalFoodName),
+      food: hasGoldEgg ? favFood : (item as AnimalFoodName),
     });
 
-    return foodXp;
+    // A Beetle is one per click; anything else is the whole batch.
+    return item && isBeetle(item) ? foodXp : foodXp * feedBatchSize;
   };
 
   const animalImageInfo = () => {
@@ -467,16 +618,19 @@ export const Chicken: React.FC<{ id: string; disabled: boolean }> = ({
     if (needsLove) return chicken.item;
     return favFood;
   };
-  const showRequestBubble = sick || needsLove || (idle && !isLocked);
+  const showRequestBubble =
+    sick || (needsLove && !hasGoldEgg) || (idle && !isLocked && !showDrops);
 
   if (chickenMachineState === "initial") return null;
 
   const level = getAnimalLevel(chicken.experience, "Chicken");
   const xpIndicatorColor =
-    favFood === selectedItem || selectedItem === "Omnifeed" || hasGoldEgg
+    favFood === selectedItem ||
+    selectedItem === "Omnifeed" ||
+    (hasBeetleFeedingAccess && !!selectedItem && isBeetle(selectedItem)) ||
+    hasGoldEgg
       ? "#71e358"
       : "#fff";
-  const xpIndicatorAmount = getAnimalXPEarned();
 
   const { animalXP } = getAnimalXP({
     state: game,
@@ -493,19 +647,6 @@ export const Chicken: React.FC<{ id: string; disabled: boolean }> = ({
           onContinue={() => {
             setShowMutantAnimalModal(false);
             onReadyClick();
-          }}
-        />
-      )}
-
-      {/* Upcoming Mutant Sign */}
-      {mutantName && (
-        <img
-          src={glow}
-          className="absolute animate-pulsate pointer-events-none"
-          style={{
-            bottom: "-6px",
-            maxWidth: "85px",
-            maxHeight: "85px",
           }}
         />
       )}
@@ -556,6 +697,8 @@ export const Chicken: React.FC<{ id: string; disabled: boolean }> = ({
               },
             )}
           />
+          {/* Upcoming Mutant Sign */}
+          {mutantName && <MutantSparkles />}
           {/* Emotion */}
           {!idle && !needsLove && !sick && (
             <img
@@ -661,7 +804,7 @@ export const Chicken: React.FC<{ id: string; disabled: boolean }> = ({
             color: xpIndicatorColor,
           }}
         >
-          {!!xpIndicatorAmount && `+${xpIndicatorAmount}`}
+          {!!feedXPAmount && `+${feedXPAmount}`}
         </span>
       </Transition>
       <Transition

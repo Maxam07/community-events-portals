@@ -11,13 +11,13 @@ import { CloseButtonPanel } from "features/game/components/CloseablePanel";
 import {
   PANEL_NPC_WEARABLES,
   RESTOCK_ATTEMPTS,
-  UNLIMITED_ATTEMPTS_AURA_DISCOUNT_SFL,
-  UNLIMITED_ATTEMPTS_DISCOUNT_AURAS,
+  UNLIMITED_ATTEMPTS_DISCOUNT_SFL,
+  UNLIMITED_ATTEMPTS_DISCOUNT,
   UNLIMITED_ATTEMPTS_SFL,
 } from "../../constants";
 import {
   getUnlimitedAttemptsSfl,
-  hasUnlimitedAttemptsDiscountAura,
+  hasUnlimitedAttemptsDiscount,
 } from "../../lib/Utils";
 import { purchase } from "features/portal/lib/portalUtil";
 import { SUNNYSIDE } from "assets/sunnyside";
@@ -36,7 +36,7 @@ export const NoAttemptsPanel: React.FC = () => {
   const { t } = useAppTranslation();
 
   const { sflBalance, wardrobe } = useSelector(portalService, _purchaseState);
-  const hasAuraDiscount = hasUnlimitedAttemptsDiscountAura(wardrobe);
+  const hasAuraDiscount = hasUnlimitedAttemptsDiscount(wardrobe);
   const unlimitedAttemptsSfl = getUnlimitedAttemptsSfl(wardrobe);
 
   return (
@@ -57,7 +57,7 @@ export const NoAttemptsPanel: React.FC = () => {
         <p className="text-sm mb-2">{t("minigame.youHaveRunOutOfAttempts")}</p>
         <p className="text-sm mb-2">{t("minigame.wouldYouLikeToUnlock")}</p>
         <Label type="info" className="mb-2">
-          {`Hold one of these Auras in your inventory to unlock unlimited attempts for ${UNLIMITED_ATTEMPTS_AURA_DISCOUNT_SFL} FLOWER: ${UNLIMITED_ATTEMPTS_DISCOUNT_AURAS.join(", ")}.`}
+          {`Hold one of these wearables in your inventory to unlock unlimited attempts for ${UNLIMITED_ATTEMPTS_DISCOUNT_SFL} FLOWER: ${UNLIMITED_ATTEMPTS_DISCOUNT.join(", ")}.`}
         </Label>
 
         <div className="flex items-center space-x-1 relative">

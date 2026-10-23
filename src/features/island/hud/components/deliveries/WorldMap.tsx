@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 
-//import worldMap from "assets/map/world_map.png";
-import worldMap from "public/world/colors_island_2026_assets/world_map.png";
+import worldMap from "assets/map/world_map.png";
+import halloween2026WorldMap from "assets/map/halloween_2026_world_map.png";
 
 import { Context } from "features/game/GameProvider";
 import { useAppTranslation } from "lib/i18n/useAppTranslations";
@@ -17,6 +17,7 @@ import { Label } from "components/ui/Label";
 import { isMobile } from "mobile-device-detect";
 import { useSelector } from "@xstate/react";
 import { useTimeBasedFeatureAccess } from "lib/utils/hooks/useTimeBasedFeatureAccess";
+import { hasPlazaAccess } from "features/island/delivery/lib/onboarding";
 
 const showDebugBorders = false;
 
@@ -39,10 +40,12 @@ export const WorldMap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   });
   const hasLevel = (level: number) =>
     meetsLevelRequirement(ascension, { ascension: 0, level });
+  // The plaza opens early for tutorial players with Sunflowers to deliver
+  const plazaAccess = hasPlazaAccess(state);
   const hasFaction = state.faction;
   const canTeleportToFactionHouse = hasLevel(7) && hasFaction;
-  const isColors2026EventActive = useTimeBasedFeatureAccess({
-    featureName: "COLORS_2026_EVENT_FLAG",
+  const isHalloween2026EventActive = useTimeBasedFeatureAccess({
+    featureName: "HALLOWEEN_2026_EVENT_FLAG",
     game: state,
   });
 
@@ -63,9 +66,12 @@ export const WorldMap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   return (
     <OuterPanel className="w-full relative shadow-xl">
-      <img src={worldMap} className="w-full" />
+      <img
+        src={isHalloween2026EventActive ? halloween2026WorldMap : worldMap}
+        className="w-full"
+      />
 
-      {!hasLevel(2) && (
+      {!plazaAccess && (
         <Label
           type="danger"
           className="absolute bottom-2"
@@ -178,16 +184,16 @@ export const WorldMap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           bottom: "20%",
         }}
         className={`flex justify-center items-center ${
-          hasLevel(2) ? "cursor-pointer" : "cursor-not-allowed"
+          plazaAccess ? "cursor-pointer" : "cursor-not-allowed"
         }`}
         onClick={() => {
-          if (!hasLevel(2)) return;
+          if (!plazaAccess) return;
           travel.play();
           navigate("/world/plaza");
           onClose();
         }}
       >
-        {!hasLevel(2) ? (
+        {!plazaAccess ? (
           isMobile ? (
             <img
               src={SUNNYSIDE.icons.lock}
@@ -460,8 +466,7 @@ export const WorldMap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           </span>
         )}
       </div>
-
-      {isColors2026EventActive && (
+      {isHalloween2026EventActive && (
         <div
           style={{
             width: "35%",
@@ -477,7 +482,7 @@ export const WorldMap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           onClick={() => {
             if (!hasLevel(2)) return;
             travel.play();
-            navigate("/world/colors_island_2026");
+            navigate("/world/halloween_island_2026");
             onClose();
           }}
         >
@@ -505,7 +510,7 @@ export const WorldMap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             )
           ) : (
             <span className="map-text text-xxs sm:text-sm">
-              {"Festival of Colors"}
+              {"Halloween Event"}
             </span>
           )}
         </div>

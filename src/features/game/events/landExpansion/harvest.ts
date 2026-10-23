@@ -61,7 +61,12 @@ import {
   type FarmActivityName,
 } from "features/game/types/farmActivity";
 import { isBuffActive } from "features/game/types/buffs";
-import { SKILL_RANKS, getSkillLevel } from "features/game/types/bumpkinSkills";
+import {
+  SKILL_RANKS,
+  getSkillLevel,
+  downgradeChapterCropWeekSkills,
+} from "features/game/types/bumpkinSkills";
+import { CHAPTER_CROP_WEEK_CROP } from "features/game/types/chapterCropWeek";
 import { prngChance } from "lib/prng";
 import { KNOWN_IDS } from "features/game/types";
 import { mfTrack } from "lib/moonforgeAnalytics";
@@ -321,7 +326,13 @@ export function getCropYieldAmount({
 
   const { bumpkin, buds, aoe } = game;
   const updatedAoe = cloneDeep(aoe);
-  const skills = bumpkin?.skills ?? {};
+  // Crystal Leaf (the CHAPTER_CROP_WEEK event crop) ignores upgraded Crops-skill ranks
+  // (base skill still applies) — cap here so every downstream yield/AOE read uses
+  // the neutralised ranks without touching the player's stored skills.
+  const skills =
+    crop === CHAPTER_CROP_WEEK_CROP
+      ? downgradeChapterCropWeekSkills(bumpkin?.skills ?? {})
+      : (bumpkin?.skills ?? {});
   const itemId = KNOWN_IDS[crop];
   const criticalDrop = (
     criticalHitName: CriticalHitName,
@@ -511,7 +522,13 @@ export function getCropYieldAmount({
     boostsUsed.push({ name: "Infernal Pitchfork", value: "+3" });
   }
 
-  if (isTemporaryCollectibleActive({ name: "Legendary Shrine", game })) {
+  if (
+    isTemporaryCollectibleActive({
+      name: "Legendary Shrine",
+      game,
+      now: createdAt,
+    })
+  ) {
     amount += 1;
     boostsUsed.push({ name: "Legendary Shrine", value: "+1" });
   }
@@ -901,11 +918,16 @@ export function getCropYieldAmount({
       name: "Bee Swarm Bonus",
       value: `+${(0.2 * count).toFixed(1)}`,
     });
-    if (skills["Pollen Power Up"]) {
-      perSwarm += 0.1;
+    const pollenPowerUpLevel = getSkillLevel(skills, "Pollen Power Up");
+    if (pollenPowerUpLevel) {
+      const bonus =
+        SKILL_RANKS["Pollen Power Up"].ranks[pollenPowerUpLevel - 1];
+      perSwarm += bonus;
       boostsUsed.push({
         name: "Pollen Power Up",
-        value: `+${(0.1 * count).toFixed(1)}`,
+        // toFixed(2) then back to Number to drop float noise AND trailing
+        // zeros, so rank 1 still reads "+0.1" (not "+0.10").
+        value: `+${Number((bonus * count).toFixed(2))}`,
       });
     }
     amount += perSwarm * count;
@@ -1095,6 +1117,13 @@ export function harvestCropFromPlot({
 
   if (!plot) {
     throw new Error("Plot does not exist");
+  }
+
+  // A lifted plot keeps growing while it sits in the inventory - the pause is
+  // only applied when it is placed back down, so harvesting an unplaced plot
+  // would side-step it entirely.
+  if (plot.x === undefined && plot.y === undefined) {
+    throw new Error("Plot is not placed");
   }
 
   const cropAffectedBy = getAffectedWeather({

@@ -7,6 +7,7 @@ import React, { useContext } from "react";
 
 import * as Auth from "features/auth/lib/Provider";
 import {
+  cacheShortcutItems,
   cacheShortcuts,
   getShortcuts,
 } from "features/farming/hud/lib/shortcuts";
@@ -25,9 +26,15 @@ import {
   getShowTimersSetting,
 } from "features/farming/hud/lib/timers";
 import { initInteractionMetrics } from "./lib/interactionMetrics";
+import { ART_MODE } from "features/auth/lib/authMachine";
+import { installPreviewShareHelper } from "./lib/preview/previewShare";
 
 interface GameContext {
   shortcutItem: (item: InventoryItemName) => void;
+  shortcutItems: (
+    items: InventoryItemName[],
+    options?: { activateFirst?: boolean },
+  ) => void;
   shortcuts: InventoryItemName[];
   selectedItem?: InventoryItemName;
   gameService: MachineInterpreter;
@@ -57,6 +64,15 @@ export const GameProvider: React.FC<React.PropsWithChildren> = ({
   useEffect(() => {
     initInteractionMetrics();
   }, []);
+
+  // ART_MODE / PR previews: expose `__sflPreview.link()` on the console so a
+  // tester can copy a URL that reproduces the state they clicked into.
+  useEffect(() => {
+    if (!ART_MODE) return;
+    return installPreviewShareHelper(
+      () => gameService.getSnapshot().context.state,
+    );
+  }, [gameService]);
 
   useEffect(() => {
     const handleRouteChange = () => {
@@ -107,6 +123,22 @@ export const GameProvider: React.FC<React.PropsWithChildren> = ({
     setShortcuts(items);
   }, []);
 
+  const shortcutItems = useCallback(
+    (
+      items: InventoryItemName[],
+      options?: {
+        activateFirst?: boolean;
+      },
+    ) => {
+      if (items.length === 0) return;
+
+      const newShortcuts = cacheShortcutItems(items, options);
+
+      setShortcuts(newShortcuts);
+    },
+    [],
+  );
+
   const toggleAnimations = () => {
     const newValue = !showAnimations;
 
@@ -134,6 +166,7 @@ export const GameProvider: React.FC<React.PropsWithChildren> = ({
     <Context.Provider
       value={{
         shortcutItem,
+        shortcutItems,
         shortcuts,
         selectedItem,
         gameService,

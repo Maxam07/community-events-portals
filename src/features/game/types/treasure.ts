@@ -30,7 +30,9 @@ export type BeachBountyChapterArtefact =
   | "Coprolite"
   | "Moon Crystal"
   | "Ammonite Shell"
-  | "Salt Dino Egg";
+  | "Salt Dino Egg"
+  | "Otter Pebble"
+  | "Cave Dwellers Artefact";
 
 export type ConsumableTreasure =
   | "Pirate Cake"
@@ -210,6 +212,27 @@ export const SELLABLE_TREASURES: Record<BeachBountyTreasure, SellableTreasure> =
         : {
             from: CHAPTERS["Salt Awakening"].startDate,
             to: CHAPTERS["Salt Awakening"].endDate,
+          }),
+    },
+    "Otter Pebble": {
+      sellPrice: 200,
+      description: "",
+      ...(hasChapterEnded("Ascension Age", Date.now())
+        ? {}
+        : {
+            from: CHAPTERS["Ascension Age"].startDate,
+            to: CHAPTERS["Ascension Age"].endDate,
+          }),
+    },
+    // TODO(Cave Dwellers): placeholder artefact
+    "Cave Dwellers Artefact": {
+      sellPrice: 200,
+      description: "",
+      ...(hasChapterEnded("Cave Dwellers", Date.now())
+        ? {}
+        : {
+            from: CHAPTERS["Cave Dwellers"].startDate,
+            to: CHAPTERS["Cave Dwellers"].endDate,
           }),
     },
   };

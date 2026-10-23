@@ -4,13 +4,13 @@ name: Portal deploy
 on:
   push:
     branches:
-      - festival-of-colors-2026
+      - halloween-portal-2026
 
 jobs:
   deploy:
     concurrency: portal-deploy
     environment: develop
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Get current date
         id: date
@@ -26,7 +26,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "24"
 
       - name: Install Dependencies
         run: yarn install

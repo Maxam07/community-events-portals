@@ -91,7 +91,10 @@ const splitBoundingBox = (boundingBox: BoundingBox, height = 1, width = 1) => {
   }));
 };
 
-function detectWaterCollision(expansions: number, boundingBox: BoundingBox) {
+export function detectWaterCollision(
+  expansions: number,
+  boundingBox: BoundingBox,
+) {
   const expansionBoundingBoxes: BoundingBox[] = new Array(expansions)
     .fill(null)
     .map((_, expansionIndex) => ({
@@ -408,6 +411,27 @@ export const ANIMAL_HOUSE_BOUNDS: Record<
       y: 7,
     },
   },
+  // TODO(Chapter 16): placeholder floor bounds, cloned from the Barn.
+  pigpen: {
+    1: {
+      height: 8,
+      width: 8,
+      x: -4,
+      y: 5,
+    },
+    2: {
+      height: 10,
+      width: 10,
+      x: -5,
+      y: 6,
+    },
+    3: {
+      height: 12,
+      width: 12,
+      x: -6,
+      y: 7,
+    },
+  },
 };
 
 export const NON_COLLIDING_OBJECTS: InventoryItemName[] = [
@@ -420,6 +444,7 @@ export const NON_COLLIDING_OBJECTS: InventoryItemName[] = [
   "Green Field Rug",
   "Fancy Rug",
   "Gaucho Rug",
+  "Salt Rug",
   "Sunflorian Faction Rug",
   "Bumpkin Faction Rug",
   "Goblin Faction Rug",
@@ -475,6 +500,71 @@ export const FURNITURE_OBJECTS: InventoryItemName[] = [
   "Stool",
 ];
 
+/**
+ * Translate a farm-space footprint into the bottom-left layout coordinates the
+ * interior tile masks use. GenesisBlock sits at canvas-centre and `Placeable`
+ * anchors (0, 0) there, so the conversion is +canvas/2 on both axes. Must match
+ * the API translation.
+ */
+const toInteriorLayout = (position: BoundingBox): BoundingBox => ({
+  ...position,
+  x: position.x + INTERIOR_CANVAS.width / 2,
+  y: position.y + INTERIOR_CANVAS.height / 2,
+});
+
+const isOutsideRect = (position: BoundingBox, bounds: BoundingBox) =>
+  position.x < bounds.x ||
+  position.x + position.width > bounds.x + bounds.width ||
+  position.y > bounds.y + bounds.height ||
+  position.y - position.height < bounds.y;
+
+/**
+ * Is this footprint outside the placeable area of `location`? The *bounds* half
+ * of {@link detectCollision}, split out so callers that run their own overlap
+ * pass reuse exactly the same geometry.
+ *
+ * The landscaping commit (`applyArrangement`) is the reason this exists: it
+ * validates a whole desired arrangement at once, so it must ask "is this in
+ * bounds" without also asking "does it hit something", which would flag two
+ * items swapping places.
+ */
+export function isOutOfBounds({
+  state,
+  position,
+  location,
+}: {
+  state: GameState;
+  position: BoundingBox;
+  location: PlaceableLocation;
+}): boolean {
+  switch (location) {
+    case "home":
+      return isOutsideRect(position, HOME_BOUNDS[state.island.type]);
+    case "petHouse":
+      return isOutsideRect(
+        position,
+        PET_HOUSE_BOUNDS[state.petHouse?.level ?? 1],
+      );
+    case "interior":
+      return !isValidInteriorBase(
+        state.island.type,
+        toInteriorLayout(position),
+      );
+    case "level_one": {
+      const { level_one: levelOne, expansion } = state.interior;
+      // An unbuilt floor has no placeable area at all.
+      if (!levelOne || !expansion) return true;
+      return !isValidHomeExpansionBase(expansion, toInteriorLayout(position));
+    }
+    case "farm":
+    default:
+      return detectWaterCollision(
+        state.inventory["Basic Land"]?.toNumber() ?? 3,
+        position,
+      );
+  }
+}
+
 function detectHomeCollision({
   state,
   position,
@@ -484,15 +574,7 @@ function detectHomeCollision({
   position: BoundingBox;
   name: LandscapingPlaceable;
 }) {
-  const bounds = HOME_BOUNDS[state.island.type];
-
-  const isOutside =
-    position.x < bounds.x ||
-    position.x + position.width > bounds.x + bounds.width ||
-    position.y > bounds.y + bounds.height ||
-    position.y - position.height < bounds.y;
-
-  if (isOutside) {
+  if (isOutOfBounds({ state, position, location: "home" })) {
     return true;
   }
 
@@ -542,16 +624,7 @@ function detectPetHouseCollision({
   position: BoundingBox;
   name: LandscapingPlaceable;
 }) {
-  const petHouseLevel = state.petHouse?.level ?? 1;
-  const bounds = PET_HOUSE_BOUNDS[petHouseLevel];
-
-  const isOutside =
-    position.x < bounds.x ||
-    position.x + position.width > bounds.x + bounds.width ||
-    position.y > bounds.y + bounds.height ||
-    position.y - position.height < bounds.y;
-
-  if (isOutside) {
+  if (isOutOfBounds({ state, position, location: "petHouse" })) {
     return true;
   }
 
@@ -732,17 +805,9 @@ function detectInteriorCollision({
   position: BoundingBox;
   name: LandscapingPlaceable;
 }) {
-  // 1. Layout mask — translate Placeable coords → bottom-left layout coords.
-  // GenesisBlock lives at canvas-centre (12, 12) and Placeable anchors
-  // coord (0, 0) there, so the conversion is +canvas/2 on both axes.
-  // Collision and render must use matching fudges — both are 0 right now,
-  // so adjust them in lockstep if alignment drifts.
-  const layoutPosition = {
-    ...position,
-    x: position.x + INTERIOR_CANVAS.width / 2,
-    y: position.y + INTERIOR_CANVAS.height / 2,
-  };
-  if (!isValidInteriorBase(state.island.type, layoutPosition)) {
+  // 1. Layout mask. Collision and render must use matching fudges — both are 0
+  // right now, so adjust them in lockstep if alignment drifts.
+  if (isOutOfBounds({ state, position, location: "interior" })) {
     return true;
   }
 
@@ -800,21 +865,11 @@ function detectLevelOneCollision({
   position: BoundingBox;
   name: LandscapingPlaceable;
 }) {
-  const levelOne = state.interior.level_one;
-  const expansion = state.interior.expansion;
-  if (!levelOne || !expansion) {
+  if (isOutOfBounds({ state, position, location: "level_one" })) {
     return true;
   }
-
-  // Match detectInteriorCollision's translation (no fudge currently).
-  const layoutPosition = {
-    ...position,
-    x: position.x + INTERIOR_CANVAS.width / 2,
-    y: position.y + INTERIOR_CANVAS.height / 2,
-  };
-  if (!isValidHomeExpansionBase(expansion, layoutPosition)) {
-    return true;
-  }
+  // isOutOfBounds already rejected an unbuilt floor.
+  const levelOne = state.interior.level_one!;
 
   // Same overlap policy as the ground floor — see detectInteriorCollision
   // for rationale. Rugs / tiles can still stack freely.
@@ -899,6 +954,38 @@ export type AOEItemName =
   | "Queen Cornelia"
   | "Gnome";
 
+// Base (no skill) footprint = the original 3x3 rectangle, shared by the three
+// scarecrow-type placeables before any rank skill widens it.
+export const BASE_AOE_EXTENT: AOEExtent = { xLeft: 1, xRight: 1, depth: 3 };
+
+/**
+ * Rank-aware AOE footprint for a placeable. The Chonky Scarecrow / Horror Mike /
+ * Laurie's Gains skills widen their placeable's area per rank (7x7 / 8x8 / 9x9);
+ * every other item keeps the base 3x3. Shared by the gameplay gate (isWithinAOE)
+ * and the landscaping overlay so the drawn area can't drift from the boosted one.
+ */
+export function getAOEExtent(
+  AOEItemName: AOEItemName,
+  skills: GameState["bumpkin"]["skills"],
+): AOEExtent {
+  let rankSkill: "Chonky Scarecrow" | "Horror Mike" | "Laurie's Gains";
+  switch (AOEItemName) {
+    case "Basic Scarecrow":
+      rankSkill = "Chonky Scarecrow";
+      break;
+    case "Scary Mike":
+      rankSkill = "Horror Mike";
+      break;
+    case "Laurie the Chuckle Crow":
+      rankSkill = "Laurie's Gains";
+      break;
+    default:
+      return BASE_AOE_EXTENT;
+  }
+  const level = getSkillLevel(skills, rankSkill);
+  return level ? SKILL_RANKS[rankSkill].ranks[level - 1] : BASE_AOE_EXTENT;
+}
+
 /**
  * Detects whether an item is within the area of effect of a placeable with AOE.
  * @param AOEItem Item which has an area of effect
@@ -934,33 +1021,11 @@ export function isWithinAOE(
     return Math.abs(dx) <= distance && Math.abs(dy) <= distance;
   };
 
-  // Base (no skill) footprint reproduces the original 3x3 rectangle. The rank
-  // skill (Chonky Scarecrow / Horror Mike / Laurie's Gains) widens it per rank.
-  const BASE_AOE: AOEExtent = { xLeft: 1, xRight: 1, depth: 3 };
-  const aoeExtent = (): AOEExtent => {
-    let rankSkill: "Chonky Scarecrow" | "Horror Mike" | "Laurie's Gains";
-    switch (AOEItemName) {
-      case "Basic Scarecrow":
-        rankSkill = "Chonky Scarecrow";
-        break;
-      case "Scary Mike":
-        rankSkill = "Horror Mike";
-        break;
-      case "Laurie the Chuckle Crow":
-        rankSkill = "Laurie's Gains";
-        break;
-      default:
-        return BASE_AOE;
-    }
-    const level = getSkillLevel(skills, rankSkill);
-    return level ? SKILL_RANKS[rankSkill].ranks[level - 1] : BASE_AOE;
-  };
-
   switch (AOEItemName) {
     case "Basic Scarecrow":
     case "Scary Mike":
     case "Laurie the Chuckle Crow": {
-      const e = aoeExtent();
+      const e = getAOEExtent(AOEItemName, skills);
       return isWithinRectangle(
         { x: x - e.xLeft, y: y - height, height, width },
         {

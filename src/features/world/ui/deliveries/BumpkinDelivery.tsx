@@ -1,5 +1,7 @@
 import type { NPCName } from "lib/npcs";
 import React, { useContext, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router";
+import { gameAnalytics } from "lib/gameAnalytics";
 import { Label } from "components/ui/Label";
 import { SUNNYSIDE } from "assets/sunnyside";
 import { Context } from "features/game/GameProvider";
@@ -58,6 +60,7 @@ import {
 import { getBumpkinHoliday } from "lib/utils/getSeasonWeek";
 import { SquareIcon } from "components/ui/SquareIcon";
 import { formatNumber } from "lib/utils/formatNumber";
+import { BoostsDisplay } from "components/ui/layouts/BoostsDisplay";
 import {
   getAscensionLevel,
   levelRequirementToTotal,
@@ -101,12 +104,15 @@ const OrderCard: React.FC<{
   const { t } = useAppTranslation();
   const { holiday } = getBumpkinHoliday({ now });
   const isHoliday = holiday === new Date(now).toISOString().split("T")[0];
+  const [showTicketBoosts, setShowTicketBoosts] = useState(false);
+  const ticketBoostsAnchorRef = useRef<HTMLDivElement>(null);
 
-  const { amount: baseTickets } = generateDeliveryTickets({
-    game,
-    npc: order.from,
-    now,
-  });
+  const { amount: baseTickets, boostsUsed: ticketBoostsUsed } =
+    generateDeliveryTickets({
+      game,
+      npc: order.from,
+      now,
+    });
   const tickets = isHoliday && !isTicketNPC(order.from) ? 0 : baseTickets;
   // Hide ticket count on frozen quest orders (holiday) to avoid mixed messaging
   const ticketDisplay =
@@ -240,7 +246,38 @@ const OrderCard: React.FC<{
                       )}
                       {!!ticketDisplay && (
                         <div className="flex items-center space-x-3 mr-1">
-                          <div className="flex items-center">
+                          <div
+                            ref={ticketBoostsAnchorRef}
+                            className={classNames("flex items-center", {
+                              "cursor-pointer": ticketBoostsUsed.length > 0,
+                            })}
+                            role={
+                              ticketBoostsUsed.length > 0 ? "button" : undefined
+                            }
+                            tabIndex={
+                              ticketBoostsUsed.length > 0 ? 0 : undefined
+                            }
+                            aria-expanded={
+                              ticketBoostsUsed.length > 0
+                                ? showTicketBoosts
+                                : undefined
+                            }
+                            onClick={(e) => {
+                              if (ticketBoostsUsed.length === 0) return;
+                              e.stopPropagation();
+                              setShowTicketBoosts((prev) => !prev);
+                            }}
+                            onKeyDown={(e) => {
+                              if (
+                                ticketBoostsUsed.length === 0 ||
+                                (e.key !== "Enter" && e.key !== " ")
+                              )
+                                return;
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setShowTicketBoosts((prev) => !prev);
+                            }}
+                          >
                             <span className="text-xs mx-1">
                               {ticketDisplay}
                             </span>
@@ -248,6 +285,18 @@ const OrderCard: React.FC<{
                               src={ITEM_DETAILS[getChapterTicket(now)].image}
                               className="h-4 w-auto"
                             />
+                            {ticketBoostsUsed.length > 0 &&
+                              showTicketBoosts && (
+                                <BoostsDisplay
+                                  boosts={ticketBoostsUsed}
+                                  show={showTicketBoosts}
+                                  state={game}
+                                  onClick={() => setShowTicketBoosts(false)}
+                                  anchorRef={ticketBoostsAnchorRef}
+                                  portalAlign="right"
+                                  portalPlacement="auto"
+                                />
+                              )}
                           </div>
                         </div>
                       )}
@@ -421,6 +470,23 @@ export const Gifts: React.FC<{
     )
     .sort((a, b) => getKeys(FLOWERS).indexOf(a) - getKeys(FLOWERS).indexOf(b));
 
+  // No favoriting step: the shortlist is derived from this NPC's own gift
+  // history (most recent first), so it's populated automatically the moment
+  // the player has gifted them anything.
+  const [recentFlowers, setRecentFlowers] = useState<FlowerName[]>(() =>
+    getRecentGiftFlowers(name),
+  );
+  const recentOwnedFlowers = recentFlowers.filter((flower) =>
+    flowers.includes(flower),
+  );
+  const otherFlowers = flowers.filter(
+    (flower) => !recentOwnedFlowers.includes(flower),
+  );
+
+  const onFlowerClick = (flower: FlowerName) => {
+    setSelected(flower);
+  };
+
   const onGift = async () => {
     const previous = game.npcs?.[name]?.friendship?.points ?? 0;
     const state = gameService.send("flowers.gifted", {
@@ -430,6 +496,11 @@ export const Gifts: React.FC<{
 
     const difference =
       (state.context.state.npcs?.[name]?.friendship?.points ?? 0) - previous;
+
+    if (selected) {
+      const updated = recordRecentGiftFlower(name, selected);
+      setRecentFlowers(updated);
+    }
 
     if (BUMPKIN_FLOWER_BONUSES[name]?.[selected as FlowerName]) {
       setMessage(
@@ -525,17 +596,52 @@ export const Gifts: React.FC<{
           <p className="text-xs mb-2">{`${t("bumpkin.delivery.noFlowers")}`}</p>
         )}
         {flowers.length > 0 && (
-          <div className="flex w-full flex-wrap mb-2">
-            {flowers.map((flower) => (
-              <Box
-                key={flower}
-                onClick={() => setSelected(flower as FlowerName)}
-                image={ITEM_DETAILS[flower].image}
-                isSelected={selected === flower}
-                count={game.inventory[flower]}
-              />
-            ))}
-          </div>
+          <>
+            {recentOwnedFlowers.length > 0 && (
+              <>
+                <Label
+                  type="default"
+                  className="mb-1 ml-1"
+                  icon={SUNNYSIDE.icons.stopwatch}
+                >
+                  {t("bumpkin.delivery.recentlyGifted")}
+                </Label>
+                <div className="flex w-full flex-wrap mb-2">
+                  {recentOwnedFlowers.map((flower) => (
+                    <Box
+                      key={flower}
+                      onClick={() => onFlowerClick(flower)}
+                      image={ITEM_DETAILS[flower].image}
+                      secondaryImage={
+                        BUMPKIN_FLOWER_BONUSES[name]?.[flower]
+                          ? lightning
+                          : undefined
+                      }
+                      isSelected={selected === flower}
+                      count={game.inventory[flower]}
+                    />
+                  ))}
+                </div>
+                <div className="border-t border-brown-600 mb-2 w-full" />
+              </>
+            )}
+            <div className="flex w-full flex-wrap mb-2">
+              {otherFlowers.map((flower) => (
+                <Box
+                  key={flower}
+                  onClick={() => onFlowerClick(flower)}
+                  image={ITEM_DETAILS[flower].image}
+                  secondaryImage={
+                    BUMPKIN_FLOWER_BONUSES[name]?.[flower]
+                      ? lightning
+                      : undefined
+                  }
+                  isSelected={selected === flower}
+                  count={game.inventory[flower]}
+                />
+              ))}
+            </div>
+          </>
         )}
       </InnerPanel>
 
@@ -594,6 +700,42 @@ function acknowledgeGiftInfoRead() {
 
 function hasReadGiftInfo() {
   return !!localStorage.getItem(LOCAL_STORAGE_KEY);
+}
+
+// Recent gift flowers are a purely client-side UI convenience (a quick-pick
+// shortlist in the gift flower grid, derived from what the player already
+// gave this NPC - no manual favoriting step) - stored in localStorage rather
+// than game state, so no server-side schema/event is needed for this.
+export const MAX_RECENT_GIFT_FLOWERS = 3;
+const recentGiftFlowersKey = (npc: NPCName) =>
+  `recent-gift-flowers.${host}-${window.location.pathname}.${npc}`;
+
+function getRecentGiftFlowers(npc: NPCName): FlowerName[] {
+  try {
+    const raw = localStorage.getItem(recentGiftFlowersKey(npc));
+    if (!raw) return [];
+
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as FlowerName[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+// Moves `flower` to the front of this NPC's recent list (de-duped), capped
+// at MAX_RECENT_GIFT_FLOWERS, and persists the result.
+function recordRecentGiftFlower(
+  npc: NPCName,
+  flower: FlowerName,
+): FlowerName[] {
+  const previous = getRecentGiftFlowers(npc);
+  const updated = [flower, ...previous.filter((f) => f !== flower)].slice(
+    0,
+    MAX_RECENT_GIFT_FLOWERS,
+  );
+
+  localStorage.setItem(recentGiftFlowersKey(npc), JSON.stringify(updated));
+  return updated;
 }
 const BumpkinGiftBar: React.FC<{
   game: GameState;
@@ -741,6 +883,11 @@ export const BumpkinDelivery: React.FC<Props> = ({ onClose, npc }) => {
   const [showFlowers, setShowFlowers] = useState(false);
   const [showSkipDialog, setShowSkipDialog] = useState(false);
   const [gift, setGift] = useState<Airdrop>();
+  // Tutorial: after the first-ever delivery the player is told what to do
+  // next - head home and spend the coins on an expansion.
+  const [firstDeliveryFulfilled, setFirstDeliveryFulfilled] = useState(false);
+
+  const navigate = useNavigate();
 
   const delivery = game.delivery.orders.find((order) => order.from === npc);
 
@@ -779,10 +926,20 @@ export const BumpkinDelivery: React.FC<Props> = ({ onClose, npc }) => {
   const isHoliday = holiday === today;
 
   const deliver = () => {
+    // Tutorial: the first delivery is the new player's first coin task.
+    const isFirstDelivery = (game.delivery.fulfilledCount ?? 0) === 0;
+
     gameService.send("order.delivered", {
       id: delivery?.id,
       friendship: true,
     });
+
+    if (isFirstDelivery) {
+      gameAnalytics.trackMilestone({
+        event: "Tutorial:FirstDeliveryCompleted",
+      });
+      setFirstDeliveryFulfilled(true);
+    }
   };
 
   const hasDelivery = getKeys(delivery?.items ?? {}).every((name) => {
@@ -876,6 +1033,30 @@ export const BumpkinDelivery: React.FC<Props> = ({ onClose, npc }) => {
   const hasClaimedBonus =
     !!completedAt &&
     new Date(completedAt).toISOString().substring(0, 10) === dateKey;
+
+  if (firstDeliveryFulfilled) {
+    return (
+      <InnerPanel>
+        <div className="p-2">
+          <div className="flex justify-between items-center mb-2">
+            <Label type="success" icon={coinsImg}>
+              {t("firstDelivery.title")}
+            </Label>
+            {onClose && (
+              <img
+                src={SUNNYSIDE.icons.close}
+                className="h-7 cursor-pointer"
+                onClick={onClose}
+              />
+            )}
+          </div>
+          <p className="text-sm mb-2">{t("firstDelivery.coins")}</p>
+          <p className="text-sm mb-1">{t("firstDelivery.expand")}</p>
+        </div>
+        <Button onClick={() => navigate("/")}>{t("firstDelivery.home")}</Button>
+      </InnerPanel>
+    );
+  }
 
   if (gift) {
     return (

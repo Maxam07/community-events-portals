@@ -33,6 +33,12 @@ import classNames from "classnames";
 import type { BuildingName } from "features/game/types/buildings";
 import { SUNNYSIDE } from "assets/sunnyside";
 import { Label } from "components/ui/Label";
+import { isCollectible } from "features/game/events/landExpansion/garbageSold";
+import {
+  getCollectiblesAcrossLocations,
+  getPlacementGroup,
+  isTemporaryCollectible,
+} from "features/game/lib/collectibleBuilt";
 import { useAppTranslation } from "lib/i18n/useAppTranslations";
 import {
   BUSH_VARIANTS,
@@ -67,6 +73,8 @@ import { NPCPlaceable } from "features/island/bumpkin/components/NPC";
 import { FarmHandDetails } from "components/ui/layouts/FarmHandDetails";
 import { getBudImage } from "lib/buds/types";
 import { InventoryFilters } from "./InventoryFilters";
+import { KNOWN_IDS } from "features/game/types";
+import { useMarketplaceTradeables } from "features/marketplace/lib/useMarketplaceTradeables";
 
 export const ITEM_ICONS: (
   season: TemperateSeasonName,
@@ -102,6 +110,7 @@ interface PanelContentProps {
   onPlace?: (name: LandscapingPlaceable) => void;
   onPlaceNFT?: (id: string, nft: NFTName) => void;
   onPlaceFarmHand?: (id: string) => void;
+  onOpenMarketplace?: () => void;
   isSaving?: boolean;
 }
 
@@ -110,6 +119,7 @@ const PanelContent: React.FC<PanelContentProps> = ({
   onPlace,
   onPlaceNFT,
   onPlaceFarmHand,
+  onOpenMarketplace,
   selectedChestItem,
   closeModal,
   state,
@@ -198,6 +208,19 @@ const PanelContent: React.FC<PanelContentProps> = ({
     );
   }
 
+  // Only one temporary collectible of a given name may be on the map at a time -
+  // a second copy merges into the same boost window and is simply wasted. The
+  // reducer rejects it either way; catching it here means the player is told why
+  // instead of dragging an item out and having the placement bounce.
+  const isAlreadyPlaced =
+    isCollectible(selectedChestItem.name) &&
+    isTemporaryCollectible(selectedChestItem.name) &&
+    getPlacementGroup(selectedChestItem.name).some((groupName) =>
+      getCollectiblesAcrossLocations(state, groupName).some(
+        (placed) => !!placed.coordinates,
+      ),
+    );
+
   return (
     <InventoryItemDetails
       game={state}
@@ -205,13 +228,23 @@ const PanelContent: React.FC<PanelContentProps> = ({
         item: selectedChestItem.name,
       }}
       properties={{
-        showOpenSeaLink: true,
+        onMarketplaceClick: onOpenMarketplace,
       }}
       actionView={
         onPlace && (
-          <Button onClick={handlePlace} disabled={isSaving}>
-            {isSaving ? t("saving") : t("place.map")}
-          </Button>
+          <div className="flex flex-col gap-1">
+            {isAlreadyPlaced && (
+              <Label type="danger" icon={SUNNYSIDE.icons.stopwatch}>
+                {t("alreadyPlaced.temporaryCollectible")}
+              </Label>
+            )}
+            <Button
+              onClick={handlePlace}
+              disabled={isSaving || isAlreadyPlaced}
+            >
+              {isSaving ? t("saving") : t("place.map")}
+            </Button>
+          </div>
         )
       }
     />
@@ -227,6 +260,7 @@ interface Props {
   onPlaceNFT?: (id: string, nft: NFTName) => void;
   onPlaceFarmHand?: (id: string) => void;
   onDepositClick?: () => void;
+  onOpenMarketplace?: (name: CollectibleName) => void;
   isSaving?: boolean;
   location?: PlaceableLocation;
 }
@@ -241,11 +275,13 @@ export const Chest: React.FC<Props> = ({
   onPlaceNFT,
   onPlaceFarmHand,
   onDepositClick,
+  onOpenMarketplace,
   location,
 }: Props) => {
   const divRef = useRef<HTMLDivElement>(null);
   const [search, setSearch] = useState("");
   const [activeCategories, setActiveCategories] = useState<string[]>([]);
+  const { isTradeable } = useMarketplaceTradeables();
 
   const toggleCategory = (id: string) =>
     setActiveCategories((prev) =>
@@ -315,6 +351,20 @@ export const Chest: React.FC<Props> = ({
   };
 
   const selectedChestItem = getSelectedChestItems();
+
+  const selectedCollectible =
+    selectedChestItem && collectibles[selectedChestItem.name as CollectibleName]
+      ? (selectedChestItem.name as CollectibleName)
+      : undefined;
+  const openMarketplace =
+    onOpenMarketplace &&
+    selectedCollectible &&
+    isTradeable({
+      collection: "collectibles",
+      id: KNOWN_IDS[selectedCollectible],
+    })
+      ? () => onOpenMarketplace(selectedCollectible)
+      : undefined;
 
   const handleItemClick = (item: LandscapingPlaceableType) => {
     onSelect(item);
@@ -436,6 +486,7 @@ export const Chest: React.FC<Props> = ({
             onPlace={onPlace}
             onPlaceNFT={onPlaceNFT}
             onPlaceFarmHand={onPlaceFarmHand}
+            onOpenMarketplace={openMarketplace}
             isSaving={isSaving}
             buds={buds}
             pets={petsNFTs}

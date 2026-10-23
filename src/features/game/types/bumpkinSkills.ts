@@ -90,10 +90,25 @@ import saltySeas from "assets/icons/skill_icons/salty_seas.webp";
 import seaBlessed from "assets/icons/skill_icons/sea_blessed.webp";
 import speedyAging from "assets/icons/skill_icons/speedy_aging.webp";
 import wideRakes from "assets/icons/skill_icons/wide_rakes.webp";
+import beetleNest from "assets/icons/skill_icons/beetle_nest.webp";
+import fungalHarvest from "assets/icons/skill_icons/fungal_harvest.webp";
+import leanCompost from "assets/icons/skill_icons/lean_compost.webp";
+import muddyBounty from "assets/icons/skill_icons/muddy_bounty.webp";
+import mushroomBloom from "assets/icons/skill_icons/mushroom_bloom.webp";
+import mycoBinSmall from "assets/icons/skill_icons/myco_bin_small.webp";
+import rapidMycelium from "assets/icons/skill_icons/rapid_mycelium.webp";
+import rareBreeds from "assets/icons/skill_icons/rare_breeds.webp";
+import sturdyDrill from "assets/icons/skill_icons/sturdy_drill.webp";
+import sturdyShovel from "assets/icons/skill_icons/sturdy_shovel.webp";
+import toolHoarder from "assets/icons/skill_icons/tool_hoarder.webp";
+import twinBeetles from "assets/icons/skill_icons/twin_beetles.webp";
 import xpIcon from "assets/icons/xp.png";
 import type { NPCName } from "lib/npcs";
 import type { BuffLabel } from ".";
 import type { ToolName } from "./craftables";
+import type { TreasureToolName } from "./tools";
+import type { BeetleName } from "./beetles";
+import { OIL_DRILL_WOOL_BY_RANK } from "./oilDrill";
 
 export type BumpkinSkillName =
   | "Green Thumb"
@@ -138,7 +153,8 @@ export type BumpkinRevampSkillTree =
   | "Bees & Flowers"
   | "Machinery"
   | "Compost"
-  | "Aging";
+  | "Aging"
+  | "Cave";
 
 export type BumpkinSkill = {
   name: BumpkinSkillName;
@@ -161,11 +177,27 @@ export type SkillUpgrade = {
   effect: SkillRankEffect;
 };
 
+// Skill points charged for a single rank-up, keyed on the skill's tier.
+const UPGRADE_POINTS_BY_TIER: Record<BumpkinSkillTier, number> = {
+  1: 1,
+  2: 3,
+  3: 6,
+};
+
 // Cost of a single rank-up for a skill of the given tier (flat per upgrade).
 export const getSkillUpgradeCost = (tier: BumpkinSkillTier) => ({
   shards: tier,
-  points: tier * 3,
+  points: UPGRADE_POINTS_BY_TIER[tier],
 });
+
+// Same-tree tier that must be unlocked (via getUnlockedTierForTree) to buy the
+// rank-up FROM `currentRank`. Each rank demands one more tier of tree progression
+// beyond the skill's own tier, capped at the max tier (3). So a Tier 1 skill needs
+// Tier 2 for Rank 2 and Tier 3 for Rank 3; Tier 2/3 skills need Tier 3 for any rank.
+export const getSkillUpgradeTierRequirement = (
+  tier: BumpkinSkillTier,
+  currentRank: number,
+): BumpkinSkillTier => Math.min(3, tier + currentRank) as BumpkinSkillTier;
 
 // Current rank of a skill: 0 = not owned, otherwise 1..maxLevel (the rank is
 // stored directly as the skill's value in `bumpkin.skills`). Clamped to a valid
@@ -189,7 +221,11 @@ export type AOEExtent = { xLeft: number; xRight: number; depth: number };
 
 // Items whose restock amount an upgradeable skill can raise — tools (More Axes /
 // More Picks) plus the two fruit seeds boosted by Crime Fruit.
-export type StockBoostName = ToolName | "Tomato Seed" | "Lemon Seed";
+export type StockBoostName =
+  | ToolName
+  | TreasureToolName
+  | "Tomato Seed"
+  | "Lemon Seed";
 
 // Per-rank effect magnitudes for an upgradeable skill, stored inline on
 // the skill's `upgrade.effect` in BUMPKIN_REVAMP_SKILL_TREE (single source of
@@ -201,7 +237,8 @@ export type SkillRankEffect =
   | { kind: "coinBonus"; ranks: readonly [number, number, number] } // fraction: 0.3 = +30%
   | { kind: "dropChance"; ranks: readonly [number, number, number] } // inner prngChance arg
   | { kind: "chance"; ranks: readonly [number, number, number] } // prngChance percent arg
-  | { kind: "costMultiplier"; ranks: readonly [number, number, number] } // multiplier on a coin cost
+  | { kind: "costMultiplier"; ranks: readonly [number, number, number] } // multiplier on a coin or resource cost
+  | { kind: "flatTimeBonus"; ranks: readonly [number, number, number] } // ms shaved off an in-flight production (e.g. composter speed up)
   | {
       kind: "stockBonus";
       ranks: Partial<Record<StockBoostName, readonly [number, number, number]>>;
@@ -219,8 +256,16 @@ export type SkillRankEffect =
   | { kind: "multiplier"; ranks: readonly [number, number, number] } // multiplier on a collectible's base effect (e.g. 2x/3x/4x)
   | { kind: "dailyLimit"; ranks: readonly [number, number, number] } // flat additions to the daily fishing reel limit
   | { kind: "xpBonus"; ranks: readonly [number, number, number] } // fraction: 0.2 = +20% (e.g. Bumpkin XP from fish)
+  | { kind: "yieldBonus"; ranks: readonly [number, number, number] } // fraction: 0.1 = +10% of a produce amount (e.g. Truffles per claim)
   | { kind: "timeReduction"; ranks: readonly [number, number, number] } // fraction 0..1 shaved off a cooking time (0.3 = -30%)
   | { kind: "flatDebuff"; ranks: readonly [number, number, number] } // a debuff magnitude that shrinks with rank (e.g. wood penalty 1/0.5/0)
+  | { kind: "oilReduction"; ranks: readonly [number, number, number] } // fraction subtracted from the crop-machine oil-consumption multiplier (0.1 = -10%)
+  | { kind: "flatBonus"; ranks: readonly [number, number, number] } // a flat per-rank quantity (queue/plot additions, or an absolute ingredient amount)
+  | {
+      kind: "growthWithOilDebuff";
+      growth: readonly [number, number, number]; // crop-machine growth-time multiplier for the boosted seed
+      oilPenalty: readonly [number, number, number]; // fraction ADDED to the crop-machine oil consumption per hour
+    }
   | {
       kind: "yieldWithDebuff";
       buff: readonly [number, number, number];
@@ -240,6 +285,45 @@ export type SkillRankEffect =
       kind: "doubleNom";
       food: readonly [number, number, number]; // guaranteed extra food from cooking
       ingredients: readonly [number, number, number]; // ingredient-cost multiplier debuff (2x/3x/4x)
+    }
+  | { kind: "flatReduction"; ranks: readonly [number, number, number] } // flat amount subtracted from a cost (e.g. greenhouse Oil usage 1/1.5/2)
+  | {
+      kind: "yieldWithOilDebuff";
+      yield: readonly [number, number, number]; // extra greenhouse produce yield
+      oilMultiplier: readonly [number, number, number]; // Oil-usage multiplier debuff (2x/3x/4x)
+    }
+  | { kind: "productionRate"; ranks: readonly [number, number, number] } // fraction ADDED to the beehive honey production rate (0.1 = +0.1 on the 1.0 base)
+  | {
+      kind: "rateWithGrowthDebuff";
+      rate: readonly [number, number, number]; // fraction ADDED to the honey production rate
+      growth: readonly [number, number, number]; // flower growth-time multiplier debuff (1.5 = +50%)
+    }
+  | {
+      kind: "costWithDebuff";
+      buff: readonly [number, number, number]; // feed-cost multiplier for the favoured animal
+      debuff: readonly [number, number, number]; // feed-cost multiplier for every other animal
+    }
+  | {
+      kind: "xpWithFeedDebuff";
+      xp: readonly [number, number, number]; // animal-XP multiplier from feed
+      feed: readonly [number, number, number]; // feed-cost multiplier debuff
+    }
+  | {
+      kind: "beetleRarity";
+      // Cave Beetle rarity weights (percent, summing to 100) per rank.
+      ranks: readonly [
+        Record<BeetleName, number>,
+        Record<BeetleName, number>,
+        Record<BeetleName, number>,
+      ];
+    }
+  | {
+      kind: "sicknessWithSpread";
+      sickness: readonly [number, number, number]; // multiplier on the whole sickness chance
+      // Multiplier on the per-sick-animal spread term, applied BEFORE it is added
+      // to the base chance. Rank 1 is a neutral 1, so it reproduces the original
+      // "halve everything" behaviour; only ranks 2/3 shrink the spread.
+      spread: readonly [number, number, number];
     };
 
 // Shared AOE footprint progression — Chonky Scarecrow / Horror Mike / Laurie's
@@ -930,7 +1014,7 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
     disabled: false,
     upgrade: {
       maxLevel: 3,
-      effect: { kind: "flatDebuff", ranks: [1, 0.75, 0.5] },
+      effect: { kind: "flatDebuff", ranks: [1, 0.9, 0.8] },
     },
     requirements: {
       points: 1,
@@ -980,7 +1064,7 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
     tree: "Fruit Patch",
     upgrade: {
       maxLevel: 3,
-      effect: { kind: "additiveYield", ranks: [1, 1.5, 2] },
+      effect: { kind: "additiveYield", ranks: [1, 1.25, 1.5] },
     },
     requirements: {
       points: 2,
@@ -1332,7 +1416,7 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
     tree: "Trees",
     upgrade: {
       maxLevel: 3,
-      effect: { kind: "chance", ranks: [15, 25, 40] } as const,
+      effect: { kind: "chance", ranks: [15, 25, 35] } as const,
     },
     requirements: {
       points: 3,
@@ -1661,6 +1745,11 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Efficient Feeding": {
     name: "Efficient Feeding",
     tree: "Animals",
+    // -5% / -6% / -7.5% feed to feed all animals.
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "costMultiplier", ranks: [0.95, 0.94, 0.925] },
+    },
     disabled: false,
     requirements: {
       points: 1,
@@ -1679,6 +1768,11 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Restless Animals": {
     name: "Restless Animals",
     tree: "Animals",
+    // -10% / -15% / -20% animal sleep time.
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "growthMultiplier", ranks: [0.9, 0.85, 0.8] },
+    },
     disabled: false,
     requirements: {
       points: 1,
@@ -1697,6 +1791,11 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Fine Fibers": {
     name: "Fine Fibers",
     tree: "Animals",
+    // +0.1 / +0.15 / +0.2 Feather, Leather and Merino Wool yield.
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "additiveYield", ranks: [0.1, 0.15, 0.2] },
+    },
     disabled: false,
     requirements: {
       points: 1,
@@ -1716,6 +1815,11 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Bountiful Bounties": {
     name: "Bountiful Bounties",
     tree: "Animals",
+    // +50% / +75% / +100% Coins from Animal Bounties.
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "coinBonus", ranks: [0.5, 0.75, 1] },
+    },
     disabled: false,
     requirements: {
       points: 1,
@@ -1734,6 +1838,13 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Double Bale": {
     name: "Double Bale",
     tree: "Animals",
+    // 2x / 2.5x / 3x Bale's effect. Bale's base boost is a decimal (0.1), so the
+    // consumer must scale it in Decimal — 0.1 * 3 drifts to 0.30000000000000004
+    // in float.
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "multiplier", ranks: [2, 2.5, 3] },
+    },
     disabled: false,
     requirements: {
       points: 1,
@@ -1772,6 +1883,16 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   Featherweight: {
     name: "Featherweight",
     tree: "Animals",
+    // +0.35 / +0.45 / +0.55 Feather yield; the debuff is subtracted from BOTH
+    // Leather and Merino Wool.
+    upgrade: {
+      maxLevel: 3,
+      effect: {
+        kind: "yieldWithDebuff",
+        buff: [0.35, 0.45, 0.55],
+        debuff: [0.1, 0.15, 0.2],
+      },
+    },
     disabled: false,
     requirements: {
       points: 1,
@@ -1797,6 +1918,11 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Abundant Harvest": {
     name: "Abundant Harvest",
     tree: "Animals",
+    // +0.2 / +0.35 / +0.5 Egg, Wool and Milk yield.
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "additiveYield", ranks: [0.2, 0.35, 0.5] },
+    },
     disabled: false,
     requirements: {
       points: 2,
@@ -1816,6 +1942,11 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Heartwarming Instruments": {
     name: "Heartwarming Instruments",
     tree: "Animals",
+    // +50% / +60% / +70% Animal XP from affection tools.
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "xpBonus", ranks: [0.5, 0.6, 0.7] },
+    },
     disabled: false,
     requirements: {
       points: 2,
@@ -1835,6 +1966,12 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Kale Mix": {
     name: "Kale Mix",
     tree: "Animals",
+    // Mixed Grain requires 3 / 2.5 / 2 Kale instead. An absolute ingredient
+    // amount, not a delta — the consumer builds a Decimal, so 2.5 is exact.
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "flatBonus", ranks: [3, 2.5, 2] },
+    },
     disabled: false,
     requirements: {
       points: 2,
@@ -1854,6 +1991,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Alternate Medicine": {
     tree: "Animals",
     name: "Alternate Medicine",
+    // Not upgradeable yet. Ranks 2/3 add a produce boost for the next 3 harvests
+    // on top of the (rank-invariant) ingredient discount, which needs the animal
+    // feedBuff slot and a conflict rule against Salt Lick / Honey Treat. Left
+    // un-ranked rather than shipping ranks that charge shards for no effect.
     disabled: false,
     requirements: {
       points: 2,
@@ -1872,6 +2013,17 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Healthy Livestock": {
     name: "Healthy Livestock",
     tree: "Animals",
+    // -50% sickness chance at every rank; only the spread shrinks (-0% / -50% /
+    // -99%). Consumed server-side only (the sickness roll lives on the API), so
+    // there is no FE read of these ranks.
+    upgrade: {
+      maxLevel: 3,
+      effect: {
+        kind: "sicknessWithSpread",
+        sickness: [0.5, 0.5, 0.5],
+        spread: [1, 0.5, 0.01],
+      },
+    },
     disabled: false,
     requirements: {
       points: 2,
@@ -1890,6 +2042,16 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Merino Whisperer": {
     name: "Merino Whisperer",
     tree: "Animals",
+    // +0.35 / +0.6 / +0.9 Merino Wool yield; the debuff is subtracted from BOTH
+    // Leather and Feather.
+    upgrade: {
+      maxLevel: 3,
+      effect: {
+        kind: "yieldWithDebuff",
+        buff: [0.35, 0.6, 0.9],
+        debuff: [0.1, 0.15, 0.2],
+      },
+    },
     disabled: false,
     requirements: {
       points: 2,
@@ -1911,10 +2073,46 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
     },
   },
 
+  // #7721 Balance Update: Pig produce, +10% / +20% / +30% Truffles per claim.
+  "Truffle Yield": {
+    name: "Truffle Yield",
+    tree: "Animals",
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "yieldBonus", ranks: [0.1, 0.2, 0.3] },
+    },
+    disabled: false,
+    requirements: {
+      points: 2,
+      tier: 2,
+      island: "spring",
+    },
+    boosts: {
+      buff: {
+        shortDescription: translate("skill.truffleYield"),
+        labelType: "success",
+        boostTypeIcon: powerup,
+        boostedItemIcon: ITEM_DETAILS.Truffle.image,
+      },
+    },
+    // TODO(Chapter 16 art): a proper skill icon.
+    image: ITEM_DETAILS.Truffle.image,
+  },
+
   // Animals - Tier 3
   "Clucky Grazing": {
     name: "Clucky Grazing",
     tree: "Animals",
+    // -25% / -35% / -50% feed for Chickens; +50% / +55% / +65% for every other
+    // animal.
+    upgrade: {
+      maxLevel: 3,
+      effect: {
+        kind: "costWithDebuff",
+        buff: [0.75, 0.65, 0.5],
+        debuff: [1.5, 1.55, 1.65],
+      },
+    },
     disabled: false,
     requirements: {
       points: 3,
@@ -1938,6 +2136,16 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Sheepwise Diet": {
     name: "Sheepwise Diet",
     tree: "Animals",
+    // -25% / -35% / -50% feed for Sheep; +50% / +55% / +65% for every other
+    // animal.
+    upgrade: {
+      maxLevel: 3,
+      effect: {
+        kind: "costWithDebuff",
+        buff: [0.75, 0.65, 0.5],
+        debuff: [1.5, 1.55, 1.65],
+      },
+    },
     disabled: false,
     requirements: {
       points: 3,
@@ -1961,6 +2169,16 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Cow-Smart Nutrition": {
     name: "Cow-Smart Nutrition",
     tree: "Animals",
+    // -25% / -35% / -50% feed for Cows; +50% / +55% / +65% for every other
+    // animal.
+    upgrade: {
+      maxLevel: 3,
+      effect: {
+        kind: "costWithDebuff",
+        buff: [0.75, 0.65, 0.5],
+        debuff: [1.5, 1.55, 1.65],
+      },
+    },
     disabled: false,
     requirements: {
       points: 3,
@@ -1981,9 +2199,78 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
       },
     },
   },
+  // #7721: the Pig diet skill (Elias, 2026-10-12), mirroring Cow-Smart
+  // Nutrition: -25% / -35% / -50% feed for Pigs; +50% / +55% / +65% for every
+  // other animal.
+  "Swill Savvy": {
+    name: "Swill Savvy",
+    tree: "Animals",
+    upgrade: {
+      maxLevel: 3,
+      effect: {
+        kind: "costWithDebuff",
+        buff: [0.75, 0.65, 0.5],
+        debuff: [1.5, 1.55, 1.65],
+      },
+    },
+    disabled: false,
+    requirements: {
+      points: 3,
+      tier: 3,
+      island: "spring",
+    },
+    boosts: {
+      buff: {
+        shortDescription: translate("skill.swillSavvy.buff"),
+        labelType: "success",
+        boostTypeIcon: powerup,
+        boostedItemIcon: ITEM_DETAILS.Pig.image,
+      },
+      debuff: {
+        shortDescription: translate("skill.swillSavvy.debuff"),
+        labelType: "danger",
+        boostTypeIcon: redArrowDown,
+      },
+    },
+  },
+  // #7721 Balance Update: +10% / +20% / +30% Pig Bristles from a trade-in,
+  // applied before the 25% sickness reduction (see `getPigBristles`).
+  "Bristle Payout": {
+    name: "Bristle Payout",
+    tree: "Animals",
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "yieldBonus", ranks: [0.1, 0.2, 0.3] },
+    },
+    disabled: false,
+    requirements: {
+      points: 3,
+      tier: 3,
+      island: "spring",
+    },
+    boosts: {
+      buff: {
+        shortDescription: translate("skill.bristlePayout"),
+        labelType: "success",
+        boostTypeIcon: powerup,
+        boostedItemIcon: ITEM_DETAILS["Pig Bristles"].image,
+      },
+    },
+    // TODO(Chapter 16 art): a proper skill icon.
+    image: ITEM_DETAILS["Pig Bristles"].image,
+  },
   "Chonky Feed": {
     name: "Chonky Feed",
     tree: "Animals",
+    // 2x / 2.5x / 3x animal XP from feed; +50% / +75% / +100% feed cost.
+    upgrade: {
+      maxLevel: 3,
+      effect: {
+        kind: "xpWithFeedDebuff",
+        xp: [2, 2.5, 3],
+        feed: [1.5, 1.75, 2],
+      },
+    },
     disabled: false,
     requirements: {
       points: 3,
@@ -2009,6 +2296,17 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Leathercraft Mastery": {
     name: "Leathercraft Mastery",
     tree: "Animals",
+    // +0.35 / +0.6 / +0.8 Leather yield; the debuff is subtracted from BOTH
+    // Feather and Merino Wool. Rank 3 is 0.8 (not 0.9) per the sheet — the
+    // asymmetry with Merino Whisperer is intentional.
+    upgrade: {
+      maxLevel: 3,
+      effect: {
+        kind: "yieldWithDebuff",
+        buff: [0.35, 0.6, 0.8],
+        debuff: [0.1, 0.15, 0.2],
+      },
+    },
     disabled: false,
     requirements: {
       points: 3,
@@ -2032,6 +2330,19 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Barnyard Rouse": {
     name: "Barnyard Rouse",
     tree: "Animals",
+    // 5 / 4 / 3.5 day cooldown. Resolved generically by getSkillCooldown, so no
+    // consumer change is needed.
+    upgrade: {
+      maxLevel: 3,
+      effect: {
+        kind: "cooldown",
+        ranks: [
+          1000 * 60 * 60 * 24 * 5,
+          1000 * 60 * 60 * 24 * 4,
+          1000 * 60 * 60 * 24 * 3.5,
+        ],
+      },
+    },
     disabled: false,
     requirements: {
       points: 3,
@@ -2067,6 +2378,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
       },
     },
     image: glass_room,
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "additiveYield", ranks: [0.1, 0.15, 0.2] },
+    },
   },
   "Seedy Business": {
     name: "Seedy Business",
@@ -2085,6 +2400,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
       },
     },
     image: seedy_business,
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "costMultiplier", ranks: [0.85, 0.8, 0.75] },
+    },
   },
   "Rice and Shine": {
     name: "Rice and Shine",
@@ -2103,6 +2422,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
       },
     },
     image: riceAndShine,
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "growthMultiplier", ranks: [0.95, 0.94, 0.925] },
+    },
   },
   "Victoria's Secretary": {
     name: "Victoria's Secretary",
@@ -2122,6 +2445,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
       },
     },
     npc: "victoria",
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "coinBonus", ranks: [0.5, 0.75, 1.0] },
+    },
   },
   // Greenhouse - Tier 2
   "Olive Express": {
@@ -2141,6 +2468,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
       },
     },
     disabled: false,
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "growthMultiplier", ranks: [0.9, 0.85, 0.8] },
+    },
   },
   "Rice Rocket": {
     name: "Rice Rocket",
@@ -2159,6 +2490,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
       },
     },
     disabled: false,
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "growthMultiplier", ranks: [0.9, 0.85, 0.8] },
+    },
   },
   "Vine Velocity": {
     name: "Vine Velocity",
@@ -2177,6 +2512,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
       },
     },
     disabled: false,
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "growthMultiplier", ranks: [0.9, 0.85, 0.8] },
+    },
   },
   "Seeded Bounty": {
     name: "Seeded Bounty",
@@ -2200,6 +2539,11 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
       },
     },
     image: seededBounty,
+    upgrade: {
+      // Only the yield leg scales; the "+1 seed to plant" debuff is fixed.
+      maxLevel: 3,
+      effect: { kind: "additiveYield", ranks: [0.5, 0.75, 1] },
+    },
   },
   // Greenhouse - Tier 3
   "Greenhouse Guru": {
@@ -2220,6 +2564,14 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
     disabled: false,
     power: true,
     image: greenhouse_guru,
+    upgrade: {
+      maxLevel: 3,
+      effect: {
+        kind: "cooldown",
+        // 4 day / 3.5 day / 3 day cooldown
+        ranks: [1000 * 60 * 60 * 96, 1000 * 60 * 60 * 84, 1000 * 60 * 60 * 72],
+      },
+    },
   },
   "Greenhouse Gamble": {
     name: "Greenhouse Gamble",
@@ -2238,6 +2590,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
     },
     disabled: false,
     image: greenhouse_gamble,
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "chance", ranks: [30, 40, 50] },
+    },
   },
   "Slick Saver": {
     name: "Slick Saver",
@@ -2256,6 +2612,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
       },
     },
     disabled: false,
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "flatReduction", ranks: [1, 1.5, 2] },
+    },
   },
   "Greasy Plants": {
     name: "Greasy Plants",
@@ -2280,6 +2640,14 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
       },
     },
     image: greasy_plants,
+    upgrade: {
+      maxLevel: 3,
+      effect: {
+        kind: "yieldWithOilDebuff",
+        yield: [1, 1.5, 2],
+        oilMultiplier: [2, 3, 4],
+      },
+    },
   },
 
   // Mining - Tier 1
@@ -3012,6 +3380,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
       },
     },
     disabled: false,
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "additiveYield", ranks: [0.1, 0.15, 0.2] },
+    },
   },
   "Hyper Bees": {
     name: "Hyper Bees",
@@ -3031,6 +3403,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
     },
     disabled: false,
     image: hyperBees,
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "productionRate", ranks: [0.1, 0.15, 0.2] },
+    },
   },
   "Blooming Boost": {
     name: "Blooming Boost",
@@ -3049,6 +3425,11 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
       },
     },
     disabled: false,
+    upgrade: {
+      maxLevel: 3,
+      // -10% / -12.5% / -15% flower growth time
+      effect: { kind: "growthMultiplier", ranks: [0.9, 0.875, 0.85] },
+    },
   },
   "Flower Sale": {
     name: "Flower Sale",
@@ -3068,6 +3449,11 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
       },
     },
     image: flower_sale,
+    upgrade: {
+      maxLevel: 3,
+      // -20% / -25% / -30% flower seed cost
+      effect: { kind: "costMultiplier", ranks: [0.8, 0.75, 0.7] },
+    },
   },
   // Bees & Flowers - Tier 2
   "Buzzworthy Treats": {
@@ -3088,6 +3474,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
     },
     disabled: false,
     image: ITEM_DETAILS["Honey Cake"].image,
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "xpBonus", ranks: [0.1, 0.2, 0.3] },
+    },
   },
   "Blossom Bonding": {
     name: "Blossom Bonding",
@@ -3106,6 +3496,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
     },
     disabled: false,
     image: blossom_bonding,
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "flatBonus", ranks: [2, 3, 4] },
+    },
   },
   "Pollen Power Up": {
     name: "Pollen Power Up",
@@ -3124,6 +3518,12 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
     },
     disabled: false,
     image: pollen,
+    upgrade: {
+      maxLevel: 3,
+      // Marginal crop yield per swarm, on top of the base +0.2 Bee Swarm bonus
+      // (total +0.3 / +0.35 / +0.4).
+      effect: { kind: "additiveYield", ranks: [0.1, 0.15, 0.2] },
+    },
   },
   "Petalled Perk": {
     name: "Petalled Perk",
@@ -3142,6 +3542,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
     },
     disabled: false,
     image: ITEM_DETAILS["Red Lotus"].image,
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "chance", ranks: [10, 17.5, 25] },
+    },
   },
   // Bees & Flowers - Tier 3
   "Bee Collective": {
@@ -3161,6 +3565,11 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
       },
     },
     disabled: false,
+    upgrade: {
+      maxLevel: 3,
+      // Percentage points ADDED to the bee swarm chance
+      effect: { kind: "chance", ranks: [20, 27.5, 35] },
+    },
   },
   "Flower Power": {
     name: "Flower Power",
@@ -3180,6 +3589,11 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
     },
     disabled: false,
     image: ITEM_DETAILS["Dawn Flower"].image,
+    upgrade: {
+      maxLevel: 3,
+      // -20% / -30% / -40% flower growth time
+      effect: { kind: "growthMultiplier", ranks: [0.8, 0.7, 0.6] },
+    },
   },
   "Flowery Abode": {
     name: "Flowery Abode",
@@ -3205,6 +3619,15 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
     },
     disabled: false,
     image: abode,
+    upgrade: {
+      maxLevel: 3,
+      effect: {
+        kind: "rateWithGrowthDebuff",
+        rate: [0.5, 0.75, 1],
+        // +50% / +60% / +70% flower growth time
+        growth: [1.5, 1.6, 1.7],
+      },
+    },
   },
   "Petal Blessed": {
     name: "Petal Blessed",
@@ -3224,6 +3647,14 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
       },
     },
     image: ITEM_DETAILS["Prism Petal"].image,
+    upgrade: {
+      maxLevel: 3,
+      effect: {
+        kind: "cooldown",
+        // 4 day / 3.5 day / 3 day cooldown
+        ranks: [1000 * 60 * 60 * 96, 1000 * 60 * 60 * 84, 1000 * 60 * 60 * 72],
+      },
+    },
   },
 
   // Machinery - Tier 1
@@ -3249,6 +3680,14 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Crop Processor Unit": {
     name: "Crop Processor Unit",
     tree: "Machinery",
+    upgrade: {
+      maxLevel: 3,
+      effect: {
+        kind: "growthWithOilDebuff",
+        growth: [0.95, 0.9, 0.85],
+        oilPenalty: [0.1, 0.15, 0.2],
+      } as const,
+    },
     requirements: {
       points: 1,
       tier: 1,
@@ -3273,6 +3712,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Oil Gadget": {
     name: "Oil Gadget",
     tree: "Machinery",
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "oilReduction", ranks: [0.1, 0.15, 0.2] } as const,
+    },
     requirements: {
       points: 1,
       tier: 1,
@@ -3292,6 +3735,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Oil Extraction": {
     name: "Oil Extraction",
     tree: "Machinery",
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "additiveYield", ranks: [1, 1.5, 2] } as const,
+    },
     requirements: {
       points: 1,
       tier: 1,
@@ -3310,6 +3757,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Leak-Proof Tank": {
     name: "Leak-Proof Tank",
     tree: "Machinery",
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "multiplier", ranks: [3, 4, 5] } as const,
+    },
     requirements: {
       points: 1,
       tier: 1,
@@ -3370,6 +3821,14 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Rapid Rig": {
     name: "Rapid Rig",
     tree: "Machinery",
+    upgrade: {
+      maxLevel: 3,
+      effect: {
+        kind: "growthWithOilDebuff",
+        growth: [0.8, 0.7, 0.6],
+        oilPenalty: [0.4, 0.5, 0.6],
+      } as const,
+    },
     requirements: {
       points: 2,
       tier: 2,
@@ -3394,6 +3853,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Oil Be Back": {
     name: "Oil Be Back",
     tree: "Machinery",
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "growthMultiplier", ranks: [0.8, 0.7, 0.6] } as const,
+    },
     requirements: {
       points: 2,
       tier: 2,
@@ -3413,6 +3876,12 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Oil Rig": {
     name: "Oil Rig",
     tree: "Machinery",
+    upgrade: {
+      maxLevel: 3,
+      // Wool required to craft the Oil Drill per rank (replaces Leather).
+      // Sourced from tools.ts so the recipe and description can't drift.
+      effect: { kind: "flatBonus", ranks: OIL_DRILL_WOOL_BY_RANK } as const,
+    },
     requirements: {
       points: 2,
       tier: 2,
@@ -3433,6 +3902,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Field Expansion Module": {
     name: "Field Expansion Module",
     tree: "Machinery",
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "flatBonus", ranks: [5, 7, 10] } as const,
+    },
     requirements: {
       points: 3,
       tier: 3,
@@ -3451,6 +3924,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Field Extension Module": {
     name: "Field Extension Module",
     tree: "Machinery",
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "flatBonus", ranks: [5, 7, 10] } as const,
+    },
     requirements: {
       points: 3,
       tier: 3,
@@ -3469,6 +3946,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Efficiency Extension Module": {
     name: "Efficiency Extension Module",
     tree: "Machinery",
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "oilReduction", ranks: [0.3, 0.4, 0.5] } as const,
+    },
     requirements: {
       points: 3,
       tier: 3,
@@ -3488,6 +3969,14 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Grease Lightning": {
     name: "Grease Lightning",
     tree: "Machinery",
+    upgrade: {
+      maxLevel: 3,
+      effect: {
+        kind: "cooldown",
+        // 4 day / 3.5 day / 3 day cooldown
+        ranks: [1000 * 60 * 60 * 96, 1000 * 60 * 60 * 84, 1000 * 60 * 60 * 72],
+      } as const,
+    },
     requirements: {
       points: 3,
       tier: 3,
@@ -3509,6 +3998,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Efficient Bin": {
     name: "Efficient Bin",
     tree: "Compost",
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "additiveYield", ranks: [5, 7, 9] } as const,
+    },
     requirements: {
       points: 1,
       tier: 1,
@@ -3527,6 +4020,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Turbo Charged": {
     name: "Turbo Charged",
     tree: "Compost",
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "additiveYield", ranks: [5, 7, 9] } as const,
+    },
     requirements: {
       points: 1,
       tier: 1,
@@ -3545,6 +4042,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Wormy Treat": {
     name: "Wormy Treat",
     tree: "Compost",
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "additiveYield", ranks: [1, 2, 3] } as const,
+    },
     requirements: {
       points: 1,
       tier: 1,
@@ -3563,6 +4064,12 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Feathery Business": {
     name: "Feathery Business",
     tree: "Compost",
+    upgrade: {
+      maxLevel: 3,
+      // Feather cost multiplier for the composter speed up. Rank 3 removes the
+      // penalty entirely (1x), so the debuff line is dropped from the panel.
+      effect: { kind: "costMultiplier", ranks: [2, 1.5, 1] } as const,
+    },
     requirements: {
       points: 1,
       tier: 1,
@@ -3624,6 +4131,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Premium Worms": {
     name: "Premium Worms",
     tree: "Compost",
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "additiveYield", ranks: [10, 15, 20] } as const,
+    },
     requirements: {
       points: 2,
       tier: 2,
@@ -3642,6 +4153,11 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Fruitful Bounty": {
     name: "Fruitful Bounty",
     tree: "Compost",
+    upgrade: {
+      maxLevel: 3,
+      // Multiplier applied to Fruitful Blend's base +0.1 fruit effect.
+      effect: { kind: "multiplier", ranks: [2, 3, 4] } as const,
+    },
     requirements: {
       points: 2,
       tier: 2,
@@ -3661,6 +4177,11 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Swift Decomposer": {
     name: "Swift Decomposer",
     tree: "Compost",
+    upgrade: {
+      maxLevel: 3,
+      // -10% / -12.5% / -15% compost time.
+      effect: { kind: "growthMultiplier", ranks: [0.9, 0.875, 0.85] } as const,
+    },
     requirements: {
       points: 2,
       tier: 2,
@@ -3678,6 +4199,16 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Composting Bonanza": {
     name: "Composting Bonanza",
     tree: "Compost",
+    upgrade: {
+      maxLevel: 3,
+      // Extra time the composter speed up removes: +1hr / +1.5hr / +2hr.
+      // The 2x resource debuff is flat across ranks, so it stays in the tree's
+      // static debuff copy rather than the effect.
+      effect: {
+        kind: "flatTimeBonus",
+        ranks: [1 * 60 * 60 * 1000, 1.5 * 60 * 60 * 1000, 2 * 60 * 60 * 1000],
+      } as const,
+    },
     requirements: {
       points: 2,
       tier: 2,
@@ -3720,6 +4251,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Composting Overhaul": {
     name: "Composting Overhaul",
     tree: "Compost",
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "additiveYield", ranks: [2, 5, 8] } as const,
+    },
     requirements: {
       points: 3,
       tier: 3,
@@ -3739,6 +4274,15 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Composting Revamp": {
     name: "Composting Revamp",
     tree: "Compost",
+    upgrade: {
+      maxLevel: 3,
+      // +fertilisers per compost, at the cost of fewer worms.
+      effect: {
+        kind: "yieldWithDebuff",
+        buff: [5, 8, 10],
+        debuff: [2, 3, 4],
+      } as const,
+    },
     requirements: {
       points: 3,
       tier: 3,
@@ -3765,6 +4309,11 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Cheap Rakes": {
     name: "Cheap Rakes",
     tree: "Aging",
+    upgrade: {
+      maxLevel: 3,
+      // Salt Rake coin cost multiplier: -20% / -30% / -40%.
+      effect: { kind: "costMultiplier", ranks: [0.8, 0.7, 0.6] } as const,
+    },
     disabled: false,
     requirements: {
       points: 1,
@@ -3784,6 +4333,11 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Speedy Aging": {
     name: "Speedy Aging",
     tree: "Aging",
+    upgrade: {
+      maxLevel: 3,
+      // -10% / -15% / -20% fish aging time.
+      effect: { kind: "growthMultiplier", ranks: [0.9, 0.85, 0.8] } as const,
+    },
     disabled: false,
     requirements: {
       points: 1,
@@ -3803,6 +4357,11 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Salty Seas": {
     name: "Salty Seas",
     tree: "Aging",
+    upgrade: {
+      maxLevel: 3,
+      // -10% / -15% / -20% salt charge replenishment time.
+      effect: { kind: "growthMultiplier", ranks: [0.9, 0.85, 0.8] } as const,
+    },
     disabled: false,
     requirements: {
       points: 1,
@@ -3822,6 +4381,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Wide Rakes": {
     name: "Wide Rakes",
     tree: "Aging",
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "additiveYield", ranks: [2, 3, 4] } as const,
+    },
     disabled: false,
     requirements: {
       points: 1,
@@ -3841,6 +4404,10 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   Bacalhau: {
     name: "Bacalhau",
     tree: "Aging",
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "additiveYield", ranks: [1, 2, 3] } as const,
+    },
     disabled: false,
     requirements: {
       points: 1,
@@ -3862,6 +4429,12 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Fish Smoking": {
     name: "Fish Smoking",
     tree: "Aging",
+    upgrade: {
+      maxLevel: 3,
+      // Multiplier on the base 10% Prime Aged chance: doubled / tripled /
+      // quadrupled.
+      effect: { kind: "multiplier", ranks: [2, 3, 4] } as const,
+    },
     disabled: false,
     requirements: {
       points: 2,
@@ -3881,6 +4454,11 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   Refiner: {
     name: "Refiner",
     tree: "Aging",
+    upgrade: {
+      maxLevel: 3,
+      // prngChance percent of +1 Refined Salt.
+      effect: { kind: "chance", ranks: [15, 25, 35] } as const,
+    },
     disabled: false,
     requirements: {
       points: 2,
@@ -3899,6 +4477,13 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Sea Blessed": {
     name: "Sea Blessed",
     tree: "Aging",
+    upgrade: {
+      maxLevel: 3,
+      // prngChance percent of restoring a charge to 4 Salt Nodes. Rank 2 is a
+      // fractional 6.5% — prngChance compares a continuous prngValue * 100
+      // against this, so it needs no tenths workaround.
+      effect: { kind: "chance", ranks: [5, 6.5, 8] } as const,
+    },
     disabled: false,
     requirements: {
       points: 2,
@@ -3920,6 +4505,13 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   Ager: {
     name: "Ager",
     tree: "Aging",
+    upgrade: {
+      maxLevel: 3,
+      // Both legs share one multiplier: 2x/3x/4x output from the aging racks
+      // for 2x/3x/4x the inputs. The sheet keeps them equal at every rank, so
+      // storing a single value keeps the buff and its debuff from drifting.
+      effect: { kind: "multiplier", ranks: [2, 3, 4] } as const,
+    },
     disabled: false,
     requirements: {
       points: 3,
@@ -3943,6 +4535,14 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
   "Salt Surge": {
     name: "Salt Surge",
     tree: "Aging",
+    upgrade: {
+      maxLevel: 3,
+      // Power skill cooldown: 3 days / 2.5 days / 2 days.
+      effect: {
+        kind: "cooldown",
+        ranks: [1000 * 60 * 60 * 72, 1000 * 60 * 60 * 60, 1000 * 60 * 60 * 48],
+      } as const,
+    },
     disabled: false,
     power: true,
     requirements: {
@@ -3960,6 +4560,301 @@ export const BUMPKIN_REVAMP_SKILL_TREE = {
       },
     },
     image: saltSurge,
+  },
+
+  // Cave - Tier 1
+  "Lean Compost": {
+    name: "Lean Compost",
+    tree: "Cave",
+    // x0.95 / x0.9 / x0.85 Myco Bin batch ingredients.
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "costMultiplier", ranks: [0.95, 0.9, 0.85] },
+    },
+    disabled: false,
+    requirements: {
+      points: 1,
+      tier: 1,
+      island: "spring",
+    },
+    boosts: {
+      buff: {
+        shortDescription: translate("skill.leanCompost"),
+        labelType: "success",
+        boostTypeIcon: powerup,
+        boostedItemIcon: mycoBinSmall,
+      },
+    },
+    image: leanCompost,
+  },
+  "Rapid Mycelium": {
+    name: "Rapid Mycelium",
+    tree: "Cave",
+    // x0.95 / x0.9 / x0.85 Myco Bin growth time (11.4h / 10.8h / 10.2h).
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "growthMultiplier", ranks: [0.95, 0.9, 0.85] },
+    },
+    disabled: false,
+    requirements: {
+      points: 1,
+      tier: 1,
+      island: "spring",
+    },
+    boosts: {
+      buff: {
+        shortDescription: translate("skill.rapidMycelium"),
+        labelType: "success",
+        boostTypeIcon: SUNNYSIDE.icons.stopwatch,
+        boostedItemIcon: mycoBinSmall,
+      },
+    },
+    image: rapidMycelium,
+  },
+  "Mushroom Bloom": {
+    name: "Mushroom Bloom",
+    tree: "Cave",
+    // +1 / +2 / +3 Mushroom tiles per Cave patch, in place of Mud.
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "flatBonus", ranks: [1, 2, 3] },
+    },
+    disabled: false,
+    requirements: {
+      points: 1,
+      tier: 1,
+      island: "spring",
+    },
+    boosts: {
+      buff: {
+        shortDescription: translate("skill.mushroomBloom"),
+        labelType: "success",
+        boostTypeIcon: powerup,
+        boostedItemIcon: fungalHarvest,
+      },
+    },
+    image: mushroomBloom,
+  },
+  "Muddy Bounty": {
+    name: "Muddy Bounty",
+    tree: "Cave",
+    // +10% / +20% / +30% Mud from each Cave Mud tile.
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "yieldBonus", ranks: [0.1, 0.2, 0.3] },
+    },
+    disabled: false,
+    requirements: {
+      points: 1,
+      tier: 1,
+      island: "spring",
+    },
+    boosts: {
+      buff: {
+        shortDescription: translate("skill.muddyBounty"),
+        labelType: "success",
+        boostTypeIcon: powerup,
+        boostedItemIcon: ITEM_DETAILS.Mud.image,
+      },
+    },
+    image: muddyBounty,
+  },
+  "Sturdy Shovel": {
+    name: "Sturdy Shovel",
+    tree: "Cave",
+    // 10% / 20% / 30% chance a Cave dig does not use up its Sand Shovel.
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "chance", ranks: [10, 20, 30] },
+    },
+    disabled: false,
+    requirements: {
+      points: 1,
+      tier: 1,
+      island: "spring",
+    },
+    boosts: {
+      buff: {
+        shortDescription: translate("skill.sturdyShovel"),
+        labelType: "success",
+        boostTypeIcon: powerup,
+        boostedItemIcon: ITEM_DETAILS["Sand Shovel"].image,
+      },
+    },
+    image: sturdyShovel,
+  },
+
+  // Cave - Tier 2
+  "Fungal Harvest": {
+    name: "Fungal Harvest",
+    tree: "Cave",
+    // +0.2 / +0.3 / +0.4 Mushrooms (Wild or Magic) from each Cave Mushroom tile.
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "additiveYield", ranks: [0.2, 0.3, 0.4] },
+    },
+    disabled: false,
+    requirements: {
+      points: 2,
+      tier: 2,
+      island: "spring",
+    },
+    boosts: {
+      buff: {
+        shortDescription: translate("skill.fungalHarvest"),
+        labelType: "success",
+        boostTypeIcon: powerup,
+        boostedItemIcon: fungalHarvest,
+      },
+    },
+    image: fungalHarvest,
+  },
+  "Beetle Nest": {
+    name: "Beetle Nest",
+    tree: "Cave",
+    // +1 / +2 / +3 Beetle tiles per Cave patch, in place of Mud.
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "flatBonus", ranks: [1, 2, 3] },
+    },
+    disabled: false,
+    requirements: {
+      points: 2,
+      tier: 2,
+      island: "spring",
+    },
+    boosts: {
+      buff: {
+        shortDescription: translate("skill.beetleNest"),
+        labelType: "success",
+        boostTypeIcon: powerup,
+        boostedItemIcon: rareBreeds,
+      },
+    },
+    image: beetleNest,
+  },
+  "Sturdy Drill": {
+    name: "Sturdy Drill",
+    tree: "Cave",
+    // 20% / 30% / 40% chance a Cave drill does not use up its Sand Drill.
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "chance", ranks: [20, 30, 40] },
+    },
+    disabled: false,
+    requirements: {
+      points: 2,
+      tier: 2,
+      island: "spring",
+    },
+    boosts: {
+      buff: {
+        shortDescription: translate("skill.sturdyDrill"),
+        labelType: "success",
+        boostTypeIcon: powerup,
+        boostedItemIcon: ITEM_DETAILS["Sand Drill"].image,
+      },
+    },
+    image: sturdyDrill,
+  },
+  "Tool Hoarder": {
+    name: "Tool Hoarder",
+    tree: "Cave",
+    // +25/+50/+100 Sand Shovel (base 125) and +5/+10/+20 Sand Drill (base 25) stock.
+    upgrade: {
+      maxLevel: 3,
+      effect: {
+        kind: "stockBonus",
+        ranks: { "Sand Shovel": [25, 50, 100], "Sand Drill": [5, 10, 20] },
+      },
+    },
+    disabled: false,
+    requirements: {
+      points: 2,
+      tier: 2,
+      island: "spring",
+    },
+    boosts: {
+      buff: {
+        shortDescription: translate("skill.toolHoarder"),
+        labelType: "success",
+        boostTypeIcon: powerup,
+        boostedItemIcon: toolHoarder,
+      },
+    },
+    image: toolHoarder,
+  },
+
+  // Cave - Tier 3
+  "Rare Breeds": {
+    name: "Rare Breeds",
+    tree: "Cave",
+    // Green / Blue / Pink / Amber Beetle odds (base 40/30/20/10).
+    upgrade: {
+      maxLevel: 3,
+      effect: {
+        kind: "beetleRarity",
+        ranks: [
+          {
+            "Green Beetle": 35,
+            "Blue Beetle": 35,
+            "Pink Beetle": 15,
+            "Amber Beetle": 15,
+          },
+          {
+            "Green Beetle": 30,
+            "Blue Beetle": 30,
+            "Pink Beetle": 20,
+            "Amber Beetle": 20,
+          },
+          {
+            "Green Beetle": 25,
+            "Blue Beetle": 25,
+            "Pink Beetle": 25,
+            "Amber Beetle": 25,
+          },
+        ],
+      },
+    },
+    disabled: false,
+    requirements: {
+      points: 3,
+      tier: 3,
+      island: "spring",
+    },
+    boosts: {
+      buff: {
+        shortDescription: translate("skill.rareBreeds"),
+        labelType: "success",
+        boostTypeIcon: powerup,
+        boostedItemIcon: rareBreeds,
+      },
+    },
+    image: rareBreeds,
+  },
+  "Twin Beetles": {
+    name: "Twin Beetles",
+    tree: "Cave",
+    // 5% / 10% / 15% chance of one more of a Beetle dug up in the Cave.
+    upgrade: {
+      maxLevel: 3,
+      effect: { kind: "chance", ranks: [5, 10, 15] },
+    },
+    disabled: false,
+    requirements: {
+      points: 3,
+      tier: 3,
+      island: "spring",
+    },
+    boosts: {
+      buff: {
+        shortDescription: translate("skill.twinBeetles"),
+        labelType: "success",
+        boostTypeIcon: powerup,
+        boostedItemIcon: rareBreeds,
+      },
+    },
+    image: twinBeetles,
   },
 } satisfies Record<string, BumpkinSkillRevamp>;
 
@@ -4069,6 +4964,119 @@ export const SKILL_RANKS = {
   "Double Nom": BUMPKIN_REVAMP_SKILL_TREE["Double Nom"].upgrade.effect,
   "Fiery Jackpot": BUMPKIN_REVAMP_SKILL_TREE["Fiery Jackpot"].upgrade.effect,
   "Fry Frenzy": BUMPKIN_REVAMP_SKILL_TREE["Fry Frenzy"].upgrade.effect,
+  "Glass Room": BUMPKIN_REVAMP_SKILL_TREE["Glass Room"].upgrade.effect,
+  "Seedy Business": BUMPKIN_REVAMP_SKILL_TREE["Seedy Business"].upgrade.effect,
+  "Rice and Shine": BUMPKIN_REVAMP_SKILL_TREE["Rice and Shine"].upgrade.effect,
+  "Victoria's Secretary":
+    BUMPKIN_REVAMP_SKILL_TREE["Victoria's Secretary"].upgrade.effect,
+  "Olive Express": BUMPKIN_REVAMP_SKILL_TREE["Olive Express"].upgrade.effect,
+  "Rice Rocket": BUMPKIN_REVAMP_SKILL_TREE["Rice Rocket"].upgrade.effect,
+  "Vine Velocity": BUMPKIN_REVAMP_SKILL_TREE["Vine Velocity"].upgrade.effect,
+  "Seeded Bounty": BUMPKIN_REVAMP_SKILL_TREE["Seeded Bounty"].upgrade.effect,
+  "Greenhouse Guru":
+    BUMPKIN_REVAMP_SKILL_TREE["Greenhouse Guru"].upgrade.effect,
+  "Greenhouse Gamble":
+    BUMPKIN_REVAMP_SKILL_TREE["Greenhouse Gamble"].upgrade.effect,
+  "Slick Saver": BUMPKIN_REVAMP_SKILL_TREE["Slick Saver"].upgrade.effect,
+  "Greasy Plants": BUMPKIN_REVAMP_SKILL_TREE["Greasy Plants"].upgrade.effect,
+  "Crop Processor Unit":
+    BUMPKIN_REVAMP_SKILL_TREE["Crop Processor Unit"].upgrade.effect,
+  "Oil Gadget": BUMPKIN_REVAMP_SKILL_TREE["Oil Gadget"].upgrade.effect,
+  "Oil Extraction": BUMPKIN_REVAMP_SKILL_TREE["Oil Extraction"].upgrade.effect,
+  "Leak-Proof Tank":
+    BUMPKIN_REVAMP_SKILL_TREE["Leak-Proof Tank"].upgrade.effect,
+  "Rapid Rig": BUMPKIN_REVAMP_SKILL_TREE["Rapid Rig"].upgrade.effect,
+  "Oil Be Back": BUMPKIN_REVAMP_SKILL_TREE["Oil Be Back"].upgrade.effect,
+  "Oil Rig": BUMPKIN_REVAMP_SKILL_TREE["Oil Rig"].upgrade.effect,
+  "Field Expansion Module":
+    BUMPKIN_REVAMP_SKILL_TREE["Field Expansion Module"].upgrade.effect,
+  "Field Extension Module":
+    BUMPKIN_REVAMP_SKILL_TREE["Field Extension Module"].upgrade.effect,
+  "Efficiency Extension Module":
+    BUMPKIN_REVAMP_SKILL_TREE["Efficiency Extension Module"].upgrade.effect,
+  "Grease Lightning":
+    BUMPKIN_REVAMP_SKILL_TREE["Grease Lightning"].upgrade.effect,
+  "Sweet Bonus": BUMPKIN_REVAMP_SKILL_TREE["Sweet Bonus"].upgrade.effect,
+  "Hyper Bees": BUMPKIN_REVAMP_SKILL_TREE["Hyper Bees"].upgrade.effect,
+  "Blooming Boost": BUMPKIN_REVAMP_SKILL_TREE["Blooming Boost"].upgrade.effect,
+  "Flower Sale": BUMPKIN_REVAMP_SKILL_TREE["Flower Sale"].upgrade.effect,
+  "Buzzworthy Treats":
+    BUMPKIN_REVAMP_SKILL_TREE["Buzzworthy Treats"].upgrade.effect,
+  "Blossom Bonding":
+    BUMPKIN_REVAMP_SKILL_TREE["Blossom Bonding"].upgrade.effect,
+  "Pollen Power Up":
+    BUMPKIN_REVAMP_SKILL_TREE["Pollen Power Up"].upgrade.effect,
+  "Petalled Perk": BUMPKIN_REVAMP_SKILL_TREE["Petalled Perk"].upgrade.effect,
+  "Bee Collective": BUMPKIN_REVAMP_SKILL_TREE["Bee Collective"].upgrade.effect,
+  "Flower Power": BUMPKIN_REVAMP_SKILL_TREE["Flower Power"].upgrade.effect,
+  "Flowery Abode": BUMPKIN_REVAMP_SKILL_TREE["Flowery Abode"].upgrade.effect,
+  "Petal Blessed": BUMPKIN_REVAMP_SKILL_TREE["Petal Blessed"].upgrade.effect,
+  "Efficient Bin": BUMPKIN_REVAMP_SKILL_TREE["Efficient Bin"].upgrade.effect,
+  "Turbo Charged": BUMPKIN_REVAMP_SKILL_TREE["Turbo Charged"].upgrade.effect,
+  "Wormy Treat": BUMPKIN_REVAMP_SKILL_TREE["Wormy Treat"].upgrade.effect,
+  "Feathery Business":
+    BUMPKIN_REVAMP_SKILL_TREE["Feathery Business"].upgrade.effect,
+  "Premium Worms": BUMPKIN_REVAMP_SKILL_TREE["Premium Worms"].upgrade.effect,
+  "Fruitful Bounty":
+    BUMPKIN_REVAMP_SKILL_TREE["Fruitful Bounty"].upgrade.effect,
+  "Swift Decomposer":
+    BUMPKIN_REVAMP_SKILL_TREE["Swift Decomposer"].upgrade.effect,
+  "Composting Bonanza":
+    BUMPKIN_REVAMP_SKILL_TREE["Composting Bonanza"].upgrade.effect,
+  "Composting Overhaul":
+    BUMPKIN_REVAMP_SKILL_TREE["Composting Overhaul"].upgrade.effect,
+  "Composting Revamp":
+    BUMPKIN_REVAMP_SKILL_TREE["Composting Revamp"].upgrade.effect,
+  "Cheap Rakes": BUMPKIN_REVAMP_SKILL_TREE["Cheap Rakes"].upgrade.effect,
+  "Speedy Aging": BUMPKIN_REVAMP_SKILL_TREE["Speedy Aging"].upgrade.effect,
+  "Salty Seas": BUMPKIN_REVAMP_SKILL_TREE["Salty Seas"].upgrade.effect,
+  "Wide Rakes": BUMPKIN_REVAMP_SKILL_TREE["Wide Rakes"].upgrade.effect,
+  Bacalhau: BUMPKIN_REVAMP_SKILL_TREE["Bacalhau"].upgrade.effect,
+  "Fish Smoking": BUMPKIN_REVAMP_SKILL_TREE["Fish Smoking"].upgrade.effect,
+  Refiner: BUMPKIN_REVAMP_SKILL_TREE["Refiner"].upgrade.effect,
+  "Sea Blessed": BUMPKIN_REVAMP_SKILL_TREE["Sea Blessed"].upgrade.effect,
+  Ager: BUMPKIN_REVAMP_SKILL_TREE["Ager"].upgrade.effect,
+  "Salt Surge": BUMPKIN_REVAMP_SKILL_TREE["Salt Surge"].upgrade.effect,
+  "Efficient Feeding":
+    BUMPKIN_REVAMP_SKILL_TREE["Efficient Feeding"].upgrade.effect,
+  "Restless Animals":
+    BUMPKIN_REVAMP_SKILL_TREE["Restless Animals"].upgrade.effect,
+  "Fine Fibers": BUMPKIN_REVAMP_SKILL_TREE["Fine Fibers"].upgrade.effect,
+  "Bountiful Bounties":
+    BUMPKIN_REVAMP_SKILL_TREE["Bountiful Bounties"].upgrade.effect,
+  "Double Bale": BUMPKIN_REVAMP_SKILL_TREE["Double Bale"].upgrade.effect,
+  Featherweight: BUMPKIN_REVAMP_SKILL_TREE["Featherweight"].upgrade.effect,
+  "Abundant Harvest":
+    BUMPKIN_REVAMP_SKILL_TREE["Abundant Harvest"].upgrade.effect,
+  "Heartwarming Instruments":
+    BUMPKIN_REVAMP_SKILL_TREE["Heartwarming Instruments"].upgrade.effect,
+  "Kale Mix": BUMPKIN_REVAMP_SKILL_TREE["Kale Mix"].upgrade.effect,
+  "Healthy Livestock":
+    BUMPKIN_REVAMP_SKILL_TREE["Healthy Livestock"].upgrade.effect,
+  "Merino Whisperer":
+    BUMPKIN_REVAMP_SKILL_TREE["Merino Whisperer"].upgrade.effect,
+  "Clucky Grazing": BUMPKIN_REVAMP_SKILL_TREE["Clucky Grazing"].upgrade.effect,
+  "Sheepwise Diet": BUMPKIN_REVAMP_SKILL_TREE["Sheepwise Diet"].upgrade.effect,
+  "Cow-Smart Nutrition":
+    BUMPKIN_REVAMP_SKILL_TREE["Cow-Smart Nutrition"].upgrade.effect,
+  "Swill Savvy": BUMPKIN_REVAMP_SKILL_TREE["Swill Savvy"].upgrade.effect,
+  "Truffle Yield": BUMPKIN_REVAMP_SKILL_TREE["Truffle Yield"].upgrade.effect,
+  "Bristle Payout": BUMPKIN_REVAMP_SKILL_TREE["Bristle Payout"].upgrade.effect,
+  "Chonky Feed": BUMPKIN_REVAMP_SKILL_TREE["Chonky Feed"].upgrade.effect,
+  "Leathercraft Mastery":
+    BUMPKIN_REVAMP_SKILL_TREE["Leathercraft Mastery"].upgrade.effect,
+  "Barnyard Rouse": BUMPKIN_REVAMP_SKILL_TREE["Barnyard Rouse"].upgrade.effect,
+  "Lean Compost": BUMPKIN_REVAMP_SKILL_TREE["Lean Compost"].upgrade.effect,
+  "Rapid Mycelium": BUMPKIN_REVAMP_SKILL_TREE["Rapid Mycelium"].upgrade.effect,
+  "Mushroom Bloom": BUMPKIN_REVAMP_SKILL_TREE["Mushroom Bloom"].upgrade.effect,
+  "Muddy Bounty": BUMPKIN_REVAMP_SKILL_TREE["Muddy Bounty"].upgrade.effect,
+  "Sturdy Shovel": BUMPKIN_REVAMP_SKILL_TREE["Sturdy Shovel"].upgrade.effect,
+  "Fungal Harvest": BUMPKIN_REVAMP_SKILL_TREE["Fungal Harvest"].upgrade.effect,
+  "Beetle Nest": BUMPKIN_REVAMP_SKILL_TREE["Beetle Nest"].upgrade.effect,
+  "Sturdy Drill": BUMPKIN_REVAMP_SKILL_TREE["Sturdy Drill"].upgrade.effect,
+  "Tool Hoarder": BUMPKIN_REVAMP_SKILL_TREE["Tool Hoarder"].upgrade.effect,
+  "Rare Breeds": BUMPKIN_REVAMP_SKILL_TREE["Rare Breeds"].upgrade.effect,
+  "Twin Beetles": BUMPKIN_REVAMP_SKILL_TREE["Twin Beetles"].upgrade.effect,
 } satisfies Record<UpgradeableSkillName, SkillRankEffect>;
 
 // Runtime guard co-located with SKILL_RANKS so callers can narrow to an
@@ -4076,6 +5084,83 @@ export const SKILL_RANKS = {
 export const isUpgradeableSkillName = (
   name: BumpkinRevampSkillName,
 ): name is UpgradeableSkillName => name in SKILL_RANKS;
+
+// Upgradeable Cooking/Crops skills whose upgraded rank is neutralised on the
+// CHAPTER_CROP_WEEK event items (the Crystal Leaf crop and the Crystal Cookie recipe).
+// Derived from the tree (tree === Cooking/Crops + an `upgrade` block) so it can
+// never drift from which skills are actually upgradeable.
+// Module-private so no other module can mutate this shared set (it drives the
+// event-item downgrade + the "boosts paused" notice); callers use the helpers below.
+const CHAPTER_CROP_WEEK_DOWNGRADED_SKILLS: Set<UpgradeableSkillName> = new Set(
+  getKeys(BUMPKIN_REVAMP_SKILL_TREE).filter(
+    (name): name is UpgradeableSkillName => {
+      const { tree } = BUMPKIN_REVAMP_SKILL_TREE[name];
+      return (tree === "Cooking" || tree === "Crops") && name in SKILL_RANKS;
+    },
+  ),
+);
+
+// Returns `skills` with every upgradeable Cooking/Crops skill capped at rank 1
+// (the base skill still applies, but the upgraded rank grants no extra bonus).
+// Used to neutralise upgraded skill effects on the CHAPTER_CROP_WEEK event items
+// WITHOUT mutating the player's real ranks — callers pass the result only into the
+// Crystal Leaf/Crystal Cookie boost math and keep the original ranks everywhere else. Returns
+// the original object untouched when nothing needs capping (the common case).
+export const downgradeChapterCropWeekSkills = (skills: Skills): Skills => {
+  let result: Skills | undefined;
+  for (const name of CHAPTER_CROP_WEEK_DOWNGRADED_SKILLS) {
+    if ((skills[name] ?? 0) > 1) {
+      result = result ?? { ...skills };
+      result[name] = 1;
+    }
+  }
+  return result ?? skills;
+};
+
+// The upgradeable skills whose downgrade actually changes a CHAPTER_CROP_WEEK
+// event item's result: Crystal Leaf is an ADVANCED plot crop and Crystal Cookie
+// is a Fire-Pit (non-cake) recipe, so only the skills that mechanically apply to
+// those are listed — e.g. Frosted Cakes (cakes only) and basic/medium farmer
+// skills are excluded because they can never affect Crystal Cookie / advanced
+// Crystal Leaf.
+//
+// `downgradeChapterCropWeekSkills` intentionally caps the WHOLE Crops/Cooking tree
+// (a correct superset — capping an inapplicable skill is a no-op for the event
+// item), so mechanics stay robust to crop/recipe tweaks; this list is a subset of
+// it, so the notice can never claim a suppression the mechanics don't make.
+const CHAPTER_CROP_WEEK_NOTICE_SKILLS: Record<
+  "Crops" | "Cooking",
+  readonly UpgradeableSkillName[]
+> = {
+  // Green Thumb (growth, all crops), Strong Roots (growth, advanced), Old Farmer
+  // (advanced yield), Acre Farm (buffs advanced), Hectare Farm (debuffs
+  // advanced), Laurie's Gains (Laurie the Chuckle Crow AOE, advanced). See
+  // getCropYieldAmount / getCropPlotTime for the class gates.
+  Crops: [
+    "Green Thumb",
+    "Strong Roots",
+    "Old Farmer",
+    "Acre Farm",
+    "Hectare Farm",
+    "Laurie's Gains",
+  ],
+  // Double Nom (cost + food, all recipes), Fast Feasts (Fire Pit time), Swift
+  // Sizzle (Fire Pit oil), Fiery Jackpot (Fire Pit crit). See cook / collectRecipe.
+  Cooking: ["Double Nom", "Fast Feasts", "Swift Sizzle", "Fiery Jackpot"],
+};
+
+// Whether the player owns an UPGRADED (rank 2+) skill that the CHAPTER_CROP_WEEK
+// event actually neutralises for its item. Drives the "ascension boosts paused"
+// notice in the Market (Crops → Crystal Leaf) and Fire Pit (Cooking → Crystal Cookie) — a
+// rank-1 skill still applies its base effect, and a skill that can't affect the
+// event item never counts, so the notice only shows a real, suppressed boost.
+export const hasUpgradedChapterCropWeekSkill = (
+  skills: Skills,
+  tree: "Crops" | "Cooking",
+): boolean =>
+  CHAPTER_CROP_WEEK_NOTICE_SKILLS[tree].some(
+    (name) => (skills[name] ?? 0) >= 2,
+  );
 
 // Effective "1 in N" gold chance shown to players for Golden Sunflower per rank.
 // Derived from the mechanical dropChance so the display can't drift: prngChance

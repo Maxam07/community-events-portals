@@ -27,6 +27,10 @@ export function submitMinigameScore({
       throw new Error(`${action.id} is not a valid minigame`);
     }
 
+    if (!Number.isFinite(action.score) || action.score < 0) {
+      throw new Error("Invalid score");
+    }
+
     const minigames = (game.minigames ??
       {}) as Required<GameState>["minigames"];
 
@@ -66,6 +70,11 @@ export function submitMinigameScore({
       action.score > prize.score
     ) {
       delete minigames.games[action.id]?.history[todayKey].prizeClaimedAt;
+    }
+
+    // Tiered prizes pay out on the latest run, not today's best
+    if (prize?.tiers) {
+      minigames.games[action.id]!.history[todayKey].lastScore = action.score;
     }
 
     return game;

@@ -14,6 +14,7 @@ import { getFlowerReadyAt as getFlowerBedReadyAt } from "./flowerBedReadiness";
 import { isWearableActive } from "./wearables";
 import cloneDeep from "lodash.clonedeep";
 import { updateBoostUsed } from "../types/updateBoostUsed";
+import { SKILL_RANKS, getSkillLevel } from "../types/bumpkinSkills";
 
 /**
  * updateBeehives runs on any event that changes the state for bees or flowers
@@ -27,6 +28,7 @@ import { updateBoostUsed } from "../types/updateBoostUsed";
 
 const getHoneyProductionRate = (
   game: GameState,
+  now: number,
 ): { rate: number; boostsUsed: { name: BoostName; value: string }[] } => {
   const { bumpkin } = game;
   let rate = 1;
@@ -42,17 +44,21 @@ const getHoneyProductionRate = (
     boostsUsed.push({ name: "Beekeeper Hat", value: "+0.2" });
   }
 
-  if (bumpkin.skills["Hyper Bees"]) {
-    rate += 0.1;
-    boostsUsed.push({ name: "Hyper Bees", value: "+0.1" });
+  const hyperBeesLevel = getSkillLevel(bumpkin.skills, "Hyper Bees");
+  if (hyperBeesLevel) {
+    const bonus = SKILL_RANKS["Hyper Bees"].ranks[hyperBeesLevel - 1];
+    rate += bonus;
+    boostsUsed.push({ name: "Hyper Bees", value: `+${bonus}` });
   }
 
-  if (bumpkin.skills["Flowery Abode"]) {
-    rate += 0.5;
-    boostsUsed.push({ name: "Flowery Abode", value: "+0.5" });
+  const floweryAbodeLevel = getSkillLevel(bumpkin.skills, "Flowery Abode");
+  if (floweryAbodeLevel) {
+    const bonus = SKILL_RANKS["Flowery Abode"].rate[floweryAbodeLevel - 1];
+    rate += bonus;
+    boostsUsed.push({ name: "Flowery Abode", value: `+${bonus}` });
   }
 
-  if (isTemporaryCollectibleActive({ name: "Bear Shrine", game })) {
+  if (isTemporaryCollectibleActive({ name: "Bear Shrine", game, now })) {
     rate += 0.5;
     boostsUsed.push({ name: "Bear Shrine", value: "+0.5" });
   }
@@ -297,7 +303,7 @@ const getBeehiveDetail = ({
       : createdAt,
     availableTime: Math.ceil(
       (DEFAULT_HONEY_PRODUCTION_TIME - produced) /
-        getHoneyProductionRate(game).rate,
+        getHoneyProductionRate(game, createdAt).rate,
     ),
   };
 };
@@ -381,8 +387,10 @@ const attachFlowers = ({ game, createdAt }: AttachFlowers) => {
       attachedAt +
       Math.min(hiveDetail.availableTime, flowerDetail.availableTime);
 
-    const { rate, boostsUsed: productionBoostsUsed } =
-      getHoneyProductionRate(stateCopy);
+    const { rate, boostsUsed: productionBoostsUsed } = getHoneyProductionRate(
+      stateCopy,
+      createdAt,
+    );
     boostsUsed.push(...productionBoostsUsed);
 
     // Attach to hive

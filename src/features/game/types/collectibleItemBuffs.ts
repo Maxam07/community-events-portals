@@ -1,3 +1,4 @@
+import Decimal from "decimal.js-light";
 import type { BedName, GameState, InventoryItemName } from "./game";
 import type { BuffLabel } from ".";
 import powerup from "assets/icons/level_up.png";
@@ -18,6 +19,8 @@ import { getKeys, getObjectEntries } from "lib/object";
 import { BED_FARMHAND_COUNT } from "./beds";
 import { isCollectibleBuilt, getExpiryCooldown } from "../lib/collectibleBuilt";
 import { hasFeatureAccess } from "lib/flags";
+import { SKILL_RANKS, getSkillLevel } from "./bumpkinSkills";
+import { FRUITFUL_BLEND_YIELD } from "./fertilisers";
 
 type FertiliserBuffLabelName =
   | "Sprout Mix"
@@ -56,6 +59,10 @@ export function getFertiliserBuffLabels({
   }
 
   if (fertiliser === "Fruitful Blend") {
+    const fruitfulBountyLevel = getSkillLevel(
+      game.bumpkin.skills,
+      "Fruitful Bounty",
+    );
     return [
       {
         shortDescription: translate("description.fruitful.blend.boost"),
@@ -63,11 +70,23 @@ export function getFertiliserBuffLabels({
         boostTypeIcon: powerup,
         boostedItemIcon: ITEM_DETAILS["Fruit Patch"].image,
       },
-      ...(game.bumpkin.skills["Fruitful Bounty"]
+      ...(fruitfulBountyLevel
         ? [
             {
               shortDescription: translate(
-                "description.fruitful.bounty.skill.boost",
+                "description.fruitful.bounty.skill.boost.ranked",
+                {
+                  // Marginal yield the skill adds on top of Fruitful Blend's
+                  // base +0.1, which it multiplies. Decimal because the base
+                  // is 0.1: a plain 0.1 * 3 yields 0.30000000000000004.
+                  value: new Decimal(FRUITFUL_BLEND_YIELD)
+                    .mul(
+                      SKILL_RANKS["Fruitful Bounty"].ranks[
+                        fruitfulBountyLevel - 1
+                      ] - 1,
+                    )
+                    .toNumber(),
+                },
               ),
               labelType: "success" as const,
               boostTypeIcon: powerup,
@@ -110,6 +129,69 @@ export function getFertiliserBuffLabels({
     },
   ];
 }
+
+/**
+ * Super Totem & Time Warp Totem grant the SAME set of boosts (only their
+ * durations differ), so both read their labels from here. Itemised one row per
+ * activity like the Legendary Shrine, rather than one sentence listing them all.
+ *
+ * Every activity here is a windowed speed boost under SPEED_BOOSTS, so all six
+ * rows switch to the "speed" wording together (see boostWindows.ts).
+ */
+const getTotemBuffLabels = (game: GameState): BuffLabel[] => {
+  const windowed = hasFeatureAccess(game, "SPEED_BOOSTS");
+
+  return [
+    {
+      shortDescription: windowed
+        ? translate("description.totem.buff.crops.speed")
+        : translate("description.totem.buff.crops"),
+      labelType: "info",
+      boostTypeIcon: SUNNYSIDE.icons.stopwatch,
+      boostedItemIcon: ITEM_DETAILS["Crop Plot"].image,
+    },
+    {
+      shortDescription: windowed
+        ? translate("description.totem.buff.fruit.speed")
+        : translate("description.totem.buff.fruit"),
+      labelType: "info",
+      boostTypeIcon: SUNNYSIDE.icons.stopwatch,
+      boostedItemIcon: ITEM_DETAILS["Fruit Patch"].image,
+    },
+    {
+      shortDescription: windowed
+        ? translate("description.totem.buff.trees.speed")
+        : translate("description.totem.buff.trees"),
+      labelType: "info",
+      boostTypeIcon: SUNNYSIDE.icons.stopwatch,
+      boostedItemIcon: ITEM_DETAILS.Tree.image,
+    },
+    {
+      shortDescription: windowed
+        ? translate("description.totem.buff.minerals.speed")
+        : translate("description.totem.buff.minerals"),
+      labelType: "info",
+      boostTypeIcon: SUNNYSIDE.icons.stopwatch,
+      boostedItemIcon: ITEM_DETAILS.Stone.image,
+    },
+    {
+      shortDescription: windowed
+        ? translate("description.totem.buff.cooking.speed")
+        : translate("description.totem.buff.cooking"),
+      labelType: "info",
+      boostTypeIcon: SUNNYSIDE.icons.stopwatch,
+      boostedItemIcon: chefHat,
+    },
+    {
+      shortDescription: windowed
+        ? translate("description.totem.buff.crafting.speed")
+        : translate("description.totem.buff.crafting"),
+      labelType: "info",
+      boostTypeIcon: SUNNYSIDE.icons.stopwatch,
+      boostedItemIcon: ITEM_DETAILS["Crafting Box"].image,
+    },
+  ];
+};
 
 export const COLLECTIBLE_BUFF_LABELS: Partial<
   Record<InventoryItemName, (game: GameState) => BuffLabel[]>
@@ -467,11 +549,20 @@ export const COLLECTIBLE_BUFF_LABELS: Partial<
       boostTypeIcon: powerup,
     },
   ],
+  "Truffle Seasoning": () => [
+    {
+      shortDescription: translate("description.truffle.seasoning.boost"),
+      labelType: "info",
+      boostTypeIcon: SUNNYSIDE.icons.stopwatch,
+    },
+  ],
 
   // Clash of Factions
-  "Turbo Sprout": () => [
+  "Turbo Sprout": (game) => [
     {
-      shortDescription: translate("description.turbo.sprout.boost"),
+      shortDescription: hasFeatureAccess(game, "SPEED_BOOSTS")
+        ? translate("description.turbo.sprout.boost.speed")
+        : translate("description.turbo.sprout.boost"),
       labelType: "info",
       boostTypeIcon: SUNNYSIDE.icons.stopwatch,
     },
@@ -717,36 +808,47 @@ export const COLLECTIBLE_BUFF_LABELS: Partial<
       boostedItemIcon: SUNNYSIDE.animalFoods.kernel_blend,
     },
   ],
-  Bale: ({ bumpkin }) => [
-    {
-      shortDescription: bumpkin.skills["Double Bale"]
-        ? translate("description.bale.eggBoost.boosted")
-        : translate("description.bale.eggBoost"),
-      labelType: "success",
-      boostTypeIcon: powerup,
-      boostedItemIcon: SUNNYSIDE.resource.egg,
-    },
-    ...(bumpkin.skills["Bale Economy"]
-      ? ([
-          {
-            shortDescription: bumpkin.skills["Double Bale"]
-              ? translate("description.bale.milkBoost.boosted")
-              : translate("description.bale.milkBoost"),
-            labelType: "success",
-            boostTypeIcon: powerup,
-            boostedItemIcon: SUNNYSIDE.resource.milk,
-          },
-          {
-            shortDescription: bumpkin.skills["Double Bale"]
-              ? translate("description.bale.woolBoost.boosted")
-              : translate("description.bale.woolBoost"),
-            labelType: "success",
-            boostTypeIcon: powerup,
-            boostedItemIcon: SUNNYSIDE.resource.wool,
-          },
-        ] as BuffLabel[])
-      : []),
-  ],
+  Bale: ({ bumpkin }) => {
+    // Double Bale multiplies Bale's +0.1 base by its rank (x2 / x2.5 / x3), so
+    // the label must reflect the owned rank rather than a hardcoded +0.2.
+    const doubleBaleLevel = getSkillLevel(bumpkin.skills, "Double Bale");
+    const baleValue = doubleBaleLevel
+      ? new Decimal(0.1)
+          .mul(SKILL_RANKS["Double Bale"].ranks[doubleBaleLevel - 1])
+          .toNumber()
+      : 0.1;
+
+    return [
+      {
+        shortDescription: translate("description.bale.eggBoost", {
+          value: baleValue,
+        }),
+        labelType: "success",
+        boostTypeIcon: powerup,
+        boostedItemIcon: SUNNYSIDE.resource.egg,
+      },
+      ...(bumpkin.skills["Bale Economy"]
+        ? ([
+            {
+              shortDescription: translate("description.bale.milkBoost", {
+                value: baleValue,
+              }),
+              labelType: "success",
+              boostTypeIcon: powerup,
+              boostedItemIcon: SUNNYSIDE.resource.milk,
+            },
+            {
+              shortDescription: translate("description.bale.woolBoost", {
+                value: baleValue,
+              }),
+              labelType: "success",
+              boostTypeIcon: powerup,
+              boostedItemIcon: SUNNYSIDE.resource.wool,
+            },
+          ] as BuffLabel[])
+        : []),
+    ];
+  },
 
   // Resources
   "Woody the Beaver": () => [
@@ -1109,11 +1211,7 @@ export const COLLECTIBLE_BUFF_LABELS: Partial<
     },
   ],
   "Time Warp Totem": (game) => [
-    {
-      shortDescription: translate("description.time.warp.totem.boost"),
-      labelType: "info",
-      boostTypeIcon: SUNNYSIDE.icons.stopwatch,
-    },
+    ...getTotemBuffLabels(game),
     {
       shortDescription: translate("description.temp.buff.effectTime", {
         time: getExpiryCooldown("Time Warp Totem", game) / (60 * 60 * 1000),
@@ -1162,7 +1260,9 @@ export const COLLECTIBLE_BUFF_LABELS: Partial<
   // Faction Shop
   "Gourmet Hourglass": (game) => [
     {
-      shortDescription: translate("description.gourmet.hourglass.boost"),
+      shortDescription: hasFeatureAccess(game, "SPEED_BOOSTS")
+        ? translate("description.gourmet.hourglass.boost.speed")
+        : translate("description.gourmet.hourglass.boost"),
       labelType: "info",
       boostTypeIcon: SUNNYSIDE.icons.stopwatch,
     },
@@ -1490,12 +1590,8 @@ export const COLLECTIBLE_BUFF_LABELS: Partial<
       boostedItemIcon: ITEM_DETAILS.Honey.image,
     },
   ],
-  "Super Totem": () => [
-    {
-      shortDescription: translate("description.superTotem.boost"),
-      labelType: "info",
-      boostTypeIcon: SUNNYSIDE.icons.stopwatch,
-    },
+  "Super Totem": (game) => [
+    ...getTotemBuffLabels(game),
     {
       shortDescription: translate("description.superTotem.boost.effectTime"),
       labelType: "danger",
@@ -1818,9 +1914,11 @@ export const COLLECTIBLE_BUFF_LABELS: Partial<
       boostTypeIcon: helpIcon,
     },
   ],
-  "Fox Shrine": () => [
+  "Fox Shrine": (game) => [
     {
-      shortDescription: translate("description.foxShrine.buff"),
+      shortDescription: hasFeatureAccess(game, "SPEED_BOOSTS")
+        ? translate("description.foxShrine.buff.speed")
+        : translate("description.foxShrine.buff"),
       labelType: "info",
       boostTypeIcon: SUNNYSIDE.icons.stopwatch,
       boostedItemIcon: ITEM_DETAILS["Crafting Box"].image,
@@ -1832,9 +1930,11 @@ export const COLLECTIBLE_BUFF_LABELS: Partial<
       boostedItemIcon: ITEM_DETAILS["Crafting Box"].image,
     },
   ],
-  "Boar Shrine": () => [
+  "Boar Shrine": (game) => [
     {
-      shortDescription: translate("description.boarShrine.buff"),
+      shortDescription: hasFeatureAccess(game, "SPEED_BOOSTS")
+        ? translate("description.boarShrine.buff.speed")
+        : translate("description.boarShrine.buff"),
       labelType: "info",
       boostTypeIcon: SUNNYSIDE.icons.stopwatch,
       boostedItemIcon: chefHat,
@@ -1888,15 +1988,19 @@ export const COLLECTIBLE_BUFF_LABELS: Partial<
       boostTypeIcon: SUNNYSIDE.icons.stopwatch,
     },
   ],
-  "Collie Shrine": () => [
+  "Collie Shrine": (game) => [
     {
-      shortDescription: translate("description.collieShrine.buff"),
+      shortDescription: hasFeatureAccess(game, "SPEED_BOOSTS")
+        ? translate("description.collieShrine.buff.speed")
+        : translate("description.collieShrine.buff"),
       labelType: "info",
       boostTypeIcon: SUNNYSIDE.icons.stopwatch,
       boostedItemIcon: SUNNYSIDE.animals.cowSleeping,
     },
     {
-      shortDescription: translate("description.collieShrine.buff.2"),
+      shortDescription: hasFeatureAccess(game, "SPEED_BOOSTS")
+        ? translate("description.collieShrine.buff.2.speed")
+        : translate("description.collieShrine.buff.2"),
       labelType: "info",
       boostTypeIcon: SUNNYSIDE.icons.stopwatch,
       boostedItemIcon: SUNNYSIDE.animals.sheepSleeping,
@@ -1928,7 +2032,7 @@ export const COLLECTIBLE_BUFF_LABELS: Partial<
       boostedItemIcon: ITEM_DETAILS.Stone.image,
     },
   ],
-  "Legendary Shrine": () => [
+  "Legendary Shrine": (game) => [
     {
       shortDescription: translate("description.legendaryShrine.buff"),
       labelType: "success",
@@ -1959,7 +2063,10 @@ export const COLLECTIBLE_BUFF_LABELS: Partial<
       boostedItemIcon: ITEM_DETAILS["Red Pansy"].image,
     },
     {
-      shortDescription: translate("description.legendaryShrine.buff.6"),
+      // Only the cook-TIME half is windowed; the yield buffs above stay as they are.
+      shortDescription: hasFeatureAccess(game, "SPEED_BOOSTS")
+        ? translate("description.legendaryShrine.buff.6.speed")
+        : translate("description.legendaryShrine.buff.6"),
       labelType: "info",
       boostTypeIcon: SUNNYSIDE.icons.stopwatch,
       boostedItemIcon: chefHat,
@@ -2022,7 +2129,9 @@ export const COLLECTIBLE_BUFF_LABELS: Partial<
       boostedItemIcon: ITEM_DETAILS["Greenhouse"].image,
     },
     {
-      shortDescription: translate("description.tortoiseShrine.buff.2"),
+      shortDescription: hasFeatureAccess(game, "SPEED_BOOSTS")
+        ? translate("description.tortoiseShrine.buff.2.speed")
+        : translate("description.tortoiseShrine.buff.2"),
       labelType: "info",
       boostTypeIcon: SUNNYSIDE.icons.stopwatch,
       boostedItemIcon: ITEM_DETAILS["Crop Machine"].image,
@@ -2044,9 +2153,11 @@ export const COLLECTIBLE_BUFF_LABELS: Partial<
       boostedItemIcon: ITEM_DETAILS["Red Pansy"].image,
     },
   ],
-  "Bantam Shrine": () => [
+  "Bantam Shrine": (game) => [
     {
-      shortDescription: translate("description.bantamShrine.buff"),
+      shortDescription: hasFeatureAccess(game, "SPEED_BOOSTS")
+        ? translate("description.bantamShrine.buff.speed")
+        : translate("description.bantamShrine.buff"),
       labelType: "info",
       boostTypeIcon: SUNNYSIDE.icons.stopwatch,
       boostedItemIcon: SUNNYSIDE.animals.chickenAsleep,
@@ -2326,6 +2437,116 @@ export const COLLECTIBLE_BUFF_LABELS: Partial<
       boostedItemIcon: SUNNYSIDE.icons.plant,
     },
   ],
+  Astrolabe: () => [
+    {
+      shortDescription: translate("description.astrolabe.boost"),
+      labelType: "vibrant",
+      boostTypeIcon: lightning,
+    },
+    {
+      shortDescription: translate("description.astrolabe.boost.2"),
+      labelType: "success",
+      boostTypeIcon: powerup,
+    },
+  ],
+  "Ascension Monument": () => [
+    {
+      shortDescription: translate("description.ascensionMonument.boost"),
+      labelType: "info",
+      boostTypeIcon: SUNNYSIDE.icons.stopwatch,
+    },
+  ],
+  "Otty the Otter": () => [
+    {
+      shortDescription: translate("description.ottyTheOtter.boost"),
+      labelType: "success",
+      boostTypeIcon: powerup,
+      boostedItemIcon: ITEM_DETAILS["Rod"].image,
+    },
+    {
+      shortDescription: translate("description.ottyTheOtter.boost.2"),
+      labelType: "vibrant",
+      boostTypeIcon: lightning,
+      boostedItemIcon: SUNNYSIDE.icons.fish,
+    },
+  ],
+  "Ascended Chicken": () => [
+    {
+      shortDescription: translate("description.ascendedChicken.boost"),
+      labelType: "success",
+      boostTypeIcon: powerup,
+      boostedItemIcon: ITEM_DETAILS["Egg"].image,
+    },
+  ],
+  "Ascended Sheep": () => [
+    {
+      shortDescription: translate("description.ascendedSheep.boost"),
+      labelType: "success",
+      boostTypeIcon: powerup,
+      boostedItemIcon: ITEM_DETAILS["Wool"].image,
+    },
+  ],
+  "Ascended Cow": () => [
+    {
+      shortDescription: translate("description.ascendedCow.boost"),
+      labelType: "info",
+      boostTypeIcon: SUNNYSIDE.icons.stopwatch,
+      boostedItemIcon: SUNNYSIDE.animals.cowSleeping,
+    },
+  ],
+  "Ruins Flower": () => [
+    {
+      shortDescription: translate("description.ruinsFlower.boost"),
+      labelType: "success",
+      boostTypeIcon: powerup,
+      boostedItemIcon: ITEM_DETAILS["Honey"].image,
+    },
+  ],
+  "Dumbo Octopus": () => [
+    {
+      shortDescription: translate("description.dumboOctopus.boost"),
+      labelType: "vibrant",
+      boostTypeIcon: lightning,
+      boostedItemIcon: SUNNYSIDE.icons.fish,
+    },
+  ],
+  "Ascended Idol": () => [
+    {
+      shortDescription: translate("description.ascendedIdol.boost"),
+      labelType: "success",
+      boostTypeIcon: powerup,
+      boostedItemIcon: ITEM_DETAILS["Salt Rake"].image,
+    },
+  ],
+  "Salt Worker Gnome": () => [
+    {
+      shortDescription: translate("description.saltWorkerGnome.boost"),
+      labelType: "info",
+      boostTypeIcon: SUNNYSIDE.icons.stopwatch,
+      boostedItemIcon: ITEM_DETAILS["Salt"].image,
+    },
+    {
+      shortDescription: translate("description.saltWorkerGnome.boost.2"),
+      labelType: "success",
+      boostTypeIcon: powerup,
+      boostedItemIcon: ITEM_DETAILS["Salt"].image,
+    },
+  ],
+  "Winged Vase": () => [
+    {
+      shortDescription: translate("description.wingedVase.boost"),
+      labelType: "vibrant",
+      boostTypeIcon: lightning,
+    },
+  ],
+  Vibraphone: () => [
+    {
+      shortDescription: translate("description.vibraphone.boost"),
+      labelType: "success",
+      boostTypeIcon: powerup,
+      boostedItemIcon: ITEM_DETAILS["Salt Lick"].image,
+    },
+  ],
 
   // All items go above this line
 
@@ -2353,7 +2574,7 @@ export const COLLECTIBLE_BUFF_LABELS: Partial<
         const translationKey =
           `description.bonus${ticket.replace(/\s+/g, "")}.boost` as TranslationKeys;
 
-        return Object.values(items)
+        return Object.values(items ?? {})
           .filter(isCollectible)
           .map((item) => [
             item,

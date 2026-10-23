@@ -9,8 +9,7 @@ import { useSelector } from "@xstate/react";
 import { PortalContext } from "../../lib/PortalProvider";
 import { secondsToString } from "lib/utils/time";
 import { PORTAL_NAME, PORTAL_TOKEN } from "../../constants";
-
-import colorsToken2026 from "assets/icons/colors_2026_token.webp";
+import { ITEM_DETAILS } from "features/game/types/images";
 
 const _prize = (state: PortalMachineState) => {
   return state.context.state?.minigames.prizes[PORTAL_NAME];
@@ -66,7 +65,7 @@ export const Prize: React.FC = () => {
           </Label>
           <div className="flex items-center space-x-2">
             {!!prize.items[PORTAL_TOKEN as keyof typeof prize.items] && (
-              <Label icon={colorsToken2026} type="warning">
+              <Label icon={ITEM_DETAILS[PORTAL_TOKEN].image} type="warning">
                 {t("minigame.eventToken", {
                   token:
                     prize.items[PORTAL_TOKEN as keyof typeof prize.items] ?? 0,

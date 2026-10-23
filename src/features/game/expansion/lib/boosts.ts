@@ -8,10 +8,12 @@ import {
   type Consumable,
   type CookableName,
   FISH_CONSUMABLES,
+  isAgedFish,
   isCookable,
+  isPrimeAgedFish,
 } from "features/game/types/consumables";
 import {
-  getExpiryCooldown,
+  getCollectibleExpiry,
   getCollectiblesAcrossLocations,
   isTemporaryCollectibleActive,
   isCollectibleBuilt,
@@ -23,7 +25,12 @@ import {
   meetsLevelRequirement,
 } from "features/game/lib/level";
 import { isWearableActive } from "features/game/lib/wearables";
-import { SKILL_RANKS, getSkillLevel } from "features/game/types/bumpkinSkills";
+import {
+  SKILL_RANKS,
+  getSkillLevel,
+  downgradeChapterCropWeekSkills,
+} from "features/game/types/bumpkinSkills";
+import { CHAPTER_CROP_WEEK_RECIPE } from "features/game/types/chapterCropWeek";
 import type { SellableItem } from "features/game/events/landExpansion/sellCrop";
 import {
   FACTION_ITEMS,
@@ -31,6 +38,7 @@ import {
 } from "features/game/lib/factions";
 import { hasVipAccess } from "features/game/lib/vipAccess";
 import { setPrecision } from "lib/utils/formatNumber";
+import { hasFeatureAccess } from "lib/flags";
 
 const crops = CROPS;
 
@@ -151,7 +159,11 @@ const applyTempCollectibleBoost = ({
   game: GameState;
   boostValue: number;
 }) => {
-  const active = isTemporaryCollectibleActive({ name: collectibleName, game });
+  const active = isTemporaryCollectibleActive({
+    name: collectibleName,
+    game,
+    now: cookStartAt,
+  });
   if (!active) return seconds;
 
   const activeItems = getCollectiblesAcrossLocations(
@@ -161,8 +173,11 @@ const applyTempCollectibleBoost = ({
   if (activeItems.length === 0) return seconds;
 
   const newestItem = activeItems.sort((a, b) => b.createdAt! - a.createdAt!)[0];
-  const cooldown = getExpiryCooldown(collectibleName, game);
-  const expiresAt = newestItem.createdAt! + cooldown;
+  const expiresAt = getCollectibleExpiry({
+    name: collectibleName,
+    collectible: newestItem,
+    game,
+  });
 
   if (expiresAt <= cookStartAt) return seconds;
 
@@ -186,6 +201,13 @@ export const getCookingTime = ({
   const { bumpkin } = game;
   const buildingName = COOKABLES[item].building;
 
+  // Under SPEED_BOOSTS the temporary cook-time boosts (the two totems, Gourmet
+  // Hourglass, Legendary Shrine, Boar Shrine) are windowed speeds applied live by
+  // `getCookingQueueReadyAts`, so they must NOT be baked in here — what this
+  // returns becomes the recipe's `baseDurationMs` (permanent boosts only). They
+  // are likewise excluded from `boostsUsed`, matching every other slice.
+  const boostsWindowed = hasFeatureAccess(game, "SPEED_BOOSTS");
+
   let reducedSecs = new Decimal(seconds);
   const boostsUsed: { name: BoostName; value: string }[] = [];
 
@@ -201,12 +223,26 @@ export const getCookingTime = ({
   }
 
   // Legendary Shrine - 50% reduction
-  if (isTemporaryCollectibleActive({ name: "Legendary Shrine", game })) {
+  if (
+    !boostsWindowed &&
+    isTemporaryCollectibleActive({
+      name: "Legendary Shrine",
+      game,
+      now: cookStartAt,
+    })
+  ) {
     reducedSecs = reducedSecs.mul(0.5);
     boostsUsed.push({ name: "Legendary Shrine", value: "x0.5" });
   }
 
-  if (isTemporaryCollectibleActive({ name: "Boar Shrine", game })) {
+  if (
+    !boostsWindowed &&
+    isTemporaryCollectibleActive({
+      name: "Boar Shrine",
+      game,
+      now: cookStartAt,
+    })
+  ) {
     reducedSecs = reducedSecs.mul(0.8);
     boostsUsed.push({ name: "Boar Shrine", value: "x0.8" });
   }
@@ -231,17 +267,20 @@ export const getCookingTime = ({
   const hasSuperTotem = isTemporaryCollectibleActive({
     name: "Super Totem",
     game,
+    now: cookStartAt,
   });
   const hasTimeWarpTotem = isTemporaryCollectibleActive({
     name: "Time Warp Totem",
     game,
+    now: cookStartAt,
   });
   const hasActiveTotem = hasSuperTotem || hasTimeWarpTotem;
 
-  if (hasActiveTotem) {
+  if (!boostsWindowed && hasActiveTotem) {
     const totemType = isTemporaryCollectibleActive({
       name: "Super Totem",
       game,
+      now: cookStartAt,
     })
       ? "Super Totem"
       : "Time Warp Totem";
@@ -260,7 +299,14 @@ export const getCookingTime = ({
     }
   }
 
-  if (isTemporaryCollectibleActive({ name: "Gourmet Hourglass", game })) {
+  if (
+    !boostsWindowed &&
+    isTemporaryCollectibleActive({
+      name: "Gourmet Hourglass",
+      game,
+      now: cookStartAt,
+    })
+  ) {
     reducedSecs = applyTempCollectibleBoost({
       seconds: reducedSecs,
       cookStartAt,
@@ -276,8 +322,15 @@ export const getCookingTime = ({
     boostsUsed.push({ name: "Desert Gnome", value: "x0.9" });
   }
 
+  // Crystal Cookie (the CHAPTER_CROP_WEEK event recipe) ignores upgraded Cooking-skill
+  // ranks — its cook-time reductions cap at rank 1 (base skill still applies).
+  const cookSkills =
+    item === CHAPTER_CROP_WEEK_RECIPE
+      ? downgradeChapterCropWeekSkills(bumpkin?.skills ?? {})
+      : (bumpkin?.skills ?? {});
+
   // -10%/-20%/-30% on Fire Pit + Kitchen with Fast Feasts skill (scales w/ rank)
-  const fastFeastsLevel = getSkillLevel(bumpkin?.skills ?? {}, "Fast Feasts");
+  const fastFeastsLevel = getSkillLevel(cookSkills, "Fast Feasts");
   if (
     (buildingName === "Fire Pit" || buildingName === "Kitchen") &&
     fastFeastsLevel
@@ -289,10 +342,7 @@ export const getCookingTime = ({
   }
 
   // -10%/-20%/-30% on Cakes with Frosted Cakes skill (scales with rank)
-  const frostedCakesLevel = getSkillLevel(
-    bumpkin?.skills ?? {},
-    "Frosted Cakes",
-  );
+  const frostedCakesLevel = getSkillLevel(cookSkills, "Frosted Cakes");
   if (item in COOKABLE_CAKES && frostedCakesLevel) {
     const multiplier =
       1 - SKILL_RANKS["Frosted Cakes"].ranks[frostedCakesLevel - 1];
@@ -397,6 +447,14 @@ export const getFoodExpBoost = ({
     boostsUsed.push({ name: "Hungry Hare", value: "x2" });
   }
 
+  if (
+    (isAgedFish(food.name) || isPrimeAgedFish(food.name)) &&
+    isCollectibleBuilt({ name: "Astrolabe", game })
+  ) {
+    boostedExp = boostedExp.mul(1.05);
+    boostsUsed.push({ name: "Astrolabe", value: "x1.05" });
+  }
+
   // Munching Mastery - +5%/+10%/+15% exp boost (scales with rank)
   const munchingMasteryLevel = getSkillLevel(skills, "Munching Mastery");
   if (munchingMasteryLevel) {
@@ -428,10 +486,13 @@ export const getFoodExpBoost = ({
     boostsUsed.push({ name: "Drive-Through Deli", value: `x${multiplier}` });
   }
 
-  // Buzzworthy Treats - 10% exp boost on honey foods
-  if (isFoodMadeWithHoney(food) && skills["Buzzworthy Treats"]) {
-    boostedExp = boostedExp.mul(1.1);
-    boostsUsed.push({ name: "Buzzworthy Treats", value: "x1.1" });
+  // Buzzworthy Treats - +10%/+20%/+30% exp boost on honey foods
+  const buzzworthyTreatsLevel = getSkillLevel(skills, "Buzzworthy Treats");
+  if (isFoodMadeWithHoney(food) && buzzworthyTreatsLevel) {
+    const multiplier =
+      1 + SKILL_RANKS["Buzzworthy Treats"].ranks[buzzworthyTreatsLevel - 1];
+    boostedExp = boostedExp.mul(multiplier);
+    boostsUsed.push({ name: "Buzzworthy Treats", value: `x${multiplier}` });
   }
 
   // Swiss Whiskers - +500 exp on cheese recipes

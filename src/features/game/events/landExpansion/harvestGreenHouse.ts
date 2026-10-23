@@ -22,6 +22,7 @@ import { KNOWN_IDS } from "features/game/types";
 import { isCollectibleBuilt } from "features/game/lib/collectibleBuilt";
 import { isWearableActive } from "features/game/lib/wearables";
 import type { GreenhouseCompostName } from "features/game/types/composters";
+import { getSkillLevel, SKILL_RANKS } from "features/game/types/bumpkinSkills";
 
 export function getGreenhouseCropYieldAmount({
   crop,
@@ -73,11 +74,17 @@ export function getGreenhouseCropYieldAmount({
       amount += 0.25;
       boostsUsed.push({ name: "Rice Panda", value: "+0.25" });
     }
+
+    if (crop === "Rice" && isWearableActive({ name: "Rice Shirt", game })) {
+      amount += 1;
+      boostsUsed.push({ name: "Rice Shirt", value: "+1" });
+    }
   } else {
     const { amount: fruitAmount, boostsUsed: fruitBoostsUsed } = getFruitYield({
       name: crop,
       game,
       prngArgs,
+      now: createdAt,
     });
     amount = fruitAmount;
     boostsUsed.push(...fruitBoostsUsed);
@@ -91,7 +98,14 @@ export function getGreenhouseCropYieldAmount({
     bumpkin: { skills },
   } = game;
 
-  if (skills["Greenhouse Gamble"] && criticalDrop("Greenhouse Gamble", 25)) {
+  const greenhouseGambleLevel = getSkillLevel(skills, "Greenhouse Gamble");
+  if (
+    greenhouseGambleLevel &&
+    criticalDrop(
+      "Greenhouse Gamble",
+      SKILL_RANKS["Greenhouse Gamble"].ranks[greenhouseGambleLevel - 1],
+    )
+  ) {
     amount += 1;
     boostsUsed.push({ name: "Greenhouse Gamble", value: "+1" });
   }
@@ -101,19 +115,25 @@ export function getGreenhouseCropYieldAmount({
     boostsUsed.push({ name: "Pharaoh Gnome", value: "+2" });
   }
 
-  if (skills["Glass Room"]) {
-    amount += 0.1;
-    boostsUsed.push({ name: "Glass Room", value: "+0.1" });
+  const glassRoomLevel = getSkillLevel(skills, "Glass Room");
+  if (glassRoomLevel) {
+    const v = SKILL_RANKS["Glass Room"].ranks[glassRoomLevel - 1];
+    amount += v;
+    boostsUsed.push({ name: "Glass Room", value: `+${v}` });
   }
 
-  if (skills["Seeded Bounty"]) {
-    amount += 0.5;
-    boostsUsed.push({ name: "Seeded Bounty", value: "+0.5" });
+  const seededBountyLevel = getSkillLevel(skills, "Seeded Bounty");
+  if (seededBountyLevel) {
+    const v = SKILL_RANKS["Seeded Bounty"].ranks[seededBountyLevel - 1];
+    amount += v;
+    boostsUsed.push({ name: "Seeded Bounty", value: `+${v}` });
   }
 
-  if (skills["Greasy Plants"]) {
-    amount += 1;
-    boostsUsed.push({ name: "Greasy Plants", value: "+1" });
+  const greasyPlantsLevel = getSkillLevel(skills, "Greasy Plants");
+  if (greasyPlantsLevel) {
+    const v = SKILL_RANKS["Greasy Plants"].yield[greasyPlantsLevel - 1];
+    amount += v;
+    boostsUsed.push({ name: "Greasy Plants", value: `+${v}` });
   }
 
   if (fertiliser === "Greenhouse Goodie") {
@@ -146,6 +166,14 @@ export function harvestGreenHouse({
     // Requires Greenhouse exists
     if (!game.buildings.Greenhouse) {
       throw new Error("Greenhouse does not exist");
+    }
+
+    // A lifted greenhouse keeps its pots growing while it sits in the inventory -
+    // the pause is only applied when it is placed back down, so harvesting from
+    // an unplaced one would side-step it entirely. The pots live on `game`, not
+    // on the building, so lifting it does not put them out of reach on its own.
+    if (!game.buildings.Greenhouse.some((b) => b.coordinates !== undefined)) {
+      throw new Error("Greenhouse is not placed");
     }
 
     if (!game.bumpkin) {
