@@ -885,7 +885,10 @@ export class Scene extends BaseScene {
 
     // Music
     // Background
-    this.load.audio("backgroundMusic", "/world/portal/music/bg_music.mp3");
+    this.load.audio(
+      "backgroundMusic",
+      "/world/portal/music/Bumping_Pumpkins.mp3",
+    );
 
     // SFX
     this.load.audio("hurt", "world/portal/sfx/hurt.wav");
@@ -994,8 +997,6 @@ export class Scene extends BaseScene {
       if (!this.anims.exists(idleAnimationKey)) {
         this.anims.create({
           key: idleAnimationKey,
-          // TODO: adjust start/end to your idle frame range once the real
-          // spritesheet is loaded.
           frames: this.anims.generateFrameNumbers(textureKey, {
             start: 0,
             end: 7,
@@ -1008,9 +1009,6 @@ export class Scene extends BaseScene {
       if (!this.anims.exists(openAnimationKey)) {
         this.anims.create({
           key: openAnimationKey,
-          // TODO: adjust start/end to your open frame range. repeat: 0 so
-          // it plays once - Chest.ts listens for "animationcomplete" on
-          // this exact key to know when to offer the upgrades.
           frames: this.anims.generateFrameNumbers(textureKey, {
             start: 8,
             end: 14,

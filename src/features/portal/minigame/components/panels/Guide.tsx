@@ -8,7 +8,7 @@ import retryIcon from "public/world/portal/halloween/retry.png";
 import {
   FINAL_BOSS_TIME_BONUS_PER_SECOND,
   INSTRUCTIONS,
-  RESOURCES_TABLE,
+  PERKS_TABLE,
   REVIVE_FLOWER_COST,
   REVIVE_MAX_PER_RUN,
   REVIVE_SCORE_MULTIPLIER,
@@ -44,34 +44,25 @@ export const Guide = () => {
             </div>
           </div>
         ))}
-        {/* Resources */}
-        <Label type="default">{t("minigame.resources")}</Label>
-        <table className="w-full text-xs table-fixed border-collapse">
-          <tbody>
-            {RESOURCES_TABLE.map(
-              ({ image, description, width = 13 }, index) => (
-                <tr key={index}>
-                  <td
-                    style={{ border: "1px solid #b96f50" }}
-                    className="p-1.5 w-1/6"
-                  >
-                    <div className="flex items-center justify-center">
-                      {<SquareIcon icon={image} width={width} />}
-                    </div>
-                  </td>
-                  <td
-                    style={{ border: "1px solid #b96f50" }}
-                    className="p-1.5 w-5/6"
-                  >
-                    {t("minigame.guideDescription", {
-                      description: description,
-                    })}
-                  </td>
-                </tr>
-              ),
-            )}
-          </tbody>
-        </table>
+        {/* Perks */}
+        <Label type="default">{t("minigame.perks")}</Label>
+        <div className="grid grid-cols-2 text-xs">
+          {PERKS_TABLE.map(
+            ({ image, perkName, description, width = 10 }, index) => (
+              <div
+                key={index}
+                style={{ border: "1px solid #b96f50" }}
+                className="flex flex-col items-center justify-start gap-2 p-2 text-center"
+              >
+                <SquareIcon icon={image} width={width} />
+                <span className="text-xs font-semibold">{perkName}</span>
+                <div className="text-xs">
+                  {t("minigame.guideDescription", { description })}
+                </div>
+              </div>
+            ),
+          )}
+        </div>
         {/* Final Boss */}
         <Label type="default">{t("minigame.finalBoss")}</Label>
         <div className="flex items-center mb-3 mx-2">
