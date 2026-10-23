@@ -55,6 +55,7 @@ cache
 /*.json
 
 /.codex
-AGENTS.md
 
 /graphify-out
+/docs/superpowers/
+/AGENTS.md

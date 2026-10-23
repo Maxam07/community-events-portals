@@ -24,7 +24,7 @@ const usernameFeatureFlag = (game: GameState) => {
   );
 };
 
-const betaFeatureFlag = ({ inventory }: GameState) =>
+export const betaFeatureFlag = ({ inventory }: GameState) =>
   CONFIG.NETWORK === "amoy" || !!inventory?.["Beta Pass"]?.gt(0);
 
 export const testnetFeatureFlag = () => CONFIG.NETWORK === "amoy";
@@ -84,9 +84,28 @@ export const TIME_BASED_FEATURE_FLAG_WINDOWS = {
     start: new Date("2026-07-13T00:00:00Z"),
     end: new Date("2026-07-23T00:00:00Z"),
   },
+  HALLOWEEN_2026_EVENT_FLAG: {
+    start: new Date("2026-10-26T00:00:00Z"),
+    end: new Date("2026-11-02T00:00:00Z"),
+  },
   RONIN_WAYPOINT_DEPRECATION: {
     start: WAYPOINT_WALLET_ENDDATE,
     end: null,
+  },
+  // Ascending from Swamp (A1) into the next island (Spooky, A2) unlocks on this
+  // date. Testnet bypasses. The first ascension (Volcano → Swamp / A0 → A1) is not
+  // time-gated — it unlocks on the standard level-150 / expansion / resource costs.
+  SPOOKY_ASCENSION: {
+    start: new Date("2026-09-07T00:00:00Z"),
+    end: null,
+  },
+  // Ascension Age chapter VIP perk: VIP holders expand their land 10% faster.
+  // Live from Mon 10th Aug 2026 (when the chapter's tasks begin) until the
+  // chapter ends — the end date must match CHAPTERS["Ascension Age"].endDate.
+  // Testnet bypasses the start date so testers can verify ahead of the cutover.
+  ASCENSION_AGE_VIP_EXPANSION: {
+    start: new Date("2026-08-10T00:00:00Z"),
+    end: new Date("2026-11-02T00:00:00Z"),
   },
 } satisfies Record<string, TimeBasedFeatureWindow>;
 
@@ -106,6 +125,10 @@ export const TIME_BASED_FEATURE_FLAGS: Record<
   APRIL_FOOLS_EVENT_FLAG: betaTimePeriodFeatureFlag,
   RONIN_WAYPOINT_DEPRECATION: timePeriodFeatureFlag,
   COLORS_2026_EVENT_FLAG: betaTimePeriodFeatureFlag,
+  HALLOWEEN_2026_EVENT_FLAG: betaTimePeriodFeatureFlag,
+  // Testnet-only bypass before the date (not beta), so live testers can reach A2.
+  SPOOKY_ASCENSION: timePeriodFeatureFlag,
+  ASCENSION_AGE_VIP_EXPANSION: timePeriodFeatureFlag,
 };
 
 /**
@@ -141,14 +164,40 @@ const FEATURE_FLAGS = {
   // Permanent Feature Flags
   ADMIN_DASHBOARDS: usernameFeatureFlag,
   AIRDROP_PLAYER: adminFeatureFlag,
+
+  // Shows the admin "Create / End Giveaway" controls on the town-hall giveaway
+  // board. The server enforces the real allowlist (GIVEAWAY_ADMIN_FARM_IDS), so
+  // this only gates the UI. Open to everyone in local development.
+  GIVEAWAY_ADMIN: (game: GameState) =>
+    import.meta.env.DEV || usernameFeatureFlag(game) || adminFeatureFlag(game),
   STREAMER_HAT: (game) =>
     (game.wardrobe["Streamer Hat"] ?? 0) > 0 || testnetFeatureFlag(),
 
   // Temporary Feature Flags
-  FACE_RECOGNITION_TEST: betaFeatureFlag,
-  LEDGER: testnetLocalStorageFeatureFlag("ledger"),
 
-  LEAGUES: () => false,
+  /**
+   * Chapter 16's Pigpen building and the Pig animal. Remove once Chapter 16
+   * ships and the Pigpen gates on its own unlock level instead.
+   */
+  PIGPEN: betaFeatureFlag,
+
+  /**
+   * Chapter 16's Cave: the Cave building in the Workbench shop and the `/cave`
+   * interior room. Remove once Chapter 16 ships and the Cave gates on its own
+   * unlock instead.
+   */
+  CAVE: betaFeatureFlag,
+
+  /**
+   * Chapter 16's direct Beetle feeding: a Beetle fed straight to an animal.
+   * Remove once Chapter 16 ships.
+   */
+  BEETLE_FEEDING: betaFeatureFlag,
+
+  FACE_RECOGNITION_TEST: betaFeatureFlag,
+  // The developer-options button that forces a captcha on your own farm
+  TRIGGER_CAPTCHA: betaFeatureFlag,
+  LEDGER: testnetLocalStorageFeatureFlag("ledger"),
 
   EASTER: () => false,
 
@@ -157,39 +206,20 @@ const FEATURE_FLAGS = {
   MODERATOR: (game) =>
     !!((game.wardrobe.Halo ?? 0) > 0) && !!game.inventory["Beta Pass"]?.gt(0),
 
-  /**
-   * Gates the new home-interior placement system: the /interior route, the
-   * /level_one upgrade route, and the `interior.upgrade` event. Beta-pass /
-   * testnet only until the feature ships to all players.
-   */
-  HOME_EXPANSIONS: betaFeatureFlag,
-
-  BOOSTS_DISPLAY: betaFeatureFlag,
-
-  // Saving & re-applying named farm layouts in landscaping mode.
-  SAVED_LAYOUTS: betaFeatureFlag,
-
-  // Bulk-fetch resources from all pets at once: the player types how many of
-  // each resource they need, the FE plans the best allocation across all pets,
-  // and one `pets.bulkFetch` event executes it.
-  BULK_PET_FETCH: betaFeatureFlag,
-
   // Speed-rate (Clash-of-Clans potion) model for time-based boosts — starting
   // with the Sparrow Shrine on crops. When on, planting stores the new
   // baseDurationMs + true plantedAt model; when off, boosts stay discount-at-start.
-  SPEED_BOOSTS: usernameFeatureFlag,
+  SPEED_BOOSTS: betaFeatureFlag,
 
-  // Importing leftover items from the old home into the new interior.
-  HOME_ITEM_MIGRATION: betaFeatureFlag,
+  // Beta testers can grab a Yakkamon pre-registration code before the level
+  // tiers open to everyone else. The server enforces the same rule.
+  YAKKAMON_BETA_ACCESS: betaFeatureFlag,
 
-  SWAMP_ASCENSION: usernameFeatureFlag,
-
-  // Per-rank skill upgrades (spend Ascension Shards + skill points to rank up a
-  // skill). Kept on its own flag so the upgrade UI + `skill.upgraded` event can
-  // be toggled independently of the rest of the ascension system (islands,
-  // expansion, level bands). Skill *effects* still apply off the stored rank
-  // regardless of this flag; only purchasing new ranks is gated here.
-  ASCENSION_SKILLS: testnetFeatureFlag,
+  // Admin testers (Gift Giver + Beta Pass, or testnet) can buy, grow, cook and
+  // trade the Chapter Crop Week items before CHAPTER_CROP_WEEK.startDate so the
+  // run can be tested on mainnet. Everyone else waits for the event window —
+  // see hasChapterCropWeekAccess. Remove once the event is live for all.
+  CHAPTER_CROP_WEEK_EARLY_ACCESS: adminFeatureFlag,
 } satisfies Record<string, FeatureFlag>;
 
 export type FeatureName = keyof typeof FEATURE_FLAGS;
@@ -197,3 +227,13 @@ export type FeatureName = keyof typeof FEATURE_FLAGS;
 export const hasFeatureAccess = (game: GameState, featureName: FeatureName) => {
   return FEATURE_FLAGS[featureName](game);
 };
+
+/**
+ * The feature names currently gated behind `betaFeatureFlag` (Beta Pass /
+ * testnet). Derived from FEATURE_FLAGS by identity so this list can't drift
+ * from the flags it's reporting on - a feature only needs to be flagged with
+ * betaFeatureFlag once to show up here, nothing else to maintain.
+ */
+export const BETA_FEATURE_NAMES = (
+  Object.keys(FEATURE_FLAGS) as FeatureName[]
+).filter((name) => FEATURE_FLAGS[name] === betaFeatureFlag);

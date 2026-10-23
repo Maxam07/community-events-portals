@@ -13,6 +13,14 @@ const dateNow = Date.now();
 const GAME_STATE: GameState = {
   ...INITIAL_FARM,
   crops: {
+    // Fixtures below write to plot `0` and spread `GAME_STATE.crops[0]`, which
+    // resolved to `undefined` while no such plot existed - so those plots came
+    // out with no coordinates. `harvest` now rejects an unplaced plot.
+    "0": {
+      createdAt: dateNow,
+      x: 20,
+      y: 20,
+    },
     "12": {
       createdAt: dateNow,
       x: 0,
@@ -50,6 +58,30 @@ describe("harvest", () => {
         createdAt: dateNow,
       }),
     ).toThrow("Nothing was planted");
+  });
+
+  it("does not harvest a plot that is not placed", () => {
+    // A lifted plot keeps growing until it is placed back down, where the pause
+    // is applied. Harvesting one from the inventory would skip it.
+    expect(() =>
+      harvest({
+        state: {
+          ...GAME_STATE,
+          crops: {
+            0: {
+              createdAt: dateNow,
+              removedAt: dateNow - 1000,
+              crop: { name: "Sunflower", plantedAt: 0 },
+            },
+          },
+        },
+        action: {
+          type: "crop.harvested",
+          index: "0",
+        },
+        createdAt: dateNow,
+      }),
+    ).toThrow("Plot is not placed");
   });
 
   it("does not harvest if the crop is not ripe", () => {
@@ -703,7 +735,9 @@ describe("harvest", () => {
   });
 
   describe("cropBuffs", () => {
-    const firstId = Object.keys(GAME_STATE.crops)[0];
+    // Pinned: `Object.keys` orders integer-like keys numerically, so this must not
+    // drift onto plot `0` - the AOE fixtures below are keyed to this plot's (0,-2).
+    const firstId = "12";
 
     it("gives double the yield of Soybeans when Soybliss is placed and ready", () => {
       const state = harvest({
@@ -2737,6 +2771,36 @@ describe("harvest", () => {
       expect(state.inventory.Cabbage).toEqual(new Decimal(1.15));
     });
 
+    it("neutralises a rank 3 Old Farmer on the Crystal Leaf event crop (+0.1, not +0.15)", () => {
+      const state = harvest({
+        state: {
+          ...GAME_STATE,
+          bumpkin: {
+            ...TEST_BUMPKIN,
+            skills: { ...TEST_BUMPKIN.skills, "Old Farmer": 3 },
+          },
+          crops: {
+            [firstId]: {
+              ...GAME_STATE.crops[firstId],
+              crop: {
+                name: "Crystal Leaf",
+                plantedAt:
+                  dateNow - (CROPS["Crystal Leaf"].harvestSeconds ?? 0) * 1000,
+              },
+            },
+          },
+        },
+        createdAt: dateNow,
+        action: { type: "crop.harvested", index: firstId },
+      });
+      expect(state.crops[firstId].crop).toBeUndefined();
+      // Crystal Leaf (event crop) ignores the upgraded rank: rank-1 bonus
+      // (+0.1), not the owned rank 3 (+0.15). The Old Farmer rank 3 Eggplant test
+      // below (a non-event advanced crop) still gets the full +0.15, proving the
+      // scoping.
+      expect(state.inventory["Crystal Leaf"]).toEqual(new Decimal(1.1));
+    });
+
     it("gives +0.125 to advanced crop when Old Farmer skill is rank 2", () => {
       const state = harvest({
         state: {
@@ -3854,6 +3918,56 @@ describe("harvest", () => {
       });
       expect(state.crops[firstId].crop).toBeUndefined();
       expect(state.inventory.Sunflower).toEqual(new Decimal(1.3));
+    });
+
+    describe("Pollen Power Up ranks", () => {
+      const harvestWithRank = (rank: number, swarmCount = 1) =>
+        harvest({
+          state: {
+            ...GAME_STATE,
+            bumpkin: {
+              ...TEST_BUMPKIN,
+              skills: { ...TEST_BUMPKIN.skills, "Pollen Power Up": rank },
+            },
+            inventory: { "Sunflower Seed": new Decimal(1) },
+            season: { season: "spring", startedAt: 0 },
+            crops: {
+              [firstId]: {
+                ...GAME_STATE.crops[firstId],
+                crop: {
+                  name: "Sunflower",
+                  plantedAt:
+                    dateNow - (CROPS["Sunflower"].harvestSeconds ?? 0) * 1000,
+                },
+                beeSwarm: {
+                  count: swarmCount,
+                  swarmActivatedAt: dateNow - 1000,
+                },
+              },
+            },
+          },
+          createdAt: dateNow,
+          action: { type: "crop.harvested", index: firstId },
+        });
+
+      it("gives a +0.35 total swarm bonus at rank 2", () => {
+        expect(harvestWithRank(2).inventory.Sunflower).toEqual(
+          new Decimal(1.35),
+        );
+      });
+
+      it("gives a +0.4 total swarm bonus at rank 3", () => {
+        expect(harvestWithRank(3).inventory.Sunflower).toEqual(
+          new Decimal(1.4),
+        );
+      });
+
+      it("scales the ranked swarm bonus by the stacked swarm count", () => {
+        // rank 3 => (0.2 + 0.2) * 3 swarms = +1.2
+        expect(harvestWithRank(3, 3).inventory.Sunflower).toEqual(
+          new Decimal(2.2),
+        );
+      });
     });
 
     it("gives +1 to medium crop when Hectare Farm skill is active", () => {

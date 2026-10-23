@@ -648,4 +648,6 @@ export type MutantFlowerName =
   | "Venus Bumpkin Trap"
   | "Black Hole Flower"
   | "Anemone Flower"
-  | "Salt Crystal Flower";
+  | "Salt Crystal Flower"
+  | "Ruins Flower"
+  | "Cyclops Bloom";

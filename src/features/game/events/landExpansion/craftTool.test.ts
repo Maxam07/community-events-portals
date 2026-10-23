@@ -2,9 +2,23 @@ import Decimal from "decimal.js-light";
 import { WORKBENCH_TOOLS } from "features/game/types/tools";
 import { TEST_FARM } from "../../lib/constants";
 import type { GameState } from "../../types/game";
-import { craftTool } from "./craftTool";
+import {
+  craftTool,
+  getToolPrice,
+  getWorkbenchToolStock,
+  TUTORIAL_FREE_AXES,
+} from "./craftTool";
+import { LEVEL_EXPERIENCE } from "features/game/lib/level";
 
-const GAME_STATE: GameState = TEST_FARM;
+// Past the free tutorial Axes, so these tests exercise normal pricing. The
+// allowance itself is covered in "tutorial free axes" below.
+const GAME_STATE: GameState = {
+  ...TEST_FARM,
+  farmActivity: {
+    ...TEST_FARM.farmActivity,
+    "Axe Crafted": TUTORIAL_FREE_AXES,
+  },
+};
 
 describe("craftTool", () => {
   it("throws an error if item is not craftable", () => {
@@ -136,6 +150,8 @@ describe("craftTool", () => {
       craftTool({
         state: {
           ...GAME_STATE,
+          // Off the tutorial island, where the daily stock governs Axes
+          island: { type: "spring" },
           stock: {
             Axe: new Decimal(0),
           },
@@ -162,7 +178,9 @@ describe("craftTool", () => {
       },
     });
 
-    expect(state.farmActivity["Axe Crafted"]).toBe(1);
+    expect(state.farmActivity["Axe Crafted"]).toBe(
+      (GAME_STATE.farmActivity["Axe Crafted"] ?? 0) + 1,
+    );
   });
 
   it("increments Coins spent when axe is crafted", () => {
@@ -425,6 +443,45 @@ describe("craftTool", () => {
     expect(state.inventory["Oil Drill"]).toEqual(new Decimal(1));
   });
 
+  // Rank 1 (20 Wool) is covered above; ranks scale the wool cost down.
+  it.each([
+    [2, 15],
+    [3, 10],
+  ])(
+    "crafts oil drill with %i Oil Rig rank => %i wool instead of leather",
+    (rank, wool) => {
+      const state = craftTool({
+        state: {
+          ...GAME_STATE,
+          coins: 100,
+          inventory: {
+            Wool: new Decimal(wool),
+            Wood: new Decimal(20),
+            Iron: new Decimal(9),
+            Leather: new Decimal(10),
+          },
+          bumpkin: {
+            ...GAME_STATE.bumpkin,
+            skills: {
+              "Oil Rig": rank,
+            },
+          },
+          island: {
+            type: "desert",
+          },
+        },
+        action: {
+          type: "tool.crafted",
+          tool: "Oil Drill",
+        },
+      });
+
+      expect(state.inventory["Wool"]).toEqual(new Decimal(0));
+      expect(state.inventory["Leather"]).toEqual(new Decimal(10));
+      expect(state.inventory["Oil Drill"]).toEqual(new Decimal(1));
+    },
+  );
+
   it("does not craft a tool if the bumpkin level is below the required level", () => {
     expect(() =>
       craftTool({
@@ -514,6 +571,31 @@ describe("craftTool", () => {
     });
 
     expect(state.coins).toEqual(84);
+  });
+
+  it("scales the Cheap Rakes discount with rank", () => {
+    // Salt Rake base cost is 20 coins: x0.7 -> 14 spent, x0.6 -> 12 spent.
+    const craftAtRank = (rank: number) =>
+      craftTool({
+        state: {
+          ...GAME_STATE,
+          coins: 100,
+          inventory: { Wood: new Decimal(10) },
+          bumpkin: {
+            ...GAME_STATE.bumpkin,
+            skills: {
+              "Cheap Rakes": rank,
+            },
+          },
+        },
+        action: {
+          type: "tool.crafted",
+          tool: "Salt Rake",
+        },
+      }).coins;
+
+    expect(craftAtRank(2)).toEqual(86);
+    expect(craftAtRank(3)).toEqual(88);
   });
 
   it("Salt Rakes cost 10% less with Salt Sculpture level 4", () => {
@@ -615,5 +697,233 @@ describe("craftTool", () => {
         }),
       ).toThrow("You can only have one of this weather item");
     });
+  });
+});
+
+describe("craftTool exploit guards", () => {
+  it("rejects a negative amount (would otherwise credit coins and mint ingredients)", () => {
+    expect(() =>
+      craftTool({
+        state: { ...GAME_STATE, coins: 0 },
+        action: { type: "tool.crafted", tool: "Axe", amount: -100 },
+      }),
+    ).toThrow("Invalid amount");
+  });
+
+  it("rejects a non-integer amount", () => {
+    expect(() =>
+      craftTool({
+        state: { ...GAME_STATE, coins: 1000 },
+        action: { type: "tool.crafted", tool: "Axe", amount: 1.5 },
+      }),
+    ).toThrow("Invalid amount");
+  });
+});
+
+describe("tutorial free axes", () => {
+  // A brand new farm: tutorial island, no coins, nothing crafted yet.
+  const NEW_FARM: GameState = {
+    ...GAME_STATE,
+    island: { type: "basic" },
+    coins: 0,
+    inventory: {},
+    farmActivity: {},
+    stock: { ...GAME_STATE.stock, Axe: new Decimal(200) },
+    createdAt: new Date("2026-10-01T00:00:00.000Z").getTime(),
+  };
+
+  const craftAxes = (state: GameState, amount: number) =>
+    craftTool({
+      state,
+      action: { type: "tool.crafted", tool: "Axe", amount },
+    });
+
+  it("gives a new player their first 10 Axes for free", () => {
+    const state = craftAxes(NEW_FARM, 10);
+
+    expect(state.coins).toEqual(0);
+    expect(state.inventory.Axe).toEqual(new Decimal(10));
+  });
+
+  it("keeps them free when bought one at a time", () => {
+    let state = NEW_FARM;
+    for (let i = 0; i < 10; i++) {
+      state = craftAxes(state, 1);
+    }
+
+    expect(state.coins).toEqual(0);
+    expect(state.inventory.Axe).toEqual(new Decimal(10));
+    expect(() => craftAxes(state, 1)).toThrow("Insufficient Coins");
+  });
+
+  it("charges only for the Axes beyond the free allowance", () => {
+    const state = craftAxes(
+      {
+        ...NEW_FARM,
+        coins: 140,
+        bumpkin: { ...NEW_FARM.bumpkin, experience: LEVEL_EXPERIENCE[3] },
+        farmActivity: { "Axe Crafted": 7 },
+      },
+      10,
+    );
+
+    // 3 free + 7 paid at 20 coins
+    expect(state.coins).toEqual(0);
+    expect(state.inventory.Axe).toEqual(new Decimal(10));
+  });
+
+  it("still needs the coins for the paid part of a batch", () => {
+    expect(() =>
+      craftAxes(
+        {
+          ...NEW_FARM,
+          coins: 139,
+          bumpkin: { ...NEW_FARM.bumpkin, experience: LEVEL_EXPERIENCE[3] },
+          farmActivity: { "Axe Crafted": 7 },
+        },
+        10,
+      ),
+    ).toThrow("Insufficient Coins");
+  });
+
+  it("charges full price once 10 Axes have been crafted", () => {
+    expect(getToolPrice(WORKBENCH_TOOLS.Axe, 1, NEW_FARM)).toEqual(0);
+    expect(
+      getToolPrice(WORKBENCH_TOOLS.Axe, 1, {
+        ...NEW_FARM,
+        farmActivity: { "Axe Crafted": 10 },
+      }),
+    ).toEqual(20);
+    expect(getToolPrice(WORKBENCH_TOOLS.Axe, 15, NEW_FARM)).toEqual(100);
+  });
+
+  it("is only for farms created from the tutorial rework onwards", () => {
+    // Older tutorial-island farms were given 10 starter Axes and have no
+    // crafts recorded, so without this gate they would get 10 more for free.
+    const justBefore = new Date("2026-09-21T02:59:59.999Z").getTime();
+    const launch = new Date("2026-09-21T03:00:00.000Z").getTime();
+
+    expect(
+      getToolPrice(WORKBENCH_TOOLS.Axe, 1, {
+        ...NEW_FARM,
+        createdAt: justBefore,
+      }),
+    ).toEqual(20);
+    expect(
+      getToolPrice(WORKBENCH_TOOLS.Axe, 1, { ...NEW_FARM, createdAt: launch }),
+    ).toEqual(0);
+  });
+
+  it("is only for the tutorial island", () => {
+    expect(() =>
+      craftAxes({ ...NEW_FARM, island: { type: "spring" } }, 1),
+    ).toThrow("Insufficient Coins");
+  });
+
+  it("sells paid Axes from a per-level budget", () => {
+    const spent: GameState = {
+      ...NEW_FARM,
+      coins: 300,
+      farmActivity: { "Axe Crafted": 10 },
+    };
+
+    // Level 1 budgets ten paid Axes
+    const state = craftAxes(spent, 10);
+    expect(state.coins).toEqual(100);
+    expect(state.inventory.Axe).toEqual(new Decimal(10));
+
+    expect(() => craftAxes(state, 1)).toThrow("Not enough stock");
+  });
+
+  it("refreshes the paid budget at level-ups", () => {
+    // The free batch and level 1's paid budget are both spent
+    const drained: GameState = {
+      ...NEW_FARM,
+      coins: 100,
+      farmActivity: { "Axe Crafted": 20 },
+    };
+
+    expect(() => craftAxes(drained, 1)).toThrow("Not enough stock");
+
+    const levelTwo: GameState = {
+      ...drained,
+      bumpkin: {
+        ...drained.bumpkin,
+        experience: LEVEL_EXPERIENCE[2],
+      },
+    };
+
+    const state = craftAxes(levelTwo, 3);
+    expect(state.coins).toEqual(40);
+    expect(state.inventory.Axe).toEqual(new Decimal(3));
+  });
+
+  it("stops growing the paid budget at level 5", () => {
+    const levelled: GameState = {
+      ...NEW_FARM,
+      coins: 100,
+      bumpkin: {
+        ...NEW_FARM.bumpkin,
+        experience: LEVEL_EXPERIENCE[7],
+      },
+      // Free batch plus level 5's full budget of fifty
+      farmActivity: { "Axe Crafted": 60 },
+    };
+
+    expect(() => craftAxes(levelled, 1)).toThrow("Not enough stock");
+  });
+
+  it("crafts free Axes even when the paid stock is empty", () => {
+    const drained: GameState = {
+      ...NEW_FARM,
+      stock: { ...NEW_FARM.stock, Axe: new Decimal(0) },
+    };
+
+    const state = craftAxes(drained, 10);
+
+    expect(state.coins).toEqual(0);
+    expect(state.inventory.Axe).toEqual(new Decimal(10));
+    // Free Axes never draw from the paid stock
+    expect(state.stock.Axe).toEqual(new Decimal(0));
+  });
+
+  it("sells Axes from the tutorial budget, not the stored stock", () => {
+    // Farms start with the full Axe stock and the daily shipment never
+    // lowers it, so the Workbench must not offer those 200 during the
+    // tutorial: only the free batch plus level 1's paid budget are on sale.
+    expect(getWorkbenchToolStock("Axe", NEW_FARM)).toEqual(new Decimal(20));
+
+    expect(
+      getWorkbenchToolStock("Axe", {
+        ...NEW_FARM,
+        farmActivity: { "Axe Crafted": 20 },
+      }),
+    ).toEqual(new Decimal(0));
+
+    // Other tools still sell from the stock
+    expect(
+      getWorkbenchToolStock("Pickaxe", {
+        ...NEW_FARM,
+        stock: { ...NEW_FARM.stock, Pickaxe: new Decimal(7) },
+      }),
+    ).toEqual(new Decimal(7));
+
+    // Once the tutorial phase is over the daily stock governs Axes again
+    expect(
+      getWorkbenchToolStock("Axe", {
+        ...NEW_FARM,
+        inventory: { "Basic Land": new Decimal(7) },
+        farmActivity: { "Axe Crafted": 60 },
+      }),
+    ).toEqual(new Decimal(200));
+  });
+
+  it("does not make other tools free", () => {
+    expect(() =>
+      craftTool({
+        state: { ...NEW_FARM, inventory: { Wood: new Decimal(3) } },
+        action: { type: "tool.crafted", tool: "Pickaxe", amount: 1 },
+      }),
+    ).toThrow("Insufficient Coins");
   });
 });

@@ -81,6 +81,7 @@ export const PlayerModal: React.FC<Props> = ({
 
   const closeModal = useCallback(() => {
     setShowPlayerModal(false);
+    playerModalManager.close();
     setTimeout(() => {
       clearHistory();
     }, 100);
@@ -294,7 +295,9 @@ export const PlayerModal: React.FC<Props> = ({
                 className="text-xxs underline cursor-pointer"
                 onClick={() => {
                   closeModal();
-                  navigate(`${marketplaceBase}/profile/${currentPlayerId}`);
+                  navigate(
+                    `${marketplaceBase}/profile/${currentPlayerId}/history`,
+                  );
                 }}
               >
                 {t("playerModal.viewTrades")}

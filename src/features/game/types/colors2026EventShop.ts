@@ -4,7 +4,9 @@ import type { InventoryItemName } from "./game";
 import { COLORS_2026_STORE } from "./minigameShop";
 
 export type EventTierItemName =
-  EventCollectibleName | EventWearableName | MegastoreKeys;
+  | EventCollectibleName
+  | EventWearableName
+  | MegastoreKeys;
 
 export type EventCollectibleName =
   // April Fools Event

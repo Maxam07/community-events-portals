@@ -20,6 +20,7 @@ import {
 } from "features/game/lib/collectibleBuilt";
 import { getCropTime } from "./plant";
 import { getFruitTime } from "./fruitPlanted";
+import { isWearableActive } from "features/game/lib/wearables";
 import { hasFeatureAccess } from "lib/flags";
 import type { Resource } from "features/game/lib/getBudYieldBoosts";
 import { produce } from "immer";
@@ -28,6 +29,7 @@ import {
   type FarmActivityName,
   trackFarmActivity,
 } from "features/game/types/farmActivity";
+import { getSkillLevel, SKILL_RANKS } from "features/game/types/bumpkinSkills";
 
 export type PlantGreenhouseAction = {
   type: "greenhouse.planted";
@@ -93,6 +95,14 @@ function getPlantedAt({
 }: GetPlantedAtArgs): {
   plantedAt: number;
   baseDurationMs?: number;
+  /**
+   * Legacy model only: the back-date applied to `plantedAt` (ms). It is a
+   * DISCOUNT, not growth already done, so the pot's progress bar has to
+   * un-back-date with it — otherwise a heavily boosted plant opens its bar
+   * near-full. Mirrors `PlantedCrop.boostedTime` (see plant.ts/getBoostedTime).
+   * Omitted when nothing boosts the grow time.
+   */
+  boostedTime?: number;
   boostsUsed: { name: BoostName; value: string }[];
 } {
   if (!crop) return { plantedAt: 0, boostsUsed: [] };
@@ -103,6 +113,7 @@ function getPlantedAt({
     crop,
     game,
     greenhouseFertiliser,
+    now: createdAt,
   });
 
   if (hasFeatureAccess(game, "SPEED_BOOSTS")) {
@@ -118,19 +129,25 @@ function getPlantedAt({
     };
   }
 
-  const offset = cropTime - boostedTime;
+  const offsetMs = (cropTime - boostedTime) * 1000;
 
-  return { plantedAt: createdAt - offset * 1000, boostsUsed };
+  return {
+    plantedAt: createdAt - offsetMs,
+    ...(offsetMs > 0 ? { boostedTime: offsetMs } : {}),
+    boostsUsed,
+  };
 }
 
 export const getGreenhouseCropTime = ({
   crop,
   game,
   greenhouseFertiliser,
+  now,
 }: {
   crop: GreenHouseCropName | GreenHouseFruitName;
   game: GameState;
   greenhouseFertiliser?: GreenhouseCompostName;
+  now: number;
 }): { seconds: number; boostsUsed: { name: BoostName; value: string }[] } => {
   let seconds = GREENHOUSE_CROP_TIME_SECONDS[crop];
   const boostsUsed: { name: BoostName; value: string }[] = [];
@@ -148,12 +165,13 @@ export const getGreenhouseCropTime = ({
       getCropTime({
         game,
         crop,
+        now,
       });
     seconds *= baseMultiplier;
     boostsUsed.push(...cropBoostsUsed);
   } else {
     const { multiplier: baseMultiplier, boostsUsed: fruitBoostsUsed } =
-      getFruitTime({ game });
+      getFruitTime({ game, now });
     seconds *= baseMultiplier;
     boostsUsed.push(...fruitBoostsUsed);
   }
@@ -165,33 +183,43 @@ export const getGreenhouseCropTime = ({
 
   if (
     !windowed &&
-    isTemporaryCollectibleActive({ name: "Tortoise Shrine", game })
+    isTemporaryCollectibleActive({ name: "Tortoise Shrine", game, now })
   ) {
     seconds *= 2 / 3; // -33% growth time
     boostsUsed.push({ name: "Tortoise Shrine", value: "x0.67" });
   }
 
-  if (game.bumpkin.skills["Rice and Shine"]) {
-    seconds *= 0.95;
-    boostsUsed.push({ name: "Rice and Shine", value: "x0.95" });
+  const { skills } = game.bumpkin;
+
+  const riceAndShineLevel = getSkillLevel(skills, "Rice and Shine");
+  if (riceAndShineLevel) {
+    const m = SKILL_RANKS["Rice and Shine"].ranks[riceAndShineLevel - 1];
+    seconds *= m;
+    boostsUsed.push({ name: "Rice and Shine", value: `x${m}` });
   }
 
-  // Olive Express: 10% reduction
-  if (crop === "Olive" && game.bumpkin.skills["Olive Express"]) {
-    seconds *= 0.9;
-    boostsUsed.push({ name: "Olive Express", value: "x0.9" });
+  // Olive Express: Olive growth-time reduction
+  const oliveExpressLevel = getSkillLevel(skills, "Olive Express");
+  if (crop === "Olive" && oliveExpressLevel) {
+    const m = SKILL_RANKS["Olive Express"].ranks[oliveExpressLevel - 1];
+    seconds *= m;
+    boostsUsed.push({ name: "Olive Express", value: `x${m}` });
   }
 
-  // Rice Rocket: 10% reduction
-  if (crop === "Rice" && game.bumpkin.skills["Rice Rocket"]) {
-    seconds *= 0.9;
-    boostsUsed.push({ name: "Rice Rocket", value: "x0.9" });
+  // Rice Rocket: Rice growth-time reduction
+  const riceRocketLevel = getSkillLevel(skills, "Rice Rocket");
+  if (crop === "Rice" && riceRocketLevel) {
+    const m = SKILL_RANKS["Rice Rocket"].ranks[riceRocketLevel - 1];
+    seconds *= m;
+    boostsUsed.push({ name: "Rice Rocket", value: `x${m}` });
   }
 
-  // Vine Velocity: 10% reduction
-  if (crop === "Grape" && game.bumpkin.skills["Vine Velocity"]) {
-    seconds *= 0.9;
-    boostsUsed.push({ name: "Vine Velocity", value: "x0.9" });
+  // Vine Velocity: Grape growth-time reduction
+  const vineVelocityLevel = getSkillLevel(skills, "Vine Velocity");
+  if (crop === "Grape" && vineVelocityLevel) {
+    const m = SKILL_RANKS["Vine Velocity"].ranks[vineVelocityLevel - 1];
+    seconds *= m;
+    boostsUsed.push({ name: "Vine Velocity", value: `x${m}` });
   }
 
   if (!windowed && greenhouseFertiliser === "Greenhouse Glow") {
@@ -211,15 +239,25 @@ export function getOilUsage({
 }): { usage: number; boostsUsed: { name: BoostName; value: string }[] } {
   let usage = OIL_USAGE[seed];
   const boostsUsed: { name: BoostName; value: string }[] = [];
+  const { skills } = game.bumpkin;
 
-  if (game.bumpkin.skills["Greasy Plants"]) {
-    usage *= 2;
-    boostsUsed.push({ name: "Greasy Plants", value: "x2" });
+  const greasyPlantsLevel = getSkillLevel(skills, "Greasy Plants");
+  if (greasyPlantsLevel) {
+    const m = SKILL_RANKS["Greasy Plants"].oilMultiplier[greasyPlantsLevel - 1];
+    usage *= m;
+    boostsUsed.push({ name: "Greasy Plants", value: `x${m}` });
   }
 
-  if (game.bumpkin.skills["Slick Saver"]) {
-    usage -= 1;
-    boostsUsed.push({ name: "Slick Saver", value: "-1" });
+  const slickSaverLevel = getSkillLevel(skills, "Slick Saver");
+  if (slickSaverLevel) {
+    const v = SKILL_RANKS["Slick Saver"].ranks[slickSaverLevel - 1];
+    usage -= v;
+    boostsUsed.push({ name: "Slick Saver", value: `-${v}` });
+  }
+
+  if (seed === "Rice Seed" && isWearableActive({ name: "Rice Shirt", game })) {
+    usage *= 0.5;
+    boostsUsed.push({ name: "Rice Shirt", value: "x0.5" });
   }
 
   return { usage, boostsUsed };
@@ -289,18 +327,21 @@ export function plantGreenhouse({
     }
 
     const plantName = SEED_TO_PLANT[action.seed];
-    const { plantedAt, baseDurationMs, boostsUsed } = getPlantedAt({
-      createdAt,
-      crop: plantName,
-      game,
-      greenhouseFertiliser: pot.fertiliser?.name,
-    });
+    const { plantedAt, baseDurationMs, boostedTime, boostsUsed } = getPlantedAt(
+      {
+        createdAt,
+        crop: plantName,
+        game,
+        greenhouseFertiliser: pot.fertiliser?.name,
+      },
+    );
     game.greenhouse.pots[potId] = {
       ...pot,
       plant: {
         name: plantName,
         plantedAt,
         ...(baseDurationMs !== undefined ? { baseDurationMs } : {}),
+        ...(boostedTime !== undefined ? { boostedTime } : {}),
       },
     };
 

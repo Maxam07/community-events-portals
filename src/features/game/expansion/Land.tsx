@@ -24,6 +24,9 @@ import { getGameGrid } from "./placeable/lib/makeGrid";
 import { LandscapingHud } from "features/island/hud/LandscapingHud";
 import { Mushroom } from "features/island/mushrooms/Mushroom";
 import { MUSHROOM_DIMENSIONS, RESOURCE_DIMENSIONS } from "../types/resources";
+import { DepletingAscensionCrystal } from "./components/resources/ascensionCrystal/components/DepletingAscensionCrystal";
+import { useMinedCrystalGhosts } from "./components/resources/ascensionCrystal/useMinedCrystalGhosts";
+import { ASCENSION_SHARDS_PER_MINE } from "../events/landExpansion/mineAscensionCrystal";
 import { GRID_WIDTH_PX, PIXEL_SCALE } from "../lib/constants";
 import { Bud } from "features/island/buds/Bud";
 import { Fisherman } from "features/island/fisherman/Fisherman";
@@ -60,6 +63,11 @@ import {
 } from "features/game/types/salt";
 import { getPendingSaltNodeIdsForUpgrade } from "features/game/types/salt";
 import { hasRequiredIslandExpansion } from "../lib/hasRequiredIslandExpansion";
+import { Context as AuthContext } from "features/auth/lib/Provider";
+import type { AuthMachineState } from "features/auth/lib/authMachine";
+import { hasFeatureAccess } from "lib/flags";
+import { PlayerModal } from "features/social/PlayerModal";
+import { Discovery } from "features/social/Discovery";
 
 export const LAND_WIDTH = 6;
 
@@ -259,6 +267,7 @@ const _petNFTPositions = (state: MachineState) => {
 };
 
 const _bumpkinPlacement = (state: MachineState) => state.context.state.bumpkin;
+const _token = (state: AuthMachineState) => state.context.user.rawToken ?? "";
 
 const _farmHandPositions = (state: MachineState) => {
   const bumpkins = state.context.state.farmHands?.bumpkins;
@@ -316,12 +325,18 @@ const _waterTrapPositions = (state: MachineState) => {
 
 export const LandComponent: React.FC = () => {
   const { gameService } = useContext(Context);
+  const { authService } = useContext(AuthContext);
   const { pathname } = useLocation();
 
   const showMarketplace = pathname.includes("marketplace");
   const showFlowerDashboard = pathname.includes("flower-dashboard");
   const showEconomyDashboard = pathname.includes("economy-dashboard");
   const showRetentionDashboard = pathname.includes("retention-dashboard");
+  const showNestedPage =
+    showMarketplace ||
+    showFlowerDashboard ||
+    showEconomyDashboard ||
+    showRetentionDashboard;
 
   const paused = useSelector(gameService, isPaused);
   const island = useSelector(gameService, _island);
@@ -414,6 +429,7 @@ export const LandComponent: React.FC = () => {
     comparePositions,
   );
   const bumpkin = useSelector(gameService, _bumpkinPlacement);
+  const token = useSelector(authService, _token);
   const { airdrops } = useSelector(
     gameService,
     _airdropPositions,
@@ -457,6 +473,16 @@ export const LandComponent: React.FC = () => {
   }, [cropPositions, collectiblePositions]);
 
   const { isVisiting: visiting } = useVisiting();
+
+  // While visiting, `farmId` is the visited farm, so the logged-in player is
+  // `visitorId`.
+  const { visitorId, farmId, visitorState, state } =
+    gameService.getSnapshot().context;
+  const loggedInFarmId = visitorId ?? farmId;
+  const hasAirdropAccess = hasFeatureAccess(
+    visitorState ?? state,
+    "AIRDROP_PLAYER",
+  );
 
   // New functions
   const cropElements = useMemo(() => {
@@ -766,8 +792,13 @@ export const LandComponent: React.FC = () => {
       });
   }, [sunstones]);
 
+  // Mining deletes the crystal, unmounting its element on the same update —
+  // the "+shards" feedback must render from here, where the node's tile is
+  // still known (see useMinedCrystalGhosts).
+  const minedCrystalGhosts = useMinedCrystalGhosts(ascensionCrystals);
+
   const ascensionCrystalElements = useMemo(() => {
-    return getObjectEntries(ascensionCrystals)
+    const crystalElements = getObjectEntries(ascensionCrystals)
       .filter(
         ([, crystal]) => crystal.x !== undefined && crystal.y !== undefined,
       )
@@ -796,7 +827,20 @@ export const LandComponent: React.FC = () => {
           </MapPlacement>
         );
       });
-  }, [ascensionCrystals]);
+
+    const ghostElements = minedCrystalGhosts.map(({ id, x, y }) => (
+      <MapPlacement
+        key={`ascension-crystal-ghost-${id}`}
+        x={x}
+        y={y}
+        {...RESOURCE_DIMENSIONS["Ascension Crystal"]}
+      >
+        <DepletingAscensionCrystal resourceAmount={ASCENSION_SHARDS_PER_MINE} />
+      </MapPlacement>
+    ));
+
+    return [...crystalElements, ...ghostElements];
+  }, [ascensionCrystals, minedCrystalGhosts]);
 
   const beehiveElements = useMemo(() => {
     return getObjectEntries(beehives)
@@ -1040,7 +1084,7 @@ export const LandComponent: React.FC = () => {
     if (!farmHands || Object.keys(farmHands).length === 0) return [];
 
     return Object.entries(farmHands).flatMap(([id, fh]) => {
-      if (!fh.coordinates || fh.location === "home") return [];
+      if (!fh.coordinates || (fh.location ?? "farm") !== "farm") return [];
 
       const { x, y, oX, oY } = fh.coordinates;
 
@@ -1061,7 +1105,8 @@ export const LandComponent: React.FC = () => {
   }, [farmHands]);
 
   const bumpkinElement = useMemo(() => {
-    if (!bumpkin?.coordinates || bumpkin.location === "home") return [];
+    if (!bumpkin?.coordinates || (bumpkin.location ?? "farm") !== "farm")
+      return [];
 
     const { x, y, oX, oY } = bumpkin.coordinates;
 
@@ -1330,10 +1375,25 @@ export const LandComponent: React.FC = () => {
 
       {!landscaping && !visiting && <Hud isFarming={true} location="farm" />}
 
-      {(showMarketplace ||
-        showFlowerDashboard ||
-        showEconomyDashboard ||
-        showRetentionDashboard) &&
+      {/*
+        The world feed opens the player and discovery modals, so they have to
+        be mounted on this surface too - same as /home and the interiors. They
+        must not depend on the Bumpkin sprite, which is only drawn here while
+        the Bumpkin is placed on the farm. The nested full screen pages below
+        mount their own player modal, so skip these while one of them is open.
+      */}
+      {!showNestedPage && (
+        <>
+          <PlayerModal
+            loggedInFarmId={loggedInFarmId}
+            token={token}
+            hasAirdropAccess={hasAirdropAccess}
+          />
+          <Discovery />
+        </>
+      )}
+
+      {showNestedPage &&
         createPortal(
           <div
             data-html2canvas-ignore="true"

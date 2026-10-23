@@ -20,18 +20,13 @@ import {
   NON_COLLIDING_OBJECTS,
   FURNITURE_OBJECTS,
 } from "features/game/expansion/placeable/lib/collisionDetection";
-import {
-  getInteriorLayoutBounds,
-  HOME_EXPANSION_LAYOUTS,
-  INTERIOR_CANVAS,
-} from "features/game/expansion/placeable/lib/interiorLayouts";
+import { INTERIOR_CANVAS } from "features/game/expansion/placeable/lib/interiorLayouts";
 import {
   HOME_EXPANSION_BACKGROUNDS,
   HOME_EXPANSION_BACKGROUND_NATIVE,
 } from "./lib/interiorBackgrounds";
 import { LevelOneGridOverlay } from "./components/LevelOneGridOverlay";
 import { UpgradeButton } from "./components/UpgradeButton";
-import { ImportHomeButton } from "./components/ImportHomeButton";
 import { Bud } from "features/island/buds/Bud";
 import { PetNFT } from "features/island/pets/PetNFT";
 import { FarmHand } from "features/island/farmhand/FarmHand";
@@ -41,7 +36,14 @@ import type { Collectibles, HomeExpansionTier } from "features/game/types/game";
 import { SUNNYSIDE } from "assets/sunnyside";
 import { animated } from "@react-spring/web";
 import { ZoomContext } from "components/ZoomProvider";
-import { InteriorBumpkins } from "features/home/components/InteriorBumpkins";
+import { useVisiting } from "lib/utils/visitUtils";
+import { VisitingHud } from "features/island/hud/VisitingHud";
+import { getInteriorExitRoute, getInteriorRoute } from "./lib/interiorRoutes";
+import { PlayerModal } from "features/social/PlayerModal";
+import { Discovery } from "features/social/Discovery";
+import { Context as AuthContext } from "features/auth/lib/Provider";
+import type { AuthMachineState } from "features/auth/lib/authMachine";
+import { hasFeatureAccess } from "lib/flags";
 
 const _landscaping = (state: MachineState) => state.matches("landscaping");
 const _bumpkin = (state: MachineState) => state.context.state.bumpkin;
@@ -53,6 +55,7 @@ const _expansion = (state: MachineState) =>
   state.context.state.interior.expansion;
 const _hasInteriorAccess = (state: MachineState) =>
   !!state.context.state.settings.interiorsEnabled;
+const _token = (state: AuthMachineState) => state.context.user.rawToken ?? "";
 
 const EMPTY_COLLECTIBLES: Collectibles = {};
 
@@ -115,13 +118,18 @@ const UPGRADE_POSITIONS: Partial<
  * the visible layout switches per `state.interior.expansion`, and the player
  * must have paid for at least the first upgrade (`interior.upgrade`) for
  * this route to have anything to render.
+ *
+ * Also mounted at /visit/:id/level_one — see Interior.tsx for how the visiting
+ * variant works.
  */
 export const LevelOne: React.FC = () => {
   const { gameService } = useContext(Context);
+  const { authService } = useContext(AuthContext);
   const { scale } = useContext(ZoomContext);
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const [scrollIntoView] = useScrollIntoView();
+  const { isVisiting, visitedFarmId } = useVisiting();
 
   const landscaping = useSelector(gameService, _landscaping);
   const bumpkin = useSelector(gameService, _bumpkin);
@@ -131,6 +139,17 @@ export const LevelOne: React.FC = () => {
   const expansion = useSelector(gameService, _expansion);
   const hasAccess = useSelector(gameService, _hasInteriorAccess);
   const levelOneFarmHands = useSelector(gameService, _levelOneFarmHands);
+  const token = useSelector(authService, _token);
+
+  // See Interior.tsx — the world feed opens the player modal, so it has to be
+  // mounted here too.
+  const { visitorId, farmId, visitorState, state } =
+    gameService.getSnapshot().context;
+  const loggedInFarmId = visitorId ?? farmId;
+  const hasAirdropAccess = hasFeatureAccess(
+    visitorState ?? state,
+    "AIRDROP_PLAYER",
+  );
   const { collectibles, positions: levelOnePositions } = useSelector(
     gameService,
     _levelOneCollectibles,
@@ -155,9 +174,6 @@ export const LevelOne: React.FC = () => {
 
   const canvasWidthPx = INTERIOR_CANVAS.width * GRID_WIDTH_PX;
   const canvasHeightPx = INTERIOR_CANVAS.height * GRID_WIDTH_PX;
-  const bumpkinLayerBounds = expansion
-    ? getInteriorLayoutBounds(HOME_EXPANSION_LAYOUTS[expansion])
-    : undefined;
 
   // Beta-only feature.
   if (!hasAccess) {
@@ -168,23 +184,41 @@ export const LevelOne: React.FC = () => {
           <p className="text-sm opacity-70">
             {"This feature is in beta. Check back soon."}
           </p>
-          <Button onClick={() => navigate("/")}>{"Back to farm"}</Button>
+          <Button
+            onClick={() => navigate(getInteriorExitRoute({ visitedFarmId }))}
+          >
+            {"Back to farm"}
+          </Button>
         </div>
       </div>
     );
   }
 
   // If the player hasn't bought their first upgrade yet, render an empty-state
-  // pointing them back to /interior to upgrade.
+  // pointing them back to /interior to upgrade. A visitor gets the same
+  // empty-state whenever the farm they're on has no level one, so the copy has
+  // to work for both.
   if (!levelOne || !expansion) {
     return (
       <div className="absolute inset-0 bg-[#181425] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4 text-white text-center px-8">
-          <p>{"You haven't unlocked level one yet."}</p>
-          <p className="text-sm opacity-70">
-            {"Visit your interior on volcano island to buy the first upgrade."}
+          <p>
+            {isVisiting
+              ? "This farm hasn't unlocked level one yet."
+              : "You haven't unlocked level one yet."}
           </p>
-          <Button onClick={() => navigate("/interior")}>
+          {!isVisiting && (
+            <p className="text-sm opacity-70">
+              {
+                "Visit your interior on volcano island to buy the first upgrade."
+              }
+            </p>
+          )}
+          <Button
+            onClick={() =>
+              navigate(getInteriorRoute({ floor: "ground", visitedFarmId }))
+            }
+          >
             {"Go to interior"}
           </Button>
         </div>
@@ -220,6 +254,9 @@ export const LevelOne: React.FC = () => {
                       ? 0
                       : 2
                 }
+                // See Interior.tsx — MapPlacement is inert while visiting
+                // unless opted in, and /home lets visitors click items.
+                enableOnVisitClick
               >
                 <Collectible
                   location="level_one"
@@ -253,6 +290,7 @@ export const LevelOne: React.FC = () => {
             oY={oY}
             height={1}
             width={1}
+            enableOnVisitClick
           >
             <Bud id={id} x={x} y={y} />
           </MapPlacement>
@@ -274,6 +312,7 @@ export const LevelOne: React.FC = () => {
             oY={oY}
             height={2}
             width={2}
+            enableOnVisitClick
           >
             <PetNFT id={id} x={x} y={y} />
           </MapPlacement>
@@ -368,49 +407,6 @@ export const LevelOne: React.FC = () => {
 
               {debug && <LevelOneGridOverlay tier={expansion} />}
 
-              {bumpkinLayerBounds && (
-                <div
-                  className="absolute pointer-events-none"
-                  style={{
-                    left: `${bumpkinLayerBounds.x * GRID_WIDTH_PX}px`,
-                    top: `${
-                      (INTERIOR_CANVAS.height - bumpkinLayerBounds.y) *
-                      GRID_WIDTH_PX
-                    }px`,
-                    width: `${bumpkinLayerBounds.width * GRID_WIDTH_PX}px`,
-                    height: `${bumpkinLayerBounds.height * GRID_WIDTH_PX}px`,
-                  }}
-                >
-                  <div
-                    className="absolute left-0 w-full pointer-events-auto"
-                    style={{ top: "-6rem" }}
-                  >
-                    <InteriorBumpkins location="level_one" />
-                  </div>
-                </div>
-              )}
-              {/*
-                Import-from-old-home button, pinned to the top-right corner of
-                the house layout (anchored to the background image's top edge).
-                Self-hides when the old home has no items left to import.
-              */}
-              {!landscaping && (
-                <div
-                  data-prevent-drag-scroll
-                  className="absolute z-30"
-                  style={{
-                    right: `${PIXEL_SCALE * 6}px`,
-                    top: `${
-                      canvasHeightPx -
-                      HOME_EXPANSION_BACKGROUND_NATIVE.height * PIXEL_SCALE +
-                      PIXEL_SCALE * 6
-                    }px`,
-                  }}
-                >
-                  <ImportHomeButton />
-                </div>
-              )}
-
               <LandscapingGrid />
 
               {landscaping && <Placeable location="level_one" />}
@@ -422,7 +418,7 @@ export const LevelOne: React.FC = () => {
                 go here later.
                 MapPlacement uses canvas-centre origin: bl(X, Y) → cc(X-12, Y-12).
               */}
-              {!landscaping && upgradePosition && (
+              {!landscaping && upgradePosition && !isVisiting && (
                 <MapPlacement
                   key="upgrade-button"
                   x={upgradePosition.x - 12}
@@ -440,10 +436,17 @@ export const LevelOne: React.FC = () => {
                   height={2}
                   width={1}
                   className="relative"
+                  // The stairs are a visitor's only way back down — the HUD
+                  // floor nav lives in the owner-only Hud.
+                  enableOnVisitClick
                 >
                   <div
                     className="h-full w-full cursor-pointer"
-                    onClick={() => navigate("/interior")}
+                    onClick={() =>
+                      navigate(
+                        getInteriorRoute({ floor: "ground", visitedFarmId }),
+                      )
+                    }
                   />
                   <img
                     src={SUNNYSIDE.icons.arrow_down}
@@ -461,8 +464,17 @@ export const LevelOne: React.FC = () => {
         </animated.div>
       </ScrollContainer>
 
-      {!landscaping && <Hud isFarming location="level_one" />}
+      {/* See Interior.tsx for why the Hud is owner-only. */}
+      {!landscaping && !isVisiting && <Hud isFarming location="level_one" />}
       {landscaping && <LandscapingHud location="level_one" />}
+      {isVisiting && <VisitingHud />}
+
+      <PlayerModal
+        loggedInFarmId={loggedInFarmId}
+        token={token}
+        hasAirdropAccess={hasAirdropAccess}
+      />
+      <Discovery />
     </>
   );
 };

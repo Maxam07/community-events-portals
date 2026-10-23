@@ -368,10 +368,10 @@ export abstract class BaseScene extends Phaser.Scene {
 
       let spawn = this.options.player.spawn;
 
-      if (SPAWNS()[this.sceneId]) {
+      const spawns = SPAWNS(this.gameState.bumpkin?.experience);
+      if (spawns[this.sceneId]) {
         spawn =
-          (from && SPAWNS()[this.sceneId][from]) ??
-          SPAWNS()[this.sceneId].default;
+          (from && spawns[this.sceneId][from]) ?? spawns[this.sceneId].default;
       }
 
       this.createPlayer({
@@ -539,7 +539,7 @@ export abstract class BaseScene extends Phaser.Scene {
       // this.physics.world.fixedStep = false; // activates sync
       // this.physics.world.fixedStep = true; // deactivates sync (default)
     } catch (error) {
-      errorLogger(JSON.stringify(error));
+      errorLogger(error as Error);
     }
 
     this.setUpNavMesh();
@@ -576,7 +576,7 @@ export abstract class BaseScene extends Phaser.Scene {
     container.add(buttonImage);
     container.add(iconImage);
     buttonImage.setDisplaySize(14, 14);
-    buttonImage.setInteractive({ useHandCursor: true });
+    buttonImage.setInteractive();
     buttonImage.on("pointerdown", () => {
       this.sound.play("button");
       buttonImage.setTexture("round_button_pressed");
@@ -2280,8 +2280,9 @@ export abstract class BaseScene extends Phaser.Scene {
       this.switchToScene = undefined;
 
       let spawn = this.options.player.spawn;
-      if (SPAWNS()[warpTo]) {
-        spawn = SPAWNS()[warpTo][this.sceneId] ?? SPAWNS()[warpTo].default;
+      const spawns = SPAWNS(this.gameState.bumpkin?.experience);
+      if (spawns[warpTo]) {
+        spawn = spawns[warpTo][this.sceneId] ?? spawns[warpTo].default;
       }
       // This will cause a loop
       // this.registry.get("navigate")(`/world/${warpTo}`);

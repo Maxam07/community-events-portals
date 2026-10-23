@@ -26,6 +26,7 @@ import {
   isBasicFruitSeed,
 } from "../events/landExpansion/fruitPlanted";
 import type { PatchFruitSeedName } from "../types/fruits";
+import { isTutorialToolStockPhase } from "../events/landExpansion/craftTool";
 import {
   type TreasureToolName,
   WORKBENCH_TOOLS,
@@ -36,6 +37,7 @@ import {
   PORTAL_NAME,
   PORTAL_TOKEN,
 } from "features/portal/minigame/constants/PortalConstants";
+import { randomID } from "lib/utils/random";
 
 // Our "zoom" factor
 export const PIXEL_SCALE = 2.625;
@@ -114,6 +116,17 @@ export const INITIAL_STOCK = (
     );
   }
 
+  // Tutorial farms (through the Water Well era): cap the tool stock so a
+  // new player cannot blow their delivery coins on tools they don't need.
+  // Axes bypass the daily stock entirely during this phase - the free batch
+  // plus a small per-level paid budget govern them instead (see craftTool's
+  // getPaidTutorialAxesLeft) - and two Pickaxes a day cover the single
+  // bought mine the gifted Pickaxes leave over (see the pickaxe ledger).
+  if (state && isTutorialToolStockPhase(state)) {
+    tools.Axe = new Decimal(0);
+    tools.Pickaxe = new Decimal(Math.min(tools.Pickaxe.toNumber(), 2));
+  }
+
   const seeds: Record<SeedName, Decimal> = {
     "Sunflower Seed": new Decimal(800),
     "Potato Seed": new Decimal(400),
@@ -141,6 +154,10 @@ export const INITIAL_STOCK = (
 
     // Chapter Crop Week (limited-time event seed)
     "Saltwort Seed": new Decimal(30),
+    // Chapter Crop Week (limited-time event seed). Previous runs' seeds are
+    // retired: keep the key (the record is exhaustive) but stock none.
+    "Saltwort Seed": new Decimal(0),
+    "Crystal Leaf Seed": new Decimal(36),
 
     "Grape Seed": new Decimal(10),
     "Olive Seed": new Decimal(10),
@@ -191,6 +208,25 @@ export const INITIAL_STOCK = (
     );
   }
 
+  const treasureTools: Record<TreasureToolName, Decimal> = {
+    "Sand Shovel": new Decimal(125),
+    "Sand Drill": new Decimal(25),
+  };
+
+  // Tool Hoarder: +25/+50/+100 Sand Shovel & +5/+10/+20 Sand Drill stock
+  const toolHoarderLevel = state?.bumpkin
+    ? getSkillLevel(state.bumpkin.skills, "Tool Hoarder")
+    : 0;
+  if (toolHoarderLevel) {
+    const { ranks } = SKILL_RANKS["Tool Hoarder"];
+    treasureTools["Sand Shovel"] = treasureTools["Sand Shovel"].add(
+      ranks["Sand Shovel"]?.[toolHoarderLevel - 1] ?? 0,
+    );
+    treasureTools["Sand Drill"] = treasureTools["Sand Drill"].add(
+      ranks["Sand Drill"]?.[toolHoarderLevel - 1] ?? 0,
+    );
+  }
+
   const restockables: Record<StockableName, Decimal> = {
     // Tools
     ...tools,
@@ -199,8 +235,7 @@ export const INITIAL_STOCK = (
     ...seeds,
 
     // Treasure Tools
-    "Sand Shovel": new Decimal(50),
-    "Sand Drill": new Decimal(10),
+    ...treasureTools,
   };
 
   return restockables;
@@ -208,40 +243,32 @@ export const INITIAL_STOCK = (
 
 type InventoryLimit = Partial<Record<SeedName, Decimal>>;
 
-// Inventory limit is 2.5x the initial stock for seeds
+export const getSeedInventoryLimitMultiplier = (seed: SeedName) => {
+  if (isGreenhouseCropSeed(seed) || isGreenhouseFruitSeed(seed)) return 5;
+  if (isBasicFruitSeed(seed as PatchFruitSeedName)) return 2;
+  if (isAdvancedFruitSeed(seed as PatchFruitSeedName)) return 1.5;
+
+  return 2.5;
+};
+
+// Seed limits use initial stock: 5x greenhouse, 2x basic fruit, 1.5x advanced
+// fruit, and 2.5x otherwise. Full Moon Berries have a fixed limit of 10.
 export const INVENTORY_LIMIT = (state: GameState): InventoryLimit => {
   return {
     ...getObjectEntries(INITIAL_STOCK(state)).reduce<InventoryLimit>(
       (acc, [key, value]) => {
         if (!isSeed(key)) return acc;
-        if (isGreenhouseCropSeed(key) || isGreenhouseFruitSeed(key)) {
-          acc[key] = new Decimal(
-            Math.ceil((value ?? new Decimal(0)).mul(5).toNumber()),
-          );
-          return acc;
-        }
-
         if (isFullMoonBerry(key)) {
           acc[key] = new Decimal(10);
           return acc;
         }
 
-        if (isBasicFruitSeed(key as PatchFruitSeedName)) {
-          acc[key] = new Decimal(
-            Math.ceil((value ?? new Decimal(0)).mul(2).toNumber()),
-          );
-          return acc;
-        }
-
-        if (isAdvancedFruitSeed(key as PatchFruitSeedName)) {
-          acc[key] = new Decimal(
-            Math.ceil((value ?? new Decimal(0)).mul(1.5).toNumber()),
-          );
-          return acc;
-        }
-
         acc[key] = new Decimal(
-          Math.ceil((value ?? new Decimal(0)).mul(2.5).toNumber()),
+          Math.ceil(
+            (value ?? new Decimal(0))
+              .mul(getSeedInventoryLimitMultiplier(key))
+              .toNumber(),
+          ),
         );
         return acc;
       },
@@ -385,8 +412,8 @@ export const BUMPKIN_EQUIPMENT: BumpkinParts = {
 };
 
 export const INITIAL_BUMPKIN: Bumpkin = {
-  equipped: BUMPKIN_EQUIPMENT as Equipped,
-  experience: 0,
+  equipped: INITIAL_EQUIPMENT as Equipped,
+  experience: 0, // Leave it at 0 so that feedBumpkin Tests don't fail
 
   id: 1,
   skills: {},
@@ -492,7 +519,6 @@ export const INITIAL_FARM: GameState = {
     "Crop Plot": new Decimal(getKeys(INITIAL_RESOURCES.crops).length),
     Tree: new Decimal(getKeys(INITIAL_RESOURCES.trees).length),
     "Stone Rock": new Decimal(getKeys(INITIAL_RESOURCES.stones).length),
-    Axe: new Decimal(10),
     Gem: new Decimal(1 * BB_TO_GEM_RATIO),
     Rug: new Decimal(1),
     Wardrobe: new Decimal(1),
@@ -500,6 +526,11 @@ export const INITIAL_FARM: GameState = {
     Celestine: new Decimal(1),
     "Red Balloon Flower": new Decimal(1),
     "Yellow Cosmos": new Decimal(1),
+    // Letter tiles - enough to spell FARM
+    "Letter F Tile": new Decimal(1),
+    "Letter A Tile": new Decimal(1),
+    "Letter R Tile": new Decimal(1),
+    "Letter M Tile": new Decimal(1),
   },
   previousInventory: {},
   username: "Bumpkin",
@@ -722,49 +753,54 @@ export const INITIAL_FARM: GameState = {
       },
     ],
   },
+  username: randomID(),
   collectibles: {},
   pumpkinPlaza: {},
   auctioneer: {},
   delivery: {
     fulfilledCount: 0,
     orders: [
+      // The tutorial's first delivery. On live farms Peggy's next order (the
+      // spare Rhubarb Tart) regenerates the moment this one is fulfilled.
+      {
+        createdAt: Date.now(),
+        readyAt: Date.now(),
+        from: "peggy",
+        reward: {
+          items: {},
+          coins: 65,
+        },
+        id: "1",
+        items: {
+          Sunflower: 9,
+        },
+      },
+      {
+        createdAt: Date.now(),
+        readyAt: Date.now(),
+        from: "blacksmith",
+        reward: {
+          items: {},
+          coins: 81,
+        },
+        id: "2",
+        items: {
+          Wood: 1,
+        },
+      },
+      // On live farms Betty's orders only generate from level 2, once the
+      // tutorial no longer points at Peggy
       {
         createdAt: Date.now(),
         readyAt: Date.now(),
         from: "betty",
         reward: {
           items: {},
-          coins: 64,
-        },
-        id: "1",
-        items: {
-          Sunflower: 30,
-        },
-      },
-      {
-        createdAt: Date.now(),
-        readyAt: Date.now(),
-        from: "grubnuk",
-        reward: {
-          items: {},
-          coins: 64,
-        },
-        id: "2",
-        items: {
-          "Pumpkin Soup": 1,
-        },
-      },
-      {
-        createdAt: Date.now(),
-        readyAt: Date.now(),
-        from: "grimbly",
-        reward: {
-          items: {},
-          coins: 48,
+          coins: 21,
         },
         id: "3",
         items: {
-          "Mashed Potato": 2,
+          Sunflower: 5,
         },
       },
     ],
@@ -773,7 +809,9 @@ export const INITIAL_FARM: GameState = {
       total: 10,
     },
   },
-  farmActivity: {},
+  farmActivity: {
+    "welcome Bonus Claimed": 1, // Skips welcome screen
+  },
   milestones: {},
   specialEvents: {
     history: {},
@@ -793,8 +831,17 @@ export const INITIAL_FARM: GameState = {
       patterns: [],
     },
   },
-  henHouse: makeAnimalBuilding("Hen House"),
-  barn: makeAnimalBuilding("Barn"),
+  // Animal buildings start EMPTY and are seeded with their starter herd by
+  // `constructBuilding`. Seeding here would also hand every existing farm a
+  // free herd, because the API hydrates a missing animal building from
+  // INITIAL_FARM - which is why `pigpen` has always been empty.
+  henHouse: { level: 1, animals: {} },
+  barn: { level: 1, animals: {} },
+  // Deliberately NOT makeAnimalBuilding("Pigpen"): that seeds 3 starter
+  // animals, and the API hydrates a missing `pigpen` from INITIAL_FARM - so
+  // every existing farm would be granted 3 free Pigs on its first load.
+  // Starter pigs, if design wants them, need a new-account-only path.
+  pigpen: { level: 1, animals: {} },
   waterWell: { level: 1 },
   agingShed: createInitialAgingShed(),
   petHouse: {
@@ -1130,6 +1177,11 @@ export const TEST_FARM: GameState = {
   },
   henHouse: makeAnimalBuilding("Hen House"),
   barn: makeAnimalBuilding("Barn"),
+  // Deliberately NOT makeAnimalBuilding("Pigpen"): that seeds 3 starter
+  // animals, and the API hydrates a missing `pigpen` from INITIAL_FARM - so
+  // every existing farm would be granted 3 free Pigs on its first load.
+  // Starter pigs, if design wants them, need a new-account-only path.
+  pigpen: { level: 1, animals: {} },
   waterWell: { level: 1 },
   agingShed: createInitialAgingShed(),
   petHouse: {
@@ -1311,8 +1363,17 @@ export const EMPTY: GameState = {
       grid: [],
     },
   },
-  henHouse: makeAnimalBuilding("Hen House"),
-  barn: makeAnimalBuilding("Barn"),
+  // Animal buildings start EMPTY and are seeded with their starter herd by
+  // `constructBuilding`. Seeding here would also hand every existing farm a
+  // free herd, because the API hydrates a missing animal building from
+  // INITIAL_FARM - which is why `pigpen` has always been empty.
+  henHouse: { level: 1, animals: {} },
+  barn: { level: 1, animals: {} },
+  // Deliberately NOT makeAnimalBuilding("Pigpen"): that seeds 3 starter
+  // animals, and the API hydrates a missing `pigpen` from INITIAL_FARM - so
+  // every existing farm would be granted 3 free Pigs on its first load.
+  // Starter pigs, if design wants them, need a new-account-only path.
+  pigpen: { level: 1, animals: {} },
   waterWell: { level: 1 },
   agingShed: createInitialAgingShed(),
   petHouse: {

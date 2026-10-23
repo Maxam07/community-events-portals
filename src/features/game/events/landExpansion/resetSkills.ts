@@ -76,7 +76,6 @@ export function resetSkills({
     }
 
     const { paymentType } = action;
-    let didPaidReset = false;
 
     switch (paymentType) {
       case "free": {
@@ -105,10 +104,12 @@ export function resetSkills({
         }
 
         game.inventory.Gem = game.inventory.Gem?.minus(gemCost);
-        didPaidReset = true;
+        bumpkin.paidSkillResets = paidSkillResets + 1;
         break;
       }
       case "ticket": {
+        // Tickets are complimentary giveaways (e.g. beta rewards) and do not
+        // count towards the escalating gem cost.
         const ticketBalance =
           game.inventory["Skill Reset Ticket"] ?? new Decimal(0);
 
@@ -117,7 +118,6 @@ export function resetSkills({
         }
 
         game.inventory["Skill Reset Ticket"] = ticketBalance.minus(1);
-        didPaidReset = true;
         break;
       }
       default: {
@@ -126,8 +126,24 @@ export function resetSkills({
       }
     }
 
-    if (didPaidReset) {
-      bumpkin.paidSkillResets = paidSkillResets + 1;
+    // Refund Ascension Shards spent on skill upgrades. Rank is stored as the
+    // skill value, so compute the refund before wiping skills. Skill points are
+    // refunded implicitly once skills are cleared.
+    let refundShards = 0;
+    for (const skill of getKeys(skills)) {
+      const skillData: BumpkinSkillRevamp =
+        BUMPKIN_REVAMP_SKILL_TREE[skill as BumpkinRevampSkillName];
+      const level = skills[skill] ?? 1;
+      if (skillData?.upgrade) {
+        // Cap to maxLevel so malformed/imported ranks can't over-refund.
+        const refundableRanks = Math.max(
+          0,
+          Math.min(level, skillData.upgrade.maxLevel) - 1,
+        );
+        refundShards +=
+          getSkillUpgradeCost(skillData.requirements.tier).shards *
+          refundableRanks;
+      }
     }
 
     // Refund Ascension Shards spent on skill upgrades. Rank is stored as the

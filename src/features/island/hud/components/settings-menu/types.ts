@@ -25,7 +25,11 @@ export type SettingMenuId =
   | "experiments"
   | "economyEditor"
   | "interiorExperiment"
-  | "designShowcase"
+  | "landscapingExperiment"
+  | "toolShopBuyAll"
+  | "statsLeaderboard"
+  | "auctionCalendar"
+  | "betaFeatures"
   | "admin"
   | "faceRecognition"
 
@@ -36,7 +40,6 @@ export type SettingMenuId =
   | "behaviour"
   | "audio"
   | "notifications"
-  | "apiKey"
 
   // Amoy Testnet Actions
   | "playerSearch"
@@ -48,4 +51,5 @@ export type SettingMenuId =
 export interface ContentComponentProps {
   onSubMenuClick: (id: SettingMenuId) => void;
   onClose: () => void;
+  onTimeMachineToggle?: () => void;
 }

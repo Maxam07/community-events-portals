@@ -44,11 +44,6 @@ export abstract class Preloader extends Phaser.Scene {
       );
 
       this.load.image(
-        "halloween_2026_tileset",
-        `world/portal/map/halloween_2026_tileset.png`,
-      );
-
-      this.load.image(
         "seasonal-tileset",
         `${CONFIG.PROTECTED_IMAGE_URL}/world/seasonal-map-extruded.png?t=1`,
       );
@@ -69,8 +64,8 @@ export abstract class Preloader extends Phaser.Scene {
       );
 
       this.load.image(
-        "colors_island_2026_tileset",
-        `world/colors_island_2026_assets/colors_island_2026_tileset.png`,
+        "halloween_island_2026_tileset",
+        `world/halloween_island_2026_assets/halloween_island_2026_tileset.png`,
       );
 
       this.load.image("speech_bubble", "world/speech_bubble.png");
@@ -130,7 +125,7 @@ export abstract class Preloader extends Phaser.Scene {
         // this.scene.start("ExternalScene");
       });
     } catch (error) {
-      errorLogger(error);
+      errorLogger(error as Error);
     }
   }
 }

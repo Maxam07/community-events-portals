@@ -92,7 +92,30 @@ export type ChapterDecorationName =
   | "Squeaky Chicken"
   | "Moon Fox Statue"
   | "Giant Acorn"
-  | "Diving Helmet";
+  | "Diving Helmet"
+  // Ascension Age
+  | "Salt Rug"
+  | "Ascended Idol"
+  | "Ascended Wheel"
+  | "Astrolabe"
+  | "Coat Rack"
+  | "Lampshade"
+  | "Marble Head"
+  | "Otty the Otter"
+  | "Salt Worker Gnome"
+  | "Shards Turtle"
+  | "Vibraphone"
+  | "Winged Vase"
+  // Cave Dwellers
+  | "Giant Truffle"
+  | "Mining Drill"
+  | "Piggy Bank"
+  | "Straw House"
+  | "Stick House"
+  | "Brick House"
+  | "Big Bad Wolf"
+  | "Pig Plush"
+  | "Pig Doll";
 
 export type EventDecorationName =
   | "Jelly Lamp"
@@ -222,7 +245,25 @@ export type EventDecorationName =
   | "Fool's Gold"
   | "Golden Slime Trophy"
   | "Silver Slime Trophy"
-  | "Bronze Slime Trophy";
+  | "Bronze Slime Trophy"
+  | "Corrupted Pumpkin"
+  | "Huge Jack-o'-lantern"
+  | "Haunted TV"
+  | "Zombie Hand Toy"
+  | "Cool Zombie Tombstone"
+  | "Destroyed Sign"
+  | "Skull Candles"
+  | "Plague Crow"
+  | "Skeleton Crow"
+  | "Witch Crow"
+  | "Fisherbird Crow"
+  | "Chained Crow"
+  | "Count Vlad Crow"
+  | "Lual Crow"
+  | "King Crow"
+  | "Devil Crow"
+  | "Pharaoh Crow"
+  | "Cultist Crow";
 
 export type TileName =
   | "Black Tile"
@@ -656,9 +697,271 @@ export const DECORATION_TEMPLATES = {
     },
     isWithdrawable: () => false,
   },
+  // Letter tiles
+  "Letter A Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter B Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter C Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter D Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter E Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter F Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter G Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter H Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter I Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter J Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter K Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter L Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter M Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter N Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter O Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter P Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter Q Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter R Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter S Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter T Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter U Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter V Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter W Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter X Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter Y Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Letter Z Tile": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  // Rarecrows sunset rewards
+  "Champion Rarecrow": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "OG Rarecrow": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
+  "Loyal Rarecrow": {
+    dimensions: {
+      width: 1,
+      height: 1,
+    },
+    isWithdrawable: () => false,
+  },
 } satisfies Record<string, Template>;
 
 export type TemplateDecorationName = keyof typeof DECORATION_TEMPLATES;
+
+export type LetterTileName =
+  | "Letter A Tile"
+  | "Letter B Tile"
+  | "Letter C Tile"
+  | "Letter D Tile"
+  | "Letter E Tile"
+  | "Letter F Tile"
+  | "Letter G Tile"
+  | "Letter H Tile"
+  | "Letter I Tile"
+  | "Letter J Tile"
+  | "Letter K Tile"
+  | "Letter L Tile"
+  | "Letter M Tile"
+  | "Letter N Tile"
+  | "Letter O Tile"
+  | "Letter P Tile"
+  | "Letter Q Tile"
+  | "Letter R Tile"
+  | "Letter S Tile"
+  | "Letter T Tile"
+  | "Letter U Tile"
+  | "Letter V Tile"
+  | "Letter W Tile"
+  | "Letter X Tile"
+  | "Letter Y Tile"
+  | "Letter Z Tile";
+
+export const LETTER_TILES: Record<LetterTileName, object> = {
+  "Letter A Tile": {},
+  "Letter B Tile": {},
+  "Letter C Tile": {},
+  "Letter D Tile": {},
+  "Letter E Tile": {},
+  "Letter F Tile": {},
+  "Letter G Tile": {},
+  "Letter H Tile": {},
+  "Letter I Tile": {},
+  "Letter J Tile": {},
+  "Letter K Tile": {},
+  "Letter L Tile": {},
+  "Letter M Tile": {},
+  "Letter N Tile": {},
+  "Letter O Tile": {},
+  "Letter P Tile": {},
+  "Letter Q Tile": {},
+  "Letter R Tile": {},
+  "Letter S Tile": {},
+  "Letter T Tile": {},
+  "Letter U Tile": {},
+  "Letter V Tile": {},
+  "Letter W Tile": {},
+  "Letter X Tile": {},
+  "Letter Y Tile": {},
+  "Letter Z Tile": {},
+};
 
 export type DecorationName =
   | DollName
@@ -676,6 +979,30 @@ export type DecorationName =
   | GiantFruit;
 
 export const DECORATION_DIMENSIONS: Record<DecorationName, Dimensions> = {
+  // Ascension Age
+  "Salt Rug": { width: 3, height: 2 },
+  "Ascended Idol": { width: 3, height: 2 },
+  "Ascended Wheel": { width: 2, height: 2 },
+  Astrolabe: { width: 2, height: 2 },
+  "Coat Rack": { width: 1, height: 2 },
+  Lampshade: { width: 1, height: 1 },
+  "Marble Head": { width: 1, height: 2 },
+  "Otty the Otter": { width: 1, height: 1 },
+  "Salt Worker Gnome": { width: 1, height: 1 },
+  "Shards Turtle": { width: 1, height: 2 },
+  Vibraphone: { width: 2, height: 2 },
+  "Winged Vase": { width: 1, height: 1 },
+  // Cave Dwellers
+  "Giant Truffle": { width: 2, height: 2 },
+  "Mining Drill": { width: 2, height: 2 },
+  "Piggy Bank": { width: 2, height: 2 },
+  "Straw House": { width: 2, height: 2 },
+  "Stick House": { width: 2, height: 2 },
+  "Brick House": { width: 2, height: 2 },
+  "Big Bad Wolf": { width: 1, height: 2 },
+  "Pig Plush": { width: 1, height: 1 },
+  "Pig Doll": { width: 1, height: 2 },
+
   "Diving Helmet": {
     width: 1,
     height: 2,
@@ -1607,6 +1934,78 @@ export const DECORATION_DIMENSIONS: Record<DecorationName, Dimensions> = {
   "Bronze Slime Trophy": {
     width: 1,
     height: 2,
+  },
+  "Corrupted Pumpkin": {
+    width: 2,
+    height: 2,
+  },
+  "Huge Jack-o'-lantern": {
+    width: 2,
+    height: 2,
+  },
+  "Haunted TV": {
+    width: 1,
+    height: 1,
+  },
+  "Zombie Hand Toy": {
+    width: 1,
+    height: 1,
+  },
+  "Cool Zombie Tombstone": {
+    width: 1,
+    height: 2,
+  },
+  "Destroyed Sign": {
+    width: 1,
+    height: 1,
+  },
+  "Skull Candles": {
+    width: 2,
+    height: 2,
+  },
+  "Plague Crow": {
+    width: 1,
+    height: 1,
+  },
+  "Skeleton Crow": {
+    width: 1,
+    height: 1,
+  },
+  "Witch Crow": {
+    width: 1,
+    height: 1,
+  },
+  "Fisherbird Crow": {
+    width: 1,
+    height: 1,
+  },
+  "Chained Crow": {
+    width: 1,
+    height: 1,
+  },
+  "Count Vlad Crow": {
+    width: 1,
+    height: 1,
+  },
+  "Lual Crow": {
+    width: 1,
+    height: 1,
+  },
+  "King Crow": {
+    width: 1,
+    height: 1,
+  },
+  "Devil Crow": {
+    width: 1,
+    height: 1,
+  },
+  "Pharaoh Crow": {
+    width: 1,
+    height: 1,
+  },
+  "Cultist Crow": {
+    width: 1,
+    height: 1,
   },
 };
 

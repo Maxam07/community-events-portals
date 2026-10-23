@@ -10,6 +10,7 @@ import {
   LEGACY_SPICE_RACK_RECIPE_IDS,
 } from "features/game/types/spiceRack";
 import { getObjectEntries } from "lib/object";
+import { CONFIG } from "lib/config";
 import { startSpiceRack } from "./startSpiceRack";
 import {
   createFermentationTestState,
@@ -206,7 +207,7 @@ describe("startSpiceRack", () => {
     expect(state.inventory.Salt?.toNumber()).toEqual(0);
   });
 
-  it("stamps Ager=true on the spice rack job when the skill is active", () => {
+  it("stamps the Ager rank on the spice rack job when the skill is active", () => {
     const state = startSpiceRack({
       state: createFermentationTestState({
         bumpkin: { ...INITIAL_BUMPKIN, skills: { Ager: 1 } },
@@ -221,10 +222,30 @@ describe("startSpiceRack", () => {
       createdAt,
     });
 
-    expect(state.agingShed.racks.spice[0].skills?.Ager).toBe(true);
+    expect(state.agingShed.racks.spice[0].skills?.Ager).toBe(1);
   });
 
-  it("stamps Ager=false on the spice rack job when the skill is not active", () => {
+  it("stamps a higher Ager rank and charges that rank's inputs", () => {
+    // Refined Salt costs 10 Salt at rank 0; Ager rank 3 charges 4x = 40.
+    const state = startSpiceRack({
+      state: createFermentationTestState({
+        bumpkin: { ...INITIAL_BUMPKIN, skills: { Ager: 3 } },
+        agingShed: { ...createInitialAgingShed(), level: 2 },
+        inventory: { Salt: new Decimal(45) },
+      }),
+      action: {
+        type: "spiceRack.started",
+        recipe: "Refined Salt",
+        jobId: TEST_JOB_ID,
+      },
+      createdAt,
+    });
+
+    expect(state.agingShed.racks.spice[0].skills?.Ager).toBe(3);
+    expect(state.inventory.Salt?.toNumber()).toEqual(5);
+  });
+
+  it("stamps Ager rank 0 on the spice rack job when the skill is not active", () => {
     const state = startSpiceRack({
       state: createFermentationTestState({
         agingShed: { ...createInitialAgingShed(), level: 2 },
@@ -238,7 +259,7 @@ describe("startSpiceRack", () => {
       createdAt,
     });
 
-    expect(state.agingShed.racks.spice[0].skills?.Ager).toBe(false);
+    expect(state.agingShed.racks.spice[0].skills?.Ager).toBe(0);
   });
 
   it("throws when Ager doubles cost beyond available ingredients", () => {
@@ -257,5 +278,65 @@ describe("startSpiceRack", () => {
         createdAt,
       }),
     ).toThrow("Insufficient ingredient");
+  });
+});
+
+describe("startSpiceRack: Truffle Seasoning (Chapter 16)", () => {
+  const INPUTS = {
+    Truffle: new Decimal(10),
+    "Refined Salt": new Decimal(5),
+    "Wild Mushroom": new Decimal(5),
+  };
+
+  const season = (state = createFermentationTestState({ inventory: INPUTS })) =>
+    startSpiceRack({
+      state,
+      action: {
+        type: "spiceRack.started",
+        recipe: "Truffle Seasoning",
+        jobId: TEST_JOB_ID,
+      },
+      createdAt,
+    });
+
+  it("charges the Truffle, Refined Salt and Wild Mushroom and queues the job", () => {
+    const state = season();
+
+    expect(state.inventory.Truffle).toEqual(new Decimal(0));
+    expect(state.inventory["Refined Salt"]).toEqual(new Decimal(0));
+    expect(state.inventory["Wild Mushroom"]).toEqual(new Decimal(0));
+    expect(state.agingShed.racks.spice[0]).toMatchObject({
+      recipe: "Truffle Seasoning",
+      startedAt: createdAt,
+    });
+  });
+
+  describe("off testnet", () => {
+    // jest runs on amoy, so the flag-off path is only reachable by pretending
+    // to be mainnet.
+    let previousNetwork: (typeof CONFIG)["NETWORK"];
+
+    beforeEach(() => {
+      previousNetwork = CONFIG.NETWORK;
+      (CONFIG as { NETWORK: "mainnet" | "amoy" }).NETWORK = "mainnet";
+    });
+
+    afterEach(() => {
+      (CONFIG as { NETWORK: "mainnet" | "amoy" }).NETWORK = previousNetwork;
+    });
+
+    it("throws without the PIGPEN feature flag", () => {
+      expect(() => season()).toThrow("Truffle Seasoning is not available yet");
+    });
+
+    it("is unlocked by a Beta Pass", () => {
+      expect(() =>
+        season(
+          createFermentationTestState({
+            inventory: { ...INPUTS, "Beta Pass": new Decimal(1) },
+          }),
+        ),
+      ).not.toThrow();
+    });
   });
 });

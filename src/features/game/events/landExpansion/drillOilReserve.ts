@@ -17,6 +17,7 @@ import {
   computeReadyAt,
   getOilBoostWindows,
 } from "features/game/lib/boostWindows";
+import { SKILL_RANKS, getSkillLevel } from "features/game/types/bumpkinSkills";
 
 export type DrillOilReserveAction = {
   type: "oilReserve.drilled";
@@ -33,14 +34,18 @@ export const BASE_OIL_DROP_AMOUNT = 10;
 export const OIL_BONUS_DROP_AMOUNT = 20;
 export const OIL_RESERVE_RECOVERY_TIME = 20 * 60 * 60;
 
-export function getOilDropAmount(game: GameState, reserve: OilReserve) {
+export function getOilDropAmount(
+  game: GameState,
+  reserve: OilReserve,
+  now: number,
+) {
   let amount = new Decimal(BASE_OIL_DROP_AMOUNT);
   const boostsUsed: { name: BoostName; value: string }[] = [];
 
   if (isNextDrillHasBonus(reserve)) {
     amount = amount.add(OIL_BONUS_DROP_AMOUNT);
 
-    if (isTemporaryCollectibleActive({ name: "Stag Shrine", game })) {
+    if (isTemporaryCollectibleActive({ name: "Stag Shrine", game, now })) {
       amount = amount.add(15);
       boostsUsed.push({ name: "Stag Shrine", value: "+15" });
     }
@@ -66,9 +71,14 @@ export function getOilDropAmount(game: GameState, reserve: OilReserve) {
     boostsUsed.push({ name: "Oil Overalls", value: "+10" });
   }
 
-  if (game.bumpkin.skills["Oil Extraction"]) {
-    amount = amount.add(1);
-    boostsUsed.push({ name: "Oil Extraction", value: "+1" });
+  const oilExtractionLevel = getSkillLevel(
+    game.bumpkin.skills,
+    "Oil Extraction",
+  );
+  if (oilExtractionLevel) {
+    const v = SKILL_RANKS["Oil Extraction"].ranks[oilExtractionLevel - 1];
+    amount = amount.add(v);
+    boostsUsed.push({ name: "Oil Extraction", value: `+${v}` });
   }
 
   if (isWearableActive({ game, name: "Oil Gallon" })) {
@@ -147,7 +157,13 @@ type getDrilledAtArgs = {
 /**
  * Single source of truth for oil recovery boosts. Used by both getDrilledAt (game) and UI.
  */
-export function getOilRecoveryTimeForDisplay({ game }: { game: GameState }): {
+export function getOilRecoveryTimeForDisplay({
+  game,
+  now,
+}: {
+  game: GameState;
+  now: number;
+}): {
   baseTimeMs: number;
   recoveryTimeMs: number;
   boostsUsed: { name: BoostName; value: string }[];
@@ -166,14 +182,16 @@ export function getOilRecoveryTimeForDisplay({ game }: { game: GameState }): {
     totalSeconds = totalSeconds * 0.5;
     boostsUsed.push({ name: "Dev Wrench", value: "x0.5" });
   }
-  if (game.bumpkin.skills["Oil Be Back"]) {
-    totalSeconds = totalSeconds * 0.8;
-    boostsUsed.push({ name: "Oil Be Back", value: "x0.8" });
+  const oilBeBackLevel = getSkillLevel(game.bumpkin.skills, "Oil Be Back");
+  if (oilBeBackLevel) {
+    const v = SKILL_RANKS["Oil Be Back"].ranks[oilBeBackLevel - 1];
+    totalSeconds = totalSeconds * v;
+    boostsUsed.push({ name: "Oil Be Back", value: `x${v}` });
   }
 
   if (
     !boostsWindowed &&
-    isTemporaryCollectibleActive({ name: "Stag Shrine", game })
+    isTemporaryCollectibleActive({ name: "Stag Shrine", game, now })
   ) {
     totalSeconds = totalSeconds * 0.75;
     boostsUsed.push({ name: "Stag Shrine", value: "x0.75" });
@@ -203,7 +221,7 @@ export function getDrilledAt({ createdAt, game }: getDrilledAtArgs): {
   boostsUsed: { name: BoostName; value: string }[];
 } {
   const { baseTimeMs, recoveryTimeMs, boostsUsed } =
-    getOilRecoveryTimeForDisplay({ game });
+    getOilRecoveryTimeForDisplay({ game, now: createdAt });
 
   if (hasFeatureAccess(game, "SPEED_BOOSTS")) {
     return { time: createdAt, baseDurationMs: recoveryTimeMs, boostsUsed };
@@ -243,6 +261,7 @@ export function drillOilReserve({
     const { amount: oilDropAmount, boostsUsed } = getOilDropAmount(
       game,
       oilReserve,
+      createdAt,
     );
 
     game.inventory.Oil = (game.inventory.Oil ?? new Decimal(0)).add(

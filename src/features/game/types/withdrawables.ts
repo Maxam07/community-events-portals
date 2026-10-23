@@ -337,6 +337,10 @@ export const WEARABLE_RELEASES: Partial<Record<BumpkinItem, Releases>> = {
     tradeAt: new Date("2025-04-08"),
     withdrawAt: CHAPTERS["Winds of Change"].endDate,
   },
+  "Locust Onesie": {
+    tradeAt: new Date("2025-04-08"),
+    withdrawAt: CHAPTERS["Winds of Change"].endDate,
+  },
   "Glacial Plume": {
     tradeAt: new Date("2025-04-08"),
     withdrawAt: CHAPTERS["Winds of Change"].endDate,
@@ -614,6 +618,48 @@ export const WEARABLE_RELEASES: Partial<Record<BumpkinItem, Releases>> = {
     withdrawAt: new Date("2026-08-31T00:00:00Z"),
   },
 
+  // Ascension Age Wearables
+  "Swamp Lily Hat": {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  "Swamp Armor": {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  "Swamp Pants": {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  "Moon Hair": {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  "Surfer Hair": {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  "Rice Shirt": {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  "Alchemist Apron": {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  "Salt Bottle Onesie": {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  "Blue Rose Dress": {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  "Fairy Sandals": {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+
   "Moonseeker Potion": {
     tradeAt: new Date("2025-11-06"),
     withdrawAt: new Date("2025-11-06"),
@@ -761,6 +807,56 @@ export const WEARABLE_RELEASES: Partial<Record<BumpkinItem, Releases>> = {
   "Glitch Aura": {
     tradeAt: new Date("2026-04-17T00:00:00Z"),
     withdrawAt: new Date("2026-04-17T00:00:00Z"),
+  },
+
+  // Colors Event 2026
+  "Rainbow Wings": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Butterfly Aura": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Slime Wall Background": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Green Slime Hair": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Blue Slime Shirt": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Slime Splattered Shirt": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Yellow Slime Puppet": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Blue Jelly Shoes": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Sad Slime Slippers": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Sad Slime Hat": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Sad Slime Pants": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Red Jelly Pants": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
   },
 };
 
@@ -1670,6 +1766,76 @@ export const INVENTORY_RELEASES: InventoryReleases = {
     tradeAt: CHAPTERS["Salt Awakening"].endDate,
     withdrawAt: new Date("2026-08-31T00:00:00Z"),
   },
+
+  // Ascension Age Collectibles
+  Crocodile: {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  "Dumbo Octopus": {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  Astrolabe: {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  "Otty the Otter": {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  "Salt Rug": {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  "Coat Rack": {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  Vibraphone: {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  "Winged Vase": {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  "Ascended Idol": {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  "Salt Worker Gnome": {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  "Ascended Wheel": {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  Lampshade: {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  "Marble Head": {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  "Ascended Chicken": {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  "Ascended Cow": {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  "Ascended Sheep": {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
+  "Ruins Flower": {
+    tradeAt: CHAPTERS["Ascension Age"].endDate,
+    withdrawAt: new Date("2026-11-30T00:00:00Z"),
+  },
   CluckCoin: {
     tradeAt: new Date("2025-01-01T00:00:00.000Z"),
   },
@@ -1825,6 +1991,72 @@ export const INVENTORY_RELEASES: InventoryReleases = {
   "The Sunflower Man Statue": {
     tradeAt: new Date("2026-04-17T00:00:00Z"),
     withdrawAt: new Date("2026-04-17T00:00:00Z"),
+  },
+
+  // Colors Event 2026
+  "Blue Paint Bucket": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Green Paint Bucket": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Purple Paint Bucket": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Yellow Paint Bucket": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Color Wheel": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Dhol Drum": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Mimic Slime Ball": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Mimic Winged Slime Ball": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Pork Jelly": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Rainbow Pork Jelly": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Slime Totem": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Giant Donut": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Fool's Gold": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Golden Slime Trophy": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Silver Slime Trophy": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
+  },
+  "Bronze Slime Trophy": {
+    tradeAt: new Date("2026-08-20T00:00:00Z"),
+    withdrawAt: new Date("2026-08-20T00:00:00Z"),
   },
 
   // Tutorial marketplace item

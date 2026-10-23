@@ -32,7 +32,7 @@ import { DesertNoticeboard } from "./beach/DesertNoticeboard";
 import { PirateChestModal } from "./chests/PirateChest";
 import { ExampleDonations } from "./donations/ExampleDonations";
 import { WorldMap } from "features/island/hud/components/deliveries/WorldMap";
-import { Colors2026 } from "./portals/Colors2026";
+import { Halloween2026 } from "./portals/Halloween2026";
 import { WeatherShop } from "features/game/expansion/components/temperateSeason/WeatherShop";
 import { PortalChooser } from "./portals/PortalChooser";
 import { EasterEggstravaganza } from "./portals/EasterEggstravaganza";
@@ -48,7 +48,11 @@ import { PetShop } from "features/pets/petShop/PetShop";
 import { LoveIslandNoticeboard } from "./loveRewardShop/LoveIslandNoticeboard";
 import { Rarecrows } from "./Rarecrows";
 import { ChapterRaffles } from "./chapterRaffles/ChapterRaffles";
+import { ChapterCropWeekLeaderboard } from "./chapterCropWeek/ChapterCropWeekLeaderboard";
+import { DesignShowcaseContent } from "features/social/DesignShowcase";
 import { FreeTrial } from "./FreeTrial";
+import { Yakkamon } from "./yakkamon/Yakkamon";
+import { GiveawayBoard } from "features/giveaway/ui/GiveawayBoard";
 import { useNavigate } from "react-router";
 
 type InteractableName =
@@ -69,6 +73,7 @@ type InteractableName =
   | "nye_button"
   | "welcome_sign"
   | "bud"
+  | "bud_box_guide"
   | "plaza_statue"
   | "auction_item"
   | "boat_modal"
@@ -152,9 +157,13 @@ type InteractableName =
   | "flower_exchange"
   | "event_store"
   | "event_noticeboard"
-  | "colors_2026"
+  | "halloween_2026"
   | "chapter_raffles"
-  | "free_trial";
+  | "chapter_crop_week_leaderboard"
+  | "design_showcase"
+  | "giveaway_board"
+  | "free_trial"
+  | "yakkamon";
 
 class InteractableModalManager {
   private listener?: (name: InteractableName, isOpen: boolean) => void;
@@ -219,6 +228,9 @@ export const InteractableModals: React.FC<Props> = ({ id, scene }) => {
       <Modal show={interactable === "free_trial"} onHide={closeModal}>
         <FreeTrial onClose={closeModal} />
       </Modal>
+      <Modal show={interactable === "giveaway_board"} onHide={closeModal}>
+        <GiveawayBoard onClose={closeModal} />
+      </Modal>
 
       {/* TODO - make smoother opening */}
       {interactable === "auction_item" && (
@@ -250,8 +262,22 @@ export const InteractableModals: React.FC<Props> = ({ id, scene }) => {
         {" "}
         <ChapterRaffles onClose={closeModal} />
       </Modal>
+      <Modal
+        show={interactable === "chapter_crop_week_leaderboard"}
+        onHide={closeModal}
+      >
+        <ChapterCropWeekLeaderboard onClose={closeModal} />
+      </Modal>
+      <Modal show={interactable === "design_showcase"} onHide={closeModal}>
+        <CloseButtonPanel onClose={closeModal}>
+          <DesignShowcaseContent />
+        </CloseButtonPanel>
+      </Modal>
       <Modal show={interactable === "rarecrows"} onHide={closeModal}>
         <Rarecrows onClose={closeModal} />
+      </Modal>
+      <Modal show={interactable === "yakkamon"} onHide={closeModal}>
+        <Yakkamon onClose={closeModal} />
       </Modal>
       <Modal show={interactable === "desert_noticeboard"} onHide={closeModal}>
         <DesertNoticeboard onClose={closeModal} />
@@ -309,6 +335,16 @@ export const InteractableModals: React.FC<Props> = ({ id, scene }) => {
           message={[
             {
               text: t("interactableModals.bud.message"),
+            },
+          ]}
+        />
+      </Modal>
+      <Modal show={interactable === "bud_box_guide"} onHide={closeModal}>
+        <SpeakingModal
+          onClose={closeModal}
+          message={[
+            {
+              text: t("interactableModals.bud.dailyPrizeAvailable"),
             },
           ]}
         />
@@ -576,9 +612,12 @@ export const InteractableModals: React.FC<Props> = ({ id, scene }) => {
         </CloseButtonPanel>
       </Modal>
 
-      <Modal show={interactable === "colors_2026"}>
-        <CloseButtonPanel onClose={closeModal}>
-          <Colors2026 onClose={closeModal} />
+      <Modal show={interactable === "halloween_2026"}>
+        <CloseButtonPanel
+          onClose={closeModal}
+          bumpkinParts={NPC_WEARABLES["Skelly Joe"]}
+        >
+          <Halloween2026 onClose={closeModal} />
         </CloseButtonPanel>
       </Modal>
 
