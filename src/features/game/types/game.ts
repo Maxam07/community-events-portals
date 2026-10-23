@@ -1672,6 +1672,7 @@ export type Minigame = {
     items?: Partial<Record<InventoryItemName, number>>;
   };
 
+  achievements?: Partial<Record<string, { unlockedAt: number }>>;
   history: Record<string, MinigameHistory>;
 };
 

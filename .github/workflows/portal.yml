@@ -4,7 +4,7 @@ name: Portal deploy
 on:
   push:
     branches:
-      - festival-of-colors-2026
+      - halloween-portal-2026
 
 jobs:
   deploy:

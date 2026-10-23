@@ -156,7 +156,6 @@ export const INITIAL_STOCK = (
     "Saltwort Seed": new Decimal(30),
     // Chapter Crop Week (limited-time event seed). Previous runs' seeds are
     // retired: keep the key (the record is exhaustive) but stock none.
-    "Saltwort Seed": new Decimal(0),
     "Crystal Leaf Seed": new Decimal(36),
 
     "Grape Seed": new Decimal(10),
@@ -753,7 +752,6 @@ export const INITIAL_FARM: GameState = {
       },
     ],
   },
-  username: randomID(),
   collectibles: {},
   pumpkinPlaza: {},
   auctioneer: {},

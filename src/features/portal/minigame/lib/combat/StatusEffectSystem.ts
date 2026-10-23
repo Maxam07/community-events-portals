@@ -111,6 +111,7 @@ export class StatusEffectSystem {
             enemy,
             {
               sourceWeaponId: effect.sourceWeaponId ?? "mossGround",
+              damage: effect.damagePerTick,
               amount: effect.damagePerTick,
               damageType: "dot",
             },
