@@ -885,7 +885,10 @@ export class Scene extends BaseScene {
 
     // Music
     // Background
-    this.load.audio("backgroundMusic", "/world/portal/music/bg_music.mp3");
+    this.load.audio(
+      "backgroundMusic",
+      "/world/portal/music/Bumping_Pumpkins.mp3",
+    );
 
     // SFX
     this.load.audio("hurt", "world/portal/sfx/hurt.wav");
@@ -1832,7 +1835,11 @@ export class Scene extends BaseScene {
         this.enemyGroup,
         (_player, enemyObj) => {
           const enemy = enemyObj as
-            StaticRangeEnemy | PhasingEnemy | MeleeEnemy | BossEnemy | MiniBoss;
+            | StaticRangeEnemy
+            | PhasingEnemy
+            | MeleeEnemy
+            | BossEnemy
+            | MiniBoss;
           enemy.handlePlayerContact();
         },
       );
@@ -2544,7 +2551,8 @@ export class Scene extends BaseScene {
   private enterUnderworld() {
     const player = this.currentPlayer;
     const portalBody = this.area3Blockade?.body as
-      Phaser.Physics.Arcade.StaticBody | undefined;
+      | Phaser.Physics.Arcade.StaticBody
+      | undefined;
     if (this.isEnteringUnderworld || !player || !portalBody) return;
 
     this.isEnteringUnderworld = true;
