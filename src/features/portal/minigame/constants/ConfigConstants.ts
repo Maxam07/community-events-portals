@@ -1,5 +1,5 @@
 import type {
-  BumpkinAura,
+  BumpkinItem,
   BumpkinWings,
   Equipped,
 } from "features/game/types/bumpkin";
@@ -86,12 +86,12 @@ export const FINAL_BOSS_TIME_BONUS_PER_SECOND = 10;
 export const HOLE_INTERACT_TILES = 3;
 
 // Attempts
-export const INITIAL_DATE = "2026-10-26"; // YYYY-MM-DD
+export const INITIAL_DATE = "2026-10-23"; // YYYY-MM-DD
 export const INITIAL_DATE_LEADERBOARD = "2026-10-28"; // YYYY-MM-DD
 export const FINAL_DATE_LEADERBOARD = "2026-11-01"; // YYYY-MM-DD
 export const ATTEMPTS_BETA_TESTERS = 0;
-export const UNLIMITED_ATTEMPTS_SFL = 200; // If this value is less than 0, the option disappears
-export const UNLIMITED_ATTEMPTS_AURA_DISCOUNT_SFL = 150;
+export const UNLIMITED_ATTEMPTS_SFL = 150; // If this value is less than 0, the option disappears
+export const UNLIMITED_ATTEMPTS_DISCOUNT_SFL = 125;
 export const FREE_DAILY_ATTEMPTS = 1;
 export const RESTOCK_ATTEMPTS = [
   { attempts: 1, sfl: 5 },
@@ -100,12 +100,9 @@ export const RESTOCK_ATTEMPTS = [
   { attempts: 20, sfl: 75 },
 ];
 
-export const UNLIMITED_ATTEMPTS_DISCOUNT_AURAS: BumpkinAura[] = [
-  "Slime Aura",
-  "Butterfly Aura",
-  "Wisp Aura",
-  "Diamond Snow Aura",
-  "Glitch Aura",
+export const UNLIMITED_ATTEMPTS_DISCOUNT: BumpkinItem[] = [
+  "Sky Tearer Wings",
+  "Bat Aura",
 ];
 
 // Beta testers

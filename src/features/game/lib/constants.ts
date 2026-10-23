@@ -480,6 +480,17 @@ export const PORTAL_MINIGAME_WARDROBE: Partial<Record<BumpkinItem, number>> = {
   "Slime Wall Background": 1,
   "Rainbow Wings": 1,
   "Butterfly Aura": 1,
+  "Sky Tearer Wings": 1,
+  "Bat Aura": 1,
+  "Vampire Headwear": 1,
+  "Butcher Knife": 1,
+  "Skeleton Mask": 1,
+  "Vampire Breeches": 1,
+  "Scary Nights Background": 1,
+  "Vampire Garments": 1,
+  "Hook and Chain": 1,
+  "Vampire Footwear": 1,
+  "Skeleton Costume": 1,
 };
 
 export const INITIAL_CHORE_BOARD: ChoreBoard = {
@@ -561,7 +572,7 @@ export const INITIAL_FARM: GameState = {
           //   highscore: 9,
           //   prizeClaimedAt: 1774809958435,
           // },
-          "2026-10-22": {
+          "2026-10-23": {
             attempts: 1,
             highscore: 14,
             prizeClaimedAt: new Date("2026-10-22T02:00:00").getTime(),

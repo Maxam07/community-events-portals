@@ -87,7 +87,7 @@ export const WEARABLES_TAB_ITEMS: BumpkinItem[] = [
   "Cardboard Wings",
   "Glitch Aura",
   "Pumpkin Head",
-  /*"Sky Tearer Wings",
+  "Sky Tearer Wings",
   "Bat Aura",
   "Vampire Headwear",
   "Butcher Knife",
@@ -97,10 +97,22 @@ export const WEARABLES_TAB_ITEMS: BumpkinItem[] = [
   "Vampire Garments",
   "Hook and Chain",
   "Vampire Footwear",
-  "Skeleton Costume",*/
+  "Skeleton Costume",
 ];
 
-export const NEW_WEARABLES = new Set<BumpkinItem>([]);
+export const NEW_WEARABLES = new Set<BumpkinItem>([
+  "Sky Tearer Wings",
+  "Bat Aura",
+  "Vampire Headwear",
+  "Butcher Knife",
+  "Skeleton Mask",
+  "Vampire Breeches",
+  "Scary Nights Background",
+  "Vampire Garments",
+  "Hook and Chain",
+  "Vampire Footwear",
+  "Skeleton Costume",
+]);
 
 export const WEARABLE_BUFFS: Partial<Record<BumpkinItem, WearableBuff>> = {
   "Slime Aura": {
@@ -468,10 +480,6 @@ export const WEARABLE_BUFFS: Partial<Record<BumpkinItem, WearableBuff>> = {
     value: -20,
     descriptionKey: "minigame.wearables.buff.aetherSpecs",
   },
-
-  // Wearables that are still commented out in WEARABLES_TAB_ITEMS. Their buffs
-  // are ready here: uncomment this block together with the items in the tab list.
-  /*
   "Hook and Chain": {
     target: { type: "weaponStat", weapon: "frostChain", stat: "range" },
     value: 7,
@@ -535,7 +543,6 @@ export const WEARABLE_BUFFS: Partial<Record<BumpkinItem, WearableBuff>> = {
     value: -50,
     descriptionKey: "minigame.wearables.buff.scaryNightsBackground",
   },
-  */
 };
 
 export const getActiveWearableBuffs = (
