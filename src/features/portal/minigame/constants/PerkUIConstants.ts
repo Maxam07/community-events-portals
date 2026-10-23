@@ -3,7 +3,7 @@ import type { PerkId } from "../Types";
 import { SUNNYSIDE } from "assets/sunnyside";
 
 import swordIcon from "public/world/portal/images/sword_icon.png";
-import speedIcon from "public/world/portal/images/lightning.png";
+import speedIcon from "public/world/portal/images/cheer.png";
 
 // Placeholder icon reuse until dedicated Halloween-themed perk art lands
 // Swap these out per perk once assets exist.

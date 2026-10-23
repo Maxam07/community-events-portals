@@ -997,8 +997,6 @@ export class Scene extends BaseScene {
       if (!this.anims.exists(idleAnimationKey)) {
         this.anims.create({
           key: idleAnimationKey,
-          // TODO: adjust start/end to your idle frame range once the real
-          // spritesheet is loaded.
           frames: this.anims.generateFrameNumbers(textureKey, {
             start: 0,
             end: 7,
@@ -1011,9 +1009,6 @@ export class Scene extends BaseScene {
       if (!this.anims.exists(openAnimationKey)) {
         this.anims.create({
           key: openAnimationKey,
-          // TODO: adjust start/end to your open frame range. repeat: 0 so
-          // it plays once - Chest.ts listens for "animationcomplete" on
-          // this exact key to know when to offer the upgrades.
           frames: this.anims.generateFrameNumbers(textureKey, {
             start: 8,
             end: 14,
@@ -1835,11 +1830,7 @@ export class Scene extends BaseScene {
         this.enemyGroup,
         (_player, enemyObj) => {
           const enemy = enemyObj as
-            | StaticRangeEnemy
-            | PhasingEnemy
-            | MeleeEnemy
-            | BossEnemy
-            | MiniBoss;
+            StaticRangeEnemy | PhasingEnemy | MeleeEnemy | BossEnemy | MiniBoss;
           enemy.handlePlayerContact();
         },
       );
@@ -2551,8 +2542,7 @@ export class Scene extends BaseScene {
   private enterUnderworld() {
     const player = this.currentPlayer;
     const portalBody = this.area3Blockade?.body as
-      | Phaser.Physics.Arcade.StaticBody
-      | undefined;
+      Phaser.Physics.Arcade.StaticBody | undefined;
     if (this.isEnteringUnderworld || !player || !portalBody) return;
 
     this.isEnteringUnderworld = true;

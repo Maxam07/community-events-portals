@@ -1,6 +1,6 @@
 import type { Scene } from "../../Scene";
 
-const DEFAULT_SFX_COOLDOWN_MS = 100;
+const DEFAULT_SFX_COOLDOWN_MS = 200;
 
 export class WeaponSfxLimiter {
   private static readonly lastPlayedByScene = new WeakMap<
