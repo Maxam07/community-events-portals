@@ -150,7 +150,7 @@ export class DamageSystem {
       payload.knockback &&
       payload.knockbackOrigin &&
       !enemy.isDead &&
-      (enemy.maxHp ?? 0) <= 10000
+      (enemy.maxHp ?? 0) <= 20000
     ) {
       enemy.applyKnockback?.(
         enemy.x - payload.knockbackOrigin.x,

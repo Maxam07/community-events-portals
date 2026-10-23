@@ -91,7 +91,7 @@ export const INITIAL_DATE_LEADERBOARD = "2026-10-28"; // YYYY-MM-DD
 export const FINAL_DATE_LEADERBOARD = "2026-11-01"; // YYYY-MM-DD
 export const ATTEMPTS_BETA_TESTERS = 0;
 export const UNLIMITED_ATTEMPTS_SFL = 150; // If this value is less than 0, the option disappears
-export const UNLIMITED_ATTEMPTS_DISCOUNT_SFL = 125;
+export const UNLIMITED_ATTEMPTS_DISCOUNT_SFL = 130;
 export const FREE_DAILY_ATTEMPTS = 1;
 export const RESTOCK_ATTEMPTS = [
   { attempts: 1, sfl: 5 },
@@ -101,6 +101,8 @@ export const RESTOCK_ATTEMPTS = [
 ];
 
 export const UNLIMITED_ATTEMPTS_DISCOUNT: BumpkinItem[] = [
+  "Butterfly Wings",
+  "Butterfly Aura",
   "Sky Tearer Wings",
   "Bat Aura",
 ];
