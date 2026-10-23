@@ -86,7 +86,7 @@ export const FINAL_BOSS_TIME_BONUS_PER_SECOND = 10;
 export const HOLE_INTERACT_TILES = 3;
 
 // Attempts
-export const INITIAL_DATE = "2026-10-23"; // YYYY-MM-DD
+export const INITIAL_DATE = "2026-10-26"; // YYYY-MM-DD
 export const INITIAL_DATE_LEADERBOARD = "2026-10-28"; // YYYY-MM-DD
 export const FINAL_DATE_LEADERBOARD = "2026-11-01"; // YYYY-MM-DD
 export const ATTEMPTS_BETA_TESTERS = 0;
