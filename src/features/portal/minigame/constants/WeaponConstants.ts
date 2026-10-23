@@ -302,10 +302,10 @@ export const WEAPON_CONFIGS: Record<WeaponId, WeaponConfig> = {
     baseStats: {
       ...BASE_WEAPON_STATS,
       damage: 0,
-      cooldownMs: 1000,
-      projectileCount: 1,
-      range: 200,
-      dotDamage: 2,
+      cooldownMs: 1300,
+      projectileCount: 2,
+      range: 150,
+      dotDamage: 3,
       dotTickMs: 1000,
       statusDurationMs: 1500,
     },
@@ -1531,7 +1531,7 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
       level: 5,
       modifiers: [
         { stat: "cooldownMs", operation: "set", value: 1000 },
-        { stat: "projectileCount", operation: "set", value: 3 },
+        { stat: "projectileCount", operation: "set", value: 4 },
         { stat: "dotDamage", operation: "set", value: 10 },
         { stat: "dotTickMs", operation: "set", value: 750 },
         { stat: "statusDurationMs", operation: "set", value: 2500 },
