@@ -592,10 +592,36 @@ export const INITIAL_FARM: GameState = {
       [PORTAL_NAME]: {
         coins: 0,
         items: {
-          [PORTAL_TOKEN as InventoryItemName]: 50,
+          [PORTAL_TOKEN as InventoryItemName]: 1,
         },
         wearables: {},
-        score: 20,
+        score: 1000,
+        tiers: [
+          {
+            score: 1000,
+            items: {
+              "Halloween Token 2026": 1,
+            },
+          },
+          {
+            score: 2000,
+            items: {
+              "Halloween Token 2026": 2,
+            },
+          },
+          {
+            score: 3000,
+            items: {
+              "Halloween Token 2026": 3,
+            },
+          },
+          {
+            score: 4000,
+            items: {
+              "Halloween Token 2026": 4,
+            },
+          },
+        ],
         startAt: 1775001600000,
         endAt: 1775088000000,
       },

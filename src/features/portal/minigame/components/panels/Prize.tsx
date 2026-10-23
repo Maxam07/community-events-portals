@@ -10,6 +10,7 @@ import { PortalContext } from "../../lib/PortalProvider";
 import { secondsToString } from "lib/utils/time";
 import { PORTAL_NAME, PORTAL_TOKEN } from "../../constants";
 import { ITEM_DETAILS } from "features/game/types/images";
+import type { InventoryItemName } from "features/game/types/game";
 
 const _prize = (state: PortalMachineState) => {
   return state.context.state?.minigames.prizes[PORTAL_NAME];
@@ -59,20 +60,37 @@ export const Prize: React.FC = () => {
             targetScore: prize.score,
           })}
         </span>
-        <div className="flex justify-between mt-2 flex-wrap gap-1">
-          <Label type="info" icon={SUNNYSIDE.icons.stopwatch}>
+        <div className="flex justify-between mt-2 gap-1">
+          <Label className="h-fit" type="info" icon={SUNNYSIDE.icons.stopwatch}>
             {secondsToString(secondsLeft, { length: "medium" })}
           </Label>
-          <div className="flex items-center space-x-2">
-            {!!prize.items[PORTAL_TOKEN as keyof typeof prize.items] && (
-              <Label icon={ITEM_DETAILS[PORTAL_TOKEN].image} type="warning">
-                {t("minigame.eventToken", {
-                  token:
-                    prize.items[PORTAL_TOKEN as keyof typeof prize.items] ?? 0,
-                  tokenName: PORTAL_TOKEN,
-                })}
-              </Label>
-            )}
+          <div className="flex flex-wrap items-center gap-1 w-60">
+            {prize.tiers?.length
+              ? prize.tiers.flatMap((tier) =>
+                  Object.entries(tier.items).map(([itemName, amount]) => (
+                    <Label
+                      key={`${tier.score}-${itemName}`}
+                      icon={ITEM_DETAILS[itemName as InventoryItemName]?.image}
+                      type="warning"
+                    >
+                      {t("minigame.prizeTier", {
+                        score: tier.score,
+                        amount,
+                        itemName,
+                      })}
+                    </Label>
+                  )),
+                )
+              : !!prize.items[PORTAL_TOKEN as keyof typeof prize.items] && (
+                  <Label icon={ITEM_DETAILS[PORTAL_TOKEN].image} type="warning">
+                    {t("minigame.eventToken", {
+                      token:
+                        prize.items[PORTAL_TOKEN as keyof typeof prize.items] ??
+                        0,
+                      tokenName: PORTAL_TOKEN,
+                    })}
+                  </Label>
+                )}
           </div>
         </div>
       </div>

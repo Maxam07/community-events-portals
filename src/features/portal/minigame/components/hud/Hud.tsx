@@ -9,6 +9,7 @@ import { Settings } from "./Settings";
 import { Travel } from "./Travel";
 import { Timer } from "./Timer";
 import { ColletedItems } from "./CollectedItems";
+import { Missions } from "./Missions";
 import { BumpkinProfile } from "./BumpkinProfile";
 import { HudWeapons } from "./HudWeapons";
 import { HudPerks } from "./HudPerks";
@@ -64,6 +65,7 @@ export const Hud: React.FC = () => {
                 {/* <Lives /> */}
                 {/* <Score /> */}
                 <ColletedItems />
+                <Missions />
               </div>
             </>
           )}
