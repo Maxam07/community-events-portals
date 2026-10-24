@@ -8,11 +8,10 @@ import type { BumpkinParts } from "lib/utils/tokenUriBuilder";
 import { WeaponsTab } from "./Weapons";
 import { WeaponsGuide } from "./WeaponsGuide";
 import { WearablesTab } from "./Wearables";
+import { DropItemsXP, Enemies } from "../panels/CodexCategories";
 
 import frozenSkullIcon from "public/world/portal/halloween/weapons/the_frost/frozen_skull_icon.png";
-import guideIcon from "public/world/page.png";
 import enemyIcon from "public/world/portal/halloween/icons/sorcerer_icon.png";
-import { DropItemsXP, Enemies } from "../panels/CodexCategories";
 export type ProfilePanelTab = "weapons" | "wearables" | "guide" | "enemy";
 
 export const ProfilePanel: React.FC<{
@@ -49,13 +48,13 @@ export const ProfilePanel: React.FC<{
     },
     {
       id: "guide" as const,
-      icon: guideIcon,
-      name: t("minigame.weaponGuide"),
+      icon: frozenSkullIcon,
+      name: t("minigame.weapon"),
     },
     {
       id: "enemy" as const,
       icon: enemyIcon,
-      name: t("minigame.enemyGuide"),
+      name: t("minigame.enemy"),
     },
   ].filter((tab) => tabs.includes(tab.id));
 

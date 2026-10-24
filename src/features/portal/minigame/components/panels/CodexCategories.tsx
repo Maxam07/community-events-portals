@@ -4,6 +4,7 @@ import {
   SKILLS_TABLE,
   DROP_ITEMS_XP_TABLE,
   ENEMIES_TABLE,
+  PERKS_TABLE,
 } from "../../constants/ConfigConstants";
 import { useAppTranslation } from "lib/i18n/useAppTranslations";
 import { Label } from "components/ui/Label";
@@ -273,6 +274,30 @@ export const Enemies: React.FC = () => {
   );
 };
 
+export const Perks: React.FC = () => {
+  const { t } = useAppTranslation();
+  return (
+    <div className="flex md:flex-row flex-col-reverse md:mr-1 items-start h-full">
+      <InnerPanel className="p-2 w-full">
+        <Label type="default">{t("minigame.perks")}</Label>
+        <div className="grid grid-cols-2 sm:grid-cols-3 w-full mt-2 gap-1">
+          {PERKS_TABLE.map((perk, index) => (
+            <PerksCard
+              key={index}
+              icon={perk.image}
+              perkName={perk.perkName}
+              levelScaling={perk.levelScaling}
+              maxLevel={perk.maxLevel}
+              description={perk.description}
+            />
+          ))}
+        </div>
+      </InnerPanel>
+      <div />
+    </div>
+  );
+};
+
 export const SkillsCard: React.FC<{
   icon: string;
   skillName: string;
@@ -368,6 +393,39 @@ export const EnemyCard: React.FC<{
           </tr>
         </tbody>
       </table>
+    </ButtonPanel>
+  );
+};
+
+export const PerksCard: React.FC<{
+  icon: string;
+  perkName: string;
+  levelScaling: number;
+  maxLevel: number;
+  description: string;
+}> = ({ icon, perkName, levelScaling, maxLevel, description }) => {
+  const { t } = useAppTranslation();
+  return (
+    <ButtonPanel className="flex flex-col items-center">
+      <img src={icon} className="h-10 py-2" />
+      <span className="text-xs font-bold pb-3 text-center">{perkName}</span>
+      <table className="w-full border-collapse text-xs">
+        <tbody>
+          <tr>
+            <th className="py-1 text-left">{t("minigame.perk.per.level")}</th>
+            <td className="py-1 text-center">{levelScaling}</td>
+          </tr>
+          <tr>
+            <th className="bg-black/10 py-1 text-left font-normal">
+              {t("minigame.perk.max.level")}
+            </th>
+            <td className="bg-black/10 py-1 text-center">{maxLevel}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div className="flex flex-col pt-1 w-full">
+        <p className="py-1 text-center text-xxs">{description}</p>
+      </div>
     </ButtonPanel>
   );
 };

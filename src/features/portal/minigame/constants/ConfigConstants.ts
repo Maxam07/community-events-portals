@@ -6,6 +6,7 @@ import type {
 import { translate as t } from "lib/i18n/translate";
 import { DROP_ITEM_XP_VALUES, ENEMY_BALANCE_STATS } from "./EnemyConstants";
 import { WEAPON_CONFIGS, WEAPON_UPGRADES } from "./WeaponConstants";
+import { PERK_CONFIGS } from "./PerkConstants";
 
 import frozen_skull_icon from "public/world/portal/halloween/weapons/the_frost/frozen_skull_icon.png";
 import blood_scythe_icon from "public/world/portal/halloween/weapons/the_bloody_harvest/blood_scythe_icon.png";
@@ -169,57 +170,79 @@ export const INSTRUCTIONS: {
 export const PERKS_TABLE: {
   image: string;
   perkName: string;
+  levelScaling: number;
+  maxLevel: number;
   description: string;
   width?: number;
 }[] = [
   {
     image: SUNNYSIDE.icons.lightning,
     perkName: t("minigame.perk.moveSpeed"),
+    levelScaling: PERK_CONFIGS.moveSpeed.valuesPerLevel[1],
+    maxLevel: PERK_CONFIGS.moveSpeed.maxLevel,
     description: t("minigame.perk.description.moveSpeed"),
   },
   {
     image: SUNNYSIDE.icons.lightning,
     perkName: t("minigame.perk.attackSpeed"),
+    levelScaling: PERK_CONFIGS.attackSpeed.valuesPerLevel[1],
+    maxLevel: PERK_CONFIGS.attackSpeed.maxLevel,
     description: t("minigame.perk.description.attackSpeed"),
   },
   {
     image: swordIcon,
     perkName: t("minigame.perk.criticalChance"),
+    levelScaling: PERK_CONFIGS.criticalChance.valuesPerLevel[1],
+    maxLevel: PERK_CONFIGS.criticalChance.maxLevel,
     description: t("minigame.perk.description.criticalChance"),
   },
   {
     image: SUNNYSIDE.icons.arrow_right,
     perkName: t("minigame.perk.projectileSpeed"),
+    levelScaling: PERK_CONFIGS.projectileSpeed.valuesPerLevel[1],
+    maxLevel: PERK_CONFIGS.projectileSpeed.maxLevel,
     description: t("minigame.perk.description.projectileSpeed"),
   },
   {
     image: SUNNYSIDE.icons.xpIcon,
     perkName: t("minigame.perk.xpGain"),
+    levelScaling: PERK_CONFIGS.xpGain.valuesPerLevel[1],
+    maxLevel: PERK_CONFIGS.xpGain.maxLevel,
     description: t("minigame.perk.description.xpGain"),
   },
   {
     image: SUNNYSIDE.icons.happy,
     perkName: t("minigame.perk.luck"),
+    levelScaling: PERK_CONFIGS.luck.valuesPerLevel[1],
+    maxLevel: PERK_CONFIGS.luck.maxLevel,
     description: t("minigame.perk.description.luck"),
   },
   {
     image: SUNNYSIDE.icons.search,
     perkName: t("minigame.perk.pickupRadius"),
+    levelScaling: PERK_CONFIGS.pickupRadius.valuesPerLevel[1],
+    maxLevel: PERK_CONFIGS.pickupRadius.maxLevel,
     description: t("minigame.perk.description.pickupRadius"),
   },
   {
     image: SUNNYSIDE.icons.stopwatch,
     perkName: t("minigame.perk.cooldownReduction"),
+    levelScaling: PERK_CONFIGS.cooldownReduction.valuesPerLevel[1],
+    maxLevel: PERK_CONFIGS.cooldownReduction.maxLevel,
     description: t("minigame.perk.description.cooldownReduction"),
   },
   {
     image: SUNNYSIDE.icons.upgrade_disc,
     perkName: t("minigame.perk.healing"),
+    levelScaling: PERK_CONFIGS.healing.valuesPerLevel[1],
+    maxLevel: PERK_CONFIGS.healing.maxLevel,
     description: t("minigame.perk.description.healing"),
   },
   {
     image: SUNNYSIDE.icons.heart,
     perkName: t("minigame.perk.maxHealth"),
+    levelScaling: PERK_CONFIGS.maxHealth.valuesPerLevel[1],
+    maxLevel: PERK_CONFIGS.maxHealth.maxLevel,
     description: t("minigame.perk.description.maxHealth"),
   },
 ];
