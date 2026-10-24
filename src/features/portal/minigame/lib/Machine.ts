@@ -88,6 +88,8 @@ export const canActivateSpecialPower = (
   resolveSpecialPower(context.weaponLevels).kind !== "none" &&
   now >= context.specialPowerCooldownUntil;
 
+export type BossHealth = { name: string; hp: number; maxHp: number };
+
 export interface Context {
   id: number;
   jwt: string | null;
@@ -127,6 +129,7 @@ export interface Context {
   // Special Power timestamps (Date.now() based, shifted while paused).
   specialPowerActiveUntil: number;
   specialPowerCooldownUntil: number;
+  bossHealth?: BossHealth;
 }
 
 const DEFAULT_WEAPON_LEVELS: Record<WeaponId, WeaponLevel> =
@@ -377,6 +380,13 @@ type SetActiveWearablesEvent = {
   wearables: BumpkinParts;
 };
 
+type SetBossHealthEvent = {
+  type: "SET_BOSS_HEALTH";
+  name: string;
+  hp: number;
+  maxHp: number;
+};
+
 export type PortalEvent =
   | SetJoystickActiveEvent
   | { type: "START" }
@@ -401,7 +411,9 @@ export type PortalEvent =
   | ChestOpenedEvent
   | SetGameplayPausedEvent
   | SetActiveWearablesEvent
-  | { type: "ACTIVATE_SPECIAL_POWER" };
+  | { type: "ACTIVATE_SPECIAL_POWER" }
+  | SetBossHealthEvent
+  | { type: "CLEAR_BOSS_HEALTH" };
 
 export type PortalState = {
   value:
@@ -450,6 +462,7 @@ const resetGameTransition = {
         ...progression,
         activeWearables: context.activeWearables,
         validations: structuredClone(VALIDATIONS),
+        bossHealth: undefined as BossHealth | undefined,
       };
     }) as any,
   },
@@ -584,6 +597,18 @@ export const portalMachine = createMachine<Context, PortalEvent, PortalState>({
     //     },
     //   }),
     // },
+    SET_BOSS_HEALTH: {
+      actions: assign({
+        bossHealth: (_: Context, event: SetBossHealthEvent) => ({
+          name: event.name,
+          hp: event.hp,
+          maxHp: event.maxHp,
+        }),
+      }),
+    },
+    CLEAR_BOSS_HEALTH: {
+      actions: assign({ bossHealth: (_: Context) => undefined }),
+    },
   },
   states: {
     initialising: {
@@ -1031,10 +1056,12 @@ export const portalMachine = createMachine<Context, PortalEvent, PortalState>({
         PLAYER_DIED: [
           {
             cond: canRevive,
-            actions: assign((context: Context): Partial<Context> => ({
-              ...pauseGameplayClock(context),
-              pendingRevive: true,
-            })) as any,
+            actions: assign(
+              (context: Context): Partial<Context> => ({
+                ...pauseGameplayClock(context),
+                pendingRevive: true,
+              }),
+            ) as any,
           },
           {
             target: "gameOver",
@@ -1069,9 +1096,11 @@ export const portalMachine = createMachine<Context, PortalEvent, PortalState>({
         HOLE_ENTERED: {
           target: "gameOver",
           actions: [
-            assign((context: Context): Partial<Context> => ({
-              collected: context.collected + getTimeBonus(context),
-            })) as any,
+            assign(
+              (context: Context): Partial<Context> => ({
+                collected: context.collected + getTimeBonus(context),
+              }),
+            ) as any,
             gameOverActions,
           ],
         },

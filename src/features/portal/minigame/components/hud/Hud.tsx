@@ -15,6 +15,7 @@ import { HudWeapons } from "./HudWeapons";
 import { HudPerks } from "./HudPerks";
 import { Target } from "./Target";
 import { SpecialPowerButton } from "./SpecialPowerButton";
+import { BossHealthBar } from "./BossHealthBar";
 
 const _isJoystickActive = (state: PortalMachineState) =>
   state.context.isJoystickActive;
@@ -60,6 +61,7 @@ export const Hud: React.FC = () => {
           {isPlaying && (
             <>
               <BumpkinProfile />
+              <BossHealthBar />
               <div className="pointer-events-none">
                 <Target />
                 {/* <Lives /> */}
