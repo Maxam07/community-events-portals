@@ -85,8 +85,7 @@ export class BossEnemy extends Phaser.GameObjects.Container {
 
   public get portalService() {
     return this.scene.registry.get("portalService") as
-      | MachineInterpreter
-      | undefined;
+      MachineInterpreter | undefined;
   }
 
   createEnemy() {
@@ -163,8 +162,7 @@ export class BossEnemy extends Phaser.GameObjects.Container {
 
   private avoidObstacles(): { x: number; y: number } {
     const obstacles = (this.scene as any).obstacles as
-      | BoundingBox[]
-      | undefined;
+      BoundingBox[] | undefined;
     if (!obstacles || obstacles.length === 0) return { x: 0, y: 0 };
 
     let pushX = 0;

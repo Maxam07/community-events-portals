@@ -10,8 +10,9 @@ import { EventBus } from "../EventBus";
 import { isEnemyAlive } from "./geometry";
 import type { StatusEffectSystem } from "./StatusEffectSystem";
 import {
-  CATEGORY_POWER_EFFECTS,
   COMBAT_CONFIG,
+  getCategoryPowerEffects,
+  getPlaguePoisonStatus,
   WEAPON_CATEGORIES,
 } from "../../constants";
 import { getPerkAmount } from "../../constants/PerkConstants";
@@ -85,20 +86,46 @@ export class DamageSystem {
     this.nextHealFlushAt = 0;
   }
 
+  // Special Power effects scale with the player level (Machine context).
+  private getPlayerLevel() {
+    return this.portalService?.state.context.playerLevel ?? 1;
+  }
+
   private getSpecialPowerStatuses(
     payload: DamagePayload,
+    enemy: EnemyLike,
   ): StatusEffectConfig[] {
     if (!this.specialPower) return [];
 
+    const level = this.getPlayerLevel();
+    const effects = getCategoryPowerEffects(level);
     const statuses: StatusEffectConfig[] = [];
 
     this.specialPower.categories.forEach((category) => {
-      if (category === "bloodyHarvest") return;
-
-      statuses.push({
-        ...CATEGORY_POWER_EFFECTS[category],
-        sourceWeaponId: payload.sourceWeaponId,
-      });
+      switch (category) {
+        case "plague":
+          // Poison is a % of THIS enemy's max HP per second.
+          statuses.push({
+            ...getPlaguePoisonStatus(enemy.maxHp, level),
+            sourceWeaponId: payload.sourceWeaponId,
+          });
+          break;
+        case "frost":
+          statuses.push({
+            ...effects.frost,
+            sourceWeaponId: payload.sourceWeaponId,
+          });
+          break;
+        case "curse":
+          statuses.push({
+            ...effects.curse,
+            sourceWeaponId: payload.sourceWeaponId,
+          });
+          break;
+        default:
+          // bloodyHarvest has no status effect (lifesteal, see applyLifesteal)
+          break;
+      }
     });
 
     return statuses;
@@ -109,7 +136,9 @@ export class DamageSystem {
   private applyLifesteal(enemy: EnemyLike) {
     if (!this.specialPower?.categories.includes("bloodyHarvest")) return;
 
-    this.pendingHeal += CATEGORY_POWER_EFFECTS.bloodyHarvest.healPerKill;
+    this.pendingHeal += getCategoryPowerEffects(
+      this.getPlayerLevel(),
+    ).bloodyHarvest.healPerKill;
     this.onLifesteal?.(enemy);
   }
 
@@ -150,7 +179,7 @@ export class DamageSystem {
       payload.knockback &&
       payload.knockbackOrigin &&
       !enemy.isDead &&
-      (enemy.maxHp ?? 0) <= 20000
+      (enemy.maxHp ?? 0) <= 10000
     ) {
       enemy.applyKnockback?.(
         enemy.x - payload.knockbackOrigin.x,
@@ -176,7 +205,7 @@ export class DamageSystem {
     if (!options.skipStatusEffects) {
       const statuses = [
         ...(payload.statusEffects ?? []),
-        ...this.getSpecialPowerStatuses(payload),
+        ...this.getSpecialPowerStatuses(payload, enemy),
       ];
 
       if (statuses.length) {

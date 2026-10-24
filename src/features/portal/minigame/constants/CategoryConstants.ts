@@ -79,7 +79,7 @@ export const CATEGORY_CONFIGS: Record<WeaponCategoryId, CategoryConfig> = {
     color: "#290264",
     labelType: "The Curse",
     glowColor: "#4203A0",
-    baseActiveMs: 7000,
+    baseActiveMs: 10000,
   },
   bloodyHarvest: {
     id: "bloodyHarvest",
@@ -88,7 +88,7 @@ export const CATEGORY_CONFIGS: Record<WeaponCategoryId, CategoryConfig> = {
     color: "#e43b44",
     labelType: "The Bloody Harvest",
     glowColor: "#ac2121",
-    baseActiveMs: 7000,
+    baseActiveMs: 5000,
   },
 };
 
@@ -103,7 +103,7 @@ export const SPECIAL_POWER_CONFIG = {
   durationMultipliers: {
     pure: 1,
     hybrid: 0.5,
-    partial: 0.7,
+    partial: 0.8,
     none: 0,
   } satisfies Record<SpecialPowerKind, number>,
   // Desktop hotkey (KeyboardEvent.key, lowercase).
@@ -111,6 +111,7 @@ export const SPECIAL_POWER_CONFIG = {
 };
 
 export const CATEGORY_POWER_EFFECTS = {
+  // Level 1 / fallback values. Real values: getCategoryPowerEffects(playerLevel).
   plague: {
     id: "plaguePoison",
     durationMs: 3000,
@@ -134,6 +135,175 @@ export const CATEGORY_POWER_EFFECTS = {
     // HP stolen for every enemy killed while the power is active.
     healPerKill: 1,
   },
+};
+
+// ---------------------------------------------------------------------------
+// Special Power effects that scale with the player level
+// ---------------------------------------------------------------------------
+// CATEGORY_POWER_EFFECTS above keeps the old fixed values (fallback only). The
+// game reads getCategoryPowerEffects(playerLevel) and getPlaguePoisonStatus(...)
+// instead. Every value is interpolated linearly from level 1 to the max level.
+export const POWER_SCALING_MIN_LEVEL = 1;
+// Must match PLAYER_MAX_LEVEL (PlayerLevelConstants.ts). It is not imported here
+// to keep this file free of circular imports; CategoryPowerScaling.test.ts
+// fails if the two ever diverge.
+export const POWER_SCALING_MAX_LEVEL = 32;
+
+type ScalingRange = { atMinLevel: number; atMaxLevel: number };
+
+export const CATEGORY_POWER_SCALING = {
+  // Poison: share of the enemy's max HP lost per second.
+  plague: { percentMaxHpPerSecond: { atMinLevel: 0.01, atMaxLevel: 0.025 } },
+  // Frost: enemy speed multiplier (lower = slower).
+  frost: { speedMultiplier: { atMinLevel: 0.6, atMaxLevel: 0.3 } },
+  // Curse: multiplier on the damage the enemy deals (lower = weaker enemy).
+  curse: { damageMultiplier: { atMinLevel: 0.7, atMaxLevel: 0.4 } },
+  // Bloody Harvest: HP stolen per kill (rounded to whole HP).
+  bloodyHarvest: { healPerKill: { atMinLevel: 1, atMaxLevel: 4 } },
+} satisfies Record<string, Record<string, ScalingRange>>;
+
+// Optional per-tick limits for the poison (HP per tick, 1 tick = 1 second).
+// Poison is a % of max HP, so it does almost nothing to 3-10 HP mobs and a lot
+// to bosses (3% of 20000 HP = 600 per second). Set a cap here to tame bosses.
+export const PLAGUE_MIN_DAMAGE_PER_TICK = 2;
+export const PLAGUE_MAX_DAMAGE_PER_TICK = 2000;
+
+// 0 at POWER_SCALING_MIN_LEVEL, 1 at POWER_SCALING_MAX_LEVEL (clamped).
+export const getPowerLevelProgress = (playerLevel: number) => {
+  const span = POWER_SCALING_MAX_LEVEL - POWER_SCALING_MIN_LEVEL;
+  const progress = (playerLevel - POWER_SCALING_MIN_LEVEL) / span;
+
+  return Number.isFinite(progress) ? Math.min(1, Math.max(0, progress)) : 0;
+};
+
+const scaleByLevel = (range: ScalingRange, playerLevel: number) =>
+  range.atMinLevel +
+  (range.atMaxLevel - range.atMinLevel) * getPowerLevelProgress(playerLevel);
+
+const round3 = (value: number) => Math.round(value * 1000) / 1000;
+
+export const getCategoryPowerEffects = (playerLevel: number) => ({
+  plague: {
+    ...CATEGORY_POWER_EFFECTS.plague,
+    percentMaxHpPerSecond: round3(
+      scaleByLevel(
+        CATEGORY_POWER_SCALING.plague.percentMaxHpPerSecond,
+        playerLevel,
+      ),
+    ),
+  },
+  frost: {
+    ...CATEGORY_POWER_EFFECTS.frost,
+    speedMultiplier: round3(
+      scaleByLevel(CATEGORY_POWER_SCALING.frost.speedMultiplier, playerLevel),
+    ),
+  },
+  curse: {
+    ...CATEGORY_POWER_EFFECTS.curse,
+    damageMultiplier: round3(
+      scaleByLevel(CATEGORY_POWER_SCALING.curse.damageMultiplier, playerLevel),
+    ),
+  },
+  bloodyHarvest: {
+    healPerKill: Math.round(
+      scaleByLevel(
+        CATEGORY_POWER_SCALING.bloodyHarvest.healPerKill,
+        playerLevel,
+      ),
+    ),
+  },
+});
+
+// Poison status for one enemy: damage per tick = % of that enemy's max HP.
+// Falls back to the old flat damage when the enemy has no max HP.
+export const getPlaguePoisonStatus = (
+  enemyMaxHp: number | undefined,
+  playerLevel: number,
+): StatusEffectConfig => {
+  const effect = getCategoryPowerEffects(playerLevel).plague;
+  const tickSeconds = effect.tickMs / 1000;
+  const percentDamage =
+    enemyMaxHp !== undefined && enemyMaxHp > 0
+      ? enemyMaxHp * effect.percentMaxHpPerSecond * tickSeconds
+      : effect.damagePerTick;
+
+  let damagePerTick = Math.max(PLAGUE_MIN_DAMAGE_PER_TICK, percentDamage);
+  if (PLAGUE_MAX_DAMAGE_PER_TICK !== undefined) {
+    damagePerTick = Math.min(PLAGUE_MAX_DAMAGE_PER_TICK, damagePerTick);
+  }
+
+  return {
+    id: effect.id,
+    durationMs: effect.durationMs,
+    tickMs: effect.tickMs,
+    damagePerTick,
+    refreshMode: effect.refreshMode,
+  };
+};
+
+// Values for the {{placeholders}} of the "categories.power.*" texts at a given
+// player level:
+//   plague        -> { percent, tick, duration }  (% of max HP per tick, seconds)
+//   frost         -> { percent, duration }        (% slower, seconds)
+//   curse         -> { percent, duration }        (% less damage dealt, seconds)
+//   bloodyHarvest -> { amount }                   (HP per kill)
+// `duration` is the duration of the status each hit applies, not of the power.
+export const getCategoryPowerDescriptionParams = (
+  category: WeaponCategoryId,
+  playerLevel: number,
+): Record<string, number> => {
+  const effects = getCategoryPowerEffects(playerLevel);
+
+  switch (category) {
+    case "plague": {
+      const tick = effects.plague.tickMs / 1000;
+
+      return {
+        percent:
+          Math.round(effects.plague.percentMaxHpPerSecond * tick * 1000) / 10,
+        tick,
+        duration: effects.plague.durationMs / 1000,
+      };
+    }
+    case "frost":
+      return {
+        percent: Math.round((1 - effects.frost.speedMultiplier) * 100),
+        duration: effects.frost.durationMs / 1000,
+      };
+    case "curse":
+      return {
+        percent: Math.round((1 - effects.curse.damageMultiplier) * 100),
+        duration: effects.curse.durationMs / 1000,
+      };
+    case "bloodyHarvest":
+      return { amount: effects.bloodyHarvest.healPerKill };
+    default:
+      return {};
+  }
+};
+
+// Same params as getCategoryPowerDescriptionParams, but as a level 1 -> max level
+// range for screens without a player level (e.g. the Codex): a value that
+// changes with the level becomes "min-max" (e.g. percent: "40-70"), the others
+// stay numbers.
+export const getCategoryPowerDescriptionRange = (
+  category: WeaponCategoryId,
+): Record<string, string | number> => {
+  const low = getCategoryPowerDescriptionParams(
+    category,
+    POWER_SCALING_MIN_LEVEL,
+  );
+  const high = getCategoryPowerDescriptionParams(
+    category,
+    POWER_SCALING_MAX_LEVEL,
+  );
+
+  return Object.fromEntries(
+    Object.keys(low).map((key) => [
+      key,
+      low[key] === high[key] ? low[key] : `${low[key]}-${high[key]}`,
+    ]),
+  );
 };
 
 export const NO_SPECIAL_POWER: SpecialPower = {

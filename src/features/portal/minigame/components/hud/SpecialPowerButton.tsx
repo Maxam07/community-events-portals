@@ -12,6 +12,7 @@ import type { PortalMachineState } from "../../lib/Machine";
 import {
   CATEGORY_CONFIGS,
   getCategoryCounts,
+  getCategoryPowerDescriptionParams,
   getSpecialPowerLabel,
   resolveSpecialPower,
   SPECIAL_POWER_CONFIG,
@@ -20,6 +21,7 @@ import {
 import type { SpecialPower } from "../../Types";
 import { useAppTranslation } from "lib/i18n/useAppTranslations";
 import type { TranslationKeys } from "lib/i18n/dictionaries/types";
+import { POWER_DESCRIPTION_KEYS } from "../panels/CodexCategories";
 
 const BUTTON_WIDTH = PIXEL_SCALE * 22;
 const BUTTON_HEIGHT = PIXEL_SCALE * 23;
@@ -31,6 +33,7 @@ const _specialPowerState = (state: PortalMachineState) => ({
   isPaused: state.context.isGameplayPaused,
   pausedAt: state.context.gameplayPausedAt,
   isJoystickActive: state.context.isJoystickActive,
+  playerLevel: state.context.playerLevel,
 });
 
 const isEditableTarget = (target: EventTarget | null) => {
@@ -80,8 +83,14 @@ export const SpecialPowerButton: React.FC = () => {
 
   const { portalService } = useContext(PortalContext);
   const { t } = useAppTranslation();
-  const { weaponLevels, cooldownUntil, isPaused, pausedAt, isJoystickActive } =
-    useSelector(portalService, _specialPowerState);
+  const {
+    weaponLevels,
+    cooldownUntil,
+    isPaused,
+    pausedAt,
+    isJoystickActive,
+    playerLevel,
+  } = useSelector(portalService, _specialPowerState);
   const button = useSound("button");
   useEffect(() => {
     const interval = window.setInterval(
@@ -152,7 +161,17 @@ export const SpecialPowerButton: React.FC = () => {
       }}
       title={
         hasPower
-          ? getSpecialPowerLabel(power, t)
+          ? [
+              getSpecialPowerLabel(power, t),
+              ...power.categories.map((category) =>
+                t(
+                  POWER_DESCRIPTION_KEYS[category],
+                  getCategoryPowerDescriptionParams(category, playerLevel),
+                ),
+              ),
+            ]
+              .filter(Boolean)
+              .join("\n")
           : `${getSpecialPowerLabel(power, t)}\n${getCategoryCountsLabel(weaponLevels, t)}`
       }
     >

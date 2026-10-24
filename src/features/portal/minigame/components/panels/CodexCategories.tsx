@@ -10,7 +10,7 @@ import { Label } from "components/ui/Label";
 import { SquareIcon } from "components/ui/SquareIcon";
 import {
   CATEGORY_CONFIGS,
-  CATEGORY_POWER_EFFECTS,
+  getCategoryPowerDescriptionRange,
   SPECIAL_POWER_CONFIG,
   WEAPON_CATEGORIES,
   WEAPON_CATEGORY_IDS,
@@ -25,42 +25,21 @@ const toPercent = (ratio: number) => Math.round(ratio * 100);
 
 type Translate = ReturnType<typeof useAppTranslation>["t"];
 
-// Power effect text built from CATEGORY_POWER_EFFECTS so balance changes in
-// constants show up here automatically.
-const getPowerDescription = (category: WeaponCategoryId, t: Translate) => {
-  switch (category) {
-    case "plague": {
-      const { damagePerTick, tickMs, durationMs } =
-        CATEGORY_POWER_EFFECTS.plague;
+export const POWER_DESCRIPTION_KEYS = {
+  plague: "minigame.categories.power.plague",
+  frost: "minigame.categories.power.frost",
+  curse: "minigame.categories.power.curse",
+  bloodyHarvest: "minigame.categories.power.bloodyHarvest",
+} as const;
 
-      return t("minigame.categories.power.plague", {
-        damage: damagePerTick,
-        tick: toSeconds(tickMs),
-        duration: toSeconds(durationMs),
-      });
-    }
-    case "frost": {
-      const { speedMultiplier, durationMs } = CATEGORY_POWER_EFFECTS.frost;
-
-      return t("minigame.categories.power.frost", {
-        percent: toPercent(1 - speedMultiplier),
-        duration: toSeconds(durationMs),
-      });
-    }
-    case "curse": {
-      const { damageMultiplier, durationMs } = CATEGORY_POWER_EFFECTS.curse;
-
-      return t("minigame.categories.power.curse", {
-        percent: toPercent(1 - damageMultiplier),
-        duration: toSeconds(durationMs),
-      });
-    }
-    case "bloodyHarvest":
-      return t("minigame.categories.power.bloodyHarvest", {
-        amount: CATEGORY_POWER_EFFECTS.bloodyHarvest.healPerKill,
-      });
-  }
-};
+// Power effect text. The effects grow with the player level, so the Codex shows
+// the level 1 -> max level range ("40-70") built from the same constants the game
+// uses (getCategoryPowerDescriptionRange), and balance changes show up here too.
+const getPowerDescription = (category: WeaponCategoryId, t: Translate) =>
+  t(
+    POWER_DESCRIPTION_KEYS[category],
+    getCategoryPowerDescriptionRange(category),
+  );
 
 const COMBINATIONS: {
   kind: SpecialPowerKind;
@@ -109,6 +88,9 @@ export const Categories: React.FC = () => {
             hotkey: SPECIAL_POWER_CONFIG.hotkey.toUpperCase(),
             cooldown: toSeconds(SPECIAL_POWER_CONFIG.cooldownMs),
           })}
+        </span>
+        <span className="text-xs block mt-1">
+          {t("minigame.categories.scalesWithLevel")}
         </span>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 w-full mt-2 gap-1">
