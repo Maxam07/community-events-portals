@@ -231,7 +231,7 @@ export const ENEMY_BALANCE_STATS = {
 
   // Area 3
   gargoyle: {
-    HP: 58,
+    HP: 250,
     SPEED: 50,
     DAMAGE: 10,
     TOTAL: 130,
@@ -240,9 +240,9 @@ export const ENEMY_BALANCE_STATS = {
     FORMATION: "surround",
     DROP_ITEM: "relicWrath",
   },
-  cultist: { HP: 364, SPEED: 30, DAMAGE: 20, DROP_ITEM: "relicLust" },
+  cultist: { HP: 750, SPEED: 30, DAMAGE: 20, DROP_ITEM: "relicLust" },
   vampire: {
-    HP: 51,
+    HP: 300,
     SPEED: 45,
     DAMAGE: 15,
     TOTAL: 130,
@@ -252,7 +252,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicWrath",
   },
   frankenstein: {
-    HP: 192,
+    HP: 500,
     SPEED: 17,
     DAMAGE: 20,
     TOTAL: 90,
@@ -262,7 +262,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicPride",
   },
   werewolf: {
-    HP: 58,
+    HP: 300,
     SPEED: 40,
     DAMAGE: 15,
     TOTAL: 130,
@@ -272,23 +272,23 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicSloth",
   },
   headless_horseman: {
-    HP: 7000,
+    HP: 10000,
     SPEED: 40,
     DAMAGE: 32,
     TOTAL: 1,
     WEAPON: ["summoning"],
     WEAPONS: {
       summoning: {
-        DELAY_MS: 500,
+        DELAY_MS: 1500,
         WARNING_DURATION_MS: 500,
-        DURATION_MS: 800,
+        DURATION_MS: 1000,
       },
     },
     FORMATION: "vertical line",
     DROP_ITEM: "relicGreed",
   },
   medusa: {
-    HP: 7000,
+    HP: 10000,
     SPEED: 30,
     DAMAGE: 30,
     TOTAL: 1,
@@ -304,20 +304,20 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGreed",
   },
   cerberus: {
-    HP: 15000,
+    HP: 25000,
     SPEED: 40,
     DAMAGE: 50,
     TOTAL: 1,
     WEAPON: ["chasing", "summoning"],
     WEAPONS: {
       chasing: {
-        NEXT_CHASE: 1000,
+        NEXT_CHASE: 1500,
         SPEED: 55,
         DURATION_MS: 3000,
       },
       summoning: {
         DELAY_MS: 1500,
-        WARNING_DURATION_MS: 300,
+        WARNING_DURATION_MS: 1000,
         DURATION_MS: 2000,
       },
     },
@@ -327,7 +327,7 @@ export const ENEMY_BALANCE_STATS = {
 
   // Area 4
   shade: {
-    HP: TESTING ? 5 : 300,
+    HP: TESTING ? 5 : 750,
     SPEED: 40,
     DAMAGE: TESTING ? 5 : 25,
     TOTAL: 140,
@@ -337,13 +337,13 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicWrath",
   },
   red_stone: {
-    HP: TESTING ? 5 : 2000,
+    HP: TESTING ? 5 : 5000,
     SPEED: 30,
     DAMAGE: 35,
     DROP_ITEM: "relicGreed",
   },
   hellHound: {
-    HP: TESTING ? 5 : 250,
+    HP: TESTING ? 5 : 500,
     SPEED: 50,
     DAMAGE: TESTING ? 5 : 20,
     TOTAL: 140,
@@ -353,7 +353,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicWrath",
   },
   demon1: {
-    HP: TESTING ? 5 : 400,
+    HP: TESTING ? 5 : 600,
     SPEED: 40,
     DAMAGE: TESTING ? 5 : 19,
     TOTAL: 130,
@@ -363,7 +363,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicSloth",
   },
   demon2: {
-    HP: TESTING ? 5 : 500,
+    HP: TESTING ? 5 : 600,
     SPEED: 45,
     DAMAGE: TESTING ? 5 : 21,
     TOTAL: 110,
@@ -373,7 +373,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicPride",
   },
   golem_area4: {
-    HP: TESTING ? 20 : 15000,
+    HP: TESTING ? 20 : 25000,
     SPEED: 50,
     DAMAGE: TESTING ? 5 : 55,
     TOTAL: 1,
@@ -388,7 +388,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGluttony",
   },
   ent_area4: {
-    HP: TESTING ? 20 : 15000,
+    HP: TESTING ? 20 : 25000,
     SPEED: 50,
     DAMAGE: TESTING ? 5 : 55,
     TOTAL: 1,
@@ -404,7 +404,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGluttony",
   },
   mummy_area4: {
-    HP: TESTING ? 20 : 15000,
+    HP: TESTING ? 20 : 25000,
     SPEED: 50,
     DAMAGE: TESTING ? 5 : 55,
     TOTAL: 1,
@@ -419,7 +419,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGluttony",
   },
   living_armor_area4: {
-    HP: TESTING ? 20 : 15000,
+    HP: TESTING ? 20 : 25000,
     SPEED: 50,
     DAMAGE: TESTING ? 5 : 60,
     TOTAL: 1,
@@ -434,7 +434,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGluttony",
   },
   headless_horseman_area4: {
-    HP: TESTING ? 20 : 15000,
+    HP: TESTING ? 20 : 25000,
     SPEED: 50,
     DAMAGE: TESTING ? 5 : 70,
     TOTAL: 1,
@@ -450,7 +450,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGluttony",
   },
   medusa_area4: {
-    HP: TESTING ? 20 : 15000,
+    HP: TESTING ? 20 : 25000,
     SPEED: 50,
     DAMAGE: TESTING ? 5 : 70,
     TOTAL: 1,
@@ -466,7 +466,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGluttony",
   },
   sorcerer: {
-    HP: TESTING ? 100 : 50000,
+    HP: TESTING ? 100 : 75000,
     SPEED: 40,
     DAMAGE: TESTING ? 5 : 75,
     TOTAL: 1,
@@ -494,7 +494,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGreed",
   },
   dungeonboss: {
-    HP: TESTING ? 2000 : 100000,
+    HP: TESTING ? 2000 : 150000,
     SPEED: 0,
     DAMAGE: TESTING ? 5 : 75,
     TOTAL: 1,

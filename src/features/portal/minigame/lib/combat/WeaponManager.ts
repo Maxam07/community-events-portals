@@ -70,7 +70,7 @@ const FROST_CHAIN_ANIMATION_KEY = "weapon_frost_chain_active";
 // The strike also hits every enemy inside weapon.stats.areaRadius around the
 // first enemy it hits. 1 = full damage for everyone in the area; lower it to
 // make the area weaker than the main hit.
-const FROST_CHAIN_AREA_DAMAGE_MULTIPLIER = 0.3;
+const FROST_CHAIN_AREA_DAMAGE_MULTIPLIER = 0.5;
 const FROST_CHAIN_AREA_COLOR = 0x8bcef7;
 const FROST_CHAIN_AREA_ALPHA = 0.1;
 const CURSED_COFFIN_ANIMATION_KEY = "weapon_cursed_coffin_active";

@@ -1056,12 +1056,10 @@ export const portalMachine = createMachine<Context, PortalEvent, PortalState>({
         PLAYER_DIED: [
           {
             cond: canRevive,
-            actions: assign(
-              (context: Context): Partial<Context> => ({
-                ...pauseGameplayClock(context),
-                pendingRevive: true,
-              }),
-            ) as any,
+            actions: assign((context: Context): Partial<Context> => ({
+              ...pauseGameplayClock(context),
+              pendingRevive: true,
+            })) as any,
           },
           {
             target: "gameOver",
@@ -1096,11 +1094,9 @@ export const portalMachine = createMachine<Context, PortalEvent, PortalState>({
         HOLE_ENTERED: {
           target: "gameOver",
           actions: [
-            assign(
-              (context: Context): Partial<Context> => ({
-                collected: context.collected + getTimeBonus(context),
-              }),
-            ) as any,
+            assign((context: Context): Partial<Context> => ({
+              collected: context.collected + getTimeBonus(context),
+            })) as any,
             gameOverActions,
           ],
         },
