@@ -1238,7 +1238,7 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
     {
       level: 10,
       modifiers: [
-        { stat: "damage", operation: "set", value: 14 },
+        { stat: "damage", operation: "set", value: 15 },
         { stat: "range", operation: "set", value: 135 },
         { stat: "projectileCount", operation: "set", value: 8 },
         { stat: "hitCooldownMs", operation: "set", value: 430 },
@@ -1247,35 +1247,35 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
     {
       level: 11,
       modifiers: [
-        { stat: "damage", operation: "set", value: 16 },
+        { stat: "damage", operation: "set", value: 18 },
         { stat: "hitCooldownMs", operation: "set", value: 390 },
       ],
     },
     {
       level: 12,
       modifiers: [
-        { stat: "damage", operation: "set", value: 18 },
+        { stat: "damage", operation: "set", value: 20 },
         { stat: "hitCooldownMs", operation: "set", value: 350 },
       ],
     },
     {
       level: 13,
       modifiers: [
-        { stat: "damage", operation: "set", value: 21 },
+        { stat: "damage", operation: "set", value: 24 },
         { stat: "hitCooldownMs", operation: "set", value: 310 },
       ],
     },
     {
       level: 14,
       modifiers: [
-        { stat: "damage", operation: "set", value: 24 },
+        { stat: "damage", operation: "set", value: 27 },
         { stat: "hitCooldownMs", operation: "set", value: 280 },
       ],
     },
     {
       level: 15,
       modifiers: [
-        { stat: "damage", operation: "set", value: 30 },
+        { stat: "damage", operation: "set", value: 35 },
         { stat: "projectileCount", operation: "set", value: 12 },
         { stat: "range", operation: "set", value: 150 },
         { stat: "hitCooldownMs", operation: "set", value: 250 },

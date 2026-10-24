@@ -696,14 +696,14 @@ export const DROP_ITEMS_XP_TABLE: {
     xp: DROP_ITEM_XP_VALUES.relicLust,
   },
   {
-    image: relicGreed,
-    description: t("minigame.enemy2"),
-    xp: DROP_ITEM_XP_VALUES.relicGreed,
-  },
-  {
     image: relicGluttony,
     description: t("minigame.enemy2"),
     xp: DROP_ITEM_XP_VALUES.relicGluttony,
+  },
+  {
+    image: relicGreed,
+    description: t("minigame.enemy2"),
+    xp: DROP_ITEM_XP_VALUES.relicGreed,
   },
   {
     image: relicEnvy,
