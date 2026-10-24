@@ -67,6 +67,12 @@ const FROST_CHAIN_FADE_MS = 220;
 const FROST_CHAIN_FRAME_WIDTH = 128;
 const FROST_CHAIN_THICKNESS_FACTOR = 1.1;
 const FROST_CHAIN_ANIMATION_KEY = "weapon_frost_chain_active";
+// The strike also hits every enemy inside weapon.stats.areaRadius around the
+// first enemy it hits. 1 = full damage for everyone in the area; lower it to
+// make the area weaker than the main hit.
+const FROST_CHAIN_AREA_DAMAGE_MULTIPLIER = 0.3;
+const FROST_CHAIN_AREA_COLOR = 0x8bcef7;
+const FROST_CHAIN_AREA_ALPHA = 0.1;
 const CURSED_COFFIN_ANIMATION_KEY = "weapon_cursed_coffin_active";
 const CRIMSON_VIAL_FRAME_WIDTH = 139;
 const CRIMSON_VIAL_THICKNESS_FACTOR = 0.5;
@@ -629,15 +635,48 @@ export class WeaponManager {
     }
 
     const strike = () => {
-      this.damageSystem.applyDamage(
-        target,
-        {
-          ...this.createPayload(weapon),
-          knockback: weapon.stats.knockback,
-          knockbackOrigin: { x: player.x, y: player.y },
-        },
-        this.props.scene.time.now,
-      );
+      const now = this.props.scene.time.now;
+      // Impact point = where the first enemy is when the chain lands.
+      const impact = isEnemyAlive(target) ? enemyCenter(target) : targetCenter;
+      const payload = {
+        ...this.createPayload(weapon),
+        knockback: weapon.stats.knockback,
+        knockbackOrigin: { x: player.x, y: player.y },
+      };
+
+      this.damageSystem.applyDamage(target, payload, now);
+
+      const radius = weapon.stats.areaRadius;
+      if (radius <= 0) return;
+
+      this.targetingSystem.inRadius(impact, radius).forEach((enemy) => {
+        if (enemy === target) return;
+
+        this.damageSystem.applyDamage(
+          enemy,
+          {
+            ...payload,
+            amount: payload.amount * FROST_CHAIN_AREA_DAMAGE_MULTIPLIER,
+          },
+          now,
+        );
+      });
+
+      const burst = this.props.scene.add
+        .circle(
+          impact.x,
+          impact.y,
+          radius,
+          FROST_CHAIN_AREA_COLOR,
+          FROST_CHAIN_AREA_ALPHA,
+        )
+        .setDepth(FROST_WEAPON_VISUAL_DEPTH);
+      this.props.scene.tweens.add({
+        targets: burst,
+        alpha: 0,
+        duration: FROST_CHAIN_FADE_MS,
+        onComplete: () => burst.destroy(),
+      });
     };
 
     const thicknessScale =

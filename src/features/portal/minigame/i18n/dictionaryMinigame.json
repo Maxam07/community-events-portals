@@ -147,7 +147,7 @@
   "weapon.description.poisonVial": "Throws a poison vial at the nearest enemy that shatters on impact.",
   "weapon.description.crimsonVial": "Binds a blood tether to the nearest enemies, making them bleed for as long as it lasts.",
   "weapon.description.cursedCoffin": "A cursed coffin drops onto the nearest enemy and bursts, launching shards in every direction.",
-  "weapon.description.frostChain": "A frozen chain anchors to the nearest enemy, dealing damage and knocking it back.",
+  "weapon.description.frostChain": "A frozen chain anchors to the nearest enemy, dealing damage in a small area around them and knocking them back. Secondary enemies hit take 70% less damage.",
   "weapon.description.mossGround": "Spreads moss under enemies, dealing damage over time.",
   "weapon.description.banishedJackOLantern": "Rolls a banished Jack O'Lantern forward, piercing through multiple enemies.",
   "weapon.description.frostFlower": "Summons a frost flower that orbits you and shoots frost at enemies.",
