@@ -1,7 +1,7 @@
 import type { PerkConfig, PerkId, PerkLevel, PerkLevels } from "../Types";
 
 export const PERK_INITIAL_LEVEL: PerkLevel = 0;
-export const PERK_MAX_LEVEL: PerkLevel = 10;
+export const PERK_MAX_LEVEL: PerkLevel = 15;
 
 // How many perk slots a player can hold at once
 export const MAX_PLAYER_PERKS = 4;
@@ -26,11 +26,12 @@ export const PERK_CONFIGS: Record<PerkId, PerkConfig> = {
   moveSpeed: {
     id: "moveSpeed",
     name: "Swift Boots",
-    description: "Grows move speed every level (big bonus at max level)",
+    description: "Grows move speed every level",
     maxLevel: PERK_MAX_LEVEL,
     weight: 10,
     valuesPerLevel: [
-      0, 0.06, 0.12, 0.18, 0.24, 0.3, 0.36, 0.42, 0.48, 0.55, 0.7,
+      0, 0.04, 0.08, 0.12, 0.16, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55,
+      0.6, 0.65, 0.7,
     ],
   },
   attackSpeed: {
@@ -40,7 +41,8 @@ export const PERK_CONFIGS: Record<PerkId, PerkConfig> = {
     maxLevel: PERK_MAX_LEVEL,
     weight: 10,
     valuesPerLevel: [
-      0, 0.07, 0.14, 0.21, 0.27, 0.33, 0.39, 0.44, 0.49, 0.54, 0.65,
+      0, 0.04, 0.08, 0.12, 0.17, 0.22, 0.27, 0.32, 0.37, 0.42, 0.47, 0.51, 0.55,
+      0.58, 0.62, 0.65,
     ],
   },
   criticalChance: {
@@ -50,25 +52,31 @@ export const PERK_CONFIGS: Record<PerkId, PerkConfig> = {
     maxLevel: PERK_MAX_LEVEL,
     weight: 8,
     valuesPerLevel: [
-      0, 0.06, 0.12, 0.18, 0.24, 0.3, 0.36, 0.42, 0.48, 0.54, 0.7,
+      0, 0.04, 0.08, 0.12, 0.16, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55,
+      0.6, 0.65, 0.7,
     ],
   },
   projectileSpeed: {
     id: "projectileSpeed",
     name: "Projectile Speed",
-    description:
-      "Grows projectile/homing speed every level (big bonus at max level)",
+    description: "Grows projectile/homing speed every level",
     maxLevel: PERK_MAX_LEVEL,
     weight: 7,
-    valuesPerLevel: [0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9, 1.05, 1.2, 1.35, 1.8],
+    valuesPerLevel: [
+      0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.62, 0.74, 0.86, 0.98, 1.1, 1.24, 1.38, 1.52,
+      1.66, 1.8,
+    ],
   },
   xpGain: {
     id: "xpGain",
     name: "XP Gain",
-    description: "Grows XP gained every level (big bonus at max level)",
+    description: "Grows XP gained every level",
     maxLevel: PERK_MAX_LEVEL,
     weight: 9,
-    valuesPerLevel: [0, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1],
+    valuesPerLevel: [
+      0, 0.1, 0.2, 0.27, 0.34, 0.41, 0.48, 0.55, 0.62, 0.69, 0.76, 0.84, 0.92,
+      1, 1.05, 1.1,
+    ],
   },
   luck: {
     id: "luck",
@@ -77,17 +85,20 @@ export const PERK_CONFIGS: Record<PerkId, PerkConfig> = {
     maxLevel: PERK_MAX_LEVEL,
     weight: 6,
     valuesPerLevel: [
-      0, 0.07, 0.14, 0.21, 0.28, 0.35, 0.42, 0.49, 0.56, 0.63, 0.8,
+      0, 0.06, 0.12, 0.18, 0.25, 0.32, 0.4, 0.48, 0.57, 0.66, 0.75, 0.84, 0.93,
+      1.02, 1.11, 1.2,
     ],
   },
   pickupRadius: {
     id: "pickupRadius",
     name: "Pickup Radius",
-    description:
-      "Grows item pickup/magnet radius every level (big bonus at max level)",
+    description: "Grows item pickup/magnet radius every level",
     maxLevel: PERK_MAX_LEVEL,
     weight: 8,
-    valuesPerLevel: [0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 3],
+    valuesPerLevel: [
+      0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9, 1.05, 1.2, 1.35, 1.5, 1.8, 2.1, 2.4,
+      2.7, 3,
+    ],
   },
   cooldownReduction: {
     id: "cooldownReduction",
@@ -97,24 +108,28 @@ export const PERK_CONFIGS: Record<PerkId, PerkConfig> = {
     maxLevel: PERK_MAX_LEVEL,
     weight: 7,
     valuesPerLevel: [
-      0, 0.06, 0.12, 0.18, 0.24, 0.3, 0.36, 0.42, 0.48, 0.54, 0.65,
+      0, 0.04, 0.08, 0.12, 0.17, 0.22, 0.27, 0.32, 0.37, 0.42, 0.47, 0.51, 0.55,
+      0.58, 0.62, 0.65,
     ],
   },
   healing: {
     id: "healing",
     name: "Healing",
-    description: "Regenerate HP every second, amount scales per level",
+    description:
+      "Regenerate HP every second, amount scales per level, but not in every level.",
     maxLevel: PERK_MAX_LEVEL,
     weight: 6,
-    valuesPerLevel: [0, 1, 2, 2, 3, 3, 4, 4, 5, 5, 7],
+    valuesPerLevel: [0, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 6, 7],
   },
   maxHealth: {
     id: "maxHealth",
     name: "Max HP",
-    description: "+20 max HP per level (+70 at max level)",
+    description: "Max HP Increased per level",
     maxLevel: PERK_MAX_LEVEL,
     weight: 10,
-    valuesPerLevel: [0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 250],
+    valuesPerLevel: [
+      0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 170, 190, 210, 230, 250,
+    ],
   },
 };
 
@@ -162,8 +177,8 @@ export const MAX_LUCK_BONUS_LEVEL_CHANCE_2 = 0.3;
 export const MAX_LUCK_BONUS_LEVEL_CHANCE_3 = 0.11;
 
 export const CHEST_BONUS_LEVEL_CHANCES: BonusLevelChances = {
-  chance2: 0.2,
-  chance3: 0.05,
+  chance2: 0.15,
+  chance3: 0.03,
 };
 
 export const getBonusLevelChances = (

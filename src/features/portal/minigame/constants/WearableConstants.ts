@@ -179,7 +179,7 @@ export const WEARABLE_BUFFS: Partial<Record<BumpkinItem, WearableBuff>> = {
       weapon: "banishedJackOLantern",
       stat: "pierce",
     },
-    value: 3,
+    value: 5,
     descriptionKey: "minigame.wearables.buff.slimeWallBackground",
   },
   "Holiday Feast Background": {
@@ -335,7 +335,7 @@ export const WEARABLE_BUFFS: Partial<Record<BumpkinItem, WearableBuff>> = {
       weapon: "banishedJackOLantern",
       stat: "size",
     },
-    value: 0.15,
+    value: 0.2,
     descriptionKey: "minigame.wearables.buff.jackOSweets",
   },
   "Frank Onesie": {
@@ -359,7 +359,7 @@ export const WEARABLE_BUFFS: Partial<Record<BumpkinItem, WearableBuff>> = {
       weapon: "banishedJackOLantern",
       stat: "pierce",
     },
-    value: 3,
+    value: 5,
     descriptionKey: "minigame.wearables.buff.candyHalbred",
   },
   "Xmas Top Hat": {
@@ -377,7 +377,7 @@ export const WEARABLE_BUFFS: Partial<Record<BumpkinItem, WearableBuff>> = {
       weapon: "banishedJackOLantern",
       stat: "size",
     },
-    value: 0.15,
+    value: 0.2,
     descriptionKey: "minigame.wearables.buff.reindeerMask",
   },
   "Snowman Mask": {
@@ -401,7 +401,7 @@ export const WEARABLE_BUFFS: Partial<Record<BumpkinItem, WearableBuff>> = {
       weapon: "banishedJackOLantern",
       stat: "damage",
     },
-    value: 0.95,
+    value: 1,
     descriptionKey: "minigame.wearables.buff.404ChicTop",
   },
   "Pumpkin Head": {

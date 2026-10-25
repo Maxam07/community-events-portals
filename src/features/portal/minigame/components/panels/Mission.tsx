@@ -94,7 +94,7 @@ export const Mission: React.FC<Props> = ({
   return (
     <>
       {page === "main" && (
-        <div className="px-2  overflow-y-auto scrollable">
+        <div className="px-2 overflow-y-auto scrollable max-h-[65dvh] md:max-h-[85dvh] overscroll-contain touch-pan-y">
           <div>
             <div className="w-full relative flex justify-between gap-1 items-center pt-1">
               <Attempts attemptsLeft={attemptsLeft} />

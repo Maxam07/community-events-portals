@@ -4,13 +4,15 @@ import {
   SKILLS_TABLE,
   DROP_ITEMS_XP_TABLE,
   ENEMIES_TABLE,
+  PERKS_TABLE,
+  ENEMY_WEAPONS,
 } from "../../constants/ConfigConstants";
 import { useAppTranslation } from "lib/i18n/useAppTranslations";
 import { Label } from "components/ui/Label";
 import { SquareIcon } from "components/ui/SquareIcon";
 import {
   CATEGORY_CONFIGS,
-  CATEGORY_POWER_EFFECTS,
+  getCategoryPowerDescriptionRange,
   SPECIAL_POWER_CONFIG,
   WEAPON_CATEGORIES,
   WEAPON_CATEGORY_IDS,
@@ -25,42 +27,21 @@ const toPercent = (ratio: number) => Math.round(ratio * 100);
 
 type Translate = ReturnType<typeof useAppTranslation>["t"];
 
-// Power effect text built from CATEGORY_POWER_EFFECTS so balance changes in
-// constants show up here automatically.
-const getPowerDescription = (category: WeaponCategoryId, t: Translate) => {
-  switch (category) {
-    case "plague": {
-      const { damagePerTick, tickMs, durationMs } =
-        CATEGORY_POWER_EFFECTS.plague;
+export const POWER_DESCRIPTION_KEYS = {
+  plague: "minigame.categories.power.plague",
+  frost: "minigame.categories.power.frost",
+  curse: "minigame.categories.power.curse",
+  bloodyHarvest: "minigame.categories.power.bloodyHarvest",
+} as const;
 
-      return t("minigame.categories.power.plague", {
-        damage: damagePerTick,
-        tick: toSeconds(tickMs),
-        duration: toSeconds(durationMs),
-      });
-    }
-    case "frost": {
-      const { speedMultiplier, durationMs } = CATEGORY_POWER_EFFECTS.frost;
-
-      return t("minigame.categories.power.frost", {
-        percent: toPercent(1 - speedMultiplier),
-        duration: toSeconds(durationMs),
-      });
-    }
-    case "curse": {
-      const { damageMultiplier, durationMs } = CATEGORY_POWER_EFFECTS.curse;
-
-      return t("minigame.categories.power.curse", {
-        percent: toPercent(1 - damageMultiplier),
-        duration: toSeconds(durationMs),
-      });
-    }
-    case "bloodyHarvest":
-      return t("minigame.categories.power.bloodyHarvest", {
-        amount: CATEGORY_POWER_EFFECTS.bloodyHarvest.healPerKill,
-      });
-  }
-};
+// Power effect text. The effects grow with the player level, so the Codex shows
+// the level 1 -> max level range ("40-70") built from the same constants the game
+// uses (getCategoryPowerDescriptionRange), and balance changes show up here too.
+const getPowerDescription = (category: WeaponCategoryId, t: Translate) =>
+  t(
+    POWER_DESCRIPTION_KEYS[category],
+    getCategoryPowerDescriptionRange(category),
+  );
 
 const COMBINATIONS: {
   kind: SpecialPowerKind;
@@ -109,6 +90,9 @@ export const Categories: React.FC = () => {
             hotkey: SPECIAL_POWER_CONFIG.hotkey.toUpperCase(),
             cooldown: toSeconds(SPECIAL_POWER_CONFIG.cooldownMs),
           })}
+        </span>
+        <span className="text-xs block mt-1">
+          {t("minigame.categories.scalesWithLevel")}
         </span>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 w-full mt-2 gap-1">
@@ -224,6 +208,27 @@ export const Enemies: React.FC = () => {
   return (
     <div className="flex md:flex-row flex-col-reverse md:mr-1 items-start h-full">
       <InnerPanel className="p-2 w-full">
+        <Label type="default">{t("minigame.enemy.powers")}</Label>
+        <table className="w-full text-xs table-fixed border-collapse mt-1 mb-2">
+          <tbody>
+            {Object.entries(ENEMY_WEAPONS).map(([initial, full]) => (
+              <tr key={full}>
+                <td
+                  style={{ border: "1px solid #b96f50" }}
+                  className="p-1.5 w-1/5"
+                >
+                  {initial}
+                </td>
+                <td
+                  style={{ border: "1px solid #b96f50" }}
+                  className="p-1.5 w-4/5"
+                >
+                  {full}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
         <Label type="default">{t("minigame.enemy")}</Label>
         <Label type="default" className="mt-2">
           {t("minigame.area1")}
@@ -237,6 +242,7 @@ export const Enemies: React.FC = () => {
               hp={item.hp}
               damage={item.damage}
               itemIcon={item.itemIcon}
+              powers={item.powers}
             />
           ))}
         </div>
@@ -252,6 +258,7 @@ export const Enemies: React.FC = () => {
               hp={item.hp}
               damage={item.damage}
               itemIcon={item.itemIcon}
+              powers={item.powers}
             />
           ))}
         </div>
@@ -267,6 +274,7 @@ export const Enemies: React.FC = () => {
               hp={item.hp}
               damage={item.damage}
               itemIcon={item.itemIcon}
+              powers={item.powers}
             />
           ))}
         </div>
@@ -282,6 +290,31 @@ export const Enemies: React.FC = () => {
               hp={item.hp}
               damage={item.damage}
               itemIcon={item.itemIcon}
+              powers={item.powers}
+            />
+          ))}
+        </div>
+      </InnerPanel>
+      <div />
+    </div>
+  );
+};
+
+export const Perks: React.FC = () => {
+  const { t } = useAppTranslation();
+  return (
+    <div className="flex md:flex-row flex-col-reverse md:mr-1 items-start h-full">
+      <InnerPanel className="p-2 w-full">
+        <Label type="default">{t("minigame.perks")}</Label>
+        <div className="grid grid-cols-2 sm:grid-cols-3 w-full mt-2 gap-1">
+          {PERKS_TABLE.map((perk, index) => (
+            <PerksCard
+              key={index}
+              icon={perk.image}
+              perkName={perk.perkName}
+              levelScaling={perk.levelScaling}
+              maxLevel={perk.maxLevel}
+              description={perk.description}
             />
           ))}
         </div>
@@ -354,12 +387,13 @@ export const EnemyCard: React.FC<{
   hp: number;
   damage: number;
   itemIcon: string;
-}> = ({ icon, type, hp, damage, itemIcon }) => {
+  powers?: string[];
+}> = ({ icon, type, hp, damage, itemIcon, powers }) => {
   const { t } = useAppTranslation();
   return (
     <ButtonPanel className="flex flex-col items-center">
       <img src={icon} className="h-10 mr-1 pb-1" />
-      <span className="text-xs font-semibold">{type}</span>
+      <span className="text-xs text-center font-semibold">{type}</span>
       <table className="mt-3 w-full border-collapse text-xs">
         <tbody>
           <tr>
@@ -386,6 +420,55 @@ export const EnemyCard: React.FC<{
           </tr>
         </tbody>
       </table>
+      <table className="pt-1 w-full border-collapse text-xs">
+        <tbody>
+          <th>
+            <div className="flex flex-col pt-3 w-full text-left">
+              <span className="text-xs pb-2">
+                {t("minigame.weaponGuide.power")}
+              </span>
+            </div>
+          </th>
+          <tr>
+            <th className="bg-black/10 px-2 py-1 text-left font-normal">
+              {Array.isArray(powers) ? powers.join(", ") : powers}
+            </th>
+          </tr>
+        </tbody>
+      </table>
+    </ButtonPanel>
+  );
+};
+
+export const PerksCard: React.FC<{
+  icon: string;
+  perkName: string;
+  levelScaling: number;
+  maxLevel: number;
+  description: string;
+}> = ({ icon, perkName, levelScaling, maxLevel, description }) => {
+  const { t } = useAppTranslation();
+  return (
+    <ButtonPanel className="flex flex-col items-center">
+      <img src={icon} className="h-10 py-2" />
+      <span className="text-xs font-bold pb-3 text-center">{perkName}</span>
+      <table className="w-full border-collapse text-xs">
+        <tbody>
+          <tr>
+            <th className="py-1 text-left">{t("minigame.perk.per.level")}</th>
+            <td className="py-1 text-center">{levelScaling}</td>
+          </tr>
+          <tr>
+            <th className="bg-black/10 py-1 text-left font-normal">
+              {t("minigame.perk.max.level")}
+            </th>
+            <td className="bg-black/10 py-1 text-center">{maxLevel}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div className="flex flex-col pt-1 w-full">
+        <p className="py-1 text-center text-xxs">{description}</p>
+      </div>
     </ButtonPanel>
   );
 };

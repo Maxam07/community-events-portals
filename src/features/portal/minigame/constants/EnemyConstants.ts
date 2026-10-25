@@ -118,7 +118,7 @@ export const ENEMY_BALANCE_STATS = {
   },
   // Area 2
   crow: {
-    HP: 13,
+    HP: 25,
     SPEED: 26,
     DAMAGE: 5,
     TOTAL: 80,
@@ -139,7 +139,7 @@ export const ENEMY_BALANCE_STATS = {
   },
   imp: { HP: 77, SPEED: 25, DAMAGE: 6, DROP_ITEM: "relicPride" },
   skeleton: {
-    HP: 12,
+    HP: 30,
     SPEED: 22,
     DAMAGE: 5,
     TOTAL: 88,
@@ -149,7 +149,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicWrath",
   },
   slime_red: {
-    HP: 10,
+    HP: 25,
     SPEED: 17,
     DAMAGE: 6,
     TOTAL: 80,
@@ -159,7 +159,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicWrath",
   },
   slime_green: {
-    HP: 10,
+    HP: 25,
     SPEED: 17,
     DAMAGE: 6,
     TOTAL: 80,
@@ -169,7 +169,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicWrath",
   },
   slime_blue: {
-    HP: 10,
+    HP: 25,
     SPEED: 17,
     DAMAGE: 6,
     TOTAL: 72,
@@ -179,7 +179,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicWrath",
   },
   mummy: {
-    HP: 2000,
+    HP: 3000,
     SPEED: 15,
     DAMAGE: 14,
     TOTAL: 1,
@@ -194,7 +194,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicLust",
   },
   living_armor: {
-    HP: 2000,
+    HP: 3000,
     SPEED: 20,
     DAMAGE: 13,
     TOTAL: 1,
@@ -209,7 +209,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicLust",
   },
   witch: {
-    HP: 3500,
+    HP: 4000,
     SPEED: 40,
     DAMAGE: 25,
     TOTAL: 1,
@@ -231,7 +231,7 @@ export const ENEMY_BALANCE_STATS = {
 
   // Area 3
   gargoyle: {
-    HP: 58,
+    HP: 100,
     SPEED: 50,
     DAMAGE: 10,
     TOTAL: 130,
@@ -240,11 +240,11 @@ export const ENEMY_BALANCE_STATS = {
     FORMATION: "surround",
     DROP_ITEM: "relicWrath",
   },
-  cultist: { HP: 364, SPEED: 30, DAMAGE: 20, DROP_ITEM: "relicLust" },
+  cultist: { HP: 550, SPEED: 30, DAMAGE: 20, DROP_ITEM: "relicLust" },
   vampire: {
-    HP: 51,
-    SPEED: 45,
-    DAMAGE: 15,
+    HP: 180,
+    SPEED: 40,
+    DAMAGE: 12,
     TOTAL: 130,
     BATCH_SIZE: 13,
     DELAY: 6500,
@@ -252,7 +252,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicWrath",
   },
   frankenstein: {
-    HP: 192,
+    HP: 350,
     SPEED: 17,
     DAMAGE: 20,
     TOTAL: 90,
@@ -262,9 +262,9 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicPride",
   },
   werewolf: {
-    HP: 58,
+    HP: 200,
     SPEED: 40,
-    DAMAGE: 15,
+    DAMAGE: 12,
     TOTAL: 130,
     BATCH_SIZE: 13,
     DELAY: 7500,
@@ -272,31 +272,31 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicSloth",
   },
   headless_horseman: {
-    HP: 4000,
-    SPEED: 30,
-    DAMAGE: 32,
+    HP: 5000,
+    SPEED: 40,
+    DAMAGE: 30,
     TOTAL: 1,
     WEAPON: ["summoning"],
     WEAPONS: {
       summoning: {
-        DELAY_MS: 500,
-        WARNING_DURATION_MS: 500,
-        DURATION_MS: 800,
+        DELAY_MS: 1500,
+        WARNING_DURATION_MS: 1500,
+        DURATION_MS: 1000,
       },
     },
     FORMATION: "vertical line",
     DROP_ITEM: "relicGreed",
   },
   medusa: {
-    HP: 4200,
-    SPEED: 25,
+    HP: 5000,
+    SPEED: 30,
     DAMAGE: 30,
     TOTAL: 1,
     WEAPON: ["chasing"],
     WEAPONS: {
       chasing: {
         NEXT_CHASE: 2000,
-        SPEED: 50,
+        SPEED: 40,
         DURATION_MS: 5000,
       },
     },
@@ -304,20 +304,20 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGreed",
   },
   cerberus: {
-    HP: 8000,
+    HP: 15000,
     SPEED: 35,
-    DAMAGE: 40,
+    DAMAGE: 35,
     TOTAL: 1,
     WEAPON: ["chasing", "summoning"],
     WEAPONS: {
       chasing: {
-        NEXT_CHASE: 1000,
-        SPEED: 55,
+        NEXT_CHASE: 1500,
+        SPEED: 45,
         DURATION_MS: 3000,
       },
       summoning: {
         DELAY_MS: 1500,
-        WARNING_DURATION_MS: 300,
+        WARNING_DURATION_MS: 1000,
         DURATION_MS: 2000,
       },
     },
@@ -327,9 +327,9 @@ export const ENEMY_BALANCE_STATS = {
 
   // Area 4
   shade: {
-    HP: TESTING ? 5 : 300,
-    SPEED: 35,
-    DAMAGE: TESTING ? 5 : 25,
+    HP: TESTING ? 5 : 400,
+    SPEED: 30,
+    DAMAGE: TESTING ? 5 : 20,
     TOTAL: 140,
     BATCH_SIZE: 14,
     DELAY: 7000,
@@ -337,14 +337,14 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicWrath",
   },
   red_stone: {
-    HP: TESTING ? 5 : 2000,
+    HP: TESTING ? 5 : 3000,
     SPEED: 30,
     DAMAGE: 35,
     DROP_ITEM: "relicGreed",
   },
   hellHound: {
-    HP: TESTING ? 5 : 250,
-    SPEED: 45,
+    HP: TESTING ? 5 : 350,
+    SPEED: 40,
     DAMAGE: TESTING ? 5 : 20,
     TOTAL: 140,
     BATCH_SIZE: 14,
@@ -355,7 +355,7 @@ export const ENEMY_BALANCE_STATS = {
   demon1: {
     HP: TESTING ? 5 : 400,
     SPEED: 30,
-    DAMAGE: TESTING ? 5 : 19,
+    DAMAGE: TESTING ? 5 : 15,
     TOTAL: 130,
     BATCH_SIZE: 13,
     DELAY: 7000,
@@ -363,9 +363,9 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicSloth",
   },
   demon2: {
-    HP: TESTING ? 5 : 500,
-    SPEED: 30,
-    DAMAGE: TESTING ? 5 : 21,
+    HP: TESTING ? 5 : 400,
+    SPEED: 35,
+    DAMAGE: TESTING ? 5 : 15,
     TOTAL: 110,
     BATCH_SIZE: 11,
     DELAY: 7000,
@@ -375,13 +375,13 @@ export const ENEMY_BALANCE_STATS = {
   golem_area4: {
     HP: TESTING ? 20 : 15000,
     SPEED: 40,
-    DAMAGE: TESTING ? 5 : 42,
+    DAMAGE: TESTING ? 5 : 35,
     TOTAL: 1,
     WEAPON: ["orbiting"],
     WEAPONS: {
       orbiting: {
-        RADIUS: 50,
-        SPEED_DEG_PER_SEC: 100,
+        RADIUS: 70,
+        SPEED_DEG_PER_SEC: 200,
       },
     },
     FORMATION: "vertical line",
@@ -390,14 +390,14 @@ export const ENEMY_BALANCE_STATS = {
   ent_area4: {
     HP: TESTING ? 20 : 15000,
     SPEED: 40,
-    DAMAGE: TESTING ? 5 : 42,
+    DAMAGE: TESTING ? 5 : 35,
     TOTAL: 1,
     WEAPON: ["summoning"],
     WEAPONS: {
       summoning: {
         DELAY_MS: 1000,
         WARNING_DURATION_MS: 500,
-        DURATION_MS: 800,
+        DURATION_MS: 2000,
       },
     },
     FORMATION: "horizontal line",
@@ -406,13 +406,13 @@ export const ENEMY_BALANCE_STATS = {
   mummy_area4: {
     HP: TESTING ? 20 : 15000,
     SPEED: 40,
-    DAMAGE: TESTING ? 5 : 44,
+    DAMAGE: TESTING ? 5 : 40,
     TOTAL: 1,
     WEAPON: ["orbiting"],
     WEAPONS: {
       orbiting: {
-        RADIUS: 50,
-        SPEED_DEG_PER_SEC: 100,
+        RADIUS: 70,
+        SPEED_DEG_PER_SEC: 200,
       },
     },
     FORMATION: "vertical line",
@@ -421,13 +421,13 @@ export const ENEMY_BALANCE_STATS = {
   living_armor_area4: {
     HP: TESTING ? 20 : 15000,
     SPEED: 40,
-    DAMAGE: TESTING ? 5 : 44,
+    DAMAGE: TESTING ? 5 : 40,
     TOTAL: 1,
     WEAPON: ["orbiting"],
     WEAPONS: {
       orbiting: {
-        RADIUS: 50,
-        SPEED_DEG_PER_SEC: 100,
+        RADIUS: 70,
+        SPEED_DEG_PER_SEC: 200,
       },
     },
     FORMATION: "horizontal line",
@@ -436,14 +436,14 @@ export const ENEMY_BALANCE_STATS = {
   headless_horseman_area4: {
     HP: TESTING ? 20 : 15000,
     SPEED: 40,
-    DAMAGE: TESTING ? 5 : 46,
+    DAMAGE: TESTING ? 5 : 45,
     TOTAL: 1,
     WEAPON: ["summoning"],
     WEAPONS: {
       summoning: {
         DELAY_MS: 500,
         WARNING_DURATION_MS: 500,
-        DURATION_MS: 800,
+        DURATION_MS: 1500,
       },
     },
     FORMATION: "vertical line",
@@ -452,13 +452,13 @@ export const ENEMY_BALANCE_STATS = {
   medusa_area4: {
     HP: TESTING ? 20 : 15000,
     SPEED: 40,
-    DAMAGE: TESTING ? 5 : 46,
+    DAMAGE: TESTING ? 5 : 45,
     TOTAL: 1,
     WEAPON: ["chasing"],
     WEAPONS: {
       chasing: {
-        NEXT_CHASE: 2000,
-        SPEED: 50,
+        NEXT_CHASE: 1000,
+        SPEED: 45,
         DURATION_MS: 5000,
       },
     },
@@ -467,8 +467,8 @@ export const ENEMY_BALANCE_STATS = {
   },
   sorcerer: {
     HP: TESTING ? 100 : 50000,
-    SPEED: 25,
-    DAMAGE: TESTING ? 5 : 50,
+    SPEED: 40,
+    DAMAGE: TESTING ? 5 : 55,
     TOTAL: 1,
     WEAPON: ["arena", "summoning", "chasing", "orbiting"],
     WEAPONS: {
@@ -476,18 +476,18 @@ export const ENEMY_BALANCE_STATS = {
         RADIUS: 150,
       },
       summoning: {
-        DELAY_MS: 6000,
+        DELAY_MS: 3000,
         WARNING_DURATION_MS: 1000,
-        DURATION_MS: 2000,
+        DURATION_MS: 3000,
       },
       chasing: {
-        NEXT_CHASE: 3000,
-        SPEED: 45,
+        NEXT_CHASE: 1000,
+        SPEED: 40,
         DURATION_MS: 5000,
       },
       orbiting: {
-        RADIUS: 120,
-        SPEED_DEG_PER_SEC: 60,
+        RADIUS: 100,
+        SPEED_DEG_PER_SEC: 150,
       },
     },
     FORMATION: "vertical line",
@@ -496,19 +496,19 @@ export const ENEMY_BALANCE_STATS = {
   dungeonboss: {
     HP: TESTING ? 2000 : 100000,
     SPEED: 0,
-    DAMAGE: TESTING ? 5 : 75,
+    DAMAGE: TESTING ? 5 : 60,
     TOTAL: 1,
     WEAPON: ["chasing", "summoning", "orbiting", "staticRange"],
     WEAPONS: {
       chasing: {
-        NEXT_CHASE: 2000,
-        SPEED: 65,
+        NEXT_CHASE: 1000,
+        SPEED: 60,
         DURATION_MS: 3000,
       },
       summoning: {
-        DELAY_MS: 3000,
+        DELAY_MS: 2000,
         WARNING_DURATION_MS: 1000,
-        DURATION_MS: 2500,
+        DURATION_MS: 4000,
       },
       orbiting: {
         RADIUS: 120,

@@ -17,7 +17,7 @@ export class DropItem extends Phaser.GameObjects.Sprite {
   private player?: BumpkinContainer;
   dropItem?: DropItemHalloweenType;
 
-  private readonly magnetRangeWithWings = 60;
+  private readonly magnetRangeWithWings = 50;
   private readonly defaultMagnetRange = 50;
   private readonly collectRange = 10;
   private readonly destroyOrb = 10000;

@@ -6,6 +6,7 @@ import type {
 import { translate as t } from "lib/i18n/translate";
 import { DROP_ITEM_XP_VALUES, ENEMY_BALANCE_STATS } from "./EnemyConstants";
 import { WEAPON_CONFIGS, WEAPON_UPGRADES } from "./WeaponConstants";
+import { PERK_CONFIGS } from "./PerkConstants";
 
 import frozen_skull_icon from "public/world/portal/halloween/weapons/the_frost/frozen_skull_icon.png";
 import blood_scythe_icon from "public/world/portal/halloween/weapons/the_bloody_harvest/blood_scythe_icon.png";
@@ -76,7 +77,7 @@ export { PORTAL_NAME } from "./PortalConstants";
 // Game config
 export const GAME_SECONDS = 900;
 export const GAME_LIVES = 100;
-export const WALKING_SPEED = 50;
+export const WALKING_SPEED = 55;
 export const PLAYER_WATER_SPEED_MULTIPLIER = 0.6;
 export const REVIVE_FLOWER_COST = 4;
 export const REVIVE_SCORE_MULTIPLIER = 0.85;
@@ -90,8 +91,8 @@ export const INITIAL_DATE = "2026-10-26"; // YYYY-MM-DD
 export const INITIAL_DATE_LEADERBOARD = "2026-10-28"; // YYYY-MM-DD
 export const FINAL_DATE_LEADERBOARD = "2026-11-01"; // YYYY-MM-DD
 export const ATTEMPTS_BETA_TESTERS = 0;
-export const UNLIMITED_ATTEMPTS_SFL = 150; // If this value is less than 0, the option disappears
-export const UNLIMITED_ATTEMPTS_DISCOUNT_SFL = 130;
+export const UNLIMITED_ATTEMPTS_SFL = 125; // If this value is less than 0, the option disappears
+export const UNLIMITED_ATTEMPTS_DISCOUNT_SFL = 100;
 export const FREE_DAILY_ATTEMPTS = 1;
 export const RESTOCK_ATTEMPTS = [
   { attempts: 1, sfl: 5 },
@@ -101,10 +102,8 @@ export const RESTOCK_ATTEMPTS = [
 ];
 
 export const UNLIMITED_ATTEMPTS_DISCOUNT: BumpkinItem[] = [
-  "Butterfly Wings",
+  "Rainbow Wings",
   "Butterfly Aura",
-  "Sky Tearer Wings",
-  "Bat Aura",
 ];
 
 // Beta testers
@@ -171,57 +170,79 @@ export const INSTRUCTIONS: {
 export const PERKS_TABLE: {
   image: string;
   perkName: string;
+  levelScaling: number;
+  maxLevel: number;
   description: string;
   width?: number;
 }[] = [
   {
     image: SUNNYSIDE.icons.lightning,
     perkName: t("minigame.perk.moveSpeed"),
+    levelScaling: PERK_CONFIGS.moveSpeed.valuesPerLevel[1],
+    maxLevel: PERK_CONFIGS.moveSpeed.maxLevel,
     description: t("minigame.perk.description.moveSpeed"),
   },
   {
     image: SUNNYSIDE.icons.lightning,
     perkName: t("minigame.perk.attackSpeed"),
+    levelScaling: PERK_CONFIGS.attackSpeed.valuesPerLevel[1],
+    maxLevel: PERK_CONFIGS.attackSpeed.maxLevel,
     description: t("minigame.perk.description.attackSpeed"),
   },
   {
     image: swordIcon,
     perkName: t("minigame.perk.criticalChance"),
+    levelScaling: PERK_CONFIGS.criticalChance.valuesPerLevel[1],
+    maxLevel: PERK_CONFIGS.criticalChance.maxLevel,
     description: t("minigame.perk.description.criticalChance"),
   },
   {
     image: SUNNYSIDE.icons.arrow_right,
     perkName: t("minigame.perk.projectileSpeed"),
+    levelScaling: PERK_CONFIGS.projectileSpeed.valuesPerLevel[1],
+    maxLevel: PERK_CONFIGS.projectileSpeed.maxLevel,
     description: t("minigame.perk.description.projectileSpeed"),
   },
   {
     image: SUNNYSIDE.icons.xpIcon,
     perkName: t("minigame.perk.xpGain"),
+    levelScaling: PERK_CONFIGS.xpGain.valuesPerLevel[1],
+    maxLevel: PERK_CONFIGS.xpGain.maxLevel,
     description: t("minigame.perk.description.xpGain"),
   },
   {
     image: SUNNYSIDE.icons.happy,
     perkName: t("minigame.perk.luck"),
+    levelScaling: PERK_CONFIGS.luck.valuesPerLevel[1],
+    maxLevel: PERK_CONFIGS.luck.maxLevel,
     description: t("minigame.perk.description.luck"),
   },
   {
     image: SUNNYSIDE.icons.search,
     perkName: t("minigame.perk.pickupRadius"),
+    levelScaling: PERK_CONFIGS.pickupRadius.valuesPerLevel[1],
+    maxLevel: PERK_CONFIGS.pickupRadius.maxLevel,
     description: t("minigame.perk.description.pickupRadius"),
   },
   {
     image: SUNNYSIDE.icons.stopwatch,
     perkName: t("minigame.perk.cooldownReduction"),
+    levelScaling: PERK_CONFIGS.cooldownReduction.valuesPerLevel[1],
+    maxLevel: PERK_CONFIGS.cooldownReduction.maxLevel,
     description: t("minigame.perk.description.cooldownReduction"),
   },
   {
     image: SUNNYSIDE.icons.upgrade_disc,
     perkName: t("minigame.perk.healing"),
+    levelScaling: PERK_CONFIGS.healing.valuesPerLevel[1],
+    maxLevel: PERK_CONFIGS.healing.maxLevel,
     description: t("minigame.perk.description.healing"),
   },
   {
     image: SUNNYSIDE.icons.heart,
     perkName: t("minigame.perk.maxHealth"),
+    levelScaling: PERK_CONFIGS.maxHealth.valuesPerLevel[1],
+    maxLevel: PERK_CONFIGS.maxHealth.maxLevel,
     description: t("minigame.perk.description.maxHealth"),
   },
 ];
@@ -293,12 +314,32 @@ export const Boss: Record<BossTypes, string> = {
   dungeonboss: "Boss",
 };
 
+export const ENEMY_WEAPONS: Record<string, string> = {
+  CH: "Chasing",
+  OR: "Orbiting",
+  SU: "Summoning",
+  SR: "Static Range",
+  SL: "Slash",
+  DO: "Domain",
+  None: "None",
+};
+
+export const getWeaponInitial = (...weapons: string[]): string[] => {
+  return weapons.map(
+    (weapon) =>
+      Object.entries(ENEMY_WEAPONS).find(
+        ([, fullName]) => fullName === weapon,
+      )?.[0] ?? "N/A",
+  );
+};
+
 export const ENEMIES_TABLE: {
   image: string;
   type: string;
   hp: number;
   damage: number;
   itemIcon: string;
+  powers?: string[];
 }[] = [
   // Area 1
   {
@@ -307,6 +348,7 @@ export const ENEMIES_TABLE: {
     hp: stats.bat.HP,
     damage: stats.bat.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.bat.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: scarecrow,
@@ -314,6 +356,7 @@ export const ENEMIES_TABLE: {
     hp: stats.scarecrow.HP,
     damage: stats.scarecrow.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.scarecrow.DROP_ITEM],
+    powers: getWeaponInitial("Static Range"),
   },
   {
     image: rat,
@@ -321,6 +364,7 @@ export const ENEMIES_TABLE: {
     hp: stats.rat.HP,
     damage: stats.rat.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.rat.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: zombie,
@@ -328,6 +372,7 @@ export const ENEMIES_TABLE: {
     hp: stats.zombie.HP,
     damage: stats.zombie.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.zombie.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: golem,
@@ -335,6 +380,7 @@ export const ENEMIES_TABLE: {
     hp: stats.golem.HP,
     damage: stats.golem.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.golem.DROP_ITEM],
+    powers: getWeaponInitial("Orbiting"),
   },
   {
     image: ent,
@@ -342,6 +388,7 @@ export const ENEMIES_TABLE: {
     hp: stats.ent.HP,
     damage: stats.ent.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.ent.DROP_ITEM],
+    powers: getWeaponInitial("Summoning"),
   },
   {
     image: minotaur,
@@ -349,6 +396,7 @@ export const ENEMIES_TABLE: {
     hp: stats.minotaur.HP,
     damage: stats.minotaur.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.minotaur.DROP_ITEM],
+    powers: getWeaponInitial("Slash"),
   },
 
   // Area 2
@@ -358,6 +406,7 @@ export const ENEMIES_TABLE: {
     hp: stats.crow.HP,
     damage: stats.crow.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.crow.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: ghost,
@@ -365,6 +414,7 @@ export const ENEMIES_TABLE: {
     hp: stats.ghost.HP,
     damage: stats.ghost.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.ghost.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: imp,
@@ -372,6 +422,7 @@ export const ENEMIES_TABLE: {
     hp: stats.imp.HP,
     damage: stats.imp.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.imp.DROP_ITEM],
+    powers: getWeaponInitial("Static Range"),
   },
   {
     image: skeleton,
@@ -379,6 +430,7 @@ export const ENEMIES_TABLE: {
     hp: stats.skeleton.HP,
     damage: stats.skeleton.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.skeleton.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: slime,
@@ -386,6 +438,7 @@ export const ENEMIES_TABLE: {
     hp: stats.slime_red.HP,
     damage: stats.slime_red.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.slime_red.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: mummy,
@@ -393,6 +446,7 @@ export const ENEMIES_TABLE: {
     hp: stats.mummy.HP,
     damage: stats.mummy.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.mummy.DROP_ITEM],
+    powers: getWeaponInitial("Orbiting"),
   },
   {
     image: living_armor,
@@ -400,6 +454,7 @@ export const ENEMIES_TABLE: {
     hp: stats.living_armor.HP,
     damage: stats.living_armor.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.living_armor.DROP_ITEM],
+    powers: getWeaponInitial("Orbiting"),
   },
   {
     image: witch,
@@ -407,6 +462,7 @@ export const ENEMIES_TABLE: {
     hp: stats.witch.HP,
     damage: stats.witch.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.witch.DROP_ITEM],
+    powers: getWeaponInitial("Orbiting", "Chasing"),
   },
 
   // Area 3
@@ -416,6 +472,7 @@ export const ENEMIES_TABLE: {
     hp: stats.gargoyle.HP,
     damage: stats.gargoyle.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.gargoyle.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: cultist,
@@ -423,6 +480,7 @@ export const ENEMIES_TABLE: {
     hp: stats.cultist.HP,
     damage: stats.cultist.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.cultist.DROP_ITEM],
+    powers: getWeaponInitial("Static Range"),
   },
   {
     image: frankenstein,
@@ -430,6 +488,7 @@ export const ENEMIES_TABLE: {
     hp: stats.frankenstein.HP,
     damage: stats.frankenstein.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.frankenstein.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: werewolf,
@@ -437,6 +496,7 @@ export const ENEMIES_TABLE: {
     hp: stats.werewolf.HP,
     damage: stats.werewolf.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.werewolf.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: headless_horseman,
@@ -444,6 +504,7 @@ export const ENEMIES_TABLE: {
     hp: stats.headless_horseman.HP,
     damage: stats.headless_horseman.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.headless_horseman.DROP_ITEM],
+    powers: getWeaponInitial("Summoning"),
   },
   {
     image: medusa,
@@ -451,6 +512,7 @@ export const ENEMIES_TABLE: {
     hp: stats.medusa.HP,
     damage: stats.medusa.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.medusa.DROP_ITEM],
+    powers: getWeaponInitial("Chasing"),
   },
   {
     image: cerberus,
@@ -458,6 +520,7 @@ export const ENEMIES_TABLE: {
     hp: stats.cerberus.HP,
     damage: stats.cerberus.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.cerberus.DROP_ITEM],
+    powers: getWeaponInitial("Chasing", "Summoning"),
   },
 
   // Area 4
@@ -467,6 +530,7 @@ export const ENEMIES_TABLE: {
     hp: stats.shade.HP,
     damage: stats.shade.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.shade.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: red_stone,
@@ -474,6 +538,7 @@ export const ENEMIES_TABLE: {
     hp: stats.red_stone.HP,
     damage: stats.red_stone.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.red_stone.DROP_ITEM],
+    powers: getWeaponInitial("Static Range"),
   },
   {
     image: demon1,
@@ -481,6 +546,7 @@ export const ENEMIES_TABLE: {
     hp: stats.demon1.HP,
     damage: stats.demon1.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.demon1.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: demon2,
@@ -488,6 +554,7 @@ export const ENEMIES_TABLE: {
     hp: stats.demon2.HP,
     damage: stats.demon2.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.demon2.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: golem,
@@ -495,6 +562,7 @@ export const ENEMIES_TABLE: {
     hp: stats.golem_area4.HP,
     damage: stats.golem_area4.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.golem_area4.DROP_ITEM],
+    powers: getWeaponInitial("Orbiting"),
   },
   {
     image: ent,
@@ -502,6 +570,7 @@ export const ENEMIES_TABLE: {
     hp: stats.ent_area4.HP,
     damage: stats.ent_area4.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.ent_area4.DROP_ITEM],
+    powers: getWeaponInitial("Summoning"),
   },
   {
     image: mummy,
@@ -509,6 +578,7 @@ export const ENEMIES_TABLE: {
     hp: stats.mummy_area4.HP,
     damage: stats.mummy_area4.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.mummy_area4.DROP_ITEM],
+    powers: getWeaponInitial("Orbiting"),
   },
   {
     image: living_armor,
@@ -516,6 +586,7 @@ export const ENEMIES_TABLE: {
     hp: stats.living_armor_area4.HP,
     damage: stats.living_armor_area4.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.living_armor_area4.DROP_ITEM],
+    powers: getWeaponInitial("Orbiting"),
   },
   {
     image: headless_horseman,
@@ -523,6 +594,7 @@ export const ENEMIES_TABLE: {
     hp: stats.headless_horseman_area4.HP,
     damage: stats.headless_horseman_area4.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.headless_horseman_area4.DROP_ITEM],
+    powers: getWeaponInitial("Summoning"),
   },
   {
     image: medusa,
@@ -530,6 +602,7 @@ export const ENEMIES_TABLE: {
     hp: stats.medusa_area4.HP,
     damage: stats.medusa_area4.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.medusa_area4.DROP_ITEM],
+    powers: getWeaponInitial("Chasing"),
   },
   {
     image: sorcerer,
@@ -537,6 +610,7 @@ export const ENEMIES_TABLE: {
     hp: stats.sorcerer.HP,
     damage: stats.sorcerer.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.sorcerer.DROP_ITEM],
+    powers: getWeaponInitial("Domain", "Summoning", "Chasing", "Orbiting"),
   },
 ];
 
@@ -675,14 +749,14 @@ export const DROP_ITEMS_XP_TABLE: {
     xp: DROP_ITEM_XP_VALUES.relicLust,
   },
   {
-    image: relicGreed,
-    description: t("minigame.enemy2"),
-    xp: DROP_ITEM_XP_VALUES.relicGreed,
-  },
-  {
     image: relicGluttony,
     description: t("minigame.enemy2"),
     xp: DROP_ITEM_XP_VALUES.relicGluttony,
+  },
+  {
+    image: relicGreed,
+    description: t("minigame.enemy2"),
+    xp: DROP_ITEM_XP_VALUES.relicGreed,
   },
   {
     image: relicEnvy,
@@ -694,14 +768,11 @@ export const DROP_ITEMS_XP_TABLE: {
 // Panel
 export const PANEL_NPC_WEARABLES: Equipped = {
   body: "Beige Farmer Potion",
-  background: "Slime Wall Background",
-  hair: "Green Slime Hair",
-  shirt: "Blue Slime Shirt",
-  pants: "Sad Slime Pants",
-  shoes: "Blue Jelly Shoes",
-  tool: "Yellow Slime Puppet",
-  wings: "Rainbow Wings",
-  hat: "Sad Slime Hat",
+  background: "Scary Nights Background",
+  suit: "Skeleton Costume",
+  tool: "Hook and Chain",
+  wings: "Sky Tearer Wings",
+  hat: "Skeleton Mask",
 };
 
 // SFX

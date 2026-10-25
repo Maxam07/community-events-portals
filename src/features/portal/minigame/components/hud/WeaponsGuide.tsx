@@ -14,6 +14,7 @@ import {
   WEAPON_DESCRIPTIONS,
   WEAPON_ICONS,
   WEAPON_IDS,
+  WEAPON_MAX_LEVEL,
   WEAPON_NAMES,
   WEAPON_STAT_DESCRIPTIONS,
   WEAPON_STAT_LABELS,
@@ -23,7 +24,10 @@ import { formatStatValue, getUpgradeableWeaponStats } from "./weaponStats";
 import infoIcon from "assets/icons/info.webp";
 
 const PANEL_CONTENT_HEIGHT = "h-[442px]";
-const GUIDE_LEVELS: WeaponLevel[] = [1, 2, 3, 4, 5, 6, 7, 8];
+const GUIDE_LEVELS: WeaponLevel[] = Array.from(
+  { length: WEAPON_MAX_LEVEL },
+  (_, index) => (index + 1) as WeaponLevel,
+);
 
 export const WeaponsGuide: React.FC = () => {
   const { t } = useAppTranslation();
@@ -119,12 +123,12 @@ export const WeaponsGuide: React.FC = () => {
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col justify-start sm:justify-center">
-          <div className="grid grid-cols-4 gap-1">
+          <div className="grid grid-cols-5 gap-1">
             {GUIDE_LEVELS.map((level) => (
               <ButtonPanel
                 key={level}
                 selected={selectedLevel === level}
-                className="flex flex-col h-12 w-100 items-center justify-center text-xs text-center"
+                className="flex flex-col h-10 w-100 items-center justify-center text-xs text-center"
                 onClick={() => setSelectedLevel(level)}
               >
                 <span>{t("minigame.level")}</span>

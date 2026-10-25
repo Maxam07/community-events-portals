@@ -8,12 +8,11 @@ import retryIcon from "public/world/portal/halloween/retry.png";
 import {
   FINAL_BOSS_TIME_BONUS_PER_SECOND,
   INSTRUCTIONS,
-  PERKS_TABLE,
   REVIVE_FLOWER_COST,
   REVIVE_MAX_PER_RUN,
   REVIVE_SCORE_MULTIPLIER,
 } from "../../constants";
-import { Categories, Enemies, Skills } from "./CodexCategories";
+import { Categories, Enemies, Perks, Skills } from "./CodexCategories";
 import { DropItemsXP } from "./CodexCategories";
 
 export const Guide = () => {
@@ -45,24 +44,7 @@ export const Guide = () => {
           </div>
         ))}
         {/* Perks */}
-        <Label type="default">{t("minigame.perks")}</Label>
-        <div className="grid grid-cols-2 text-xs">
-          {PERKS_TABLE.map(
-            ({ image, perkName, description, width = 10 }, index) => (
-              <div
-                key={index}
-                style={{ border: "1px solid #b96f50" }}
-                className="flex flex-col items-center justify-start gap-2 p-2 text-center"
-              >
-                <SquareIcon icon={image} width={width} />
-                <span className="text-xs font-semibold">{perkName}</span>
-                <div className="text-xs">
-                  {t("minigame.guideDescription", { description })}
-                </div>
-              </div>
-            ),
-          )}
-        </div>
+        <Perks />
         {/* Final Boss */}
         <Label type="default">{t("minigame.finalBoss")}</Label>
         <div className="flex items-center mb-3 mx-2">

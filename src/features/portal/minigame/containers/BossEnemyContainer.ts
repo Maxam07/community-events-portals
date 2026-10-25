@@ -81,12 +81,33 @@ export class BossEnemy extends Phaser.GameObjects.Container {
 
     this.lifeBar.setVisible(true);
     this.createEnemy();
+
+    if (bossType === "dungeonboss") {
+      this.lifeBar.setVisible(false); // optional
+      this.publishHealth();
+    }
   }
 
   public get portalService() {
     return this.scene.registry.get("portalService") as
       | MachineInterpreter
       | undefined;
+  }
+
+  private publishHealth() {
+    if (this.bossType !== "dungeonboss") return;
+
+    this.portalService?.send({
+      type: "SET_BOSS_HEALTH",
+      name: "Dungeon Boss",
+      hp: this.hp,
+      maxHp: this.maxHp,
+    });
+  }
+
+  private clearHealth() {
+    if (this.bossType !== "dungeonboss") return;
+    this.portalService?.send({ type: "CLEAR_BOSS_HEALTH" });
   }
 
   createEnemy() {
@@ -152,6 +173,7 @@ export class BossEnemy extends Phaser.GameObjects.Container {
 
     this.enemyBody?.setVelocity(0, 0);
     this.lifeBar.setVisible(false);
+    this.clearHealth();
     this.sprite.setAlpha(1);
     this.sprite.anims.resume(); // in case slow/stun paused it
 
@@ -390,6 +412,7 @@ export class BossEnemy extends Phaser.GameObjects.Container {
     this.isDead = this.hp <= 0;
 
     this.lifeBar.setHealth(this.hp);
+    this.publishHealth();
 
     if (this.isDead) {
       this.setMove(false);
