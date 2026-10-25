@@ -209,7 +209,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicLust",
   },
   witch: {
-    HP: 400,
+    HP: 4000,
     SPEED: 40,
     DAMAGE: 25,
     TOTAL: 1,
@@ -375,7 +375,7 @@ export const ENEMY_BALANCE_STATS = {
   golem_area4: {
     HP: TESTING ? 20 : 15000,
     SPEED: 40,
-    DAMAGE: TESTING ? 5 : 45,
+    DAMAGE: TESTING ? 5 : 35,
     TOTAL: 1,
     WEAPON: ["orbiting"],
     WEAPONS: {
@@ -390,7 +390,7 @@ export const ENEMY_BALANCE_STATS = {
   ent_area4: {
     HP: TESTING ? 20 : 15000,
     SPEED: 40,
-    DAMAGE: TESTING ? 5 : 45,
+    DAMAGE: TESTING ? 5 : 35,
     TOTAL: 1,
     WEAPON: ["summoning"],
     WEAPONS: {
@@ -406,7 +406,7 @@ export const ENEMY_BALANCE_STATS = {
   mummy_area4: {
     HP: TESTING ? 20 : 15000,
     SPEED: 40,
-    DAMAGE: TESTING ? 5 : 45,
+    DAMAGE: TESTING ? 5 : 40,
     TOTAL: 1,
     WEAPON: ["orbiting"],
     WEAPONS: {
@@ -421,7 +421,7 @@ export const ENEMY_BALANCE_STATS = {
   living_armor_area4: {
     HP: TESTING ? 20 : 15000,
     SPEED: 40,
-    DAMAGE: TESTING ? 5 : 50,
+    DAMAGE: TESTING ? 5 : 40,
     TOTAL: 1,
     WEAPON: ["orbiting"],
     WEAPONS: {
@@ -436,7 +436,7 @@ export const ENEMY_BALANCE_STATS = {
   headless_horseman_area4: {
     HP: TESTING ? 20 : 15000,
     SPEED: 40,
-    DAMAGE: TESTING ? 5 : 50,
+    DAMAGE: TESTING ? 5 : 45,
     TOTAL: 1,
     WEAPON: ["summoning"],
     WEAPONS: {
@@ -452,7 +452,7 @@ export const ENEMY_BALANCE_STATS = {
   medusa_area4: {
     HP: TESTING ? 20 : 15000,
     SPEED: 40,
-    DAMAGE: TESTING ? 5 : 50,
+    DAMAGE: TESTING ? 5 : 45,
     TOTAL: 1,
     WEAPON: ["chasing"],
     WEAPONS: {
