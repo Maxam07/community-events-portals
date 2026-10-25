@@ -77,7 +77,7 @@ export { PORTAL_NAME } from "./PortalConstants";
 // Game config
 export const GAME_SECONDS = 900;
 export const GAME_LIVES = 100;
-export const WALKING_SPEED = 50;
+export const WALKING_SPEED = 55;
 export const PLAYER_WATER_SPEED_MULTIPLIER = 0.6;
 export const REVIVE_FLOWER_COST = 4;
 export const REVIVE_SCORE_MULTIPLIER = 0.85;
@@ -768,14 +768,11 @@ export const DROP_ITEMS_XP_TABLE: {
 // Panel
 export const PANEL_NPC_WEARABLES: Equipped = {
   body: "Beige Farmer Potion",
-  background: "Slime Wall Background",
-  hair: "Green Slime Hair",
-  shirt: "Blue Slime Shirt",
-  pants: "Sad Slime Pants",
-  shoes: "Blue Jelly Shoes",
-  tool: "Yellow Slime Puppet",
-  wings: "Rainbow Wings",
-  hat: "Sad Slime Hat",
+  background: "Scary Nights Background",
+  suit: "Skeleton Costume",
+  tool: "Hook and Chain",
+  wings: "Sky Tearer Wings",
+  hat: "Skeleton Mask",
 };
 
 // SFX

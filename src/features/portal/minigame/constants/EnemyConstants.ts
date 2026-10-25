@@ -502,7 +502,7 @@ export const ENEMY_BALANCE_STATS = {
     WEAPONS: {
       chasing: {
         NEXT_CHASE: 1000,
-        SPEED: 65,
+        SPEED: 60,
         DURATION_MS: 3000,
       },
       summoning: {
@@ -512,7 +512,7 @@ export const ENEMY_BALANCE_STATS = {
       },
       orbiting: {
         RADIUS: 120,
-        SPEED_DEG_PER_SEC: 200,
+        SPEED_DEG_PER_SEC: 100,
       },
     },
     FORMATION: "horizontal line",
