@@ -198,10 +198,26 @@ export class Scene extends BaseScene {
       frameWidth: 32,
       frameHeight: 32,
     });
+    this.load.spritesheet(
+      "crow_summon",
+      "world/portal/halloween/enemy-crow_summon.webp",
+      {
+        frameWidth: 32,
+        frameHeight: 32,
+      },
+    );
     this.load.spritesheet("ghost", "world/portal/halloween/ghost.webp", {
       frameWidth: 37,
       frameHeight: 40,
     });
+    this.load.spritesheet(
+      "ghost_summon",
+      "world/portal/halloween/ghost_summon.webp",
+      {
+        frameWidth: 37,
+        frameHeight: 40,
+      },
+    );
     this.load.spritesheet("gargoyle", "world/portal/halloween/gargoyle.webp", {
       frameWidth: 48,
       frameHeight: 48,
@@ -299,6 +315,14 @@ export class Scene extends BaseScene {
       },
     );
     this.load.spritesheet(
+      "skeleton_summon",
+      "world/portal/halloween/SkeletonNormal-Sheet_summon.webp",
+      {
+        frameWidth: 14,
+        frameHeight: 17,
+      },
+    );
+    this.load.spritesheet(
       "slime_red",
       "world/portal/halloween/slime_red.webp",
       {
@@ -317,6 +341,30 @@ export class Scene extends BaseScene {
     this.load.spritesheet(
       "slime_blue",
       "world/portal/halloween/slime_blue.webp",
+      {
+        frameWidth: 18,
+        frameHeight: 16,
+      },
+    );
+    this.load.spritesheet(
+      "slime_red_summon",
+      "world/portal/halloween/slime_red_summon.webp",
+      {
+        frameWidth: 18,
+        frameHeight: 16,
+      },
+    );
+    this.load.spritesheet(
+      "slime_green_summon",
+      "world/portal/halloween/slime_green_summon.webp",
+      {
+        frameWidth: 18,
+        frameHeight: 16,
+      },
+    );
+    this.load.spritesheet(
+      "slime_blue_summon",
+      "world/portal/halloween/slime_blue_summon.webp",
       {
         frameWidth: 18,
         frameHeight: 16,
@@ -426,13 +474,37 @@ export class Scene extends BaseScene {
         frameHeight: 48,
       },
     );
+    this.load.spritesheet(
+      "minotaur_summon",
+      "world/portal/halloween/minotaur-Sheet_summon.webp",
+      {
+        frameWidth: 48,
+        frameHeight: 48,
+      },
+    );
     this.load.spritesheet("witch", "world/portal/halloween/boss_witch.webp", {
       frameWidth: 32,
       frameHeight: 36,
     });
     this.load.spritesheet(
+      "witch_summon",
+      "world/portal/halloween/boss_witch_summon.webp",
+      {
+        frameWidth: 32,
+        frameHeight: 36,
+      },
+    );
+    this.load.spritesheet(
       "cerberus",
       "world/portal/halloween/cerberus-walk.webp",
+      {
+        frameWidth: 80,
+        frameHeight: 48,
+      },
+    );
+    this.load.spritesheet(
+      "cerberus_summon",
+      "world/portal/halloween/cerberus-walk_summon.webp",
       {
         frameWidth: 80,
         frameHeight: 48,
@@ -575,6 +647,14 @@ export class Scene extends BaseScene {
     this.load.spritesheet(
       "sorcerer_clone",
       "world/portal/halloween/sorcerer-Sheet.webp",
+      {
+        frameWidth: 48,
+        frameHeight: 48,
+      },
+    );
+    this.load.spritesheet(
+      "sorcerer_summon",
+      "world/portal/halloween/sorcerer-Sheet_summon.webp",
       {
         frameWidth: 48,
         frameHeight: 48,

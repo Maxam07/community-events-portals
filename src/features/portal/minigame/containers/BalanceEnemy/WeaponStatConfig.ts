@@ -173,12 +173,12 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
     },
     chasing: {
       TEXTURE: [
-        "skeleton",
-        "ghost",
-        "slime_red",
-        "crow",
-        "slime_blue",
-        "slime_green",
+        "skeleton_summon",
+        "ghost_summon",
+        "slime_red_summon",
+        "crow_summon",
+        "slime_blue_summon",
+        "slime_green_summon",
       ],
       NEXT_CHASE: stats.witch.WEAPONS.chasing.NEXT_CHASE,
       SPEED: stats.witch.WEAPONS.chasing.SPEED,
@@ -225,7 +225,7 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
   },
   dungeonboss: {
     summoning: {
-      TEXTURE: "sorcerer",
+      TEXTURE: "sorcerer_summon",
       WARNING: "shadow_warning",
       DELAY_MS: stats.dungeonboss.WEAPONS.summoning.DELAY_MS,
       WARNING_DURATION_MS:
@@ -233,13 +233,13 @@ export const WEAPON_BALANCE_STATS: Record<WeaponEnemyType, WeaponStats> = {
       DURATION_MS: stats.dungeonboss.WEAPONS.summoning.DURATION_MS,
     },
     chasing: {
-      TEXTURE: ["cerberus", "minotaur"],
+      TEXTURE: ["cerberus_summon", "minotaur_summon"],
       NEXT_CHASE: stats.dungeonboss.WEAPONS.chasing.NEXT_CHASE,
       SPEED: stats.dungeonboss.WEAPONS.chasing.SPEED,
       DURATION_MS: stats.dungeonboss.WEAPONS.chasing.DURATION_MS,
     },
     orbiting: {
-      TEXTURE: "witch",
+      TEXTURE: "witch_summon",
       RADIUS: stats.dungeonboss.WEAPONS.orbiting.RADIUS,
       SPEED_DEG_PER_SEC: stats.dungeonboss.WEAPONS.orbiting.SPEED_DEG_PER_SEC,
     },
