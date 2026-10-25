@@ -5,6 +5,7 @@ import {
   DROP_ITEMS_XP_TABLE,
   ENEMIES_TABLE,
   PERKS_TABLE,
+  ENEMY_WEAPONS,
 } from "../../constants/ConfigConstants";
 import { useAppTranslation } from "lib/i18n/useAppTranslations";
 import { Label } from "components/ui/Label";
@@ -207,6 +208,27 @@ export const Enemies: React.FC = () => {
   return (
     <div className="flex md:flex-row flex-col-reverse md:mr-1 items-start h-full">
       <InnerPanel className="p-2 w-full">
+        <Label type="default">{t("minigame.enemy.powers")}</Label>
+        <table className="w-full text-xs table-fixed border-collapse mt-1 mb-2">
+          <tbody>
+            {Object.entries(ENEMY_WEAPONS).map(([initial, full]) => (
+              <tr key={full}>
+                <td
+                  style={{ border: "1px solid #b96f50" }}
+                  className="p-1.5 w-1/5"
+                >
+                  {initial}
+                </td>
+                <td
+                  style={{ border: "1px solid #b96f50" }}
+                  className="p-1.5 w-4/5"
+                >
+                  {full}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
         <Label type="default">{t("minigame.enemy")}</Label>
         <Label type="default" className="mt-2">
           {t("minigame.area1")}
@@ -220,6 +242,7 @@ export const Enemies: React.FC = () => {
               hp={item.hp}
               damage={item.damage}
               itemIcon={item.itemIcon}
+              powers={item.powers}
             />
           ))}
         </div>
@@ -235,6 +258,7 @@ export const Enemies: React.FC = () => {
               hp={item.hp}
               damage={item.damage}
               itemIcon={item.itemIcon}
+              powers={item.powers}
             />
           ))}
         </div>
@@ -250,6 +274,7 @@ export const Enemies: React.FC = () => {
               hp={item.hp}
               damage={item.damage}
               itemIcon={item.itemIcon}
+              powers={item.powers}
             />
           ))}
         </div>
@@ -265,6 +290,7 @@ export const Enemies: React.FC = () => {
               hp={item.hp}
               damage={item.damage}
               itemIcon={item.itemIcon}
+              powers={item.powers}
             />
           ))}
         </div>
@@ -361,12 +387,13 @@ export const EnemyCard: React.FC<{
   hp: number;
   damage: number;
   itemIcon: string;
-}> = ({ icon, type, hp, damage, itemIcon }) => {
+  powers?: string[];
+}> = ({ icon, type, hp, damage, itemIcon, powers }) => {
   const { t } = useAppTranslation();
   return (
     <ButtonPanel className="flex flex-col items-center">
       <img src={icon} className="h-10 mr-1 pb-1" />
-      <span className="text-xs font-semibold">{type}</span>
+      <span className="text-xs text-center font-semibold">{type}</span>
       <table className="mt-3 w-full border-collapse text-xs">
         <tbody>
           <tr>
@@ -390,6 +417,22 @@ export const EnemyCard: React.FC<{
             <td className="bg-black/10 px-2 py-1 text-center">
               <img src={itemIcon} className="inline-block h-4" />
             </td>
+          </tr>
+        </tbody>
+      </table>
+      <table className="pt-1 w-full border-collapse text-xs">
+        <tbody>
+          <th>
+            <div className="flex flex-col pt-3 w-full text-left">
+              <span className="text-xs pb-2">
+                {t("minigame.weaponGuide.power")}
+              </span>
+            </div>
+          </th>
+          <tr>
+            <th className="bg-black/10 px-2 py-1 text-left font-normal">
+              {Array.isArray(powers) ? powers.join(", ") : powers}
+            </th>
           </tr>
         </tbody>
       </table>

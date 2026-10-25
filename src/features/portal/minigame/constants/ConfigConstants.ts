@@ -314,12 +314,32 @@ export const Boss: Record<BossTypes, string> = {
   dungeonboss: "Boss",
 };
 
+export const ENEMY_WEAPONS: Record<string, string> = {
+  CH: "Chasing",
+  OR: "Orbiting",
+  SU: "Summoning",
+  SR: "Static Range",
+  SL: "Slash",
+  DO: "Domain",
+  None: "None",
+};
+
+export const getWeaponInitial = (...weapons: string[]): string[] => {
+  return weapons.map(
+    (weapon) =>
+      Object.entries(ENEMY_WEAPONS).find(
+        ([, fullName]) => fullName === weapon,
+      )?.[0] ?? "N/A",
+  );
+};
+
 export const ENEMIES_TABLE: {
   image: string;
   type: string;
   hp: number;
   damage: number;
   itemIcon: string;
+  powers?: string[];
 }[] = [
   // Area 1
   {
@@ -328,6 +348,7 @@ export const ENEMIES_TABLE: {
     hp: stats.bat.HP,
     damage: stats.bat.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.bat.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: scarecrow,
@@ -335,6 +356,7 @@ export const ENEMIES_TABLE: {
     hp: stats.scarecrow.HP,
     damage: stats.scarecrow.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.scarecrow.DROP_ITEM],
+    powers: getWeaponInitial("Static Range"),
   },
   {
     image: rat,
@@ -342,6 +364,7 @@ export const ENEMIES_TABLE: {
     hp: stats.rat.HP,
     damage: stats.rat.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.rat.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: zombie,
@@ -349,6 +372,7 @@ export const ENEMIES_TABLE: {
     hp: stats.zombie.HP,
     damage: stats.zombie.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.zombie.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: golem,
@@ -356,6 +380,7 @@ export const ENEMIES_TABLE: {
     hp: stats.golem.HP,
     damage: stats.golem.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.golem.DROP_ITEM],
+    powers: getWeaponInitial("Orbiting"),
   },
   {
     image: ent,
@@ -363,6 +388,7 @@ export const ENEMIES_TABLE: {
     hp: stats.ent.HP,
     damage: stats.ent.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.ent.DROP_ITEM],
+    powers: getWeaponInitial("Summoning"),
   },
   {
     image: minotaur,
@@ -370,6 +396,7 @@ export const ENEMIES_TABLE: {
     hp: stats.minotaur.HP,
     damage: stats.minotaur.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.minotaur.DROP_ITEM],
+    powers: getWeaponInitial("Slash"),
   },
 
   // Area 2
@@ -379,6 +406,7 @@ export const ENEMIES_TABLE: {
     hp: stats.crow.HP,
     damage: stats.crow.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.crow.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: ghost,
@@ -386,6 +414,7 @@ export const ENEMIES_TABLE: {
     hp: stats.ghost.HP,
     damage: stats.ghost.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.ghost.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: imp,
@@ -393,6 +422,7 @@ export const ENEMIES_TABLE: {
     hp: stats.imp.HP,
     damage: stats.imp.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.imp.DROP_ITEM],
+    powers: getWeaponInitial("Static Range"),
   },
   {
     image: skeleton,
@@ -400,6 +430,7 @@ export const ENEMIES_TABLE: {
     hp: stats.skeleton.HP,
     damage: stats.skeleton.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.skeleton.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: slime,
@@ -407,6 +438,7 @@ export const ENEMIES_TABLE: {
     hp: stats.slime_red.HP,
     damage: stats.slime_red.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.slime_red.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: mummy,
@@ -414,6 +446,7 @@ export const ENEMIES_TABLE: {
     hp: stats.mummy.HP,
     damage: stats.mummy.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.mummy.DROP_ITEM],
+    powers: getWeaponInitial("Orbiting"),
   },
   {
     image: living_armor,
@@ -421,6 +454,7 @@ export const ENEMIES_TABLE: {
     hp: stats.living_armor.HP,
     damage: stats.living_armor.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.living_armor.DROP_ITEM],
+    powers: getWeaponInitial("Orbiting"),
   },
   {
     image: witch,
@@ -428,6 +462,7 @@ export const ENEMIES_TABLE: {
     hp: stats.witch.HP,
     damage: stats.witch.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.witch.DROP_ITEM],
+    powers: getWeaponInitial("Orbiting", "Chasing"),
   },
 
   // Area 3
@@ -437,6 +472,7 @@ export const ENEMIES_TABLE: {
     hp: stats.gargoyle.HP,
     damage: stats.gargoyle.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.gargoyle.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: cultist,
@@ -444,6 +480,7 @@ export const ENEMIES_TABLE: {
     hp: stats.cultist.HP,
     damage: stats.cultist.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.cultist.DROP_ITEM],
+    powers: getWeaponInitial("Static Range"),
   },
   {
     image: frankenstein,
@@ -451,6 +488,7 @@ export const ENEMIES_TABLE: {
     hp: stats.frankenstein.HP,
     damage: stats.frankenstein.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.frankenstein.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: werewolf,
@@ -458,6 +496,7 @@ export const ENEMIES_TABLE: {
     hp: stats.werewolf.HP,
     damage: stats.werewolf.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.werewolf.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: headless_horseman,
@@ -465,6 +504,7 @@ export const ENEMIES_TABLE: {
     hp: stats.headless_horseman.HP,
     damage: stats.headless_horseman.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.headless_horseman.DROP_ITEM],
+    powers: getWeaponInitial("Summoning"),
   },
   {
     image: medusa,
@@ -472,6 +512,7 @@ export const ENEMIES_TABLE: {
     hp: stats.medusa.HP,
     damage: stats.medusa.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.medusa.DROP_ITEM],
+    powers: getWeaponInitial("Chasing"),
   },
   {
     image: cerberus,
@@ -479,6 +520,7 @@ export const ENEMIES_TABLE: {
     hp: stats.cerberus.HP,
     damage: stats.cerberus.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.cerberus.DROP_ITEM],
+    powers: getWeaponInitial("Chasing", "Summoning"),
   },
 
   // Area 4
@@ -488,6 +530,7 @@ export const ENEMIES_TABLE: {
     hp: stats.shade.HP,
     damage: stats.shade.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.shade.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: red_stone,
@@ -495,6 +538,7 @@ export const ENEMIES_TABLE: {
     hp: stats.red_stone.HP,
     damage: stats.red_stone.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.red_stone.DROP_ITEM],
+    powers: getWeaponInitial("Static Range"),
   },
   {
     image: demon1,
@@ -502,6 +546,7 @@ export const ENEMIES_TABLE: {
     hp: stats.demon1.HP,
     damage: stats.demon1.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.demon1.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: demon2,
@@ -509,6 +554,7 @@ export const ENEMIES_TABLE: {
     hp: stats.demon2.HP,
     damage: stats.demon2.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.demon2.DROP_ITEM],
+    powers: getWeaponInitial("None"),
   },
   {
     image: golem,
@@ -516,6 +562,7 @@ export const ENEMIES_TABLE: {
     hp: stats.golem_area4.HP,
     damage: stats.golem_area4.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.golem_area4.DROP_ITEM],
+    powers: getWeaponInitial("Orbiting"),
   },
   {
     image: ent,
@@ -523,6 +570,7 @@ export const ENEMIES_TABLE: {
     hp: stats.ent_area4.HP,
     damage: stats.ent_area4.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.ent_area4.DROP_ITEM],
+    powers: getWeaponInitial("Summoning"),
   },
   {
     image: mummy,
@@ -530,6 +578,7 @@ export const ENEMIES_TABLE: {
     hp: stats.mummy_area4.HP,
     damage: stats.mummy_area4.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.mummy_area4.DROP_ITEM],
+    powers: getWeaponInitial("Orbiting"),
   },
   {
     image: living_armor,
@@ -537,6 +586,7 @@ export const ENEMIES_TABLE: {
     hp: stats.living_armor_area4.HP,
     damage: stats.living_armor_area4.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.living_armor_area4.DROP_ITEM],
+    powers: getWeaponInitial("Orbiting"),
   },
   {
     image: headless_horseman,
@@ -544,6 +594,7 @@ export const ENEMIES_TABLE: {
     hp: stats.headless_horseman_area4.HP,
     damage: stats.headless_horseman_area4.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.headless_horseman_area4.DROP_ITEM],
+    powers: getWeaponInitial("Summoning"),
   },
   {
     image: medusa,
@@ -551,6 +602,7 @@ export const ENEMIES_TABLE: {
     hp: stats.medusa_area4.HP,
     damage: stats.medusa_area4.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.medusa_area4.DROP_ITEM],
+    powers: getWeaponInitial("Chasing"),
   },
   {
     image: sorcerer,
@@ -558,6 +610,7 @@ export const ENEMIES_TABLE: {
     hp: stats.sorcerer.HP,
     damage: stats.sorcerer.DAMAGE,
     itemIcon: DROP_ITEM_ASSETS[stats.sorcerer.DROP_ITEM],
+    powers: getWeaponInitial("Domain", "Summoning", "Chasing", "Orbiting"),
   },
 ];
 
