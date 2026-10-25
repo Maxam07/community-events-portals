@@ -179,7 +179,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicWrath",
   },
   mummy: {
-    HP: 2000,
+    HP: 3000,
     SPEED: 15,
     DAMAGE: 14,
     TOTAL: 1,
@@ -194,7 +194,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicLust",
   },
   living_armor: {
-    HP: 2000,
+    HP: 3000,
     SPEED: 20,
     DAMAGE: 13,
     TOTAL: 1,
@@ -209,7 +209,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicLust",
   },
   witch: {
-    HP: 3500,
+    HP: 400,
     SPEED: 40,
     DAMAGE: 25,
     TOTAL: 1,
@@ -231,7 +231,7 @@ export const ENEMY_BALANCE_STATS = {
 
   // Area 3
   gargoyle: {
-    HP: 150,
+    HP: 100,
     SPEED: 50,
     DAMAGE: 10,
     TOTAL: 130,
@@ -242,9 +242,9 @@ export const ENEMY_BALANCE_STATS = {
   },
   cultist: { HP: 550, SPEED: 30, DAMAGE: 20, DROP_ITEM: "relicLust" },
   vampire: {
-    HP: 200,
-    SPEED: 45,
-    DAMAGE: 15,
+    HP: 180,
+    SPEED: 40,
+    DAMAGE: 12,
     TOTAL: 130,
     BATCH_SIZE: 13,
     DELAY: 6500,
@@ -252,7 +252,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicWrath",
   },
   frankenstein: {
-    HP: 300,
+    HP: 350,
     SPEED: 17,
     DAMAGE: 20,
     TOTAL: 90,
@@ -262,9 +262,9 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicPride",
   },
   werewolf: {
-    HP: 250,
+    HP: 200,
     SPEED: 40,
-    DAMAGE: 15,
+    DAMAGE: 12,
     TOTAL: 130,
     BATCH_SIZE: 13,
     DELAY: 7500,
@@ -290,7 +290,7 @@ export const ENEMY_BALANCE_STATS = {
   medusa: {
     HP: 5000,
     SPEED: 30,
-    DAMAGE: 35,
+    DAMAGE: 30,
     TOTAL: 1,
     WEAPON: ["chasing"],
     WEAPONS: {
@@ -305,8 +305,8 @@ export const ENEMY_BALANCE_STATS = {
   },
   cerberus: {
     HP: 15000,
-    SPEED: 40,
-    DAMAGE: 40,
+    SPEED: 35,
+    DAMAGE: 35,
     TOTAL: 1,
     WEAPON: ["chasing", "summoning"],
     WEAPONS: {
@@ -327,9 +327,9 @@ export const ENEMY_BALANCE_STATS = {
 
   // Area 4
   shade: {
-    HP: TESTING ? 5 : 500,
-    SPEED: 40,
-    DAMAGE: TESTING ? 5 : 25,
+    HP: TESTING ? 5 : 400,
+    SPEED: 30,
+    DAMAGE: TESTING ? 5 : 20,
     TOTAL: 140,
     BATCH_SIZE: 14,
     DELAY: 7000,
@@ -344,7 +344,7 @@ export const ENEMY_BALANCE_STATS = {
   },
   hellHound: {
     HP: TESTING ? 5 : 350,
-    SPEED: 50,
+    SPEED: 40,
     DAMAGE: TESTING ? 5 : 20,
     TOTAL: 140,
     BATCH_SIZE: 14,
@@ -353,9 +353,9 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicWrath",
   },
   demon1: {
-    HP: TESTING ? 5 : 450,
-    SPEED: 40,
-    DAMAGE: TESTING ? 5 : 19,
+    HP: TESTING ? 5 : 400,
+    SPEED: 30,
+    DAMAGE: TESTING ? 5 : 15,
     TOTAL: 130,
     BATCH_SIZE: 13,
     DELAY: 7000,
@@ -363,9 +363,9 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicSloth",
   },
   demon2: {
-    HP: TESTING ? 5 : 450,
-    SPEED: 45,
-    DAMAGE: TESTING ? 5 : 21,
+    HP: TESTING ? 5 : 400,
+    SPEED: 35,
+    DAMAGE: TESTING ? 5 : 15,
     TOTAL: 110,
     BATCH_SIZE: 11,
     DELAY: 7000,
