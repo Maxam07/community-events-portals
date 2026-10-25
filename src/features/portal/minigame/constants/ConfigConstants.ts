@@ -112,14 +112,14 @@ export const UNLIMITED_ATTEMPTS_DISCOUNT: BumpkinItem[] = [
 //   29, 9609, 49035, 155026, 1181, 151471, 49035, 86, 79871, 2299, 21303, 206876,
 //   9239, 36214, 55626, 3249, 128122,
 // ];
-export const BETA_TESTERS: number[] = [3456169667100986];
+export const BETA_TESTERS: number[] = [];
 
 export const ATTEMPTS_PURCHASED_BY_MISTAKE: {
   id: number;
   attempts: number | "unlimited";
 }[] = [
   // { id: {FarmId}, attempts: 1 },
-  // { id: {FarmId}, attempts: "unlimited" },
+  { id: 90898, attempts: "unlimited" },
 ];
 
 export const PASSIVE_ABILITY_ITEM: BumpkinWings = "Underworld Stimpack";

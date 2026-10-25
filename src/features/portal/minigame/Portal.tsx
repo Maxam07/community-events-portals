@@ -336,7 +336,7 @@ export const Portal: React.FC = () => {
           {getLevelUpRows(pendingLevelUpChoice?.options).map((row) => (
             <div
               key={row.key}
-              className="flex flex-wrap items-stretch justify-center gap-3"
+              className="flex flex-wrap items-stretch justify-center gap-x-3 gap-y-12"
             >
               {row.options.map((option: LevelUpOption) => {
                 const card = (() => {
