@@ -66,6 +66,15 @@ export class StatusEffectSystem {
           existing.nextTickAt,
           activeEffect.nextTickAt,
         );
+        // A refresh keeps the strongest tick damage, so a stronger reapply
+        // (e.g. stacked Crimson Vial tethers) takes effect immediately.
+        if (
+          activeEffect.damagePerTick !== undefined &&
+          (existing.damagePerTick === undefined ||
+            activeEffect.damagePerTick > existing.damagePerTick)
+        ) {
+          existing.damagePerTick = activeEffect.damagePerTick;
+        }
       } else {
         current.push(activeEffect);
       }

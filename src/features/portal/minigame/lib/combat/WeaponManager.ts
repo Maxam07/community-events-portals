@@ -126,6 +126,9 @@ export class WeaponManager {
   private readonly darknessBookSelectedTargets = new Set<EnemyLike>();
   private readonly claimedBeeTargets = new Set<EnemyLike>();
   private readonly bloodTethers: BloodTether[] = [];
+  // True while the Crimson Vial has tethers out; used to start its cooldown
+  // only after the last tether is gone (expired or the enemy died).
+  private bloodTethersWereActive = false;
   private lastAimVector: Vector = { ...FALLBACK_AIM_VECTOR };
   private nextAreaCollisionCheckAt = 0;
   private isShutDown = false;
@@ -235,10 +238,29 @@ export class WeaponManager {
       }
 
       if (weapon.config.behavior === "orbital") return;
+
+      if (weapon.config.behavior === "bloodTether") {
+        // The cooldown only starts once every tether is gone.
+        if (this.bloodTethers.length > 0) {
+          this.bloodTethersWereActive = true;
+          return;
+        }
+        if (this.bloodTethersWereActive) {
+          this.bloodTethersWereActive = false;
+          this.cooldowns.use(weapon.id, time, weapon.stats.cooldownMs);
+          return;
+        }
+      }
+
       if (!this.cooldowns.isReady(weapon.id, time)) return;
       if (!this.fireWeapon(weapon, time)) return;
 
-      this.cooldowns.use(weapon.id, time, weapon.stats.cooldownMs);
+      // Moss Ground keeps a single zone: the cooldown starts when it ends.
+      const cooldownMs =
+        weapon.config.behavior === "snareArea"
+          ? weapon.stats.durationMs + weapon.stats.cooldownMs
+          : weapon.stats.cooldownMs;
+      this.cooldowns.use(weapon.id, time, cooldownMs);
     });
   }
 
@@ -738,19 +760,41 @@ export class WeaponManager {
     const statusEffects = this.createPayload(weapon).statusEffects;
     let fired = false;
 
+    const range = this.getEffectiveRange(weapon);
+
     for (let slot = 0; slot < freeSlots; slot++) {
-      const target = this.nearestInRange(tetheredEnemies);
+      // Prefer an enemy that has no tether yet. Only when there is none in
+      // range, stack another tether on an already tethered enemy.
+      let target = this.nearestInRange(tetheredEnemies);
+      if (target && distanceBetween(player, enemyCenter(target)) > range) {
+        target = undefined;
+      }
+      if (!target) target = this.pickBloodTetherStackTarget(range);
       if (!target) break;
 
       const targetCenter = enemyCenter(target);
-      if (
-        distanceBetween(player, targetCenter) > this.getEffectiveRange(weapon)
-      )
-        break;
 
       tetheredEnemies.add(target);
-      if (statusEffects)
-        this.statusEffectSystem.apply(target, statusEffects, time);
+      if (statusEffects) {
+        // Tethers stacked on the same enemy deal damage * sqrt(tethers),
+        // the same diminishing returns used by the Fly Storm bees.
+        const stacks =
+          this.bloodTethers.filter((tether) => tether.enemy === target).length +
+          1;
+        this.statusEffectSystem.apply(
+          target,
+          stacks > 1
+            ? statusEffects.map((status) => ({
+                ...status,
+                damagePerTick:
+                  status.damagePerTick !== undefined
+                    ? Math.round(status.damagePerTick * Math.sqrt(stacks))
+                    : undefined,
+              }))
+            : statusEffects,
+          time,
+        );
+      }
 
       const thicknessScale =
         (weapon.stats.range / CRIMSON_VIAL_FRAME_WIDTH) *
@@ -780,6 +824,41 @@ export class WeaponManager {
     }
 
     return fired;
+  }
+
+  // Already tethered enemy (alive, in range) with the fewest tethers; ties go
+  // to the closest one to the player.
+  private pickBloodTetherStackTarget(range: number): EnemyLike | undefined {
+    const { player } = this.props;
+    const counts = new Map<EnemyLike, number>();
+
+    this.bloodTethers.forEach(({ enemy }) => {
+      if (!enemy.active || enemy.isDead || !enemy.scene) return;
+      counts.set(enemy, (counts.get(enemy) ?? 0) + 1);
+    });
+
+    const enemies = Array.from(counts.keys());
+    let best: EnemyLike | undefined;
+    let bestCount = Infinity;
+    let bestDistance = Infinity;
+
+    for (let index = 0; index < enemies.length; index++) {
+      const enemy = enemies[index];
+      const count = counts.get(enemy) ?? 0;
+      const distance = distanceBetween(player, enemyCenter(enemy));
+      if (distance > range) continue;
+
+      if (
+        count < bestCount ||
+        (count === bestCount && distance < bestDistance)
+      ) {
+        best = enemy;
+        bestCount = count;
+        bestDistance = distance;
+      }
+    }
+
+    return best;
   }
 
   private updateBloodTethers(time: number) {
@@ -812,6 +891,7 @@ export class WeaponManager {
   private clearBloodTethers() {
     this.bloodTethers.forEach((tether) => tether.link.destroy());
     this.bloodTethers.length = 0;
+    this.bloodTethersWereActive = false;
   }
 
   private placeLink(
@@ -964,6 +1044,9 @@ export class WeaponManager {
       orientedHitbox: projectile.orientedHitbox,
       ricochetTexture: projectile.ricochetTexture,
     });
+    if (projectileObject instanceof RollingProjectile) {
+      projectileObject.setRepeatHitCooldown(weapon.stats.hitCooldownMs);
+    }
     EventBus.emit("weapon:fired", {
       id: weapon.id,
       x: projectileObject.x,
@@ -1166,6 +1249,11 @@ export class WeaponManager {
 
     const time = this.props.scene.time.now;
 
+    // A rolling pumpkin can hit the same enemy again; those repeat hits must
+    // not consume its pierce.
+    const isRepeatHit =
+      projectile instanceof RollingProjectile && projectile.hasHit(enemy);
+
     projectile.registerHit(enemy, time);
 
     if (projectile.behavior === "exploding") {
@@ -1195,6 +1283,8 @@ export class WeaponManager {
       projectile.despawn();
       return;
     }
+
+    if (isRepeatHit) return;
 
     if (projectile.pierceRemaining <= 0) {
       projectile.despawn();

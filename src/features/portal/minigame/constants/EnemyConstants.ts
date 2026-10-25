@@ -118,7 +118,7 @@ export const ENEMY_BALANCE_STATS = {
   },
   // Area 2
   crow: {
-    HP: 13,
+    HP: 25,
     SPEED: 26,
     DAMAGE: 5,
     TOTAL: 80,
@@ -139,7 +139,7 @@ export const ENEMY_BALANCE_STATS = {
   },
   imp: { HP: 77, SPEED: 25, DAMAGE: 6, DROP_ITEM: "relicPride" },
   skeleton: {
-    HP: 12,
+    HP: 30,
     SPEED: 22,
     DAMAGE: 5,
     TOTAL: 88,
@@ -149,7 +149,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicWrath",
   },
   slime_red: {
-    HP: 10,
+    HP: 25,
     SPEED: 17,
     DAMAGE: 6,
     TOTAL: 80,
@@ -159,7 +159,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicWrath",
   },
   slime_green: {
-    HP: 10,
+    HP: 25,
     SPEED: 17,
     DAMAGE: 6,
     TOTAL: 80,
@@ -169,7 +169,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicWrath",
   },
   slime_blue: {
-    HP: 10,
+    HP: 25,
     SPEED: 17,
     DAMAGE: 6,
     TOTAL: 72,
@@ -231,7 +231,7 @@ export const ENEMY_BALANCE_STATS = {
 
   // Area 3
   gargoyle: {
-    HP: 250,
+    HP: 150,
     SPEED: 50,
     DAMAGE: 10,
     TOTAL: 130,
@@ -242,7 +242,7 @@ export const ENEMY_BALANCE_STATS = {
   },
   cultist: { HP: 550, SPEED: 30, DAMAGE: 20, DROP_ITEM: "relicLust" },
   vampire: {
-    HP: 250,
+    HP: 200,
     SPEED: 45,
     DAMAGE: 15,
     TOTAL: 130,
@@ -373,9 +373,9 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicPride",
   },
   golem_area4: {
-    HP: TESTING ? 20 : 20000,
-    SPEED: 50,
-    DAMAGE: TESTING ? 5 : 55,
+    HP: TESTING ? 20 : 15000,
+    SPEED: 40,
+    DAMAGE: TESTING ? 5 : 45,
     TOTAL: 1,
     WEAPON: ["orbiting"],
     WEAPONS: {
@@ -388,9 +388,9 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGluttony",
   },
   ent_area4: {
-    HP: TESTING ? 20 : 20000,
-    SPEED: 50,
-    DAMAGE: TESTING ? 5 : 55,
+    HP: TESTING ? 20 : 15000,
+    SPEED: 40,
+    DAMAGE: TESTING ? 5 : 45,
     TOTAL: 1,
     WEAPON: ["summoning"],
     WEAPONS: {
@@ -404,9 +404,9 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGluttony",
   },
   mummy_area4: {
-    HP: TESTING ? 20 : 20000,
-    SPEED: 50,
-    DAMAGE: TESTING ? 5 : 55,
+    HP: TESTING ? 20 : 15000,
+    SPEED: 40,
+    DAMAGE: TESTING ? 5 : 45,
     TOTAL: 1,
     WEAPON: ["orbiting"],
     WEAPONS: {
@@ -419,9 +419,9 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGluttony",
   },
   living_armor_area4: {
-    HP: TESTING ? 20 : 20000,
-    SPEED: 50,
-    DAMAGE: TESTING ? 5 : 60,
+    HP: TESTING ? 20 : 15000,
+    SPEED: 40,
+    DAMAGE: TESTING ? 5 : 50,
     TOTAL: 1,
     WEAPON: ["orbiting"],
     WEAPONS: {
@@ -434,9 +434,9 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGluttony",
   },
   headless_horseman_area4: {
-    HP: TESTING ? 20 : 20000,
-    SPEED: 50,
-    DAMAGE: TESTING ? 5 : 70,
+    HP: TESTING ? 20 : 15000,
+    SPEED: 40,
+    DAMAGE: TESTING ? 5 : 50,
     TOTAL: 1,
     WEAPON: ["summoning"],
     WEAPONS: {
@@ -450,15 +450,15 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGluttony",
   },
   medusa_area4: {
-    HP: TESTING ? 20 : 20000,
-    SPEED: 50,
-    DAMAGE: TESTING ? 5 : 70,
+    HP: TESTING ? 20 : 15000,
+    SPEED: 40,
+    DAMAGE: TESTING ? 5 : 50,
     TOTAL: 1,
     WEAPON: ["chasing"],
     WEAPONS: {
       chasing: {
         NEXT_CHASE: 1000,
-        SPEED: 50,
+        SPEED: 45,
         DURATION_MS: 5000,
       },
     },
@@ -468,7 +468,7 @@ export const ENEMY_BALANCE_STATS = {
   sorcerer: {
     HP: TESTING ? 100 : 50000,
     SPEED: 40,
-    DAMAGE: TESTING ? 5 : 75,
+    DAMAGE: TESTING ? 5 : 55,
     TOTAL: 1,
     WEAPON: ["arena", "summoning", "chasing", "orbiting"],
     WEAPONS: {
@@ -482,7 +482,7 @@ export const ENEMY_BALANCE_STATS = {
       },
       chasing: {
         NEXT_CHASE: 1000,
-        SPEED: 45,
+        SPEED: 40,
         DURATION_MS: 5000,
       },
       orbiting: {
@@ -496,7 +496,7 @@ export const ENEMY_BALANCE_STATS = {
   dungeonboss: {
     HP: TESTING ? 2000 : 100000,
     SPEED: 0,
-    DAMAGE: TESTING ? 5 : 75,
+    DAMAGE: TESTING ? 5 : 60,
     TOTAL: 1,
     WEAPON: ["chasing", "summoning", "orbiting", "staticRange"],
     WEAPONS: {
