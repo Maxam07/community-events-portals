@@ -130,6 +130,7 @@ export const ATTEMPTS_PURCHASED_BY_MISTAKE: {
   { id: 167952, attempts: 2 },
   { id: 747158164920966, attempts: 2 },
   { id: 20349, attempts: 2 },
+  { id: 4486232672043868, attempts: 10 },
 
   // { id: {FarmId}, attempts: "unlimited" },
 ];
