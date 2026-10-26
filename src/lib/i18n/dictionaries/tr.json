@@ -8890,5 +8890,6 @@
   "npc.Modal.skellyJoe": "Selamlar! Umarım bu ürkütücü etkinlikte eğlenirsin! Tüm desteğiniz için teşekkürler!",
   "npc.Modal.vampireJim": "Cadılar Bayramı'nı seviyorum!!! İşte küçük bir ödül, kimseye bahsetme...",
   "halloween2026.gift.claimed": "Artık hediyem olduğuna göre, etkinliğin tadını çıkarın! Mutlu Cadılar Bayramı!",
-  "event.noticeboard.three": "Mağaza, önceki katmanlardan belirli miktarda öğe satın aldıktan sonra satın almak için yeni öğelerin kilidini açabileceğiniz katmanlı bir sistem kullanır. Ayrıca $FLOWER kazanma şansına sahip olmak için olabildiğince çok etkinlik bileti almayı unutmayın!"
+  "event.noticeboard.three": "Mağaza, önceki katmanlardan belirli miktarda öğe satın aldıktan sonra satın almak için yeni öğelerin kilidini açabileceğiniz katmanlı bir sistem kullanır. Ayrıca $FLOWER kazanma şansına sahip olmak için olabildiğince çok etkinlik bileti almayı unutmayın!",
+  "unequip": "Donanımı boşalt"
 }
