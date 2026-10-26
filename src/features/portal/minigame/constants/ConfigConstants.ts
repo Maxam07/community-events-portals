@@ -131,6 +131,12 @@ export const ATTEMPTS_PURCHASED_BY_MISTAKE: {
   // { id: {FarmId}, attempts: "unlimited" },
 ];
 
+// Banned players are hidden from the leaderboard
+export const BANNED_FARM_IDS: number[] = [
+  // 12345, // FarmId
+  7267084005403912,
+];
+
 export const PASSIVE_ABILITY_ITEM: BumpkinWings = "Underworld Stimpack";
 
 export const IMMUNITY_TOOLTIP: {

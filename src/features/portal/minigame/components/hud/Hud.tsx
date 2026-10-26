@@ -63,7 +63,7 @@ export const Hud: React.FC = () => {
               <BumpkinProfile />
               <BossHealthBar />
               <div className="pointer-events-none">
-                <Target />
+                {/* <Target /> */}
                 {/* <Lives /> */}
                 {/* <Score /> */}
                 <ColletedItems />

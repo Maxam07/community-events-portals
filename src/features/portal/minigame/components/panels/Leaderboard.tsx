@@ -7,6 +7,7 @@ import { PortalContext } from "../../lib/PortalProvider";
 import { decodeToken } from "features/auth/actions/login";
 import { useSelector } from "@xstate/react";
 import {
+  BANNED_FARM_IDS,
   FINAL_DATE_LEADERBOARD,
   INITIAL_DATE,
   INITIAL_DATE_LEADERBOARD,
@@ -154,6 +155,7 @@ export const Leaderboard: React.FC = () => {
             endDate={toUtcDate(FINAL_DATE_LEADERBOARD)}
             farmId={Number(farmId)}
             jwt={jwt as string}
+            excludedFarmIds={BANNED_FARM_IDS}
             onBack={() => null}
           />
         ) : (
@@ -212,6 +214,7 @@ export const Leaderboard: React.FC = () => {
             endDate={toUtcDate(appliedEndDate)}
             farmId={Number(farmId)}
             jwt={jwt as string}
+            excludedFarmIds={BANNED_FARM_IDS}
           />
         </div>
       )}

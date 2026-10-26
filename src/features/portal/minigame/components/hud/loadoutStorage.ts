@@ -34,6 +34,33 @@ export const REQUIRED: BumpkinPart[] = [
 export const getStorageKey = (farmId: number) =>
   `portal:${PORTAL_NAME}:wearableLoadouts:${farmId}`;
 
+export const getSelectedSlotStorageKey = (farmId: number) =>
+  `portal:${PORTAL_NAME}:wearableLoadoutSlot:${farmId}`;
+
+export const loadSelectedLoadoutSlot = (
+  farmId: number,
+): WearableLoadoutSlot => {
+  try {
+    const slot = localStorage.getItem(getSelectedSlotStorageKey(farmId));
+    return LOADOUT_SLOTS.includes(slot as WearableLoadoutSlot)
+      ? (slot as WearableLoadoutSlot)
+      : "I";
+  } catch {
+    return "I";
+  }
+};
+
+export const saveSelectedLoadoutSlot = (
+  farmId: number,
+  slot: WearableLoadoutSlot,
+) => {
+  try {
+    localStorage.setItem(getSelectedSlotStorageKey(farmId), slot);
+  } catch {
+    return;
+  }
+};
+
 const getDefaultLoadouts = (equipment: BumpkinParts): WearableLoadouts => ({
   I: { ...equipment },
   II: { ...equipment },

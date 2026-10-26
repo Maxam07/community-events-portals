@@ -17,9 +17,11 @@ import { WEARABLE_BUFFS } from "../../constants";
 import { LOADOUT_SLOTS, type WearableLoadoutSlot } from "./loadoutStorage";
 export {
   getStorageKey,
+  loadSelectedLoadoutSlot,
   loadStoredLoadouts,
   LOADOUT_SLOTS,
   resolveStoredLoadouts,
+  saveSelectedLoadoutSlot,
   saveStoredLoadouts,
 } from "./loadoutStorage";
 export type {

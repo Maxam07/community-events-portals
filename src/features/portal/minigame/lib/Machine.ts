@@ -65,12 +65,14 @@ const getFinalRunScore = (context: Context) => {
   const baseScore = getRunScore(context);
   const bonusApplied = !context.usedWearableBuff;
 
+  const score = bonusApplied
+    ? roundToTwoDecimals(baseScore * NO_WEARABLE_BUFF_SCORE_MULTIPLIER)
+    : roundToTwoDecimals(baseScore);
+
   return {
     baseScore,
     bonusApplied,
-    score: bonusApplied
-      ? roundToTwoDecimals(baseScore * NO_WEARABLE_BUFF_SCORE_MULTIPLIER)
-      : baseScore,
+    score: Math.ceil(score),
   };
 };
 

@@ -8,8 +8,10 @@ import { PortalContext } from "../../lib/PortalProvider";
 import type { PortalMachineState } from "../../lib/Machine";
 import type { BumpkinParts } from "lib/utils/tokenUriBuilder";
 import {
+  loadSelectedLoadoutSlot,
   loadStoredLoadouts,
   LOADOUT_SLOTS,
+  saveSelectedLoadoutSlot,
   Profile,
   saveStoredLoadouts,
   type WearableLoadouts,
@@ -321,12 +323,15 @@ export const BumpkinProfile: React.FC<BumpkinProfileProps> = ({
       });
     }
 
+    const selectedSlot = loadSelectedLoadoutSlot(farmId);
+
     // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCurrentTab(selectedSlot);
     setDefaultEquipment(stored.defaultEquipment);
     setLoadouts(loadouts);
-    setEquipped(loadouts[currentTab]);
+    setEquipped(loadouts[selectedSlot]);
     portalService.send("SET_ACTIVE_WEARABLES", {
-      wearables: loadouts[currentTab],
+      wearables: loadouts[selectedSlot],
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [farmId, bumpkinEquipmentKey]);
@@ -337,8 +342,9 @@ export const BumpkinProfile: React.FC<BumpkinProfileProps> = ({
     const nextEquipment = loadouts[currentTab];
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setEquipped(nextEquipment);
+    saveSelectedLoadoutSlot(farmId, currentTab);
     portalService.send("SET_ACTIVE_WEARABLES", { wearables: nextEquipment });
-  }, [currentTab, loadouts, portalService]);
+  }, [currentTab, loadouts, portalService, farmId]);
 
   const availableWearableCounts = useMemo<
     Partial<Record<BumpkinItem, number>>

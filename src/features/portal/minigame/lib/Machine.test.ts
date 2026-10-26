@@ -617,7 +617,7 @@ describe("portalMachine progression flow", () => {
     service.stop();
   });
 
-  it("applies the no-buff score multiplier and submits two decimal precision", () => {
+  it("applies the no-buff score multiplier and rounds the submitted score up", () => {
     const service = interpret(
       portalMachine.withContext({
         ...portalMachine.initialState.context,
@@ -631,13 +631,13 @@ describe("portalMachine progression flow", () => {
     service.send("GAME_OVER");
 
     expect(service.state.context.lastBaseScore).toBe(10.05);
-    expect(service.state.context.collected).toBe(11.06);
-    expect(service.state.context.lastScore).toBe(11.06);
+    expect(service.state.context.collected).toBe(12);
+    expect(service.state.context.lastScore).toBe(12);
     expect(service.state.context.lastScoreBonusApplied).toBe(true);
-    expect(submitScore).toHaveBeenCalledWith({ score: 11.06 });
+    expect(submitScore).toHaveBeenCalledWith({ score: 12 });
     expect(submitMinigameScore).toHaveBeenCalledWith(
       expect.objectContaining({
-        action: expect.objectContaining({ score: 11.06 }),
+        action: expect.objectContaining({ score: 12 }),
       }),
     );
 
@@ -725,10 +725,10 @@ describe("portalMachine progression flow", () => {
 
     service.send("END_GAME_EARLY");
 
-    expect(service.state.context.collected).toBe(11.06);
-    expect(service.state.context.lastScore).toBe(11.06);
+    expect(service.state.context.collected).toBe(12);
+    expect(service.state.context.lastScore).toBe(12);
     expect(service.state.context.lastScoreBonusApplied).toBe(true);
-    expect(submitScore).toHaveBeenCalledWith({ score: 11.06 });
+    expect(submitScore).toHaveBeenCalledWith({ score: 12 });
 
     service.stop();
   });

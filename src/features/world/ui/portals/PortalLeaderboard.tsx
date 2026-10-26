@@ -16,6 +16,36 @@ import { toOrdinalSuffix } from "features/retreat/components/auctioneer/AuctionL
 import { NPCIcon } from "features/island/bumpkin/components/NPC";
 import { Button } from "components/ui/Button";
 
+/**
+ * Removes excluded players and shifts the remaining ranks up by the number of
+ * excluded players ranked above them across all the given lists.
+ */
+export const excludePlayers = (
+  lists: (CompetitionPlayer[] | undefined)[],
+  excludedFarmIds: number[],
+): CompetitionPlayer[][] => {
+  if (excludedFarmIds.length === 0) return lists.map((list) => list ?? []);
+
+  const excludedRanks = new Map<number, number>();
+  lists.forEach((list) =>
+    list?.forEach((player) => {
+      if (excludedFarmIds.includes(player.id)) {
+        excludedRanks.set(player.id, player.rank);
+      }
+    }),
+  );
+  const ranks = [...excludedRanks.values()];
+
+  return lists.map((list) =>
+    (list ?? [])
+      .filter((player) => !excludedFarmIds.includes(player.id))
+      .map((player) => ({
+        ...player,
+        rank: player.rank - ranks.filter((rank) => rank < player.rank).length,
+      })),
+  );
+};
+
 export const PortalLeaderboard: React.FC<{
   name: MinigameName;
   farmId: number;
@@ -25,6 +55,7 @@ export const PortalLeaderboard: React.FC<{
   endDate?: Date;
   formatPoints?: (value: number) => string;
   isAccumulator?: boolean;
+  excludedFarmIds?: number[];
 }> = ({
   name,
   farmId,
@@ -34,6 +65,7 @@ export const PortalLeaderboard: React.FC<{
   endDate,
   formatPoints,
   isAccumulator,
+  excludedFarmIds = [],
 }) => {
   const [data, setData] = useState<CompetitionLeaderboardResponse>();
   const [now] = useState(() => Date.now());
@@ -67,9 +99,21 @@ export const PortalLeaderboard: React.FC<{
 
   if (!data) return <Loading />;
 
-  const { leaderboard, accumulators, miniboard, accumulatorMiniboard, player } =
-    data;
-  const items = (!!isAccumulator && accumulators?.slice(0, 10)) || leaderboard;
+  const [leaderboard, miniboard] = excludePlayers(
+    [data.leaderboard, data.miniboard],
+    excludedFarmIds,
+  );
+  const [accumulators, accumulatorMiniboard] = excludePlayers(
+    [data.accumulators, data.accumulatorMiniboard],
+    excludedFarmIds,
+  );
+  const player =
+    data.player && !excludedFarmIds.includes(data.player.id)
+      ? data.player
+      : undefined;
+  const items =
+    (!!isAccumulator && data.accumulators && accumulators.slice(0, 10)) ||
+    leaderboard;
   const title =
     !!isAccumulator && accumulators?.length
       ? t("competition.accumulator")
