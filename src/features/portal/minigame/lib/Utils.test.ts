@@ -4,6 +4,11 @@ jest.mock("../constants", () => ({
   ATTEMPTS_BETA_TESTERS: 0,
   ATTEMPTS_PURCHASED_BY_MISTAKE: [],
   BETA_TESTERS: [],
+  EXTRA_FREE_ATTEMPTS_BY_DAY: {
+    "2025-12-31": 5,
+    "2026-01-02": 2,
+    "2026-01-04": 3,
+  },
   FREE_DAILY_ATTEMPTS: 1,
   INITIAL_DATE: "2026-01-01",
   RESTOCK_ATTEMPTS: [],
@@ -48,5 +53,19 @@ describe("portal minigame attempts utils", () => {
     };
 
     expect(getAttemptsLeft(minigame)).toBe(Infinity);
+  });
+
+  it("adds extra free attempts only for configured days within the event", () => {
+    jest.useFakeTimers().setSystemTime(new Date("2026-01-03T12:00:00Z"));
+
+    const minigame: Minigame = {
+      highscore: 0,
+      history: {},
+      purchases: [],
+    };
+
+    expect(getAttemptsLeft(minigame)).toBe(3 + 2);
+
+    jest.useRealTimers();
   });
 });

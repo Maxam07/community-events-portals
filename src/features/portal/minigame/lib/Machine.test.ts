@@ -51,6 +51,7 @@ jest.mock("../constants", () => {
       boss3: { DAMAGE: 1 },
     },
     FREE_DAILY_ATTEMPTS: 1,
+    EXTRA_FREE_ATTEMPTS_BY_DAY: {},
     GAME_LIVES: 100,
     GAME_SECONDS: 300,
     REVIVE_FLOWER_COST: 4,

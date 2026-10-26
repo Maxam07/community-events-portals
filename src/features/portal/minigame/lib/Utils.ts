@@ -5,6 +5,7 @@ import {
   UNLIMITED_ATTEMPTS_DISCOUNT_SFL,
   UNLIMITED_ATTEMPTS_DISCOUNT,
   FREE_DAILY_ATTEMPTS,
+  EXTRA_FREE_ATTEMPTS_BY_DAY,
   RESTOCK_ATTEMPTS,
   BETA_TESTERS,
   INITIAL_DATE,
@@ -52,7 +53,8 @@ export const getAttemptsLeft = (minigame?: Minigame, farmId = 0) => {
 
   // Free daily attempts
   const freeTotalAttempts =
-    getDaysPassedSince(INITIAL_DATE) * FREE_DAILY_ATTEMPTS;
+    getDaysPassedSince(INITIAL_DATE) * FREE_DAILY_ATTEMPTS +
+    getExtraFreeAttempts(dateKey);
 
   // Total attempts
   let attemptsLeft = freeTotalAttempts - totalAttemptsUsed + restockAttempts;
@@ -76,6 +78,18 @@ export const getAttemptsLeft = (minigame?: Minigame, farmId = 0) => {
 
   return attemptsLeft;
 };
+
+/**
+ * Sums the extra free attempts of every configured day from INITIAL_DATE up to today.
+ * @param dateKey Today's UTC date in the format "YYYY-MM-DD".
+ * @returns The total extra free attempts unlocked so far.
+ */
+const getExtraFreeAttempts = (dateKey: string) =>
+  Object.entries(EXTRA_FREE_ATTEMPTS_BY_DAY).reduce(
+    (sum, [day, attempts]) =>
+      day >= INITIAL_DATE && day <= dateKey ? sum + attempts : sum,
+    0,
+  );
 
 /**
  * Checks if there are any recent purchases of unlimited attempts.

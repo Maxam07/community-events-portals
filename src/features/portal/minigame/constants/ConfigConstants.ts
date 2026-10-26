@@ -94,6 +94,11 @@ export const ATTEMPTS_BETA_TESTERS = 0;
 export const UNLIMITED_ATTEMPTS_SFL = 125; // If this value is less than 0, the option disappears
 export const UNLIMITED_ATTEMPTS_DISCOUNT_SFL = 100;
 export const FREE_DAILY_ATTEMPTS = 1;
+// Extra free attempts granted on top of FREE_DAILY_ATTEMPTS for a specific day
+export const EXTRA_FREE_ATTEMPTS_BY_DAY: Record<string, number> = {
+  // "2026-10-31": 2, // YYYY-MM-DD: extra attempts
+  "2026-10-27": 1,
+};
 export const RESTOCK_ATTEMPTS = [
   { attempts: 1, sfl: 5 },
   { attempts: 3, sfl: 15 },
