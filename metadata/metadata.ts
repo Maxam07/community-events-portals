@@ -15644,7 +15644,7 @@ export const OPEN_SEA_COLLECTIBLES: Record<InventoryItemName, Metadata> = {
     decimals: 18,
     attributes: [
       { trait_type: "Purpose", value: "Resource" },
-      { trait_type: "Tradable", value: "No" },
+      { trait_type: "Tradable", value: "Yes" },
     ],
     external_url: "https://docs.sunflower-land.com/getting-started/about",
     name: "Green Beetle",
@@ -15654,7 +15654,7 @@ export const OPEN_SEA_COLLECTIBLES: Record<InventoryItemName, Metadata> = {
     decimals: 18,
     attributes: [
       { trait_type: "Purpose", value: "Resource" },
-      { trait_type: "Tradable", value: "No" },
+      { trait_type: "Tradable", value: "Yes" },
     ],
     external_url: "https://docs.sunflower-land.com/getting-started/about",
     name: "Blue Beetle",
@@ -15664,7 +15664,7 @@ export const OPEN_SEA_COLLECTIBLES: Record<InventoryItemName, Metadata> = {
     decimals: 18,
     attributes: [
       { trait_type: "Purpose", value: "Resource" },
-      { trait_type: "Tradable", value: "No" },
+      { trait_type: "Tradable", value: "Yes" },
     ],
     external_url: "https://docs.sunflower-land.com/getting-started/about",
     name: "Pink Beetle",
@@ -15674,7 +15674,7 @@ export const OPEN_SEA_COLLECTIBLES: Record<InventoryItemName, Metadata> = {
     decimals: 18,
     attributes: [
       { trait_type: "Purpose", value: "Resource" },
-      { trait_type: "Tradable", value: "No" },
+      { trait_type: "Tradable", value: "Yes" },
     ],
     external_url: "https://docs.sunflower-land.com/getting-started/about",
     name: "Amber Beetle",
@@ -15695,7 +15695,7 @@ export const OPEN_SEA_COLLECTIBLES: Record<InventoryItemName, Metadata> = {
     decimals: 18,
     attributes: [
       { trait_type: "Purpose", value: "Resource" },
-      { trait_type: "Tradable", value: "No" },
+      { trait_type: "Tradable", value: "Yes" },
     ],
     external_url: "https://docs.sunflower-land.com/getting-started/about",
     name: "Pig Bristles",
@@ -15705,7 +15705,7 @@ export const OPEN_SEA_COLLECTIBLES: Record<InventoryItemName, Metadata> = {
     decimals: 18,
     attributes: [
       { trait_type: "Purpose", value: "Resource" },
-      { trait_type: "Tradable", value: "No" },
+      { trait_type: "Tradable", value: "Yes" },
     ],
     external_url: "https://docs.sunflower-land.com/getting-started/about",
     name: "Truffle",
@@ -22828,5 +22828,16 @@ export const OPEN_SEA_WEARABLES: Record<BumpkinItem, Metadata> = {
     ],
     external_url: "https://docs.sunflower-land.com/getting-started/about",
     name: "Bat Aura",
+  },
+  "Firefly Aura": {
+    description:
+      "A gentle swarm of cave fireflies drifts around you, lighting the way through the dark.",
+    decimals: 0,
+    attributes: [
+      { trait_type: "Part", value: "Aura" },
+      { trait_type: "Tradable", value: "Yes" },
+    ],
+    external_url: "https://docs.sunflower-land.com/getting-started/about",
+    name: "Firefly Aura",
   },
 };
