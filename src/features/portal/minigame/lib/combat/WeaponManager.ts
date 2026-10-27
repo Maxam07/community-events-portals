@@ -125,6 +125,9 @@ export class WeaponManager {
   private readonly activeWeapons = new Map<WeaponId, RuntimeWeapon>();
   private readonly darknessBookSelectedTargets = new Set<EnemyLike>();
   private readonly claimedBeeTargets = new Set<EnemyLike>();
+  // Shared with every HomingBee (stable reference), refreshed each frame so
+  // bees can count how many flies are stinging the same target.
+  private readonly activeBees: HomingBee[] = [];
   private readonly bloodTethers: BloodTether[] = [];
   // True while the Crimson Vial has tethers out; used to start its cooldown
   // only after the last tether is gone (expired or the enemy died).
@@ -303,6 +306,7 @@ export class WeaponManager {
     this.clearGroup(this.orbitalGroup);
     this.clearGroup(this.beeGroup);
     this.claimedBeeTargets.clear();
+    this.activeBees.length = 0;
     this.clearBloodTethers();
 
     loadout.forEach(({ id, level }) => this.setWeaponLevel(id, level));
@@ -943,6 +947,7 @@ export class WeaponManager {
         hitCooldownMs: weapon.stats.hitCooldownMs,
         range: this.getEffectiveRange(weapon),
         claimedTargets: this.claimedBeeTargets,
+        allActiveBees: this.activeBees,
       });
       spawned++;
     }
@@ -1203,9 +1208,14 @@ export class WeaponManager {
     }
 
     const bees = this.beeGroup.getChildren();
+    this.activeBees.length = 0;
     for (let index = 0; index < bees.length; index++) {
       const bee = bees[index];
-      if (!(bee instanceof HomingBee) || !bee.active) continue;
+      if (bee instanceof HomingBee && bee.active) this.activeBees.push(bee);
+    }
+
+    for (let index = 0; index < this.activeBees.length; index++) {
+      const bee = this.activeBees[index];
 
       const stingTarget = bee.update(time, {
         targeting: this.targetingSystem,

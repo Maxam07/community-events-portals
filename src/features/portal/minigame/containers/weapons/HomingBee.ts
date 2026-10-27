@@ -92,7 +92,7 @@ export class HomingBee extends Phaser.Physics.Arcade.Sprite {
       this.anims.stop();
     }
     this.payload = { ...payload };
-    this.baseDamage = payload.damage;
+    this.baseDamage = payload.amount;
     this.speed = speed;
     this.hitCooldownMs = hitCooldownMs;
     this.range = range;
@@ -177,18 +177,20 @@ export class HomingBee extends Phaser.Physics.Arcade.Sprite {
 
       this.nextStingAt = time + this.hitCooldownMs;
 
-      // Aplica o dimensionamento de raiz quadrada: DTotal = D * sqrt(N)
-      // O dano individual de cada mosca é distribuído proporcionalmente: (D * sqrt(N)) / N
       if (this.allActiveBees && this.target) {
+        // Only bees already stinging this target count; bees still flying
+        // toward it don't deal damage yet.
         const fliesOnTarget = this.allActiveBees.filter(
-          (bee) => bee.active && bee.target === this.target,
+          (bee) => bee.active && bee.isAttached && bee.target === this.target,
         ).length;
 
+        // Total damage on one target per sting cycle is base * sqrt(n),
+        // split evenly across the n bees. The damage system reads `amount`.
         if (fliesOnTarget > 1) {
-          this.payload.damage =
+          this.payload.amount =
             (this.baseDamage * Math.sqrt(fliesOnTarget)) / fliesOnTarget;
         } else {
-          this.payload.damage = this.baseDamage;
+          this.payload.amount = this.baseDamage;
         }
       }
 
@@ -248,10 +250,8 @@ export class HomingBee extends Phaser.Physics.Arcade.Sprite {
 
     const candidates = targeting.inRadius(this, this.range);
 
-    // 1. Tenta pegar primeiro um alvo que NÃO possui moscas
     let target = targeting.nearest(this, candidates, this.claimedTargets);
 
-    // 2. Se não houver nenhum alvo livre, permite pegar um alvo que já possui moscas
     if (!target && candidates.length > 0) {
       target = targeting.nearest(this, candidates, new Set());
     }

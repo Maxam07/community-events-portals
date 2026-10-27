@@ -1265,21 +1265,21 @@ export const WEAPON_UPGRADES: Record<WeaponId, WeaponUpgrade[]> = {
     {
       level: 13,
       modifiers: [
-        { stat: "damage", operation: "set", value: 24 },
+        { stat: "damage", operation: "set", value: 25 },
         { stat: "hitCooldownMs", operation: "set", value: 310 },
       ],
     },
     {
       level: 14,
       modifiers: [
-        { stat: "damage", operation: "set", value: 27 },
+        { stat: "damage", operation: "set", value: 31 },
         { stat: "hitCooldownMs", operation: "set", value: 280 },
       ],
     },
     {
       level: 15,
       modifiers: [
-        { stat: "damage", operation: "set", value: 32 },
+        { stat: "damage", operation: "set", value: 37 },
         { stat: "projectileCount", operation: "set", value: 12 },
         { stat: "range", operation: "set", value: 150 },
         { stat: "hitCooldownMs", operation: "set", value: 250 },
