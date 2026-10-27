@@ -92,11 +92,9 @@ export const Hud: React.FC = () => {
             </>
           )}
         </div>
-        {!isJoystickActive && (
-          <>
-            <Travel />
-          </>
-        )}
+        <>
+          <Travel />
+        </>
       </div>
     </HudContainer>
   );
