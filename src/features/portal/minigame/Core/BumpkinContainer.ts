@@ -21,6 +21,7 @@ import { getTradeableDisplay } from "features/marketplace/lib/tradeables";
 import type { MachineInterpreter } from "../lib/Machine";
 import type { EnemyType, WeaponId } from "../Types";
 import { ENEMY_BALANCE_STATS } from "../constants";
+import { HitIndicator } from "../containers/HitIndicator";
 
 const NAME_ALIASES: Partial<Record<NPCName, string>> = {
   "pumpkin' pete": "pete",
@@ -59,9 +60,11 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
   public backfx: Phaser.GameObjects.Sprite | undefined;
   public frontfx: Phaser.GameObjects.Sprite | undefined;
   public backParticles:
-    Phaser.GameObjects.Particles.ParticleEmitter | undefined;
+    | Phaser.GameObjects.Particles.ParticleEmitter
+    | undefined;
   public frontParticles:
-    Phaser.GameObjects.Particles.ParticleEmitter | undefined;
+    | Phaser.GameObjects.Particles.ParticleEmitter
+    | undefined;
 
   public clothing: Player["clothing"];
   public username: string | undefined;
@@ -102,10 +105,12 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
   isHurting = false;
   private hurtInvincibilityTimer: Phaser.Time.TimerEvent | undefined;
   private hurtAnimationCompleteHandler:
-    ((animation: Phaser.Animations.Animation) => void) | undefined;
+    | ((animation: Phaser.Animations.Animation) => void)
+    | undefined;
 
   // Halloween
   blockadeArrow: Phaser.GameObjects.Image | undefined;
+  hitIndicator: HitIndicator | undefined;
 
   constructor({
     scene,
@@ -251,7 +256,8 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
 
   get portalService() {
     return this.scene.registry.get("portalService") as
-      MachineInterpreter | undefined;
+      | MachineInterpreter
+      | undefined;
   }
 
   private hasOpaqueBlackFrameBackground(textureKey: string) {
@@ -360,7 +366,12 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
   }: {
     textureKey: string;
     animationName:
-      "idle" | "walking" | "dig" | "drilling" | "hurt" | "swimming";
+      | "idle"
+      | "walking"
+      | "dig"
+      | "drilling"
+      | "hurt"
+      | "swimming";
     onLoaded: (url?: string) => void;
   }) {
     if (this.scene.textures.exists(textureKey)) {
@@ -1210,7 +1221,11 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
     }
   }
 
-  public hurt(enemyType: EnemyType, damageMultiplier = 1) {
+  public hurt(
+    enemyType: EnemyType,
+    damageMultiplier = 1,
+    hitTextureKey?: string,
+  ) {
     if (this.portalService?.state.context.isGameplayPaused) return;
     if (this.isHurting) return;
 
@@ -1220,6 +1235,7 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
     if (damage <= 0) return;
 
     this.isHurting = true;
+    if (hitTextureKey) this.showHitIndicator(hitTextureKey);
     this.playHurtSound();
     this.portalService?.send("LOSE_LIFE", { enemyType, damage });
     this.playHeartFall(damage);
@@ -1441,6 +1457,21 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
     if (lives > 0) return false;
     this.portalService?.send("PLAYER_DIED");
     return true;
+  }
+
+  public showHitIndicator(textureKey: string, frame?: string | number) {
+    const resizeTexture = ["golem_stone", "Fire"];
+    if (!this.hitIndicator?.active) {
+      this.hitIndicator = new HitIndicator({
+        x: 0,
+        y: -24,
+        scene: this.scene,
+        size: textureKey === "golem_stone" ? 10 : 14,
+      });
+      this.add(this.hitIndicator);
+    }
+
+    this.hitIndicator.show(textureKey, frame);
   }
 
   private createBlockadeArrow() {

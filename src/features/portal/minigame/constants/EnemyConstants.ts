@@ -28,7 +28,7 @@ export const DROP_ITEM_XP_VALUES: Record<DropItemHalloweenType, number> = {
 export const ENEMY_BALANCE_STATS = {
   // Area 1
   bat: {
-    HP: 3,
+    HP: TESTING ? 1 : 3,
     SPEED: 20,
     DAMAGE: 1,
     TOTAL: 88,
@@ -39,7 +39,7 @@ export const ENEMY_BALANCE_STATS = {
   },
   scarecrow: { HP: 30, SPEED: 20, DAMAGE: 2, DROP_ITEM: "relicSloth" },
   carnivore_plant: {
-    HP: 3,
+    HP: TESTING ? 1 : 3,
     SPEED: 15,
     DAMAGE: 2,
     TOTAL: 80,
@@ -49,7 +49,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicWrath",
   },
   rat: {
-    HP: 3,
+    HP: TESTING ? 1 : 3,
     SPEED: 30,
     DAMAGE: 2,
     TOTAL: 88,
@@ -59,7 +59,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicWrath",
   },
   zombie: {
-    HP: 4,
+    HP: TESTING ? 1 : 4,
     SPEED: 10,
     DAMAGE: 3,
     TOTAL: 80,
@@ -69,9 +69,9 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicWrath",
   },
   golem: {
-    HP: 200,
+    HP: TESTING ? 50 : 200,
     SPEED: 15,
-    DAMAGE: 7,
+    DAMAGE: TESTING ? 2 : 7,
     TOTAL: 1,
     WEAPON: ["orbiting"],
     WEAPONS: {
@@ -84,9 +84,9 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicPride",
   },
   ent: {
-    HP: 200,
+    HP: TESTING ? 50 : 200,
     SPEED: 25,
-    DAMAGE: 7,
+    DAMAGE: TESTING ? 2 : 7,
     TOTAL: 1,
     WEAPON: ["summoning"],
     WEAPONS: {
@@ -100,9 +100,9 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicPride",
   },
   minotaur: {
-    HP: 550,
+    HP: TESTING ? 100 : 550,
     SPEED: 25,
-    DAMAGE: 12,
+    DAMAGE: TESTING ? 5 : 12,
     TOTAL: 1,
     WEAPON: ["slash"],
     WEAPONS: {
@@ -118,9 +118,9 @@ export const ENEMY_BALANCE_STATS = {
   },
   // Area 2
   crow: {
-    HP: 25,
+    HP: TESTING ? 5 : 25,
     SPEED: 26,
-    DAMAGE: 5,
+    DAMAGE: TESTING ? 1 : 5,
     TOTAL: 80,
     BATCH_SIZE: 8,
     DELAY: 7000,
@@ -128,20 +128,20 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicWrath",
   },
   ghost: {
-    HP: 44,
+    HP: TESTING ? 5 : 44,
     SPEED: 16,
-    DAMAGE: 7,
+    DAMAGE: TESTING ? 1 : 7,
     TOTAL: 50,
     BATCH_SIZE: 5,
     DELAY: 7000,
     FORMATION: "surround",
     DROP_ITEM: "relicPride",
   },
-  imp: { HP: 77, SPEED: 25, DAMAGE: 6, DROP_ITEM: "relicPride" },
+  imp: { HP: TESTING ? 5 : 77, SPEED: 25, DAMAGE: 6, DROP_ITEM: "relicPride" },
   skeleton: {
-    HP: 30,
+    HP: TESTING ? 5 : 30,
     SPEED: 22,
-    DAMAGE: 5,
+    DAMAGE: TESTING ? 1 : 5,
     TOTAL: 88,
     BATCH_SIZE: 8,
     DELAY: 6500,
@@ -149,9 +149,9 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicWrath",
   },
   slime_red: {
-    HP: 25,
+    HP: TESTING ? 5 : 25,
     SPEED: 17,
-    DAMAGE: 6,
+    DAMAGE: TESTING ? 1 : 6,
     TOTAL: 80,
     BATCH_SIZE: 8,
     DELAY: 7000,
@@ -159,9 +159,9 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicWrath",
   },
   slime_green: {
-    HP: 25,
+    HP: TESTING ? 5 : 25,
     SPEED: 17,
-    DAMAGE: 6,
+    DAMAGE: TESTING ? 1 : 6,
     TOTAL: 80,
     BATCH_SIZE: 8,
     DELAY: 7500,
@@ -169,9 +169,9 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicWrath",
   },
   slime_blue: {
-    HP: 25,
+    HP: TESTING ? 5 : 25,
     SPEED: 17,
-    DAMAGE: 6,
+    DAMAGE: TESTING ? 1 : 6,
     TOTAL: 72,
     BATCH_SIZE: 8,
     DELAY: 8000,
@@ -179,9 +179,9 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicWrath",
   },
   mummy: {
-    HP: 3000,
+    HP: TESTING ? 500 : 3000,
     SPEED: 15,
-    DAMAGE: 14,
+    DAMAGE: TESTING ? 5 : 14,
     TOTAL: 1,
     WEAPON: ["orbiting"],
     WEAPONS: {
@@ -194,9 +194,9 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicLust",
   },
   living_armor: {
-    HP: 3000,
+    HP: TESTING ? 500 : 3000,
     SPEED: 20,
-    DAMAGE: 13,
+    DAMAGE: TESTING ? 5 : 13,
     TOTAL: 1,
     WEAPON: ["orbiting"],
     WEAPONS: {
@@ -209,9 +209,9 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicLust",
   },
   witch: {
-    HP: 4000,
+    HP: TESTING ? 1000 : 4000,
     SPEED: 40,
-    DAMAGE: 25,
+    DAMAGE: TESTING ? 5 : 25,
     TOTAL: 1,
     WEAPON: ["orbiting", "chasing"],
     WEAPONS: {
@@ -231,9 +231,9 @@ export const ENEMY_BALANCE_STATS = {
 
   // Area 3
   gargoyle: {
-    HP: 100,
+    HP: TESTING ? 5 : 100,
     SPEED: 50,
-    DAMAGE: 10,
+    DAMAGE: TESTING ? 2 : 10,
     TOTAL: 130,
     BATCH_SIZE: 13,
     DELAY: 7000,
@@ -242,9 +242,9 @@ export const ENEMY_BALANCE_STATS = {
   },
   cultist: { HP: 550, SPEED: 30, DAMAGE: 20, DROP_ITEM: "relicLust" },
   vampire: {
-    HP: 180,
+    HP: TESTING ? 5 : 180,
     SPEED: 40,
-    DAMAGE: 12,
+    DAMAGE: TESTING ? 2 : 12,
     TOTAL: 130,
     BATCH_SIZE: 13,
     DELAY: 6500,
@@ -252,9 +252,9 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicWrath",
   },
   frankenstein: {
-    HP: 350,
+    HP: TESTING ? 5 : 350,
     SPEED: 17,
-    DAMAGE: 20,
+    DAMAGE: TESTING ? 2 : 20,
     TOTAL: 90,
     BATCH_SIZE: 9,
     DELAY: 7000,
@@ -262,9 +262,9 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicPride",
   },
   werewolf: {
-    HP: 200,
+    HP: TESTING ? 100 : 200,
     SPEED: 40,
-    DAMAGE: 12,
+    DAMAGE: TESTING ? 2 : 12,
     TOTAL: 130,
     BATCH_SIZE: 13,
     DELAY: 7500,
@@ -272,9 +272,9 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicSloth",
   },
   headless_horseman: {
-    HP: 5000,
+    HP: TESTING ? 100 : 5000,
     SPEED: 40,
-    DAMAGE: 30,
+    DAMAGE: TESTING ? 5 : 30,
     TOTAL: 1,
     WEAPON: ["summoning"],
     WEAPONS: {
@@ -288,9 +288,9 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGreed",
   },
   medusa: {
-    HP: 5000,
+    HP: TESTING ? 1000 : 5000,
     SPEED: 30,
-    DAMAGE: 30,
+    DAMAGE: TESTING ? 5 : 30,
     TOTAL: 1,
     WEAPON: ["chasing"],
     WEAPONS: {
@@ -304,9 +304,9 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGreed",
   },
   cerberus: {
-    HP: 15000,
+    HP: TESTING ? 1000 : 15000,
     SPEED: 35,
-    DAMAGE: 35,
+    DAMAGE: TESTING ? 5 : 35,
     TOTAL: 1,
     WEAPON: ["chasing", "summoning"],
     WEAPONS: {
@@ -339,7 +339,7 @@ export const ENEMY_BALANCE_STATS = {
   red_stone: {
     HP: TESTING ? 5 : 3000,
     SPEED: 30,
-    DAMAGE: 35,
+    DAMAGE: TESTING ? 5 : 35,
     DROP_ITEM: "relicGreed",
   },
   hellHound: {
@@ -373,7 +373,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicPride",
   },
   golem_area4: {
-    HP: TESTING ? 20 : 15000,
+    HP: TESTING ? 2000 : 15000,
     SPEED: 40,
     DAMAGE: TESTING ? 5 : 35,
     TOTAL: 1,
@@ -388,7 +388,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGluttony",
   },
   ent_area4: {
-    HP: TESTING ? 20 : 15000,
+    HP: TESTING ? 2000 : 15000,
     SPEED: 40,
     DAMAGE: TESTING ? 5 : 35,
     TOTAL: 1,
@@ -404,7 +404,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGluttony",
   },
   mummy_area4: {
-    HP: TESTING ? 20 : 15000,
+    HP: TESTING ? 2000 : 15000,
     SPEED: 40,
     DAMAGE: TESTING ? 5 : 40,
     TOTAL: 1,
@@ -419,7 +419,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGluttony",
   },
   living_armor_area4: {
-    HP: TESTING ? 20 : 15000,
+    HP: TESTING ? 2000 : 15000,
     SPEED: 40,
     DAMAGE: TESTING ? 5 : 40,
     TOTAL: 1,
@@ -434,7 +434,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGluttony",
   },
   headless_horseman_area4: {
-    HP: TESTING ? 20 : 15000,
+    HP: TESTING ? 2000 : 15000,
     SPEED: 40,
     DAMAGE: TESTING ? 5 : 45,
     TOTAL: 1,
@@ -450,7 +450,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGluttony",
   },
   medusa_area4: {
-    HP: TESTING ? 20 : 15000,
+    HP: TESTING ? 2000 : 15000,
     SPEED: 40,
     DAMAGE: TESTING ? 5 : 45,
     TOTAL: 1,
@@ -466,7 +466,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGluttony",
   },
   sorcerer: {
-    HP: TESTING ? 100 : 50000,
+    HP: TESTING ? 2000 : 50000,
     SPEED: 40,
     DAMAGE: TESTING ? 5 : 55,
     TOTAL: 1,
@@ -494,7 +494,7 @@ export const ENEMY_BALANCE_STATS = {
     DROP_ITEM: "relicGreed",
   },
   dungeonboss: {
-    HP: TESTING ? 2000 : 100000,
+    HP: TESTING ? 5000 : 100000,
     SPEED: 0,
     DAMAGE: TESTING ? 5 : 60,
     TOTAL: 1,
