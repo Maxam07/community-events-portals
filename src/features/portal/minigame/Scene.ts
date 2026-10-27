@@ -10,6 +10,7 @@ import {
   HOLE_INTERACT_TILES,
   PLAYER_WATER_SPEED_MULTIPLIER,
   PORTAL_NAME,
+  REVIVE_INVINCIBILITY_SECONDS,
   WALKING_SPEED,
   getPerkAmount,
   rollForRareChest,
@@ -1022,6 +1023,7 @@ export class Scene extends BaseScene {
     this.createObstacles();
     this.initialiseCombat();
     this.initialiseWearables();
+    this.initialiseReviveInvincibility();
 
     this.createBlockade();
     this.createBlockadeGuide();
@@ -1846,6 +1848,25 @@ export class Scene extends BaseScene {
         ...nextWearables,
         updatedAt: Date.now(),
       });
+    });
+
+    this.events.once("shutdown", () => {
+      subscription?.unsubscribe();
+    });
+  }
+
+  private initialiseReviveInvincibility() {
+    const portalService = this.portalService;
+    let revivesUsed = portalService?.state.context.revivesUsed ?? 0;
+
+    const subscription = portalService?.subscribe((state) => {
+      const nextRevivesUsed = state.context.revivesUsed;
+      if (nextRevivesUsed > revivesUsed) {
+        this.currentPlayer?.grantReviveInvincibility(
+          REVIVE_INVINCIBILITY_SECONDS * 1000,
+        );
+      }
+      revivesUsed = nextRevivesUsed;
     });
 
     this.events.once("shutdown", () => {

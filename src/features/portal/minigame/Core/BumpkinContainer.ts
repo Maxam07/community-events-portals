@@ -20,7 +20,7 @@ import { KNOWN_IDS } from "features/game/types";
 import { getTradeableDisplay } from "features/marketplace/lib/tradeables";
 import type { MachineInterpreter } from "../lib/Machine";
 import type { EnemyType, WeaponId } from "../Types";
-import { ENEMY_BALANCE_STATS } from "../constants";
+import { ENEMY_BALANCE_STATS, REVIVE_INVINCIBILITY_ALPHA } from "../constants";
 
 const NAME_ALIASES: Partial<Record<NPCName, string>> = {
   "pumpkin' pete": "pete",
@@ -101,6 +101,7 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
   isSwimming = false;
   isHurting = false;
   private hurtInvincibilityTimer: Phaser.Time.TimerEvent | undefined;
+  private reviveInvincibilityTimer: Phaser.Time.TimerEvent | undefined;
   private hurtAnimationCompleteHandler:
     ((animation: Phaser.Animations.Animation) => void) | undefined;
 
@@ -1210,9 +1211,24 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
     }
   }
 
+  public grantReviveInvincibility(durationMs: number) {
+    this.invincible = true;
+    this.setAlpha(REVIVE_INVINCIBILITY_ALPHA);
+
+    this.reviveInvincibilityTimer?.remove(false);
+    this.reviveInvincibilityTimer = this.scene.time.delayedCall(
+      durationMs,
+      () => {
+        this.reviveInvincibilityTimer = undefined;
+        this.invincible = false;
+        if (this.active) this.setAlpha(1);
+      },
+    );
+  }
+
   public hurt(enemyType: EnemyType, damageMultiplier = 1) {
     if (this.portalService?.state.context.isGameplayPaused) return;
-    if (this.isHurting) return;
+    if (this.isHurting || this.invincible) return;
 
     const damage = Math.floor(
       ENEMY_BALANCE_STATS[enemyType].DAMAGE * damageMultiplier,

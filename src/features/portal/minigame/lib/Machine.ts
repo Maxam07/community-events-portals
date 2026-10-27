@@ -924,8 +924,9 @@ export const portalMachine = createMachine<Context, PortalEvent, PortalState>({
                 };
               }
 
-              const resumeState: Partial<Context> =
-                context.endAt > 0
+              const resumeState: Partial<Context> = context.pendingRevive
+                ? {}
+                : context.endAt > 0
                   ? resumeGameplayClock(context)
                   : {
                       isGameplayPaused: false,
@@ -1076,7 +1077,9 @@ export const portalMachine = createMachine<Context, PortalEvent, PortalState>({
               context: Context,
               event: PurchaseReviveEvent,
             ): Partial<Context> => ({
-              ...resumeGameplayClock(context),
+              ...(context.pendingLevelUpChoice
+                ? {}
+                : resumeGameplayClock(context)),
               state: purchaseMinigameItem({
                 state: context.state as GameState,
                 action: {
