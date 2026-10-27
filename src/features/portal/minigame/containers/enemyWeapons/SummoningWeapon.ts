@@ -203,7 +203,13 @@ export class SummoningWeapon extends Phaser.GameObjects.Sprite {
       return;
     }
 
-    this.player?.hurt(this.enemyType, getOwnerDamageMultiplier(this.target));
+    const key = this.texture?.key;
+
+    this.player?.hurt(
+      this.enemyType,
+      getOwnerDamageMultiplier(this.target),
+      key && !key.startsWith("__") ? key : undefined,
+    );
   }
 
   /**

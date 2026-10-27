@@ -21,6 +21,7 @@ import { getTradeableDisplay } from "features/marketplace/lib/tradeables";
 import type { MachineInterpreter } from "../lib/Machine";
 import type { EnemyType, WeaponId } from "../Types";
 import { ENEMY_BALANCE_STATS, REVIVE_INVINCIBILITY_ALPHA } from "../constants";
+import { HitIndicator } from "../containers/HitIndicator";
 
 const NAME_ALIASES: Partial<Record<NPCName, string>> = {
   "pumpkin' pete": "pete",
@@ -107,6 +108,7 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
 
   // Halloween
   blockadeArrow: Phaser.GameObjects.Image | undefined;
+  hitIndicator: HitIndicator | undefined;
 
   constructor({
     scene,
@@ -1226,7 +1228,11 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
     );
   }
 
-  public hurt(enemyType: EnemyType, damageMultiplier = 1) {
+  public hurt(
+    enemyType: EnemyType,
+    damageMultiplier = 1,
+    hitTextureKey?: string,
+  ) {
     if (this.portalService?.state.context.isGameplayPaused) return;
     if (this.isHurting || this.invincible) return;
 
@@ -1236,6 +1242,7 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
     if (damage <= 0) return;
 
     this.isHurting = true;
+    if (hitTextureKey) this.showHitIndicator(hitTextureKey);
     this.playHurtSound();
     this.portalService?.send("LOSE_LIFE", { enemyType, damage });
     this.playHeartFall(damage);
@@ -1457,6 +1464,21 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
     if (lives > 0) return false;
     this.portalService?.send("PLAYER_DIED");
     return true;
+  }
+
+  public showHitIndicator(textureKey: string, frame?: string | number) {
+    const resizeTexture = ["golem_stone", "Fire"];
+    if (!this.hitIndicator?.active) {
+      this.hitIndicator = new HitIndicator({
+        x: 0,
+        y: -24,
+        scene: this.scene,
+        size: textureKey === "golem_stone" ? 10 : 14,
+      });
+      this.add(this.hitIndicator);
+    }
+
+    this.hitIndicator.show(textureKey, frame);
   }
 
   private createBlockadeArrow() {

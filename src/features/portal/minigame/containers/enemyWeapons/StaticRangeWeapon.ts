@@ -162,7 +162,13 @@ export class StaticRangeWeapon extends Phaser.GameObjects.Sprite {
   public handlePlayerContact() {
     if (!this.active || this.isDead) return;
 
-    this.player.hurt(this.enemyType, getOwnerDamageMultiplier(this.target));
+    const key = this.texture?.key;
+
+    this.player.hurt(
+      this.enemyType,
+      getOwnerDamageMultiplier(this.target),
+      key && !key.startsWith("__") ? key : undefined,
+    );
 
     this.resetToTarget();
   }
