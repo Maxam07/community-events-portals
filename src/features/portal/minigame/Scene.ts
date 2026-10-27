@@ -1931,7 +1931,11 @@ export class Scene extends BaseScene {
         this.enemyGroup,
         (_player, enemyObj) => {
           const enemy = enemyObj as
-            StaticRangeEnemy | PhasingEnemy | MeleeEnemy | BossEnemy | MiniBoss;
+            | StaticRangeEnemy
+            | PhasingEnemy
+            | MeleeEnemy
+            | BossEnemy
+            | MiniBoss;
           enemy.handlePlayerContact();
         },
       );
@@ -2235,9 +2239,37 @@ export class Scene extends BaseScene {
     formation: EnemyFormation,
     weaponTypes: WeaponType[],
     count = 1,
+    spawnPosition?: { x: number; y: number },
   ) {
     if (!this.currentPlayer) return 0;
-    const positions = this.getSpawnPositions(formation, count, miniBossType);
+
+    let positions: { x: number; y: number }[];
+
+    if (spawnPosition) {
+      const minX = 1 * SQUARE_WIDTH;
+      const maxX = 39 * SQUARE_WIDTH;
+      const minY = 1 * SQUARE_WIDTH; // Top limit
+      const maxY = 33 * SQUARE_WIDTH; // Bottom limit
+      const edgeBuffer = 10 * SQUARE_WIDTH;
+      const playerX = this.currentPlayer.x;
+
+      let direction: number;
+
+      if (playerX <= minX + edgeBuffer) {
+        direction = 1;
+      } else if (playerX >= maxX - edgeBuffer) {
+        direction = -1;
+      } else {
+        direction = Math.random() < 0.5 ? -1 : 1;
+      }
+
+      positions = Array.from({ length: count }, () => ({
+        x: Phaser.Math.Clamp(playerX + direction * spawnPosition.x, minX, maxX),
+        y: Phaser.Math.Clamp(spawnPosition.y, minY, maxY),
+      }));
+    } else {
+      positions = this.getSpawnPositions(formation, count, miniBossType);
+    }
 
     positions.forEach(({ x: spawnX, y: spawnY }) => {
       if (!this.currentPlayer) return;
@@ -2281,8 +2313,37 @@ export class Scene extends BaseScene {
     spawnPosition?: { x: number; y: number },
   ) {
     if (!this.currentPlayer) return 0;
+
+    const minX = 1 * SQUARE_WIDTH;
+    const maxX = 39 * SQUARE_WIDTH;
+    const edgeBuffer = 10 * SQUARE_WIDTH;
+
     const positions = spawnPosition
-      ? [spawnPosition]
+      ? bossType === "dungeonboss"
+        ? [spawnPosition]
+        : (() => {
+            const playerX = this.currentPlayer.x;
+            const playerY = this.currentPlayer.y;
+            const spawnDistance = spawnPosition.x;
+
+            let direction: number;
+
+            if (playerX <= minX + edgeBuffer) {
+              direction = 1; // Spawn right
+            } else if (playerX >= maxX - edgeBuffer) {
+              direction = -1; // Spawn left
+            } else {
+              direction = Math.random() < 0.5 ? -1 : 1;
+            }
+
+            const x = Phaser.Math.Clamp(
+              playerX + direction * spawnDistance,
+              minX,
+              maxX,
+            );
+
+            return [{ x, y: playerY }];
+          })()
       : this.getSpawnPositions(formation, 1, bossType);
 
     positions.forEach(({ x: spawnX, y: spawnY }) => {
@@ -2374,9 +2435,16 @@ export class Scene extends BaseScene {
     total: number,
     weaponType: WeaponType[],
     formation: EnemyFormation,
+    spawnPosition?: { x: number; y: number },
   ) {
     for (let i = 0; i < total; i++) {
-      this.createMiniBossEnemy(miniBossType, formation, weaponType);
+      this.createMiniBossEnemy(
+        miniBossType,
+        formation,
+        weaponType,
+        1,
+        spawnPosition,
+      );
     }
   }
 
@@ -2430,12 +2498,16 @@ export class Scene extends BaseScene {
     }
   }
 
-  private spawnMiniBoss(config: MiniBossWaveConfig) {
+  private spawnMiniBoss(
+    config: MiniBossWaveConfig,
+    spawnPosition?: { x: number; y: number },
+  ) {
     this.miniBossWave(
       config.miniBossType,
       config.totalEnemy,
       config.weaponType,
       config.formation,
+      config.spawnPosition,
     );
   }
 
@@ -2643,7 +2715,8 @@ export class Scene extends BaseScene {
   private enterUnderworld() {
     const player = this.currentPlayer;
     const portalBody = this.area3Blockade?.body as
-      Phaser.Physics.Arcade.StaticBody | undefined;
+      | Phaser.Physics.Arcade.StaticBody
+      | undefined;
     if (this.isEnteringUnderworld || !player || !portalBody) return;
 
     this.isEnteringUnderworld = true;

@@ -52,7 +52,22 @@ export type WeaponId =
   | "crimsonVial";
 
 export type WeaponLevel =
-  0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15;
+  | 0
+  | 1
+  | 2
+  | 3
+  | 4
+  | 5
+  | 6
+  | 7
+  | 8
+  | 9
+  | 10
+  | 11
+  | 12
+  | 13
+  | 14
+  | 15;
 
 // Weapon categories drive the Special Power: the category composition of
 // the equipped loadout decides which power (and at what duration) is ready.
@@ -86,7 +101,22 @@ export type PerkId =
   | "maxHealth";
 
 export type PerkLevel =
-  0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15;
+  | 0
+  | 1
+  | 2
+  | 3
+  | 4
+  | 5
+  | 6
+  | 7
+  | 8
+  | 9
+  | 10
+  | 11
+  | 12
+  | 13
+  | 14
+  | 15;
 
 export type PerkLevels = Record<PerkId, PerkLevel>;
 
@@ -136,10 +166,20 @@ export type LevelUpChoice = {
 export type ChestRarity = "rare" | "epic" | "legendary";
 
 export type DamageType =
-  "physical" | "water" | "explosion" | "light" | "dot" | "summon";
+  | "physical"
+  | "water"
+  | "explosion"
+  | "light"
+  | "dot"
+  | "summon";
 
 export type TargetingMode =
-  "nearest" | "random" | "movementVector" | "chainNext" | "inCone" | "inRadius";
+  | "nearest"
+  | "random"
+  | "movementVector"
+  | "chainNext"
+  | "inCone"
+  | "inRadius";
 
 export type WeaponBehavior =
   | "orbital"
@@ -205,7 +245,11 @@ export type WeaponUpgrade = {
 };
 
 export type ProjectileBehavior =
-  "linear" | "exploding" | "bouncing" | "light" | "rolling";
+  | "linear"
+  | "exploding"
+  | "bouncing"
+  | "light"
+  | "rolling";
 
 export type ProjectileConfig = {
   texture: string;
@@ -221,7 +265,11 @@ export type ProjectileConfig = {
 };
 
 export type StatusEffectId =
-  "oilDot" | "plaguePoison" | "frostSlow" | "curseWeakness" | "bleed";
+  | "oilDot"
+  | "plaguePoison"
+  | "frostSlow"
+  | "curseWeakness"
+  | "bleed";
 
 export type StatusEffectConfig = {
   id: StatusEffectId;
@@ -288,7 +336,12 @@ export type DropItemHalloweenType =
   | "relicEnvy";
 
 export type WeaponType =
-  "chasing" | "orbiting" | "summoning" | "staticRange" | "slash" | "arena";
+  | "chasing"
+  | "orbiting"
+  | "summoning"
+  | "staticRange"
+  | "slash"
+  | "arena";
 export type CodexCategoryName = "Skills" | "Enemies" | "DropItems";
 export type PassiveAbilityType = "wings";
 export type EnemyType =
@@ -299,7 +352,10 @@ export type EnemyType =
   | MiniBossType;
 export type WeaponEnemyType = BossTypes | MiniBossType | StaticRangeEnemyTypes;
 export type EnemyFormation =
-  "vertical line" | "horizontal line" | "circle" | "surround";
+  | "vertical line"
+  | "horizontal line"
+  | "circle"
+  | "surround";
 export type AreaEnemyType =
   | PhasingEnemyTypes
   | MeleeEnemyTypes
@@ -415,6 +471,7 @@ export type MiniBossWaveConfig = {
   totalEnemy: number;
   weaponType: WeaponType[];
   formation: EnemyFormation;
+  spawnPosition?: { x: number; y: number };
   flag: string;
   area: number;
 };
