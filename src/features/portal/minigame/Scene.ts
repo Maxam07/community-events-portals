@@ -968,7 +968,7 @@ export class Scene extends BaseScene {
     // Background
     this.load.audio(
       "backgroundMusic",
-      "/world/portal/music/Bumping_Pumpkins.mp3",
+      "/world/portal/music/Castle_Grounds.mp3",
     );
 
     // SFX
@@ -1062,7 +1062,7 @@ export class Scene extends BaseScene {
     this.sound.getAll("backgroundMusic").forEach((sound) => sound.destroy());
     this.backgroundMusic = this.sound.add("backgroundMusic", {
       loop: true,
-      volume: 0.2,
+      volume: 0.07,
     });
     if (this.isGameReady || this.isGamePlaying) {
       this.backgroundMusic.play();
