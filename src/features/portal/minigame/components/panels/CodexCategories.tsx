@@ -25,6 +25,21 @@ import type { SpecialPowerKind, WeaponCategoryId } from "../../Types";
 const toSeconds = (ms: number) => Number((ms / 1000).toFixed(1));
 const toPercent = (ratio: number) => Math.round(ratio * 100);
 
+// Perk value shown in the Codex. Percent perks come from the constants as a
+// ratio (0.05 -> "+5%"); cooldown reduction uses "-" instead of "+".
+// Flat perks (healing, max health) keep the raw constant value.
+const formatPerkValue = (
+  value: number,
+  percent?: boolean,
+  negative?: boolean,
+) => {
+  if (!percent || typeof value !== "number" || Number.isNaN(value)) {
+    return value;
+  }
+  const percentValue = Number((Math.abs(value) * 100).toFixed(1));
+  return `${negative ? "-" : "+"}${percentValue}%`;
+};
+
 type Translate = ReturnType<typeof useAppTranslation>["t"];
 
 export const POWER_DESCRIPTION_KEYS = {
@@ -315,6 +330,11 @@ export const Perks: React.FC = () => {
               levelScaling={perk.levelScaling}
               maxLevel={perk.maxLevel}
               description={perk.description}
+              levelScaling1={perk.levelScaling1}
+              levelScaling5={perk.levelScaling5}
+              levelScaling10={perk.levelScaling10}
+              percent={perk.percent}
+              negative={perk.negative}
             />
           ))}
         </div>
@@ -444,10 +464,26 @@ export const PerksCard: React.FC<{
   icon: string;
   perkName: string;
   levelScaling: number;
+  levelScaling1: number;
+  levelScaling5: number;
+  levelScaling10: number;
   maxLevel: number;
   description: string;
-}> = ({ icon, perkName, levelScaling, maxLevel, description }) => {
+  percent?: boolean;
+  negative?: boolean;
+}> = ({
+  icon,
+  perkName,
+  levelScaling,
+  levelScaling1,
+  levelScaling10,
+  levelScaling5,
+  description,
+  percent,
+  negative,
+}) => {
   const { t } = useAppTranslation();
+  const format = (value: number) => formatPerkValue(value, percent, negative);
   return (
     <ButtonPanel className="flex flex-col items-center">
       <img src={icon} className="h-10 py-2" />
@@ -455,14 +491,28 @@ export const PerksCard: React.FC<{
       <table className="w-full border-collapse text-xs">
         <tbody>
           <tr>
-            <th className="py-1 text-left">{t("minigame.perk.per.level")}</th>
-            <td className="py-1 text-center">{levelScaling}</td>
+            <th className="bg-black/10 py-1 text-left">
+              {t("minigame.perk.per.level1")}
+            </th>
+            <td className="bg-black/10 py-1 text-center">
+              {format(levelScaling1)}
+            </td>
           </tr>
           <tr>
-            <th className="bg-black/10 py-1 text-left font-normal">
-              {t("minigame.perk.max.level")}
+            <th className="py-1 text-left">{t("minigame.perk.per.level5")}</th>
+            <td className="py-1 text-center">{format(levelScaling5)}</td>
+          </tr>
+          <tr>
+            <th className="bg-black/10 py-1 text-left">
+              {t("minigame.perk.per.level10")}
             </th>
-            <td className="bg-black/10 py-1 text-center">{maxLevel}</td>
+            <td className="bg-black/10 py-1 text-center">
+              {format(levelScaling10)}
+            </td>
+          </tr>
+          <tr>
+            <th className="py-1 text-left">{t("minigame.perk.per.level")}</th>
+            <td className="py-1 text-center">{format(levelScaling)}</td>
           </tr>
         </tbody>
       </table>

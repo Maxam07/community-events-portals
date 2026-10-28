@@ -56,6 +56,7 @@ import relicLust from "public/world/portal/halloween/relics_lust.webp";
 import relicGreed from "public/world/portal/halloween/relics_greed.webp";
 import relicGluttony from "public/world/portal/halloween/relics_gluttony.webp";
 import relicEnvy from "public/world/portal/halloween/relics_envy.webp";
+import speedIcon from "public/world/portal/images/cheer.png";
 
 import tooltip_icon from "public/world/portal/images/ExpOrb_combined.webp";
 import swordIcon from "public/world/portal/images/sword_icon.png";
@@ -197,77 +198,121 @@ export const PERKS_TABLE: {
   image: string;
   perkName: string;
   levelScaling: number;
+  levelScaling1: number;
+  levelScaling5: number;
+  levelScaling10: number;
   maxLevel: number;
   description: string;
   width?: number;
+  percent?: boolean;
+  negative?: boolean;
 }[] = [
   {
-    image: SUNNYSIDE.icons.lightning,
+    image: speedIcon,
     perkName: t("minigame.perk.moveSpeed"),
-    levelScaling: PERK_CONFIGS.moveSpeed.valuesPerLevel[1],
+    levelScaling1: PERK_CONFIGS.moveSpeed.valuesPerLevel[1],
+    levelScaling5: PERK_CONFIGS.moveSpeed.valuesPerLevel[5],
+    levelScaling10: PERK_CONFIGS.moveSpeed.valuesPerLevel[10],
+    levelScaling: PERK_CONFIGS.moveSpeed.valuesPerLevel[15],
     maxLevel: PERK_CONFIGS.moveSpeed.maxLevel,
     description: t("minigame.perk.description.moveSpeed"),
+    percent: true,
   },
   {
     image: SUNNYSIDE.icons.lightning,
     perkName: t("minigame.perk.attackSpeed"),
-    levelScaling: PERK_CONFIGS.attackSpeed.valuesPerLevel[1],
+    levelScaling1: PERK_CONFIGS.attackSpeed.valuesPerLevel[1],
+    levelScaling5: PERK_CONFIGS.attackSpeed.valuesPerLevel[5],
+    levelScaling10: PERK_CONFIGS.attackSpeed.valuesPerLevel[10],
+    levelScaling: PERK_CONFIGS.attackSpeed.valuesPerLevel[15],
     maxLevel: PERK_CONFIGS.attackSpeed.maxLevel,
     description: t("minigame.perk.description.attackSpeed"),
+    percent: true,
   },
   {
     image: swordIcon,
     perkName: t("minigame.perk.criticalChance"),
-    levelScaling: PERK_CONFIGS.criticalChance.valuesPerLevel[1],
+    levelScaling1: PERK_CONFIGS.criticalChance.valuesPerLevel[1],
+    levelScaling5: PERK_CONFIGS.criticalChance.valuesPerLevel[5],
+    levelScaling10: PERK_CONFIGS.criticalChance.valuesPerLevel[10],
+    levelScaling: PERK_CONFIGS.criticalChance.valuesPerLevel[15],
     maxLevel: PERK_CONFIGS.criticalChance.maxLevel,
     description: t("minigame.perk.description.criticalChance"),
+    percent: true,
   },
   {
     image: SUNNYSIDE.icons.arrow_right,
     perkName: t("minigame.perk.projectileSpeed"),
-    levelScaling: PERK_CONFIGS.projectileSpeed.valuesPerLevel[1],
+    levelScaling1: PERK_CONFIGS.projectileSpeed.valuesPerLevel[1],
+    levelScaling5: PERK_CONFIGS.projectileSpeed.valuesPerLevel[5],
+    levelScaling10: PERK_CONFIGS.projectileSpeed.valuesPerLevel[10],
+    levelScaling: PERK_CONFIGS.projectileSpeed.valuesPerLevel[15],
     maxLevel: PERK_CONFIGS.projectileSpeed.maxLevel,
     description: t("minigame.perk.description.projectileSpeed"),
+    percent: true,
   },
   {
     image: SUNNYSIDE.icons.xpIcon,
     perkName: t("minigame.perk.xpGain"),
-    levelScaling: PERK_CONFIGS.xpGain.valuesPerLevel[1],
+    levelScaling1: PERK_CONFIGS.xpGain.valuesPerLevel[1],
+    levelScaling5: PERK_CONFIGS.xpGain.valuesPerLevel[5],
+    levelScaling10: PERK_CONFIGS.xpGain.valuesPerLevel[10],
+    levelScaling: PERK_CONFIGS.xpGain.valuesPerLevel[15],
     maxLevel: PERK_CONFIGS.xpGain.maxLevel,
     description: t("minigame.perk.description.xpGain"),
+    percent: true,
   },
   {
     image: SUNNYSIDE.icons.happy,
     perkName: t("minigame.perk.luck"),
-    levelScaling: PERK_CONFIGS.luck.valuesPerLevel[1],
+    levelScaling1: PERK_CONFIGS.luck.valuesPerLevel[1],
+    levelScaling5: PERK_CONFIGS.luck.valuesPerLevel[5],
+    levelScaling10: PERK_CONFIGS.luck.valuesPerLevel[10],
+    levelScaling: PERK_CONFIGS.luck.valuesPerLevel[15],
     maxLevel: PERK_CONFIGS.luck.maxLevel,
     description: t("minigame.perk.description.luck"),
+    percent: true,
   },
   {
     image: SUNNYSIDE.icons.search,
     perkName: t("minigame.perk.pickupRadius"),
-    levelScaling: PERK_CONFIGS.pickupRadius.valuesPerLevel[1],
+    levelScaling1: PERK_CONFIGS.pickupRadius.valuesPerLevel[1],
+    levelScaling5: PERK_CONFIGS.pickupRadius.valuesPerLevel[5],
+    levelScaling10: PERK_CONFIGS.pickupRadius.valuesPerLevel[10],
+    levelScaling: PERK_CONFIGS.pickupRadius.valuesPerLevel[15],
     maxLevel: PERK_CONFIGS.pickupRadius.maxLevel,
     description: t("minigame.perk.description.pickupRadius"),
+    percent: true,
   },
   {
     image: SUNNYSIDE.icons.stopwatch,
     perkName: t("minigame.perk.cooldownReduction"),
-    levelScaling: PERK_CONFIGS.cooldownReduction.valuesPerLevel[1],
+    levelScaling1: PERK_CONFIGS.cooldownReduction.valuesPerLevel[1],
+    levelScaling5: PERK_CONFIGS.cooldownReduction.valuesPerLevel[5],
+    levelScaling10: PERK_CONFIGS.cooldownReduction.valuesPerLevel[10],
+    levelScaling: PERK_CONFIGS.cooldownReduction.valuesPerLevel[15],
     maxLevel: PERK_CONFIGS.cooldownReduction.maxLevel,
     description: t("minigame.perk.description.cooldownReduction"),
+    percent: true,
+    negative: true,
   },
   {
     image: SUNNYSIDE.icons.upgrade_disc,
     perkName: t("minigame.perk.healing"),
-    levelScaling: PERK_CONFIGS.healing.valuesPerLevel[1],
+    levelScaling1: PERK_CONFIGS.healing.valuesPerLevel[1],
+    levelScaling5: PERK_CONFIGS.healing.valuesPerLevel[5],
+    levelScaling10: PERK_CONFIGS.healing.valuesPerLevel[10],
+    levelScaling: PERK_CONFIGS.healing.valuesPerLevel[15],
     maxLevel: PERK_CONFIGS.healing.maxLevel,
     description: t("minigame.perk.description.healing"),
   },
   {
     image: SUNNYSIDE.icons.heart,
     perkName: t("minigame.perk.maxHealth"),
-    levelScaling: PERK_CONFIGS.maxHealth.valuesPerLevel[1],
+    levelScaling1: PERK_CONFIGS.maxHealth.valuesPerLevel[1],
+    levelScaling5: PERK_CONFIGS.maxHealth.valuesPerLevel[5],
+    levelScaling10: PERK_CONFIGS.maxHealth.valuesPerLevel[10],
+    levelScaling: PERK_CONFIGS.maxHealth.valuesPerLevel[15],
     maxLevel: PERK_CONFIGS.maxHealth.maxLevel,
     description: t("minigame.perk.description.maxHealth"),
   },
