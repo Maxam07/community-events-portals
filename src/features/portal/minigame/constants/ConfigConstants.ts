@@ -146,6 +146,8 @@ export const ATTEMPTS_PURCHASED_BY_MISTAKE: {
 export const BANNED_FARM_IDS: number[] = [
   // 12345, // FarmId
   7267084005403912,
+  3789239050013145, //NQN
+  3055473214040933, //AYBB
 ];
 
 export const PASSIVE_ABILITY_ITEM: BumpkinWings = "Underworld Stimpack";
